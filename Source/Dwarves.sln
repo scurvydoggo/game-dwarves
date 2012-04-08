@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves", "Dwarves\Dwarves\Dwarves.csproj", "{5314B19C-25EE-4E09-9027-AE68224C6E9C}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "DwarvesContent", "Dwarves\DwarvesContent\DwarvesContent.contentproj", "{E2EAB85D-F0F5-4140-9C53-361D5DDEB089}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5314B19C-25EE-4E09-9027-AE68224C6E9C}.Debug|x86.ActiveCfg = Debug|x86
+		{5314B19C-25EE-4E09-9027-AE68224C6E9C}.Debug|x86.Build.0 = Debug|x86
+		{5314B19C-25EE-4E09-9027-AE68224C6E9C}.Release|x86.ActiveCfg = Release|x86
+		{5314B19C-25EE-4E09-9027-AE68224C6E9C}.Release|x86.Build.0 = Release|x86
+		{E2EAB85D-F0F5-4140-9C53-361D5DDEB089}.Debug|x86.ActiveCfg = Debug|x86
+		{E2EAB85D-F0F5-4140-9C53-361D5DDEB089}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
