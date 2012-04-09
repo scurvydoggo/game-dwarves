@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farseer Physics XNA", "..\L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugView XNA", "..\Libraries\FarseerPhysics\DebugViews\DebugViewXNA\DebugView XNA.csproj", "{FC7845FA-13FE-4FF8-822A-A577F3F59B00}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugView XNA Content", "..\Libraries\FarseerPhysics\DebugViews\DebugViewXNA\Content\DebugView XNA Content.contentproj", "{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,12 @@ Global
 		{FC7845FA-13FE-4FF8-822A-A577F3F59B00}.Release|Mixed Platforms.Build.0 = Release|x86
 		{FC7845FA-13FE-4FF8-822A-A577F3F59B00}.Release|x86.ActiveCfg = Release|x86
 		{FC7845FA-13FE-4FF8-822A-A577F3F59B00}.Release|x86.Build.0 = Release|x86
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Release|x86.ActiveCfg = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,5 +100,6 @@ Global
 		{D8857024-A665-4263-AC54-68CC5C83204C} = {64EFF220-6A02-4EC5-A25D-2EAD856CC767}
 		{0A850700-1ABB-4288-A391-6726B90EBEB9} = {953DB84F-0237-48A9-95CD-DC1269E47A6E}
 		{FC7845FA-13FE-4FF8-822A-A577F3F59B00} = {953DB84F-0237-48A9-95CD-DC1269E47A6E}
+		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317} = {953DB84F-0237-48A9-95CD-DC1269E47A6E}
 	EndGlobalSection
 EndGlobal
