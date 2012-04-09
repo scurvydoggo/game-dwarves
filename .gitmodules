@@ -7,3 +7,4 @@
 [submodule "Libraries/FarseerPhysics"]
 	path = Libraries/FarseerPhysics
 	url = https://github.com/d-snp/Farseer-Physics.git
+	ignore = dirty
