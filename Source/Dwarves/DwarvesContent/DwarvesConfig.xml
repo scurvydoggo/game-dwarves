@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnaContent>
+  <Asset Type="Dwarves.DwarvesConfig">
+    <DataConnectionString>Data Source="C:\Workspace\Repo\dwarves.db3";Version=3;</DataConnectionString>
+    <DbProviderFactoryAssembly>System.Data.SQLite.dll</DbProviderFactoryAssembly>
+    <DbProviderFactoryClass>System.Data.SQLite.SQLiteFactory</DbProviderFactoryClass>
+    <EntityTransformerAssembly>Dwarves.Data.dll</EntityTransformerAssembly>
+    <EntityTransformerClass>Dwarves.Data.Transformer.DwarvesEntityTransformer</EntityTransformerClass>
+  </Asset>
+</XnaContent>

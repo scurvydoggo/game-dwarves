@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugView XNA", "..\Librari
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugView XNA Content", "..\Libraries\FarseerPhysics\DebugViews\DebugViewXNA\Content\DebugView XNA Content.contentproj", "{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.Core", "Dwarves.Core\Dwarves.Core.csproj", "{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.Data", "Dwarves.Data\Dwarves.Data.csproj", "{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +95,26 @@ Global
 		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{AC26EDE1-2A42-4A57-BEEE-9603FCAC9317}.Release|x86.ActiveCfg = Debug|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0FC97D04-EC48-44DA-A2C0-BC1C129443C7}.Release|x86.ActiveCfg = Release|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{244D5FA5-5A64-4D47-8DD9-A2C64C2176AD}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
