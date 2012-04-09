@@ -9,7 +9,7 @@ namespace Dwarves.Component.Physics
     using FarseerPhysics.Dynamics;
 
     /// <summary>
-    /// Component for entity physics.
+    /// Physics body of entity.
     /// </summary>
     public class PhysicsComponent : IComponent
     {

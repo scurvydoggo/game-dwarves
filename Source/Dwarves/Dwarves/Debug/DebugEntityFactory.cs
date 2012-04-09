@@ -19,6 +19,8 @@ namespace Dwarves.Debug
     /// </summary>
     public class DebugEntityFactory
     {
+        #region Public Methods
+
         /// <summary>
         /// Create a camera entity.
         /// </summary>
@@ -70,6 +72,10 @@ namespace Dwarves.Debug
             return entity;
         }
 
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
         /// Create a rectangle body.
         /// </summary>
@@ -95,6 +101,8 @@ namespace Dwarves.Debug
 
             return body;
         }
+
+        #endregion
     }
 }
 #endif

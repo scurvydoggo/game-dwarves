@@ -46,6 +46,7 @@
     <Compile Include="Component\Input\InputPositionComponent.cs" />
     <Compile Include="Component\Input\InputRegionComponent.cs" />
     <Compile Include="Component\Physics\PhysicsComponent.cs" />
+    <Compile Include="Component\Physics\TerrainComponent.cs" />
     <Compile Include="Component\Screen\CameraComponent.cs" />
     <Compile Include="Component\Spatial\PositionComponent.cs" />
     <Compile Include="Component\Spatial\ScaleComponent.cs" />

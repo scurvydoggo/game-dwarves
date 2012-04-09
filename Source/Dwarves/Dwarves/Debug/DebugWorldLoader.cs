@@ -6,6 +6,7 @@
 #if DEBUG
 namespace Dwarves.Debug
 {
+    using Dwarves.Component.Physics;
     using EntitySystem;
     using FarseerPhysics.Collision;
     using FarseerPhysics.Common;
@@ -34,6 +35,7 @@ namespace Dwarves.Debug
         /// <summary>
         /// Initializes a new instance of the DebugWorldLoader class.
         /// </summary>
+        /// <param name="content">The game content manager.</param>
         public DebugWorldLoader(ContentManager content)
         {
             this.entityFactory = new DebugEntityFactory();
@@ -54,6 +56,9 @@ namespace Dwarves.Debug
             this.entityFactory.CreateCrate(entityManager, world, 0.0f, 10.0f);
 
             // Create terrain
+            Entity terrainEntity = entityManager.CreateEntity();
+
+            // Create terrain object
             var terrain = new MSTerrain(world, new AABB(new Vector2(-25, -45), new Vector2(60, 30)))
                 {
                     PointsPerUnit = 8,
@@ -66,6 +71,9 @@ namespace Dwarves.Debug
             terrain.Initialize();
             Texture2D texture = this.content.Load<Texture2D>("Test1_Terrain");
             terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
+
+            // Add terrain component
+            entityManager.AddComponent(terrainEntity, new TerrainComponent(terrain));
         }
     }
 }
