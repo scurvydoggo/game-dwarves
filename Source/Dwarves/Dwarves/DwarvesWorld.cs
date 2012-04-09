@@ -55,7 +55,7 @@ namespace Dwarves
             drawSystems.AddSystem(new DebugDrawSystem(entityManager, this.PhysicsWorld, device, content));
 
             // Create the data adapter
-            DwarvesConfig config = content.Load<DwarvesConfig>("DwarvesConfig");
+            DwarvesConfig config = content.Load<DwarvesConfig>("Config\\DwarvesConfig");
             this.entityDataAdapter = new DwarvesDataAdapter(config);
 
 #if DEBUG

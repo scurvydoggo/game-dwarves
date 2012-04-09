@@ -42,11 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Component\Game\DwarfComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
     <Compile Include="Component\Input\InputPositionComponent.cs" />
     <Compile Include="Component\Input\InputRegionComponent.cs" />
     <Compile Include="Component\Physics\PhysicsComponent.cs" />
     <Compile Include="Component\Physics\TerrainComponent.cs" />
+    <Compile Include="Component\Render\SpriteComponent.cs" />
     <Compile Include="Component\Screen\CameraComponent.cs" />
     <Compile Include="Component\Spatial\PositionComponent.cs" />
     <Compile Include="Component\Spatial\ScaleComponent.cs" />
@@ -75,6 +77,7 @@
       <Name>DebugView XNA</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

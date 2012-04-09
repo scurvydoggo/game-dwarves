@@ -52,8 +52,8 @@ namespace Dwarves.Debug
             // Create the camera entity
             this.entityFactory.CreateCamera(entityManager, 1.0f, 1.0f, 1.0f);
 
-            // Add a crate
-            this.entityFactory.CreateCrate(entityManager, world, 0.0f, 10.0f);
+            // Add a dwarf
+            this.entityFactory.CreateDwarf(entityManager, world, 0.0f, 10.0f);
 
             // Create terrain
             Entity terrainEntity = entityManager.CreateEntity();
@@ -69,7 +69,7 @@ namespace Dwarves.Debug
                 };
 
             terrain.Initialize();
-            Texture2D texture = this.content.Load<Texture2D>("Test1_Terrain");
+            Texture2D texture = this.content.Load<Texture2D>("Terrain\\Test1_Terrain");
             terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
 
             // Add terrain component

@@ -11,7 +11,6 @@ namespace Dwarves.Debug
     using Dwarves.Component.Spatial;
     using EntitySystem;
     using FarseerPhysics.Dynamics;
-    using FarseerPhysics.Factories;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -47,27 +46,23 @@ namespace Dwarves.Debug
         }
 
         /// <summary>
-        /// Create a crate entity.
+        /// Create a dwarf entity.
         /// </summary>
         /// <param name="entityManager">The entity manager.</param>
         /// <param name="world">The physics world.</param>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
         /// <returns>The entity.</returns>
-        public Entity CreateCrate(EntityManager entityManager, World world, float x, float y)
+        public Entity CreateDwarf(EntityManager entityManager, World world, float x, float y)
         {
             Entity entity = entityManager.CreateEntity();
 
             // Create the physics body
-            var body = this.CreateRectangleBody(entity, world, 2, 2, 1.0f, false);
+            var body = this.CreateDwarfBody(entity, world);
 
             // Create the components
-            var position = new PositionComponent(body, new Vector2(x, y));
-            var physics = new PhysicsComponent(body);
-
-            // Add the components
-            entityManager.AddComponent(entity, position);
-            entityManager.AddComponent(entity, physics);
+            entityManager.AddComponent(entity, new PositionComponent(body, new Vector2(x, y)));
+            entityManager.AddComponent(entity, new PhysicsComponent(body));
 
             return entity;
         }
@@ -77,27 +72,16 @@ namespace Dwarves.Debug
         #region Private Methods
 
         /// <summary>
-        /// Create a rectangle body.
+        /// Create a dwarf body.
         /// </summary>
         /// <param name="entity">The entity that this body belongs to.</param>
         /// <param name="world">The physics world.</param>
-        /// <param name="width">The width of the rectangle.</param>
-        /// <param name="height">The height of the rectangle.</param>
-        /// <param name="density">The density of the rectangle.</param>
-        /// <param name="isStatic">Indicates whether this is a static body.</param>
         /// <returns>The body.</returns>
-        private Body CreateRectangleBody(
-            Entity entity, World world, float width, float height, float density, bool isStatic)
+        private Body CreateDwarfBody(Entity entity, World world)
         {
             var body = new Body(world);
             body.UserData = entity;
-
-            // Create the fixture
-            Fixture fixture = FixtureFactory.AttachRectangle(width, height, density, new Vector2(0, 0), body);
-            fixture.UserData = entity;
-
-            // Set the body type
-            body.IsStatic = isStatic;
+            body.IsStatic = false;
 
             return body;
         }
