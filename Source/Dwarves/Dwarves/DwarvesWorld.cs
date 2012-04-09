@@ -64,7 +64,7 @@ namespace Dwarves
             ///////////////////////////
 
             // Load the test level
-            var debugWorldLoader = new Dwarves.Debug.DebugWorldLoader();
+            var debugWorldLoader = new Dwarves.Debug.DebugWorldLoader(content);
             debugWorldLoader.LoadTest1(entityManager, this.PhysicsWorld);
 
             // Save the test level to the database

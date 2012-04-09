@@ -7,7 +7,12 @@
 namespace Dwarves.Debug
 {
     using EntitySystem;
+    using FarseerPhysics.Collision;
+    using FarseerPhysics.Common;
     using FarseerPhysics.Dynamics;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Content;
+    using Microsoft.Xna.Framework.Graphics;
 
     /// <summary>
     /// Contains code for loading hard-coded world setups to use for development and testing. In the final product, all
@@ -22,11 +27,17 @@ namespace Dwarves.Debug
         private DebugEntityFactory entityFactory;
 
         /// <summary>
+        /// The content manager.
+        /// </summary>
+        private ContentManager content;
+
+        /// <summary>
         /// Initializes a new instance of the DebugWorldLoader class.
         /// </summary>
-        public DebugWorldLoader()
+        public DebugWorldLoader(ContentManager content)
         {
             this.entityFactory = new DebugEntityFactory();
+            this.content = content;
         }
 
         /// <summary>
@@ -41,6 +52,20 @@ namespace Dwarves.Debug
 
             // Add a crate
             this.entityFactory.CreateCrate(entityManager, world, 0.0f, 10.0f);
+
+            // Create terrain
+            var terrain = new MSTerrain(world, new AABB(new Vector2(-25, -45), new Vector2(60, 30)))
+                {
+                    PointsPerUnit = 8,
+                    CellSize = 15,
+                    SubCellSize = 2,
+                    Decomposer = Decomposer.Earclip,
+                    Iterations = 2,
+                };
+
+            terrain.Initialize();
+            Texture2D texture = this.content.Load<Texture2D>("Test1_Terrain");
+            terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
         }
     }
 }
