@@ -10,9 +10,7 @@ namespace Dwarves.Debug
     using EntitySystem;
     using FarseerPhysics.Collision;
     using FarseerPhysics.Common;
-    using FarseerPhysics.Dynamics;
     using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Content;
     using Microsoft.Xna.Framework.Graphics;
 
     /// <summary>
@@ -28,38 +26,30 @@ namespace Dwarves.Debug
         private DebugEntityFactory entityFactory;
 
         /// <summary>
-        /// The content manager.
-        /// </summary>
-        private ContentManager content;
-
-        /// <summary>
         /// Initializes a new instance of the DebugWorldLoader class.
         /// </summary>
-        /// <param name="content">The game content manager.</param>
-        public DebugWorldLoader(ContentManager content)
+        public DebugWorldLoader()
         {
             this.entityFactory = new DebugEntityFactory();
-            this.content = content;
         }
 
         /// <summary>
         /// Load test level 1.
         /// </summary>
-        /// <param name="entityManager">The entity manager.</param>
-        /// <param name="world">The physics world.</param>
-        public void LoadTest1(EntityManager entityManager, World world)
+        /// <param name="world">The world context.</param>
+        public void LoadTest1(WorldContext world)
         {
             // Create the camera entity
-            this.entityFactory.CreateCamera(entityManager, 1.0f, 1.0f, 1.0f);
+            this.entityFactory.CreateCamera(world, 1.0f, 1.0f, 1.0f);
 
             // Add a dwarf
-            this.entityFactory.CreateDwarf(entityManager, world, 0.0f, 10.0f);
+            this.entityFactory.CreateDwarf(world, 0.0f, 10.0f);
 
             // Create terrain
-            Entity terrainEntity = entityManager.CreateEntity();
+            Entity terrainEntity = world.EntityManager.CreateEntity();
 
             // Create terrain object
-            var terrain = new MSTerrain(world, new AABB(new Vector2(-25, -45), new Vector2(60, 30)))
+            var terrain = new MSTerrain(world.Physics, new AABB(new Vector2(-25, -45), new Vector2(60, 30)))
                 {
                     PointsPerUnit = 8,
                     CellSize = 15,
@@ -69,11 +59,11 @@ namespace Dwarves.Debug
                 };
 
             terrain.Initialize();
-            Texture2D texture = this.content.Load<Texture2D>("Terrain\\Test1_Terrain");
+            Texture2D texture = world.Resources.Load<Texture2D>("Terrain\\Test1_Terrain");
             terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
 
             // Add terrain component
-            entityManager.AddComponent(terrainEntity, new TerrainComponent(terrain));
+            world.EntityManager.AddComponent(terrainEntity, new TerrainComponent(terrain));
         }
     }
 }

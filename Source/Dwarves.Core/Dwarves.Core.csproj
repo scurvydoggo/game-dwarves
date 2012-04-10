@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+	<Compile Include="Builder\HumanoidBuilder.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
@@ -56,9 +57,11 @@
     <Compile Include="Data\DwarvesDataAdapter.cs" />
     <Compile Include="DwarvesConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Render\SpriteManager.cs" />
     <Compile Include="Subsystem\DebugDrawSystem.cs" />
     <Compile Include="Subsystem\InputSystem.cs" />
     <Compile Include="Subsystem\PhysicsSystem.cs" />
+    <Compile Include="WorldContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\EntitySystem\EntitySystem.Data\EntitySystem.Data.csproj">
