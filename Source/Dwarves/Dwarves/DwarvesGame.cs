@@ -83,7 +83,7 @@ namespace Dwarves
                 int delta = (int)gameTime.ElapsedGameTime.TotalMilliseconds;
 
                 // Step the world
-                this.gameWorld.EntitySystemWorld.Step(delta);
+                this.gameWorld.Step(delta);
 
                 base.Update(gameTime);
             }
@@ -107,7 +107,7 @@ namespace Dwarves
                 int delta = (int)gameTime.ElapsedGameTime.TotalMilliseconds;
 
                 // Draw the world
-                this.gameWorld.EntitySystemWorld.Draw(delta);
+                this.gameWorld.Draw(delta);
 
                 base.Draw(gameTime);
             }

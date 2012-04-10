@@ -22,14 +22,14 @@ namespace Dwarves.Debug
         /// <summary>
         /// Create a camera entity.
         /// </summary>
-        /// <param name="entityManager">The entity manager.</param>
+        /// <param name="world">The world context.</param>
         /// <param name="centerX">The X point for the center of the camera.</param>
         /// <param name="centerY">The Y point for the center of the camera.</param>
         /// <param name="zoom">The zoom ratio of the camera.</param>
         /// <returns>The entity.</returns>
-        public Entity CreateCamera(EntityManager entityManager, float centerX, float centerY, float zoom)
+        public Entity CreateCamera(WorldContext world, float centerX, float centerY, float zoom)
         {
-            Entity entity = entityManager.CreateEntity();
+            Entity entity = world.EntityManager.CreateEntity();
 
             // Create the components
             var camera = new CameraComponent();
@@ -37,9 +37,9 @@ namespace Dwarves.Debug
             var scale = new ScaleComponent(zoom);
 
             // Add the components
-            entityManager.AddComponent(entity, camera);
-            entityManager.AddComponent(entity, position);
-            entityManager.AddComponent(entity, scale);
+            world.EntityManager.AddComponent(entity, camera);
+            world.EntityManager.AddComponent(entity, position);
+            world.EntityManager.AddComponent(entity, scale);
 
             return entity;
         }
@@ -47,25 +47,24 @@ namespace Dwarves.Debug
         /// <summary>
         /// Create a crate entity.
         /// </summary>
-        /// <param name="entityManager">The entity manager.</param>
-        /// <param name="world">The physics world.</param>
+        /// <param name="world">The world context.</param>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
         /// <returns>The entity.</returns>
-        public Entity CreateCrate(EntityManager entityManager, World world, float x, float y)
+        public Entity CreateCrate(WorldContext world, float x, float y)
         {
-            Entity entity = entityManager.CreateEntity();
+            Entity entity = world.EntityManager.CreateEntity();
 
             // Create the physics body
-            var body = this.CreateRectangleBody(entity, world, 2, 2, 1.0f, false);
+            var body = this.CreateRectangleBody(entity, world.Physics, 2, 2, 1.0f, false);
 
             // Create the components
             var position = new PositionComponent(body, new Vector2(x, y));
             var physics = new PhysicsComponent(body);
 
             // Add the components
-            entityManager.AddComponent(entity, position);
-            entityManager.AddComponent(entity, physics);
+            world.EntityManager.AddComponent(entity, position);
+            world.EntityManager.AddComponent(entity, physics);
 
             return entity;
         }
