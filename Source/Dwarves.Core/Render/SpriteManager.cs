@@ -37,7 +37,7 @@ namespace Dwarves.Render
         private Dictionary<string, Dictionary<int, string>> variationMap;
 
         /// <summary>
-        /// Random number generator.
+        /// For random selection of sprite variations.
         /// </summary>
         private Random random;
 
@@ -56,7 +56,7 @@ namespace Dwarves.Render
             this.variationMap = new Dictionary<string, Dictionary<int, string>>();
             this.random = new Random();
 
-            // Build the list of available sprite indices
+            // Build the list of available sprite variations
             this.BuildVariationMap();
         }
 
@@ -120,7 +120,7 @@ namespace Dwarves.Render
         /// Get the source rectangle for a random variation of the given base name.
         /// </summary>
         /// <param name="baseSpriteName">The base name of the sprite.</param>
-        /// <param name="variation">The variation index of the sprite.</param>
+        /// <param name="variation">The variation index of the sprite; -1 if the sprite does not exist.</param>
         /// <returns>The source rectangle; If the sprite does not exist then a rectangle with all values set to zero is
         /// returned.</returns>
         public Rectangle GetRandomSpriteRectangle(string baseSpriteName, out int variation)
