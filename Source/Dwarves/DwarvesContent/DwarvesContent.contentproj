@@ -43,13 +43,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Sprite\sprites.png">
-      <Name>sprites</Name>
+    <Compile Include="Sprite\Sprites.png">
+      <Name>Sprites</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="Sprite\sprites_map.xml">
-      <Name>sprites_map</Name>
+    <Compile Include="Sprite\SpritesMap.xml">
+      <Name>SpritesMap</Name>
       <Importer>XmlImporter</Importer>
       <Processor>PassThroughProcessor</Processor>
     </Compile>
