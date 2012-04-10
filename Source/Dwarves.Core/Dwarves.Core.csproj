@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
     <Compile Include="Component\Input\InputPositionComponent.cs" />
