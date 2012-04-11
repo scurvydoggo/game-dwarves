@@ -84,7 +84,7 @@ namespace Dwarves
         #region Properties
 
         /// <summary>
-        /// Gets the world.
+        /// Gets the world context.
         /// </summary>
         public WorldContext World { get; private set; }
 
