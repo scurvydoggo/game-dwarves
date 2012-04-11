@@ -6,6 +6,7 @@
 #if DEBUG
 namespace Dwarves.Debug
 {
+    using Dwarves.Assembler;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
     using EntitySystem;
@@ -53,6 +54,9 @@ namespace Dwarves.Debug
         public Entity CreateDwarf(WorldContext world, float x, float y)
         {
             Entity entity = world.EntityManager.CreateEntity();
+
+            DwarfBodyAssembler bodyAssembler = new DwarfBodyAssembler(world);
+            bodyAssembler.AssembleBody(entity);
 
             // TODO
             return entity;

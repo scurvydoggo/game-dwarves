@@ -14,6 +14,11 @@ namespace Dwarves
     public class WorldContext
     {
         /// <summary>
+        /// The scaling factor for converting pixels to meters in the physics world.
+        /// </summary>
+        public const float PixelsToMeters = 1.01f;
+
+        /// <summary>
         /// Initializes a new instance of the WorldContext class.
         /// </summary>
         /// <param name="entityManager">The entity manager.</param>

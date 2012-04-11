@@ -36,14 +36,20 @@ namespace Dwarves
         private ContentManager content;
 
         /// <summary>
+        /// The mapping of sprite names to their source rectangles in the spritesheet.
+        /// </summary>
+        private Dictionary<string, Rectangle> spriteRectangles;
+
+        /// <summary>
         /// The sprite source rectangle mapping. Sprites are accessed via a set of identifiers that are specified in the
         /// sprite's name. These are (in order):
         ///   Category: The type of sprite (eg. Font, Menu, Body)
+        ///   Type: The type of sprite being seeked (eg. Cloud, Leg, Explosion).
         ///   Family: The family of sprite. Null for none. (eg. Dwarf, Goblin).
-        ///   Name: The sprite being seeked (eg. Cloud, Leg, Explosion).
-        ///   Variation: The variation number of the sprite. -1 for none. (eg. 1 for Red, 2 for Green, 3 for Blue).
+        ///   Variation: The variation of the sprite. -1 for none. (eg. 1 for Red, 2 for Green, 3 for Blue).
+        ///   Sprite name: The full name of the sprite (as referenced in SpriteRectangles).
         /// </summary>
-        private Dictionary<Tuple<string, string, string>, Dictionary<int, Rectangle>> spriteMap;
+        private Dictionary<Tuple<string, string, string>, Dictionary<int, string>> spriteMap;
 
         /// <summary>
         /// Provides random selection of resources.
@@ -61,11 +67,10 @@ namespace Dwarves
         public ResourceManager(ContentManager content)
         {
             this.content = content;
-            this.spriteMap = new Dictionary<Tuple<string, string, string>, Dictionary<int, Rectangle>>();
+            this.spriteMap = new Dictionary<Tuple<string, string, string>, Dictionary<int, string>>();
             this.random = new Random();
-
+            this.spriteRectangles = this.content.Load<Dictionary<string, Rectangle>>("Sprite\\SpriteRectangles");
             this.SpriteSheet = this.content.Load<Texture2D>("Sprite\\Sprites");
-            this.SpriteRectangles = this.content.Load<Dictionary<string, Rectangle>>("Sprite\\SpriteRectangles");
 
             // Build the list of available sprite variations
             this.BuildSpriteInfoMap();
@@ -79,11 +84,6 @@ namespace Dwarves
         /// Gets the spritesheet.
         /// </summary>
         public Texture2D SpriteSheet { get; private set; }
-
-        /// <summary>
-        /// Gets the mapping of sprite names to their source rectangles in the spritesheet.
-        /// </summary>
-        public Dictionary<string, Rectangle> SpriteRectangles { get; private set; }
 
         #endregion
 
@@ -101,94 +101,94 @@ namespace Dwarves
         }
 
         /// <summary>
-        /// Get the source rectangle for the sprite with the given identifying attributes.
+        /// Get the name of the sprite with the given identifying attributes.
         /// </summary>
         /// <param name="category">The sprite category.</param>
-        /// <param name="name">The sprite name.</param>
+        /// <param name="type">The sprite type.</param>
         /// <param name="family">The sprite family; Null if the sprite has no family.</param>
         /// <param name="variation">The variation index of the sprite; -1 if the sprite has no variation.</param>
-        /// <returns>The source rectangle; Null if the sprite does not exist.</returns>
-        public Rectangle? GetSpriteRectangle(string category, string name, string family = null, int variation = -1)
+        /// <returns>The full sprite name.</returns>
+        public string GetSpriteName(string category, string type, string family = null, int variation = -1)
         {
-            Rectangle? rectangle = null;
-
-            var key = Tuple.Create(category, name, family);
-            if (this.spriteMap.ContainsKey(key))
+            Dictionary<int, string> variations = this.spriteMap[Tuple.Create(category, type, family)];
+            if (variation == -1)
             {
-                Dictionary<int, Rectangle> variations = this.spriteMap[key];
-                if (variations.Count > 0)
-                {
-                    if (variation == -1)
-                    {
-                        // Get the first element since no variation was specified
-                        rectangle = variations.ElementAt(0).Value;
-                    }
-                    else
-                    {
-                        // Get the specified variation
-                        if (variations.ContainsKey(variation))
-                        {
-                            rectangle = this.spriteMap[key][variation];
-                        }
-                    }
-                }
+                // Get the first element since no variation was specified
+                return variations.ElementAt(0).Value;
             }
-
-            return rectangle;
+            else
+            {
+                // Get the specified variation
+                return variations[variation];
+            }
         }
 
         /// <summary>
-        /// Get the source rectangle for a random variation of the sprite with the given identifying attributes.
+        /// Get the source rectangle for the sprite with the given name.
         /// </summary>
-        /// <param name="category">The sprite category.</param>
-        /// <param name="name">The sprite name.</param>
-        /// <param name="variation">The variation index of the sprite; -1 if the sprite does not exist.</param>
-        /// <returns>The source rectangle; Null if the sprite does not exist.</returns>
-        public Rectangle? GetRandomSpriteRectangle(string category, string name, out int variation)
+        /// <param name="spriteName">The sprite name.</param>
+        /// <returns>The source rectangle.</returns>
+        public Rectangle GetSpriteRectangle(string spriteName)
         {
-            return this.GetRandomSpriteRectangle(category, name, null, out variation);
+            return this.spriteRectangles[spriteName];
         }
 
         /// <summary>
         /// Get the source rectangle for a random variation of the sprite with the given identifying attributes.
         /// </summary>
         /// <param name="category">The sprite category.</param>
-        /// <param name="name">The sprite name.</param>
+        /// <param name="type">The sprite type.</param>
+        /// <param name="variation">The variation index of the sprite; -1 if the sprite does not exist.</param>
+        /// <returns>The source rectangle.</returns>
+        public Rectangle GetRandomSpriteRectangle(string category, string type, out int variation)
+        {
+            return this.GetRandomSpriteRectangle(category, type, null, out variation);
+        }
+
+        /// <summary>
+        /// Get the source rectangle for a random variation of the sprite with the given identifying attributes.
+        /// </summary>
+        /// <param name="category">The sprite category.</param>
+        /// <param name="type">The sprite type.</param>
         /// <param name="family">The sprite family; Null if the sprite has no family.</param>
         /// <param name="variation">The variation index of the sprite; -1 if the sprite does not exist.</param>
-        /// <returns>The source rectangle; Null if the sprite does not exist.</returns>
-        public Rectangle? GetRandomSpriteRectangle(string category, string name, string family, out int variation)
+        /// <returns>The source rectangle.</returns>
+        public Rectangle GetRandomSpriteRectangle(string category, string type, string family, out int variation)
         {
-            List<int> variations = this.GetSpriteVariations(category, name, family);
+            variation = this.GetRandomSpriteVariation(category, type, family);
+            string spriteName = this.GetSpriteName(category, type, family, variation);
+            return this.GetSpriteRectangle(spriteName);
+        }
+
+        /// <summary>
+        /// Get the variations for the sprite with the given identifying attributes.
+        /// </summary>
+        /// <param name="category">The sprite category.</param>
+        /// <param name="type">The sprite type.</param>
+        /// <param name="family">The sprite family; Null if the sprite has no family.</param>
+        /// <returns>The list of sprite variations.</returns>
+        public List<int> GetSpriteVariations(string category, string type, string family = null)
+        {
+            return this.spriteMap[Tuple.Create(category, type, family)].Keys.ToList();
+        }
+
+        /// <summary>
+        /// Get a random variation of the sprite with the given identifying attributes.
+        /// </summary>
+        /// <param name="category">The sprite category.</param>
+        /// <param name="type">The sprite type.</param>
+        /// <param name="family">The sprite family; Null if the sprite has no family.</param>
+        /// <returns>The variation; -1 if no variations exist.</returns>
+        public int GetRandomSpriteVariation(string category, string type, string family = null)
+        {
+            List<int> variations = this.GetSpriteVariations(category, type, family);
             if (variations.Count > 0)
             {
-                variation = this.random.Next(0, variations.Count);
-                return this.GetSpriteRectangle(category, name, family, variation);
+                return variations[this.random.Next(0, variations.Count)];
             }
             else
             {
-                variation = -1;
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Get the variation numbers for the sprite with the given identifying attributes.
-        /// </summary>
-        /// <param name="category">The sprite category.</param>
-        /// <param name="name">The sprite name.</param>
-        /// <param name="family">The sprite family; Null if the sprite has no family.</param>
-        /// <returns>The list of sprite variation numbers.</returns>
-        public List<int> GetSpriteVariations(string category, string name, string family = null)
-        {
-            var key = Tuple.Create(category, name, family);
-            if (this.spriteMap.ContainsKey(key))
-            {
-                return this.spriteMap[key].Keys.ToList();
-            }
-            else
-            {
-                return new List<int>();
+                return -1;
             }
         }
 
@@ -202,7 +202,7 @@ namespace Dwarves
         private void BuildSpriteInfoMap()
         {
             // Match on all sprites which have a numerical suffix and add these to the collection
-            foreach (KeyValuePair<string, Rectangle> kvp in this.SpriteRectangles)
+            foreach (KeyValuePair<string, Rectangle> kvp in this.spriteRectangles)
             {
                 string spriteName = kvp.Key;
                 Rectangle rectangle = kvp.Value;
@@ -219,11 +219,11 @@ namespace Dwarves
                     Tuple<string, string, string> key = Tuple.Create(category, name, family);
                     if (this.spriteMap.ContainsKey(key))
                     {
-                        this.spriteMap[key].Add(variation, rectangle);
+                        this.spriteMap[key].Add(variation, spriteName);
                     }
                     else
                     {
-                        this.spriteMap.Add(key, new Dictionary<int, Rectangle> { { variation, rectangle } });
+                        this.spriteMap.Add(key, new Dictionary<int, string> { { variation, spriteName } });
                     }
                 }
             }

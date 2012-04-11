@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assembler\BodyAssembler.cs" />
+    <Compile Include="Assembler\DwarfBodyAssembler.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
