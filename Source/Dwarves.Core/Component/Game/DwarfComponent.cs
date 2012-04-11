@@ -5,10 +5,12 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Game
 {
+    using EntitySystem.Component;
+
     /// <summary>
     /// Represents a dwarf entity.
     /// </summary>
-    public class DwarfComponent
+    public class DwarfComponent : IComponent
     {
     }
 }
