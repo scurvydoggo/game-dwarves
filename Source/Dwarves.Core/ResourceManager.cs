@@ -65,7 +65,7 @@ namespace Dwarves
             this.random = new Random();
 
             this.SpriteSheet = this.content.Load<Texture2D>("Sprite\\Sprites");
-            this.SpriteRectangles = this.content.Load<Dictionary<string, Rectangle>>("Sprite\\SpriteMap");
+            this.SpriteRectangles = this.content.Load<Dictionary<string, Rectangle>>("Sprite\\SpriteRectangles");
 
             // Build the list of available sprite variations
             this.BuildSpriteInfoMap();

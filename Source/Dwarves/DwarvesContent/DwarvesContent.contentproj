@@ -48,8 +48,8 @@
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
-    <Compile Include="Sprite\SpritesMap.xml">
-      <Name>SpritesMap</Name>
+    <Compile Include="Sprite\SpriteRectangles.xml">
+      <Name>SpriteRectangles</Name>
       <Importer>XmlImporter</Importer>
       <Processor>PassThroughProcessor</Processor>
     </Compile>
