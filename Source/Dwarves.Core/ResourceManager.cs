@@ -213,8 +213,6 @@ namespace Dwarves
                     string category = matches[0].Groups["category"].Value;
                     string name = matches[0].Groups["name"].Value;
                     string family = matches[0].Groups["family"].Value;
-                    string variationStr = !string.IsNullOrEmpty(matches[0].Groups["family"].Value) ?
-                        matches[0].Groups["family"].Value : null;
                     int variation = !string.IsNullOrEmpty(matches[0].Groups["variation"].Value) ?
                         int.Parse(matches[0].Groups["variation"].Value) : -1;
 
