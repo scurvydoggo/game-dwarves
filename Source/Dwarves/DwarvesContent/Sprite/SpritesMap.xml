@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <XnaContent>
 <Asset Type="System.Collections.Generic.Dictionary[System.String, Microsoft.Xna.Framework.Rectangle]">
-<Item><Key>torso1</Key><Value>0 0 11 10</Value></Item>
-<Item><Key>beard1</Key><Value>12 0 8 13</Value></Item>
-<Item><Key>head1</Key><Value>21 0 6 10</Value></Item>
-<Item><Key>arm_lower1</Key><Value>0 11 4 6</Value></Item>
-<Item><Key>arm_upper1</Key><Value>5 11 4 4</Value></Item>
-<Item><Key>leg_left1</Key><Value>0 18 4 4</Value></Item>
-<Item><Key>leg_right1</Key><Value>5 16 3 4</Value></Item>
+<Item><Key>body-torso-dwarf1</Key><Value>0 0 11 10</Value></Item>
+<Item><Key>body-beard-dwarf1</Key><Value>12 0 8 13</Value></Item>
+<Item><Key>body-head-dwarf1</Key><Value>21 0 6 10</Value></Item>
+<Item><Key>body-arm_lower-dwarf1</Key><Value>0 11 4 6</Value></Item>
+<Item><Key>body-arm_upper-dwarf1</Key><Value>5 11 4 4</Value></Item>
+<Item><Key>body-leg-dwarf1</Key><Value>0 18 4 4</Value></Item>
 </Asset>
 </XnaContent>
