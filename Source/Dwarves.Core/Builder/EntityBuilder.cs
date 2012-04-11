@@ -16,33 +16,33 @@ namespace Dwarves.Builder
         /// <summary>
         /// Initializes a new instance of the EntityBuilder class.
         /// </summary>
-        /// <param name="entityManager">The entity manager.</param>
-        public EntityBuilder(EntityManager entityManager)
+        /// <param name="world">The world context.</param>
+        public EntityBuilder(WorldContext world)
         {
-            this.EntityManager = entityManager;
+            this.World = world;
         }
 
         /// <summary>
         /// Gets or sets the entity being built.
         /// </summary>
-        protected Entity Entity { get; set; }
+        protected Entity CurrentEntity { get; set; }
 
         /// <summary>
-        /// Gets the entity manager.
+        /// Gets the world context.
         /// </summary>
-        protected EntityManager EntityManager { get; private set; }
+        protected WorldContext World { get; private set; }
 
         /// <summary>
         /// Begin building a new entity.
         /// </summary>
         public void Begin()
         {
-            if (this.Entity != null)
+            if (this.CurrentEntity != null)
             {
                 throw new ApplicationException();
             }
 
-            this.Entity = this.EntityManager.CreateEntity();
+            this.CurrentEntity = this.World.EntityManager.CreateEntity();
         }
 
         /// <summary>
@@ -51,9 +51,9 @@ namespace Dwarves.Builder
         /// <returns>The entity that was built.</returns>
         public Entity End()
         {
-            Entity entity = this.Entity;
+            Entity entity = this.CurrentEntity;
 
-            this.Entity = null;
+            this.CurrentEntity = null;
 
             return entity;
         }
@@ -63,9 +63,9 @@ namespace Dwarves.Builder
         /// </summary>
         public void Rollback()
         {
-            if (this.Entity != null)
+            if (this.CurrentEntity != null)
             {
-                this.EntityManager.RemoveEntity(this.Entity);
+                this.World.EntityManager.RemoveEntity(this.CurrentEntity);
             }
         }
     }
