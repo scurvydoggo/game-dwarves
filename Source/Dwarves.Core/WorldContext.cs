@@ -7,7 +7,6 @@ namespace Dwarves
 {
     using EntitySystem;
     using FarseerPhysics.Dynamics;
-    using Microsoft.Xna.Framework.Content;
 
     /// <summary>
     /// Maintains a reference to the key objects representing the state of the game world.
@@ -19,8 +18,8 @@ namespace Dwarves
         /// </summary>
         /// <param name="entityManager">The entity manager.</param>
         /// <param name="physics">The physics world.</param>
-        /// <param name="resources">The game content manager.</param>
-        public WorldContext(EntityManager entityManager, World physics, ContentManager resources)
+        /// <param name="resources">The game resources.</param>
+        public WorldContext(EntityManager entityManager, World physics, ResourceManager resources)
         {
             this.EntityManager = entityManager;
             this.Physics = physics;
@@ -38,8 +37,8 @@ namespace Dwarves
         public World Physics { get; private set; }
 
         /// <summary>
-        /// Gets the game content manager.
+        /// Gets the game resources.
         /// </summary>
-        public ContentManager Resources { get; private set; }
+        public ResourceManager Resources { get; private set; }
     }
 }
