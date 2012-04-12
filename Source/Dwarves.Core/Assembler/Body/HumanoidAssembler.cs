@@ -1,9 +1,9 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="BodyAssembler.cs" company="Acidwashed Games">
+// <copyright file="HumanoidAssembler.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Assembler
+namespace Dwarves.Assembler.Body
 {
     using System.Collections.Generic;
     using Dwarves.Component.Game;
@@ -17,9 +17,9 @@ namespace Dwarves.Assembler
     using Microsoft.Xna.Framework;
 
     /// <summary>
-    /// Assembles body components.
+    /// Assembles humanoid body components.
     /// </summary>
-    public abstract class BodyAssembler
+    public class HumanoidAssembler
     {
         /// <summary>
         /// The world context.
@@ -27,30 +27,36 @@ namespace Dwarves.Assembler
         private WorldContext world;
 
         /// <summary>
-        /// Initializes a new instance of the BodyAssembler class.
+        /// Initializes a new instance of the HumanoidAssembler class.
         /// </summary>
         /// <param name="world">The world context.</param>
-        public BodyAssembler(WorldContext world)
+        public HumanoidAssembler(WorldContext world)
         {
             this.world = world;
         }
 
         /// <summary>
-        /// Gets the sprite family for this body.
-        /// </summary>
-        protected abstract string SpriteFamily { get; }
-
-        /// <summary>
         /// Assemble the body for the given entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        public void AssembleBody(Entity entity)
+        /// <param name="args">The assembler args.</param>
+        public void AssembleBody(Entity entity, HumanoidAssemblerArgs args)
         {
-            // Get the clothes variation
-            int variation = this.GetRandomClothesVariation(this.SpriteFamily);
+            // Randomise the sprite variations
+            int varTorso = this.world.Resources.GetRandomSpriteVariation("body", "torso", args.Family);
+            int headVar = this.world.Resources.GetRandomSpriteVariation("body", "head", args.Family);
+            int beardVar = this.world.Resources.GetRandomSpriteVariation("body", "beard", args.Family);
 
-            // Create the torso
-            this.AssembleBodyPart(entity, BodyPart.Torso, "head", variation, true);
+            // Create the body parts
+            Entity torso = this.AssembleBodyPart(entity, BodyPart.Torso, args.Family, "torso", varTorso);
+            Entity head = this.AssembleBodyPart(entity, BodyPart.Head, args.Family, "head", headVar);
+            Entity leftUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args.Family, "arm_upper", varTorso);
+            Entity rightUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args.Family, "arm_upper", varTorso);
+            Entity leftLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args.Family, "arm_lower", varTorso);
+            Entity rightLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args.Family, "arm_lower", varTorso);
+            Entity leftLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args.Family, "leg");
+            Entity rightLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args.Family, "leg");
+            Entity beard = this.AssembleBodyPart(entity, BodyPart.Beard, args.Family, "beard", beardVar, false);
         }
 
         /// <summary>
@@ -58,6 +64,7 @@ namespace Dwarves.Assembler
         /// </summary>
         /// <param name="bodyEntity">The body entity that the torso belongs to.</param>
         /// <param name="bodyPart">The type of body part.</param>
+        /// <param name="spriteFamily">The sprite family.</param>
         /// <param name="spriteType">The sprite type.</param>
         /// <param name="spriteVariation">The sprite variation.</param>
         /// <param name="hasPhysics">Indicates whether the body part has physics.</param>
@@ -65,9 +72,10 @@ namespace Dwarves.Assembler
         public Entity AssembleBodyPart(
             Entity bodyEntity,
             BodyPart bodyPart,
+            string spriteFamily,
             string spriteType,
-            int spriteVariation,
-            bool hasPhysics)
+            int spriteVariation = -1,
+            bool hasPhysics = true)
         {
             Entity entity = this.world.EntityManager.CreateEntity();
 
@@ -76,7 +84,7 @@ namespace Dwarves.Assembler
 
             // Add the sprite
             string spriteName =
-                this.world.Resources.GetSpriteName("body", spriteType, this.SpriteFamily, spriteVariation);
+                this.world.Resources.GetSpriteName("body", spriteType, spriteFamily, spriteVariation);
             this.world.EntityManager.AddComponent(entity, new SpriteComponent(spriteName));
 
             // Create the physics component
@@ -104,33 +112,13 @@ namespace Dwarves.Assembler
 
                 // Create a single body with multiple fixtures
                 Body body = BodyFactory.CreateCompoundPolygon(this.world.Physics, convexVertices, 1.0f);
+                body.IsStatic = false;
 
                 // Add the physics component
                 this.world.EntityManager.AddComponent(entity, new PhysicsComponent(body));
             }
 
             return entity;
-        }
-
-        /// <summary>
-        /// Get a random variation of the body's clothes.
-        /// </summary>
-        /// <param name="family">The sprite family.</param>
-        /// <returns>The variation.</returns>
-        private int GetRandomClothesVariation(string family)
-        {
-            return this.world.Resources.GetRandomSpriteVariation("body", "torso", family);
-        }
-
-        /// <summary>
-        /// Body assembler args.
-        /// </summary>
-        public class Args
-        {
-            /// <summary>
-            /// Gets or sets the body's sprite family.
-            /// </summary>
-            public string SpriteFamily { get; set; }
         }
     }
 }

@@ -26,12 +26,22 @@ namespace Dwarves.Component.Game
         /// <summary>
         /// Body part.
         /// </summary>
-        Arm,
+        UpperArm,
 
         /// <summary>
         /// Body part.
         /// </summary>
-        Leg
+        LowerArm,
+
+        /// <summary>
+        /// Body part.
+        /// </summary>
+        Leg,
+
+        /// <summary>
+        /// Body part.
+        /// </summary>
+        Beard
     }
 
     /// <summary>

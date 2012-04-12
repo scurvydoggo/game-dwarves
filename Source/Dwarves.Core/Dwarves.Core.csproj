@@ -42,8 +42,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assembler\BodyAssembler.cs" />
-    <Compile Include="Assembler\DwarfBodyAssembler.cs" />
+    <Compile Include="Assembler\Body\HumanoidAssemblerArgs.cs" />
+    <Compile Include="Assembler\Body\HumanoidAssembler.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
