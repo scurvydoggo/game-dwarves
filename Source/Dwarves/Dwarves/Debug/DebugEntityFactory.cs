@@ -59,15 +59,15 @@ namespace Dwarves.Debug
                 "dwarf",
                 DwarfConst.CollisionGroupDwarf,
                 new Vector2(x, y),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f));
+                new Vector2(4.0f, 0.0f) * DwarfConst.PixelsToMeters,
+                new Vector2(-0.5f, 6.5f) * DwarfConst.PixelsToMeters,
+                new Vector2(0.5f, 13.0f) * DwarfConst.PixelsToMeters,
+                new Vector2(-2.5f, 6.5f) * DwarfConst.PixelsToMeters,
+                new Vector2(-2.0f, 1.5f) * DwarfConst.PixelsToMeters,
+                new Vector2(1.0f, 13.0f) * DwarfConst.PixelsToMeters,
+                new Vector2(0.0f, 11.0f) * DwarfConst.PixelsToMeters,
+                new Vector2(-2.5f, 8.0f) * DwarfConst.PixelsToMeters,
+                new Vector2(-3.0f, 3.0f));
 
             var bodyAssembler = new HumanoidAssembler(world);
             bodyAssembler.AssembleBody(entity, args);

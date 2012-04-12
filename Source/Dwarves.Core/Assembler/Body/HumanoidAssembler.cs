@@ -116,7 +116,7 @@ namespace Dwarves.Assembler.Body
         /// <param name="position">The world position of the body part.</param>
         /// <param name="collisionGroup">The collision group of the body part.</param>
         /// <param name="spriteVariation">The sprite variation.</param>
-        /// <param name="hasPhysics">Indicates whether the body part has physics.</param>
+        /// <param name="isPhysical">Indicates whether the body part can collide with physics objects.</param>
         /// <returns>The body part entity.</returns>
         public Entity AssembleBodyPart(
             Entity bodyEntity,
@@ -126,7 +126,7 @@ namespace Dwarves.Assembler.Body
             Vector2 position,
             short collisionGroup,
             int spriteVariation = -1,
-            bool hasPhysics = true)
+            bool isPhysical = true)
         {
             Entity entity = this.world.EntityManager.CreateEntity();
 
@@ -138,9 +138,8 @@ namespace Dwarves.Assembler.Body
                 this.world.Resources.GetSpriteName("body", spriteType, spriteFamily, spriteVariation);
             this.world.EntityManager.AddComponent(entity, new SpriteComponent(spriteName));
 
-            // Create the physics component
-            Body body = null;
-            if (hasPhysics)
+            Body body;
+            if (isPhysical)
             {
                 // Get the texture data for the sprite
                 Rectangle rectangle = this.world.Resources.GetSpriteRectangle(spriteName);
@@ -151,7 +150,7 @@ namespace Dwarves.Assembler.Body
                 Vertices vertices = PolygonTools.CreatePolygon(spriteData, rectangle.Width, true);
 
                 // Scale the vertices from pixels to physics-world units
-                var scale = new Vector2(-DwarfConst.PixelsToMeters);
+                var scale = new Vector2(DwarfConst.PixelsToMeters, -DwarfConst.PixelsToMeters);
                 vertices.Scale(ref scale);
 
                 // Translate the polygon to the centroid
@@ -162,14 +161,20 @@ namespace Dwarves.Assembler.Body
                 // Partition into smaller polygons to split concave segments
                 List<Vertices> convexVertices = BayazitDecomposer.ConvexPartition(vertices);
 
-                // Create a single body with multiple fixtures
+                // Create the body
                 body = BodyFactory.CreateCompoundPolygon(this.world.Physics, convexVertices, 1.0f);
-                body.IsStatic = false;
-                body.CollisionGroup = collisionGroup;
-
-                // Add the physics component
-                this.world.EntityManager.AddComponent(entity, new PhysicsComponent(body));
             }
+            else
+            {
+                body = BodyFactory.CreateEdge(this.world.Physics, Vector2.Zero, Vector2.Zero);
+            }
+
+            body.IsStatic = false;
+            body.CollisionGroup = collisionGroup;
+            body.IsSensor = !isPhysical;
+
+            // Add the physics component
+            this.world.EntityManager.AddComponent(entity, new PhysicsComponent(body));
 
             // Create the position component
             this.world.EntityManager.AddComponent(entity, new PositionComponent(position, body));

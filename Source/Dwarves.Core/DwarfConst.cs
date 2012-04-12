@@ -13,7 +13,7 @@ namespace Dwarves
         /// <summary>
         /// The scaling factor for converting pixels to meters in the physics world.
         /// </summary>
-        public const float PixelsToMeters = 0.1f;
+        public const float PixelsToMeters = 0.5f;
 
         /// <summary>
         /// Collision group.

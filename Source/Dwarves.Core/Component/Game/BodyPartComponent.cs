@@ -7,6 +7,7 @@ namespace Dwarves.Component.Game
 {
     using EntitySystem;
     using EntitySystem.Component;
+    using FarseerPhysics.Dynamics.Joints;
 
     /// <summary>
     /// The body part types.
@@ -64,5 +65,10 @@ namespace Dwarves.Component.Game
         /// Gets or sets the body part type.
         /// </summary>
         public BodyPart BodyPart { get; set; }
+
+        /// <summary>
+        /// Gets or sets the body part joint.
+        /// </summary>
+        public Joint Joint { get; set; }
     }
 }
