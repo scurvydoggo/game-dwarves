@@ -13,15 +13,22 @@ namespace Dwarves.Assembler.Body
         /// <summary>
         /// Initializes a new instance of the HumanoidAssemblerArgs class.
         /// </summary>
-        /// <param name="family">The sprite family.</param>
-        public HumanoidAssemblerArgs(string family)
+        /// <param name="spriteFamily">The sprite family.</param>
+        /// <param name="collisionGroup">The collision group for the body.</param>
+        public HumanoidAssemblerArgs(string spriteFamily, short collisionGroup)
         {
-            this.Family = family;
+            this.SpriteFamily = spriteFamily;
+            this.CollisionGroup = collisionGroup;
         }
 
         /// <summary>
         /// Gets or sets the sprites family that this body belongs to.
         /// </summary>
-        public string Family { get; set; }
+        public string SpriteFamily { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collision group for the body.
+        /// </summary>
+        public short CollisionGroup { get; set; }
     }
 }

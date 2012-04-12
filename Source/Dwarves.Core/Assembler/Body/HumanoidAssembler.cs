@@ -43,20 +43,20 @@ namespace Dwarves.Assembler.Body
         public void AssembleBody(Entity entity, HumanoidAssemblerArgs args)
         {
             // Randomise the sprite variations
-            int varTorso = this.world.Resources.GetRandomSpriteVariation("body", "torso", args.Family);
-            int headVar = this.world.Resources.GetRandomSpriteVariation("body", "head", args.Family);
-            int beardVar = this.world.Resources.GetRandomSpriteVariation("body", "beard", args.Family);
+            int torsoVariation = this.world.Resources.GetRandomSpriteVariation("body", "torso", args.SpriteFamily);
+            int headVariation = this.world.Resources.GetRandomSpriteVariation("body", "head", args.SpriteFamily);
+            int beardVariation = this.world.Resources.GetRandomSpriteVariation("body", "beard", args.SpriteFamily);
 
             // Create the body parts
-            Entity torso = this.AssembleBodyPart(entity, BodyPart.Torso, args.Family, "torso", varTorso);
-            Entity head = this.AssembleBodyPart(entity, BodyPart.Head, args.Family, "head", headVar);
-            Entity leftUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args.Family, "arm_upper", varTorso);
-            Entity rightUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args.Family, "arm_upper", varTorso);
-            Entity leftLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args.Family, "arm_lower", varTorso);
-            Entity rightLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args.Family, "arm_lower", varTorso);
-            Entity leftLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args.Family, "leg");
-            Entity rightLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args.Family, "leg");
-            Entity beard = this.AssembleBodyPart(entity, BodyPart.Beard, args.Family, "beard", beardVar, false);
+            Entity torso = this.AssembleBodyPart(entity, BodyPart.Torso, args, "torso", torsoVariation);
+            Entity head = this.AssembleBodyPart(entity, BodyPart.Head, args, "head", headVariation);
+            Entity leftUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args, "arm_upper", torsoVariation);
+            Entity rightUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args, "arm_upper", torsoVariation);
+            Entity leftLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args, "arm_lower", torsoVariation);
+            Entity rightLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args, "arm_lower", torsoVariation);
+            Entity leftLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args, "leg");
+            Entity rightLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args, "leg");
+            Entity beard = this.AssembleBodyPart(entity, BodyPart.Beard, args, "beard", beardVariation, false);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Dwarves.Assembler.Body
         /// </summary>
         /// <param name="bodyEntity">The body entity that the torso belongs to.</param>
         /// <param name="bodyPart">The type of body part.</param>
-        /// <param name="spriteFamily">The sprite family.</param>
+        /// <param name="args">The assembler args.</param>
         /// <param name="spriteType">The sprite type.</param>
         /// <param name="spriteVariation">The sprite variation.</param>
         /// <param name="hasPhysics">Indicates whether the body part has physics.</param>
@@ -72,7 +72,7 @@ namespace Dwarves.Assembler.Body
         public Entity AssembleBodyPart(
             Entity bodyEntity,
             BodyPart bodyPart,
-            string spriteFamily,
+            HumanoidAssemblerArgs args,
             string spriteType,
             int spriteVariation = -1,
             bool hasPhysics = true)
@@ -84,7 +84,7 @@ namespace Dwarves.Assembler.Body
 
             // Add the sprite
             string spriteName =
-                this.world.Resources.GetSpriteName("body", spriteType, spriteFamily, spriteVariation);
+                this.world.Resources.GetSpriteName("body", spriteType, args.SpriteFamily, spriteVariation);
             this.world.EntityManager.AddComponent(entity, new SpriteComponent(spriteName));
 
             // Create the physics component
@@ -99,7 +99,7 @@ namespace Dwarves.Assembler.Body
                 Vertices vertices = PolygonTools.CreatePolygon(spriteData, rectangle.Width, true);
 
                 // Scale the vertices from pixels to physics-world units
-                var scale = new Vector2(-WorldContext.PixelsToMeters);
+                var scale = new Vector2(-DwarfConst.PixelsToMeters);
                 vertices.Scale(ref scale);
 
                 // Translate the polygon to the centroid
@@ -113,6 +113,9 @@ namespace Dwarves.Assembler.Body
                 // Create a single body with multiple fixtures
                 Body body = BodyFactory.CreateCompoundPolygon(this.world.Physics, convexVertices, 1.0f);
                 body.IsStatic = false;
+
+                // Set collision group
+                body.CollisionGroup = args.CollisionGroup;
 
                 // Add the physics component
                 this.world.EntityManager.AddComponent(entity, new PhysicsComponent(body));
