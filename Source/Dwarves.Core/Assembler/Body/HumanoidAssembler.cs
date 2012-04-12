@@ -65,36 +65,20 @@ namespace Dwarves.Assembler.Body
                 args.BodyPosition + args.HeadPosition,
                 args.CollisionGroup,
                 clothesVariation);
-            Entity leftUpperArm = this.AssembleBodyPart(
+            Entity leftArm = this.AssembleBodyPart(
                 entity,
-                BodyPart.UpperArm,
-                "arm_upper",
+                BodyPart.Arm,
+                "arm",
                 args.SpriteFamily,
-                args.BodyPosition + args.UpperArmPosition,
+                args.BodyPosition + args.ArmPosition,
                 args.CollisionGroup,
                 clothesVariation);
-            Entity rightUpperArm = this.AssembleBodyPart(
+            Entity rightArm = this.AssembleBodyPart(
                 entity,
-                BodyPart.UpperArm,
-                "arm_upper",
+                BodyPart.Arm,
+                "arm",
                 args.SpriteFamily,
-                args.BodyPosition + args.UpperArmPosition + args.LeftToRightOffset,
-                args.CollisionGroup,
-                clothesVariation);
-            Entity leftLowerArm = this.AssembleBodyPart(
-                entity,
-                BodyPart.LowerArm,
-                "arm_lower",
-                args.SpriteFamily,
-                args.BodyPosition + args.LowerArmPosition,
-                args.CollisionGroup,
-                clothesVariation);
-            Entity rightLowerArm = this.AssembleBodyPart(
-                entity,
-                BodyPart.LowerArm,
-                "arm_lower",
-                args.SpriteFamily,
-                args.BodyPosition + args.LowerArmPosition + args.LeftToRightOffset,
+                args.BodyPosition + args.ArmPosition + args.LeftToRightOffset,
                 args.CollisionGroup,
                 clothesVariation);
             Entity leftLeg = this.AssembleBodyPart(

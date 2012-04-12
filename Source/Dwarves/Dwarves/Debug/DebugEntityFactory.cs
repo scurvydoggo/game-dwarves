@@ -67,8 +67,6 @@ namespace Dwarves.Debug
                 new Vector2(0.0f, 0.0f),
                 new Vector2(0.0f, 0.0f),
                 new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f),
                 new Vector2(0.0f, 0.0f));
 
             var bodyAssembler = new HumanoidAssembler(world);
