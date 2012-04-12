@@ -9,6 +9,7 @@ namespace Dwarves.Assembler.Body
     using Dwarves.Component.Game;
     using Dwarves.Component.Physics;
     using Dwarves.Component.Render;
+    using Dwarves.Component.Spatial;
     using EntitySystem;
     using FarseerPhysics.Common;
     using FarseerPhysics.Common.Decomposition;
@@ -43,20 +44,82 @@ namespace Dwarves.Assembler.Body
         public void AssembleBody(Entity entity, HumanoidAssemblerArgs args)
         {
             // Randomise the sprite variations
-            int torsoVariation = this.world.Resources.GetRandomSpriteVariation("body", "torso", args.SpriteFamily);
+            int clothesVariation = this.world.Resources.GetRandomSpriteVariation("body", "torso", args.SpriteFamily);
             int headVariation = this.world.Resources.GetRandomSpriteVariation("body", "head", args.SpriteFamily);
             int beardVariation = this.world.Resources.GetRandomSpriteVariation("body", "beard", args.SpriteFamily);
 
             // Create the body parts
-            Entity torso = this.AssembleBodyPart(entity, BodyPart.Torso, args, "torso", torsoVariation);
-            Entity head = this.AssembleBodyPart(entity, BodyPart.Head, args, "head", headVariation);
-            Entity leftUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args, "arm_upper", torsoVariation);
-            Entity rightUpperArm = this.AssembleBodyPart(entity, BodyPart.UpperArm, args, "arm_upper", torsoVariation);
-            Entity leftLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args, "arm_lower", torsoVariation);
-            Entity rightLowerArm = this.AssembleBodyPart(entity, BodyPart.LowerArm, args, "arm_lower", torsoVariation);
-            Entity leftLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args, "leg");
-            Entity rightLeg = this.AssembleBodyPart(entity, BodyPart.Leg, args, "leg");
-            Entity beard = this.AssembleBodyPart(entity, BodyPart.Beard, args, "beard", beardVariation, false);
+            Entity torso = this.AssembleBodyPart(
+                entity,
+                BodyPart.Torso,
+                "torso",
+                args.SpriteFamily,
+                args.BodyPosition + args.TorsoPosition,
+                args.CollisionGroup,
+                clothesVariation);
+            Entity head = this.AssembleBodyPart(
+                entity,
+                BodyPart.Head,
+                "head",
+                args.SpriteFamily,
+                args.BodyPosition + args.HeadPosition,
+                args.CollisionGroup,
+                clothesVariation);
+            Entity leftUpperArm = this.AssembleBodyPart(
+                entity,
+                BodyPart.UpperArm,
+                "arm_upper",
+                args.SpriteFamily,
+                args.BodyPosition + args.UpperArmPosition,
+                args.CollisionGroup,
+                clothesVariation);
+            Entity rightUpperArm = this.AssembleBodyPart(
+                entity,
+                BodyPart.UpperArm,
+                "arm_upper",
+                args.SpriteFamily,
+                args.BodyPosition + args.UpperArmPosition + args.LeftToRightOffset,
+                args.CollisionGroup,
+                clothesVariation);
+            Entity leftLowerArm = this.AssembleBodyPart(
+                entity,
+                BodyPart.LowerArm,
+                "arm_lower",
+                args.SpriteFamily,
+                args.BodyPosition + args.LowerArmPosition,
+                args.CollisionGroup,
+                clothesVariation);
+            Entity rightLowerArm = this.AssembleBodyPart(
+                entity,
+                BodyPart.LowerArm,
+                "arm_lower",
+                args.SpriteFamily,
+                args.BodyPosition + args.LowerArmPosition + args.LeftToRightOffset,
+                args.CollisionGroup,
+                clothesVariation);
+            Entity leftLeg = this.AssembleBodyPart(
+                entity,
+                BodyPart.Leg,
+                "leg",
+                args.SpriteFamily,
+                args.BodyPosition + args.LegPosition,
+                args.CollisionGroup);
+            Entity rightLeg = this.AssembleBodyPart(
+                entity,
+                BodyPart.Leg,
+                "leg",
+                args.SpriteFamily,
+                args.BodyPosition + args.LegPosition + args.LeftToRightOffset,
+                args.CollisionGroup);
+            Entity beard = this.AssembleBodyPart(
+                entity,
+                BodyPart.Beard,
+                "beard",
+                args.SpriteFamily,
+                args.BodyPosition + args.BeardPosition,
+                args.CollisionGroup,
+                beardVariation,
+                false);
         }
 
         /// <summary>
@@ -64,16 +127,20 @@ namespace Dwarves.Assembler.Body
         /// </summary>
         /// <param name="bodyEntity">The body entity that the torso belongs to.</param>
         /// <param name="bodyPart">The type of body part.</param>
-        /// <param name="args">The assembler args.</param>
         /// <param name="spriteType">The sprite type.</param>
+        /// <param name="spriteFamily">The sprite family.</param>
+        /// <param name="position">The world position of the body part.</param>
+        /// <param name="collisionGroup">The collision group of the body part.</param>
         /// <param name="spriteVariation">The sprite variation.</param>
         /// <param name="hasPhysics">Indicates whether the body part has physics.</param>
         /// <returns>The body part entity.</returns>
         public Entity AssembleBodyPart(
             Entity bodyEntity,
             BodyPart bodyPart,
-            HumanoidAssemblerArgs args,
             string spriteType,
+            string spriteFamily,
+            Vector2 position,
+            short collisionGroup,
             int spriteVariation = -1,
             bool hasPhysics = true)
         {
@@ -84,10 +151,11 @@ namespace Dwarves.Assembler.Body
 
             // Add the sprite
             string spriteName =
-                this.world.Resources.GetSpriteName("body", spriteType, args.SpriteFamily, spriteVariation);
+                this.world.Resources.GetSpriteName("body", spriteType, spriteFamily, spriteVariation);
             this.world.EntityManager.AddComponent(entity, new SpriteComponent(spriteName));
 
             // Create the physics component
+            Body body = null;
             if (hasPhysics)
             {
                 // Get the texture data for the sprite
@@ -111,15 +179,16 @@ namespace Dwarves.Assembler.Body
                 List<Vertices> convexVertices = BayazitDecomposer.ConvexPartition(vertices);
 
                 // Create a single body with multiple fixtures
-                Body body = BodyFactory.CreateCompoundPolygon(this.world.Physics, convexVertices, 1.0f);
+                body = BodyFactory.CreateCompoundPolygon(this.world.Physics, convexVertices, 1.0f);
                 body.IsStatic = false;
-
-                // Set collision group
-                body.CollisionGroup = args.CollisionGroup;
+                body.CollisionGroup = collisionGroup;
 
                 // Add the physics component
                 this.world.EntityManager.AddComponent(entity, new PhysicsComponent(body));
             }
+
+            // Create the position component
+            this.world.EntityManager.AddComponent(entity, new PositionComponent(position, body));
 
             return entity;
         }

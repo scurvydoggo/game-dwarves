@@ -39,9 +39,9 @@ namespace Dwarves.Component.Spatial
         /// <summary>
         /// Initializes a new instance of the PositionComponent class.
         /// </summary>
-        /// <param name="body">The physics body whose position will be acted upon.</param>
         /// <param name="position">The position.</param>
-        public PositionComponent(Body body, Vector2 position)
+        /// <param name="body">The physics body whose position will be acted upon.</param>
+        public PositionComponent(Vector2 position, Body body)
         {
             this.body = body;
             this.Position = position;

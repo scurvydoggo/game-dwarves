@@ -55,8 +55,24 @@ namespace Dwarves.Debug
         {
             Entity entity = world.EntityManager.CreateEntity();
 
+            var args = new HumanoidAssemblerArgs(
+                "dwarf",
+                DwarfConst.CollisionGroupDwarf,
+                new Vector2(x, y),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, 0.0f));
+
             var bodyAssembler = new HumanoidAssembler(world);
-            bodyAssembler.AssembleBody(entity, new HumanoidAssemblerArgs("dwarf", DwarfConst.CollisionGroupDwarf));
+            bodyAssembler.AssembleBody(entity, args);
 
             // TODO
             return entity;
