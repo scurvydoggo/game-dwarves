@@ -57,6 +57,7 @@
     <Compile Include="Component\Spatial\ScaleComponent.cs" />
     <Compile Include="Data\DwarvesDataAdapter.cs" />
     <Compile Include="DwarvesConfig.cs" />
+    <Compile Include="DwarfConst.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager.cs" />
     <Compile Include="Subsystem\DebugDrawSystem.cs" />

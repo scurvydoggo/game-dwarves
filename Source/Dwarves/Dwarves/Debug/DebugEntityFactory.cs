@@ -56,7 +56,7 @@ namespace Dwarves.Debug
             Entity entity = world.EntityManager.CreateEntity();
 
             var bodyAssembler = new HumanoidAssembler(world);
-            bodyAssembler.AssembleBody(entity, new HumanoidAssemblerArgs("dwarf"));
+            bodyAssembler.AssembleBody(entity, new HumanoidAssemblerArgs("dwarf", DwarfConst.CollisionGroupDwarf));
 
             // TODO
             return entity;
