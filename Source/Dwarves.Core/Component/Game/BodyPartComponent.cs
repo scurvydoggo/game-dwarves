@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Game
 {
+    using System.Collections.Generic;
     using EntitySystem;
     using EntitySystem.Component;
     using FarseerPhysics.Dynamics.Joints;
@@ -54,6 +55,7 @@ namespace Dwarves.Component.Game
         {
             this.ParentEntity = parentEntity;
             this.BodyPart = bodyPart;
+            this.Joints = new List<Joint>();
         }
 
         /// <summary>
@@ -62,13 +64,13 @@ namespace Dwarves.Component.Game
         public Entity ParentEntity { get; private set; }
 
         /// <summary>
-        /// Gets or sets the body part type.
+        /// Gets the body part type.
         /// </summary>
-        public BodyPart BodyPart { get; set; }
+        public BodyPart BodyPart { get; private set; }
 
         /// <summary>
-        /// Gets or sets the body part joint.
+        /// Gets the body part joints.
         /// </summary>
-        public Joint Joint { get; set; }
+        public List<Joint> Joints { get; private set; }
     }
 }

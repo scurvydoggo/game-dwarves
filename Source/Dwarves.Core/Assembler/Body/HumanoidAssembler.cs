@@ -14,6 +14,7 @@ namespace Dwarves.Assembler.Body
     using FarseerPhysics.Common;
     using FarseerPhysics.Common.Decomposition;
     using FarseerPhysics.Dynamics;
+    using FarseerPhysics.Dynamics.Joints;
     using FarseerPhysics.Factories;
     using Microsoft.Xna.Framework;
 
@@ -22,10 +23,16 @@ namespace Dwarves.Assembler.Body
     /// </summary>
     public class HumanoidAssembler
     {
+        #region Private Variables
+
         /// <summary>
         /// The world context.
         /// </summary>
         private WorldContext world;
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the HumanoidAssembler class.
@@ -35,6 +42,10 @@ namespace Dwarves.Assembler.Body
         {
             this.world = world;
         }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// Assemble the body for the given entity.
@@ -49,7 +60,7 @@ namespace Dwarves.Assembler.Body
             int beardVariation = this.world.Resources.GetRandomSpriteVariation("body", "beard", args.SpriteFamily);
 
             // Create the body parts
-            Entity torso = this.AssembleBodyPart(
+            BodyPartInfo torso = this.AssembleBodyPart(
                 entity,
                 BodyPart.Torso,
                 "torso",
@@ -57,7 +68,7 @@ namespace Dwarves.Assembler.Body
                 args.BodyPosition + args.TorsoPosition,
                 args.CollisionGroup,
                 clothesVariation);
-            Entity head = this.AssembleBodyPart(
+            BodyPartInfo head = this.AssembleBodyPart(
                 entity,
                 BodyPart.Head,
                 "head",
@@ -65,7 +76,7 @@ namespace Dwarves.Assembler.Body
                 args.BodyPosition + args.HeadPosition,
                 args.CollisionGroup,
                 clothesVariation);
-            Entity leftArm = this.AssembleBodyPart(
+            BodyPartInfo leftArm = this.AssembleBodyPart(
                 entity,
                 BodyPart.Arm,
                 "arm",
@@ -73,7 +84,7 @@ namespace Dwarves.Assembler.Body
                 args.BodyPosition + args.ArmPosition,
                 args.CollisionGroup,
                 clothesVariation);
-            Entity rightArm = this.AssembleBodyPart(
+            BodyPartInfo rightArm = this.AssembleBodyPart(
                 entity,
                 BodyPart.Arm,
                 "arm",
@@ -81,21 +92,21 @@ namespace Dwarves.Assembler.Body
                 args.BodyPosition + args.ArmPosition + args.LeftToRightOffset,
                 args.CollisionGroup,
                 clothesVariation);
-            Entity leftLeg = this.AssembleBodyPart(
+            BodyPartInfo leftLeg = this.AssembleBodyPart(
                 entity,
                 BodyPart.Leg,
                 "leg",
                 args.SpriteFamily,
                 args.BodyPosition + args.LegPosition,
                 args.CollisionGroup);
-            Entity rightLeg = this.AssembleBodyPart(
+            BodyPartInfo rightLeg = this.AssembleBodyPart(
                 entity,
                 BodyPart.Leg,
                 "leg",
                 args.SpriteFamily,
                 args.BodyPosition + args.LegPosition + args.LeftToRightOffset,
                 args.CollisionGroup);
-            Entity beard = this.AssembleBodyPart(
+            BodyPartInfo beard = this.AssembleBodyPart(
                 entity,
                 BodyPart.Beard,
                 "beard",
@@ -104,7 +115,21 @@ namespace Dwarves.Assembler.Body
                 args.CollisionGroup,
                 beardVariation,
                 false);
+
+            // Create the joints
+            this.CreateFixedJoint(head, beard, args.BodyPosition + args.HeadPosition);
+            this.CreateRotationalJoint(torso, head, args.NeckJointPosition - args.HeadPosition);
+            this.CreateRotationalJoint(torso, leftArm, args.ShoulderJointPosition - args.ArmPosition);
+            this.CreateRotationalJoint(
+                torso, rightArm, args.ShoulderJointPosition - args.ArmPosition - args.LeftToRightOffset);
+            this.CreateRotationalJoint(torso, leftLeg, args.HipJointPosition - args.LegPosition);
+            this.CreateRotationalJoint(
+                torso, rightLeg, args.HipJointPosition - args.LegPosition - args.LeftToRightOffset);
         }
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// Create the body part entity.
@@ -117,8 +142,8 @@ namespace Dwarves.Assembler.Body
         /// <param name="collisionGroup">The collision group of the body part.</param>
         /// <param name="spriteVariation">The sprite variation.</param>
         /// <param name="isPhysical">Indicates whether the body part can collide with physics objects.</param>
-        /// <returns>The body part entity.</returns>
-        public Entity AssembleBodyPart(
+        /// <returns>The body part entity and the component.</returns>
+        private BodyPartInfo AssembleBodyPart(
             Entity bodyEntity,
             BodyPart bodyPart,
             string spriteType,
@@ -131,7 +156,8 @@ namespace Dwarves.Assembler.Body
             Entity entity = this.world.EntityManager.CreateEntity();
 
             // Add the body part
-            this.world.EntityManager.AddComponent(entity, new BodyPartComponent(bodyEntity, bodyPart));
+            var bodyPartComponent = new BodyPartComponent(bodyEntity, bodyPart);
+            this.world.EntityManager.AddComponent(entity, bodyPartComponent);
 
             // Add the sprite
             string spriteName =
@@ -174,12 +200,93 @@ namespace Dwarves.Assembler.Body
             body.IsSensor = !isPhysical;
 
             // Add the physics component
-            this.world.EntityManager.AddComponent(entity, new PhysicsComponent(body));
+            var physicsComponent = new PhysicsComponent(body);
+            this.world.EntityManager.AddComponent(entity, physicsComponent);
 
             // Create the position component
             this.world.EntityManager.AddComponent(entity, new PositionComponent(position, body));
 
-            return entity;
+            return new BodyPartInfo(entity, bodyPartComponent, physicsComponent);
         }
+
+        /// <summary>
+        /// Create a rotational joint between the two body parts.
+        /// </summary>
+        /// <param name="bodyPartA">The first body part being joined.</param>
+        /// <param name="bodyPartB">The second body part being joined.</param>
+        /// <param name="positionB">The position of the joint relative to the second body part.</param>
+        private void CreateRotationalJoint(BodyPartInfo bodyPartA, BodyPartInfo bodyPartB, Vector2 positionB)
+        {
+            // Create the joint
+            Joint joint = JointFactory.CreateRevoluteJoint(
+                this.world.Physics,
+                bodyPartA.PhysicsComponent.Body,
+                bodyPartB.PhysicsComponent.Body,
+                positionB);
+
+            // Register the joint with the two body parts
+            bodyPartA.BodyPartComponent.Joints.Add(joint);
+            bodyPartB.BodyPartComponent.Joints.Add(joint);
+        }
+
+        /// <summary>
+        /// Create a rotational joint between the two body parts.
+        /// </summary>
+        /// <param name="bodyPartA">The first body part being joined.</param>
+        /// <param name="bodyPartB">The second body part being joined.</param>
+        /// <param name="positionWorld">The position of the joint in world coordinates.</param>
+        private void CreateFixedJoint(BodyPartInfo bodyPartA, BodyPartInfo bodyPartB, Vector2 positionWorld)
+        {
+            // Create the joint
+            Joint joint = JointFactory.CreateWeldJoint(
+                this.world.Physics,
+                bodyPartA.PhysicsComponent.Body,
+                bodyPartB.PhysicsComponent.Body,
+                positionWorld);
+
+            // Register the joint with the two body parts
+            bodyPartA.BodyPartComponent.Joints.Add(joint);
+            bodyPartB.BodyPartComponent.Joints.Add(joint);
+        }
+
+        #endregion
+
+        #region Inner Classes
+
+        /// <summary>
+        /// Body part info.
+        /// </summary>
+        private class BodyPartInfo
+        {
+            /// <summary>
+            /// Initializes a new instance of the BodyPartInfo class.
+            /// </summary>
+            /// <param name="entity">The body part entity.</param>
+            /// <param name="bodyPartComponent">The body part component.</param>
+            /// <param name="physicsComponent">The physics component.</param>
+            public BodyPartInfo(Entity entity, BodyPartComponent bodyPartComponent, PhysicsComponent physicsComponent)
+            {
+                this.Entity = entity;
+                this.BodyPartComponent = bodyPartComponent;
+                this.PhysicsComponent = physicsComponent;
+            }
+
+            /// <summary>
+            /// Gets the body part entity.
+            /// </summary>
+            public Entity Entity { get; private set; }
+
+            /// <summary>
+            /// Gets the body part component.
+            /// </summary>
+            public BodyPartComponent BodyPartComponent { get; private set; }
+
+            /// <summary>
+            /// Gets the physics component.
+            /// </summary>
+            public PhysicsComponent PhysicsComponent { get; private set; }
+        }
+
+        #endregion
     }
 }
