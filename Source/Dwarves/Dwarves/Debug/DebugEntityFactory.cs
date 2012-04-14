@@ -67,7 +67,7 @@ namespace Dwarves.Debug
                 new Vector2(1.0f, 13.0f) * DwarfConst.PixelsToMeters,
                 new Vector2(0.0f, 11.0f) * DwarfConst.PixelsToMeters,
                 new Vector2(-2.5f, 8.0f) * DwarfConst.PixelsToMeters,
-                new Vector2(-3.0f, 3.0f));
+                new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters);
 
             var bodyAssembler = new HumanoidAssembler(world);
             bodyAssembler.AssembleBody(entity, args);

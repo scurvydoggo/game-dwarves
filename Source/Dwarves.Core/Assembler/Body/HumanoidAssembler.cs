@@ -120,11 +120,9 @@ namespace Dwarves.Assembler.Body
             this.CreateFixedJoint(head, beard, args.BodyPosition + args.HeadPosition);
             this.CreateRotationalJoint(torso, head, args.NeckJointPosition - args.HeadPosition);
             this.CreateRotationalJoint(torso, leftArm, args.ShoulderJointPosition - args.ArmPosition);
-            this.CreateRotationalJoint(
-                torso, rightArm, args.ShoulderJointPosition - args.ArmPosition - args.LeftToRightOffset);
+            this.CreateRotationalJoint(torso, rightArm, args.ShoulderJointPosition - args.ArmPosition);
             this.CreateRotationalJoint(torso, leftLeg, args.HipJointPosition - args.LegPosition);
-            this.CreateRotationalJoint(
-                torso, rightLeg, args.HipJointPosition - args.LegPosition - args.LeftToRightOffset);
+            this.CreateRotationalJoint(torso, rightLeg, args.HipJointPosition - args.LegPosition);
         }
 
         #endregion
