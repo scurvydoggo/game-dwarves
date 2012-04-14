@@ -117,7 +117,7 @@ namespace Dwarves.Assembler.Body
                 false);
 
             // Create the joints
-            this.CreateFixedJoint(head, beard, args.BodyPosition + args.HeadPosition);
+            this.CreateFixedJoint(head, beard);
             this.CreateRotationalJoint(torso, head, args.NeckJointPosition - args.HeadPosition);
             this.CreateRotationalJoint(torso, leftArm, args.ShoulderJointPosition - args.ArmPosition);
             this.CreateRotationalJoint(torso, rightArm, args.ShoulderJointPosition - args.ArmPosition);
@@ -190,7 +190,9 @@ namespace Dwarves.Assembler.Body
             }
             else
             {
-                body = BodyFactory.CreateEdge(this.world.Physics, Vector2.Zero, Vector2.Zero);
+                // Create a tiny rectangle since this isn't a physical body. A body is just created so that the body
+                // part can be welded onto other parts
+                body = BodyFactory.CreateRectangle(this.world.Physics, 0.001f, 0.001f, 1.0f);
             }
 
             body.IsStatic = false;
@@ -228,19 +230,19 @@ namespace Dwarves.Assembler.Body
         }
 
         /// <summary>
-        /// Create a rotational joint between the two body parts.
+        /// Create a fixed joint between the two body parts.
         /// </summary>
         /// <param name="bodyPartA">The first body part being joined.</param>
         /// <param name="bodyPartB">The second body part being joined.</param>
-        /// <param name="positionWorld">The position of the joint in world coordinates.</param>
-        private void CreateFixedJoint(BodyPartInfo bodyPartA, BodyPartInfo bodyPartB, Vector2 positionWorld)
+        private void CreateFixedJoint(BodyPartInfo bodyPartA, BodyPartInfo bodyPartB)
         {
             // Create the joint
             Joint joint = JointFactory.CreateWeldJoint(
                 this.world.Physics,
                 bodyPartA.PhysicsComponent.Body,
                 bodyPartB.PhysicsComponent.Body,
-                positionWorld);
+                Vector2.Zero,
+                Vector2.Zero);
 
             // Register the joint with the two body parts
             bodyPartA.BodyPartComponent.Joints.Add(joint);
