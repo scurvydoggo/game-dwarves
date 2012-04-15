@@ -38,9 +38,9 @@ namespace Dwarves
         /// <summary>
         /// Initializes a new instance of the DwarvesWorld class.
         /// </summary>
-        /// <param name="device">The graphics device.</param>
+        /// <param name="graphics">The graphics device.</param>
         /// <param name="content">The content manager.</param>
-        public DwarvesWorld(GraphicsDevice device, ContentManager content)
+        public DwarvesWorld(GraphicsDevice graphics, ContentManager content)
         {
             // Create the entity system world
             this.entitySystemWorld = new EntitySystemWorld();
@@ -58,11 +58,12 @@ namespace Dwarves
             var drawSystems = this.entitySystemWorld.DrawSystemManager;
 
             // Create update systems
-            updateSystems.AddSystem(new InputSystem(this.World.EntityManager, device));
+            updateSystems.AddSystem(new InputSystem(this.World.EntityManager, graphics));
             updateSystems.AddSystem(new PhysicsSystem(this.World.EntityManager, this.World.Physics));
 
             // Create draw systems
-            drawSystems.AddSystem(new DebugDrawSystem(this.World.EntityManager, this.World.Physics, device, content));
+            drawSystems.AddSystem(new DebugDrawSystem(this.World.EntityManager, this.World.Physics, graphics, content));
+            drawSystems.AddSystem(new SpriteSystem(this.World.EntityManager, this.World.Resources, graphics));
 
             // Create the data adapter
             DwarvesConfig config = content.Load<DwarvesConfig>("Config\\DwarvesConfig");

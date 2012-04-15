@@ -30,13 +30,17 @@ namespace Dwarves.Subsystem
         /// </summary>
         /// <param name="entityManager">The EntityManager for the world that this system belongs to.</param>
         /// <param name="world">The physics world.</param>
-        /// <param name="device">The graphics device.</param>
+        /// <param name="graphics">The graphics device.</param>
         /// <param name="content">The content manager.</param>
-        public DebugDrawSystem(EntityManager entityManager, World world, GraphicsDevice device, ContentManager content)
+        public DebugDrawSystem(
+            EntityManager entityManager,
+            World world,
+            GraphicsDevice graphics,
+            ContentManager content)
             : base(entityManager)
         {
             this.debugView = new DebugViewXNA(world);
-            this.debugView.LoadContent(device, content);
+            this.debugView.LoadContent(graphics, content);
 
             // Set the debug flags
             ////this.debugView.AppendFlags(DebugViewFlags.AABB);

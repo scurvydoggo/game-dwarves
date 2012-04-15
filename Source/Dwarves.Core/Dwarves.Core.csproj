@@ -63,6 +63,7 @@
     <Compile Include="Subsystem\DebugDrawSystem.cs" />
     <Compile Include="Subsystem\InputSystem.cs" />
     <Compile Include="Subsystem\PhysicsSystem.cs" />
+    <Compile Include="Subsystem\SpriteSystem.cs" />
     <Compile Include="WorldContext.cs" />
   </ItemGroup>
   <ItemGroup>
