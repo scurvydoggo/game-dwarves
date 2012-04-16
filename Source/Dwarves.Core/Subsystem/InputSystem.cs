@@ -29,7 +29,7 @@ namespace Dwarves.Subsystem
         /// <summary>
         /// The graphics device.
         /// </summary>
-        private GraphicsDevice device;
+        private GraphicsDevice graphics;
 
         /// <summary>
         /// The previous mouse state.
@@ -45,11 +45,11 @@ namespace Dwarves.Subsystem
         /// Initializes a new instance of the InputSystem class.
         /// </summary>
         /// <param name="entityManager">The EntityManager for the world that this system belongs to.</param>
-        /// <param name="device">The graphics device.</param>
-        public InputSystem(EntityManager entityManager, GraphicsDevice device)
+        /// <param name="graphics">The graphics device.</param>
+        public InputSystem(EntityManager entityManager, GraphicsDevice graphics)
             : base(entityManager)
         {
-            this.device = device;
+            this.graphics = graphics;
             this.prevMouseState = null;
             this.prevEntityWithFocus = null;
         }
@@ -110,8 +110,8 @@ namespace Dwarves.Subsystem
                     float deltaY = mouseState.Y - this.prevMouseState.Value.Y;
 
                     // Transform from screen coordinates to game-world coordinates
-                    deltaX *= cameraComponent.ProjectionWidth / (float)this.device.Viewport.Width;
-                    deltaY *= cameraComponent.ProjectionHeight / (float)this.device.Viewport.Height;
+                    deltaX *= cameraComponent.ProjectionWidth / (float)this.graphics.Viewport.Width;
+                    deltaY *= cameraComponent.ProjectionHeight / (float)this.graphics.Viewport.Height;
 
                     // Transform from game-world coordinates to camera-relative coordinates
                     deltaX /= cameraZoom.Scale;

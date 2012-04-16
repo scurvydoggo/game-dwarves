@@ -204,7 +204,7 @@ namespace Dwarves.Assembler.Body
             this.world.EntityManager.AddComponent(entity, physicsComponent);
 
             // Create the position component
-            this.world.EntityManager.AddComponent(entity, new PositionComponent(position, body));
+            this.world.EntityManager.AddComponent(entity, new PositionComponent(body, position));
 
             return new BodyPartInfo(entity, bodyPartComponent, physicsComponent);
         }

@@ -20,6 +20,11 @@ namespace Dwarves.Component.Spatial
         private Vector2 position;
 
         /// <summary>
+        /// The rotation of the component for IsPhysicsBased = false.
+        /// </summary>
+        private float rotation;
+
+        /// <summary>
         /// The physics body. This is only set when IsPhysicsBased = true.
         /// </summary>
         private Body body;
@@ -28,23 +33,27 @@ namespace Dwarves.Component.Spatial
         /// Initializes a new instance of the PositionComponent class.
         /// </summary>
         /// <param name="position">The position.</param>
+        /// <param name="rotation">The rotation in radians.</param>
         /// <param name="isScreenCoordinates">Indicates whether this position represents screen coordinates.</param>
-        public PositionComponent(Vector2 position, bool isScreenCoordinates = false)
+        public PositionComponent(Vector2 position, float rotation = 0.0f, bool isScreenCoordinates = false)
         {
             this.body = null;
             this.Position = position;
+            this.Rotation = rotation;
             this.IsScreenCoordinates = isScreenCoordinates;
         }
 
         /// <summary>
         /// Initializes a new instance of the PositionComponent class.
         /// </summary>
-        /// <param name="position">The position.</param>
         /// <param name="body">The physics body whose position will be acted upon.</param>
-        public PositionComponent(Vector2 position, Body body)
+        /// <param name="position">The position.</param>
+        /// <param name="rotation">The rotation in radians.</param>
+        public PositionComponent(Body body, Vector2 position, float rotation = 0.0f)
         {
             this.body = body;
             this.Position = position;
+            this.Rotation = rotation;
             this.IsScreenCoordinates = false;
         }
 
@@ -74,6 +83,36 @@ namespace Dwarves.Component.Spatial
                 else
                 {
                     this.position = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rotation in radians.
+        /// </summary>
+        public float Rotation
+        {
+            get
+            {
+                if (this.IsPhysicsBased)
+                {
+                    return this.body.Rotation;
+                }
+                else
+                {
+                    return this.rotation;
+                }
+            }
+
+            set
+            {
+                if (this.IsPhysicsBased)
+                {
+                    this.body.Rotation = value;
+                }
+                else
+                {
+                    this.rotation = value;
                 }
             }
         }
