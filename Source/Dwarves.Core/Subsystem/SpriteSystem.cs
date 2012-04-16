@@ -84,11 +84,11 @@ namespace Dwarves.Subsystem
                     else
                     {
                         float x = spritePos.Position.X;
-                        float y = -spritePos.Position.Y;
+                        float y = spritePos.Position.Y;
 
                         // Transform from game-coordinates to camera-coordinates
                         x = (x - cameraPos.Position.X) * cameraZoom.Scale;
-                        y = (y - cameraPos.Position.Y) * cameraZoom.Scale;
+                        y = (cameraPos.Position.Y - y) * cameraZoom.Scale;
 
                         // Transform from camera-coordinates to screen-coordinates
                         float screenScaleX = cameraComponent.ProjectionWidth / (float)this.graphics.Viewport.Width;
