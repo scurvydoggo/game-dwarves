@@ -60,7 +60,12 @@ namespace Dwarves.Subsystem
             // Draw the sprites in a single batch
             using (var spriteBatch = new SpriteBatch(this.graphics))
             {
-                spriteBatch.Begin();
+                spriteBatch.Begin(
+                    SpriteSortMode.Deferred,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp,
+                    DepthStencilState.None,
+                    RasterizerState.CullCounterClockwise);
 
                 foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(SpriteComponent)))
                 {
