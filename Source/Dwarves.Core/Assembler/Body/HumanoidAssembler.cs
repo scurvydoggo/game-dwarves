@@ -177,11 +177,6 @@ namespace Dwarves.Assembler.Body
                 var scale = new Vector2(DwarfConst.PixelsToMeters, -DwarfConst.PixelsToMeters);
                 vertices.Scale(ref scale);
 
-                // Translate the polygon to the centroid
-                Vector2 origin = vertices.GetCentroid();
-                Vector2 originTranslate = -origin;
-                vertices.Translate(ref originTranslate);
-
                 // Partition into smaller polygons to split concave segments
                 List<Vertices> convexVertices = BayazitDecomposer.ConvexPartition(vertices);
 
