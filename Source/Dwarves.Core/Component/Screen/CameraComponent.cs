@@ -15,12 +15,12 @@ namespace Dwarves.Component.Screen
         /// <summary>
         /// The default width (in game-world meters) of the camera projection.
         /// </summary>
-        public const float DefaultProjectionWidth = 50.0f;
+        public const float DefaultProjectionWidth = 80.0f;
 
         /// <summary>
         /// The default height (in game-world meters) of the camera projection.
         /// </summary>
-        public const float DefaultProjectionHeight = 50.0f;
+        public const float DefaultProjectionHeight = 48.0f;
 
         /// <summary>
         /// The default size of a single zoom step.
