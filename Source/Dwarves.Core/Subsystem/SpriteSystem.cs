@@ -77,26 +77,36 @@ namespace Dwarves.Subsystem
 
                     // Transform from game-coordinates into screen coordinates
                     Vector2 screenPos;
+                    Vector2 spriteScale;
                     if (spritePos.IsScreenCoordinates)
                     {
                         screenPos = spritePos.Position;
+                        spriteScale = new Vector2(1.0f);
                     }
                     else
                     {
                         float x = spritePos.Position.X;
                         float y = spritePos.Position.Y;
+                        float screenScaleX = (float)this.graphics.Viewport.Width / cameraComponent.ProjectionWidth;
+                        float screenScaleY = (float)this.graphics.Viewport.Height / cameraComponent.ProjectionHeight;
 
                         // Transform from game-coordinates to camera-coordinates
                         x = (x - cameraPos.Position.X) * cameraZoom.Scale;
                         y = (cameraPos.Position.Y - y) * cameraZoom.Scale;
 
                         // Transform from camera-coordinates to screen-coordinates
-                        float screenScaleX = cameraComponent.ProjectionWidth / (float)this.graphics.Viewport.Width;
-                        float screenScaleY = cameraComponent.ProjectionHeight / (float)this.graphics.Viewport.Height;
-                        x = x / screenScaleX + ((float)this.graphics.Viewport.Width) / 2;
-                        y = y / screenScaleY + ((float)this.graphics.Viewport.Height) / 2;
+                        x *= screenScaleX;
+                        y *= screenScaleY;
+
+                        // Offset from the camera which points to the center of the viewport
+                        x += ((float)this.graphics.Viewport.Width) / 2;
+                        y += ((float)this.graphics.Viewport.Height) / 2;
 
                         screenPos = new Vector2(x, y);
+
+                        // Calculate the sprite scale vector
+                        spriteScale =
+                            new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale * DwarfConst.PixelsToMeters;
                     }
 
                     // Draw the sprite
@@ -107,7 +117,7 @@ namespace Dwarves.Subsystem
                         Color.White,
                         -spritePos.Rotation,
                         Vector2.Zero,
-                        cameraZoom.Scale,
+                        spriteScale,
                         SpriteEffects.None,
                         0);
                 }

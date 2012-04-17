@@ -58,16 +58,16 @@ namespace Dwarves.Debug
             var args = new HumanoidAssemblerArgs(
                 "dwarf",
                 DwarfConst.CollisionGroupDwarf,
-                new Vector2(x, y),
-                new Vector2(4.0f, 0.0f) * DwarfConst.PixelsToMeters,
-                new Vector2(-0.5f, 6.5f) * DwarfConst.PixelsToMeters,
-                new Vector2(0.5f, 13.0f) * DwarfConst.PixelsToMeters,
-                new Vector2(-2.5f, 6.5f) * DwarfConst.PixelsToMeters,
-                new Vector2(-2.0f, 1.5f) * DwarfConst.PixelsToMeters,
-                new Vector2(1.0f, 13.0f) * DwarfConst.PixelsToMeters,
-                new Vector2(0.0f, 11.0f) * DwarfConst.PixelsToMeters,
-                new Vector2(-2.5f, 8.0f) * DwarfConst.PixelsToMeters,
-                new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters);
+                new Vector2(x, y),                                      // Body position
+                new Vector2(4.0f, 0.0f) * DwarfConst.PixelsToMeters,    // Right-left offset
+                new Vector2(-5.0f, 11.0f) * DwarfConst.PixelsToMeters,  // Torso
+                new Vector2(-2.0f, 19.0f) * DwarfConst.PixelsToMeters,  // Head
+                new Vector2(-3.0f, 9.0f) * DwarfConst.PixelsToMeters,   // Arm
+                new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters,   // Leg
+                new Vector2(-3.0f, 20.0f) * DwarfConst.PixelsToMeters,  // Beard
+                new Vector2(0.0f, 11.0f) * DwarfConst.PixelsToMeters,   // Neck joint
+                new Vector2(-2.5f, 8.0f) * DwarfConst.PixelsToMeters,   // Shoulder joint
+                new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters);  // Hip joint
 
             var bodyAssembler = new HumanoidAssembler(world);
             bodyAssembler.AssembleBody(entity, args);
