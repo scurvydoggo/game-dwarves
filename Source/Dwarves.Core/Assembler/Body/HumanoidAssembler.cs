@@ -118,11 +118,51 @@ namespace Dwarves.Assembler.Body
 
             // Create the joints
             this.CreateFixedJoint(head, beard);
-            this.CreateRotationalJoint(torso, head, args.NeckJointPosition - args.HeadPosition);
-            this.CreateRotationalJoint(torso, leftArm, args.ShoulderJointPosition - args.ArmPosition);
-            this.CreateRotationalJoint(torso, rightArm, args.ShoulderJointPosition - args.ArmPosition);
-            this.CreateRotationalJoint(torso, leftLeg, args.HipJointPosition - args.LegPosition);
-            this.CreateRotationalJoint(torso, rightLeg, args.HipJointPosition - args.LegPosition);
+            this.CreateRotationalJoint(
+                torso,
+                head,
+                args.NeckJointPosition.Position - args.HeadPosition,
+                args.NeckJointPosition.EnableLimit,
+                args.NeckJointPosition.UpperLimit,
+                args.NeckJointPosition.LowerLimit,
+                args.NeckJointPosition.EnableMotor,
+                args.NeckJointPosition.MaxMotorTorque);
+            this.CreateRotationalJoint(
+                torso,
+                leftArm,
+                args.ShoulderJointPosition.Position - args.ArmPosition,
+                args.NeckJointPosition.EnableLimit,
+                args.NeckJointPosition.UpperLimit,
+                args.NeckJointPosition.LowerLimit,
+                args.NeckJointPosition.EnableMotor,
+                args.NeckJointPosition.MaxMotorTorque);
+            this.CreateRotationalJoint(
+                torso,
+                rightArm,
+                args.ShoulderJointPosition.Position - args.ArmPosition,
+                args.NeckJointPosition.EnableLimit,
+                args.NeckJointPosition.UpperLimit,
+                args.NeckJointPosition.LowerLimit,
+                args.NeckJointPosition.EnableMotor,
+                args.NeckJointPosition.MaxMotorTorque);
+            this.CreateRotationalJoint(
+                torso,
+                leftLeg,
+                args.HipJointPosition.Position - args.LegPosition,
+                args.NeckJointPosition.EnableLimit,
+                args.NeckJointPosition.UpperLimit,
+                args.NeckJointPosition.LowerLimit,
+                args.NeckJointPosition.EnableMotor,
+                args.NeckJointPosition.MaxMotorTorque);
+            this.CreateRotationalJoint(
+                torso,
+                rightLeg,
+                args.HipJointPosition.Position - args.LegPosition,
+                args.NeckJointPosition.EnableLimit,
+                args.NeckJointPosition.UpperLimit,
+                args.NeckJointPosition.LowerLimit,
+                args.NeckJointPosition.EnableMotor,
+                args.NeckJointPosition.MaxMotorTorque);
         }
 
         #endregion
@@ -210,14 +250,34 @@ namespace Dwarves.Assembler.Body
         /// <param name="bodyPartA">The first body part being joined.</param>
         /// <param name="bodyPartB">The second body part being joined.</param>
         /// <param name="positionB">The position of the joint relative to the second body part.</param>
-        private void CreateRotationalJoint(BodyPartInfo bodyPartA, BodyPartInfo bodyPartB, Vector2 positionB)
+        /// <param name="enableLimit">Indicates whether the limit is enabled.</param>
+        /// <param name="upperLimit">The upper joint limit in radians.</param>
+        /// <param name="lowerLimit">The lower joint limit in radians.</param>
+        /// <param name="enableMotor">Indicates whether the motor is enabled.</param>
+        /// <param name="maxMotorTorque">The maximum motor torque.</param>
+        private void CreateRotationalJoint(
+            BodyPartInfo bodyPartA,
+            BodyPartInfo bodyPartB,
+            Vector2 positionB,
+            bool enableLimit,
+            float upperLimit,
+            float lowerLimit,
+            bool enableMotor,
+            float maxMotorTorque)
         {
             // Create the joint
-            Joint joint = JointFactory.CreateRevoluteJoint(
+            RevoluteJoint joint = JointFactory.CreateRevoluteJoint(
                 this.world.Physics,
                 bodyPartA.PhysicsComponent.Body,
                 bodyPartB.PhysicsComponent.Body,
                 positionB);
+
+            // Set the limit and motor properties
+            joint.UpperLimit = upperLimit;
+            joint.LowerLimit = lowerLimit;
+            joint.MaxMotorTorque = maxMotorTorque;
+            joint.LimitEnabled = enableLimit;
+            joint.MotorEnabled = enableMotor;
 
             // Register the joint with the two body parts
             bodyPartA.BodyPartComponent.Joints.Add(joint);

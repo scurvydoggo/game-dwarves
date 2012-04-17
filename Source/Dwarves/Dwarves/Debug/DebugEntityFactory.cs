@@ -55,6 +55,28 @@ namespace Dwarves.Debug
         {
             Entity entity = world.EntityManager.CreateEntity();
 
+            var neckJoint = new HumanoidAssemblerArgs.RevoluteJoint(
+                new Vector2(0.0f, 11.0f) * DwarfConst.PixelsToMeters,
+                true,
+                -MathHelper.Pi / 4,
+                MathHelper.Pi / 4,
+                false,
+                0.0f);
+            var shoulderJoint = new HumanoidAssemblerArgs.RevoluteJoint(
+                new Vector2(-2.5f, 8.0f) * DwarfConst.PixelsToMeters,
+                true,
+                -MathHelper.Pi / 4,
+                MathHelper.Pi / 4,
+                false,
+                0.0f);
+            var hipJoint = new HumanoidAssemblerArgs.RevoluteJoint(
+                new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters,
+                true,
+                -MathHelper.Pi / 4,
+                MathHelper.Pi / 4,
+                false,
+                0.0f);
+
             var args = new HumanoidAssemblerArgs(
                 "dwarf",
                 DwarfConst.CollisionGroupDwarf,
@@ -65,9 +87,9 @@ namespace Dwarves.Debug
                 new Vector2(-3.0f, 9.0f) * DwarfConst.PixelsToMeters,   // Arm
                 new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters,   // Leg
                 new Vector2(-3.0f, 20.0f) * DwarfConst.PixelsToMeters,  // Beard
-                new Vector2(0.0f, 11.0f) * DwarfConst.PixelsToMeters,   // Neck joint
-                new Vector2(-2.5f, 8.0f) * DwarfConst.PixelsToMeters,   // Shoulder joint
-                new Vector2(-2.0f, 3.0f) * DwarfConst.PixelsToMeters);  // Hip joint
+                neckJoint,                                              // Neck joint
+                shoulderJoint,                                          // Shoulder joint
+                hipJoint);                                              // Hip joint
 
             var bodyAssembler = new HumanoidAssembler(world);
             bodyAssembler.AssembleBody(entity, args);

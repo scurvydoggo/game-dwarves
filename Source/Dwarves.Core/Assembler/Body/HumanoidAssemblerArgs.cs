@@ -24,9 +24,9 @@ namespace Dwarves.Assembler.Body
         /// <param name="armPosition">The body-relative position of the arm.</param>
         /// <param name="legPosition">The body-relative position of the leg.</param>
         /// <param name="beardPosition">The body-relative position of the beard.</param>
-        /// <param name="neckJointJointPosition">The body-relative joint position of the neck.</param>
-        /// <param name="shoulderJointPosition">The body-relative joint position of the shoulder.</param>
-        /// <param name="hipJointPosition">The body-relative joint position of the hip.</param>
+        /// <param name="neckJointJoint">The neck joint info.</param>
+        /// <param name="shoulderJoint">The shoulder joint info.</param>
+        /// <param name="hipJoint">The hip joint info.</param>
         public HumanoidAssemblerArgs(
             string spriteFamily,
             short collisionGroup,
@@ -37,9 +37,9 @@ namespace Dwarves.Assembler.Body
             Vector2 armPosition,
             Vector2 legPosition,
             Vector2 beardPosition,
-            Vector2 neckJointJointPosition,
-            Vector2 shoulderJointPosition,
-            Vector2 hipJointPosition)
+            RevoluteJoint neckJointJoint,
+            RevoluteJoint shoulderJoint,
+            RevoluteJoint hipJoint)
         {
             this.SpriteFamily = spriteFamily;
             this.CollisionGroup = collisionGroup;
@@ -50,9 +50,9 @@ namespace Dwarves.Assembler.Body
             this.ArmPosition = armPosition;
             this.LegPosition = legPosition;
             this.BeardPosition = beardPosition;
-            this.NeckJointPosition = neckJointJointPosition;
-            this.ShoulderJointPosition = shoulderJointPosition;
-            this.HipJointPosition = hipJointPosition;
+            this.NeckJointPosition = neckJointJoint;
+            this.ShoulderJointPosition = shoulderJoint;
+            this.HipJointPosition = hipJoint;
         }
 
         #region General
@@ -79,7 +79,7 @@ namespace Dwarves.Assembler.Body
 
         #endregion
 
-        #region Body Part Positon
+        #region Body Part
 
         /// <summary>
         /// Gets or sets the body-relative position.
@@ -108,22 +108,87 @@ namespace Dwarves.Assembler.Body
 
         #endregion
 
-        #region Joint Position
+        #region Joint
 
         /// <summary>
         /// Gets or sets the body-relative joint position.
         /// </summary>
-        public Vector2 NeckJointPosition { get; set; }
+        public RevoluteJoint NeckJointPosition { get; set; }
 
         /// <summary>
         /// Gets or sets the body-relative joint position.
         /// </summary>
-        public Vector2 ShoulderJointPosition { get; set; }
+        public RevoluteJoint ShoulderJointPosition { get; set; }
 
         /// <summary>
         /// Gets or sets the body-relative joint position.
         /// </summary>
-        public Vector2 HipJointPosition { get; set; }
+        public RevoluteJoint HipJointPosition { get; set; }
+
+        #endregion
+
+        #region Inner Classes
+
+        /// <summary>
+        /// Revolute joint settings.
+        /// </summary>
+        public class RevoluteJoint
+        {
+            /// <summary>
+            /// Initializes a new instance of the RevoluteJoint class.
+            /// </summary>
+            /// <param name="position">The body-relative joint position.</param>
+            /// <param name="enableLimit">Indicates whether the limit is enabled.</param>
+            /// <param name="lowerLimit">The lower joint limit in radians.</param>
+            /// <param name="upperLimit">The upper joint limit in radians.</param>
+            /// <param name="enableMotor">Indicates whether the motor is enabled.</param>
+            /// <param name="maxMotorTorque">The maximum motor torque.</param>
+            public RevoluteJoint(
+                Vector2 position,
+                bool enableLimit,
+                float lowerLimit,
+                float upperLimit,
+                bool enableMotor,
+                float maxMotorTorque)
+            {
+                this.Position = position;
+                this.EnableLimit = enableLimit;
+                this.LowerLimit = lowerLimit;
+                this.UpperLimit = upperLimit;
+                this.EnableMotor = enableMotor;
+                this.MaxMotorTorque = maxMotorTorque;
+            }
+
+            /// <summary>
+            /// Gets or sets the body-relative joint position.
+            /// </summary>
+            public Vector2 Position { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the limit is enabled.
+            /// </summary>
+            public bool EnableLimit { get; set; }
+
+            /// <summary>
+            /// Gets or sets the lower joint limit in radians.
+            /// </summary>
+            public float LowerLimit { get; set; }
+
+            /// <summary>
+            /// Gets or sets the upper joint limit in radians.
+            /// </summary>
+            public float UpperLimit { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the motor is enabled.
+            /// </summary>
+            public bool EnableMotor { get; set; }
+
+            /// <summary>
+            /// Gets or sets the maximum motor torque.
+            /// </summary>
+            public float MaxMotorTorque { get; set; }
+        }
 
         #endregion
     }
