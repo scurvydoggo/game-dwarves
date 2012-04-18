@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="DwarfConst.cs" company="Acidwashed Games">
+// <copyright file="Const.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -8,7 +8,7 @@ namespace Dwarves
     /// <summary>
     /// The game constants.
     /// </summary>
-    public static class DwarfConst
+    public static class Const
     {
         /// <summary>
         /// The scaling factor for converting pixels to meters in the physics world.

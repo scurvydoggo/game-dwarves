@@ -214,7 +214,7 @@ namespace Dwarves.Assembler.Body
                 Vertices vertices = PolygonTools.CreatePolygon(spriteData, rectangle.Width, true);
 
                 // Scale the vertices from pixels to physics-world units
-                var scale = new Vector2(DwarfConst.PixelsToMeters, -DwarfConst.PixelsToMeters);
+                var scale = new Vector2(Const.PixelsToMeters, -Const.PixelsToMeters);
                 vertices.Scale(ref scale);
 
                 // Partition into smaller polygons to split concave segments

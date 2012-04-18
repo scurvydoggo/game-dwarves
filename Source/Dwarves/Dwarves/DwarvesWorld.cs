@@ -46,7 +46,7 @@ namespace Dwarves
             this.entitySystemWorld = new EntitySystemWorld();
 
             // Create the physics world
-            var physicsWorld = new World(new Vector2(0.0f, -9.8f));
+            var physicsWorld = new World(new Vector2(0, -9.8f));
 
             // Create the resource manager
             var resourceManager = new ResourceManager(content);

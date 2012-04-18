@@ -111,7 +111,7 @@ namespace Dwarves.Subsystem
 
                         // Calculate the sprite scale vector
                         spriteScale =
-                            new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale * DwarfConst.PixelsToMeters;
+                            new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale * Const.PixelsToMeters;
                     }
 
                     // Draw the sprite
