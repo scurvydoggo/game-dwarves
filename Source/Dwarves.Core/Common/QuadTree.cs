@@ -3,55 +3,49 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Terrain
+namespace Dwarves.Common
 {
     using Microsoft.Xna.Framework;
 
     /// <summary>
-    /// A 2D quadtree which splits a rectangle.
+    /// A 2D position-based quadtree.
     /// </summary>
-    public class QuadTree
+    /// <typeparam name="T">The type of data contained in the quad tree.</typeparam>
+    public class QuadTree<T>
     {
         /// <summary>
         /// Initializes a new instance of the QuadTree class.
         /// </summary>
-        /// <param name="min">The top-left position.</param>
-        /// <param name="max">The bottom-right position.</param>
-        public QuadTree(Vector2 min, Vector2 max)
+        /// <param name="rectangle">The rectangle.</param>
+        public QuadTree(RectangleF rectangle)
         {
-            this.Min = min;
-            this.Max = max;
+            this.Rectangle = rectangle;
         }
 
         /// <summary>
-        /// Gets the top-left position.
+        /// Gets the rectangle.
         /// </summary>
-        public Vector2 Min { get; private set; }
+        public RectangleF Rectangle { get; private set; }
 
         /// <summary>
-        /// Gets the bottom-right position.
+        /// Gets the top-left quadrant.
         /// </summary>
-        public Vector2 Max { get; private set; }
+        public QuadTree<T> TopLeft { get; private set; }
 
         /// <summary>
-        /// Gets the top-left terrain quadrant.
+        /// Gets the top-right quadrant.
         /// </summary>
-        public QuadTree TopLeft { get; private set; }
+        public QuadTree<T> TopRight { get; private set; }
 
         /// <summary>
-        /// Gets the top-right terrain quadrant.
+        /// Gets the bottom-left quadrant.
         /// </summary>
-        public QuadTree TopRight { get; private set; }
+        public QuadTree<T> BottomLeft { get; private set; }
 
         /// <summary>
-        /// Gets the bottom-left terrain quadrant.
+        /// Gets the bottom-right quadrant.
         /// </summary>
-        public QuadTree BottomLeft { get; private set; }
-
-        /// <summary>
-        /// Gets the bottom-right terrain quadrant.
-        /// </summary>
-        public QuadTree BottomRight { get; private set; }
+        public QuadTree<T> BottomRight { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this node is a leaf (has no child quadrants).
@@ -88,12 +82,18 @@ namespace Dwarves.Terrain
         /// </summary>
         public void Split()
         {
-            Vector2 center = this.Min + ((this.Max - this.Min) / 2);
+            Vector2 topLeft = this.Rectangle.TopLeft;
+            Vector2 center = this.Rectangle.Center;
+            Vector2 bottomRight = this.Rectangle.BottomRight;
 
-            this.TopLeft = new QuadTree(this.Min, center);
-            this.TopRight = new QuadTree(new Vector2(center.X, this.Min.Y), new Vector2(this.Max.X, center.Y));
-            this.BottomLeft = new QuadTree(new Vector2(this.Min.X, center.Y), new Vector2(center.X, this.Max.Y));
-            this.BottomRight = new QuadTree(center, this.Max);
+            this.TopLeft = new QuadTree<T>(
+                new RectangleF(topLeft, center));
+            this.TopRight = new QuadTree<T>(
+                new RectangleF(new Vector2(center.X, bottomRight.Y), new Vector2(topLeft.X, center.Y)));
+            this.BottomLeft = new QuadTree<T>(
+                new RectangleF(new Vector2(bottomRight.X, center.Y), new Vector2(center.X, topLeft.Y)));
+            this.BottomRight = new QuadTree<T>(
+                new RectangleF(center, topLeft));
         }
     }
 }

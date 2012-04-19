@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Assembler\Body\HumanoidAssemblerArgs.cs" />
     <Compile Include="Assembler\Body\HumanoidAssembler.cs" />
+    <Compile Include="Common\RectangleF.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
@@ -64,7 +65,7 @@
     <Compile Include="Subsystem\InputSystem.cs" />
     <Compile Include="Subsystem\PhysicsSystem.cs" />
     <Compile Include="Subsystem\SpriteSystem.cs" />
-    <Compile Include="Terrain\QuadTree.cs" />
+    <Compile Include="Common\QuadTree.cs" />
     <Compile Include="WorldContext.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -85,7 +86,9 @@
       <Name>DebugView XNA</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Terrain\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
