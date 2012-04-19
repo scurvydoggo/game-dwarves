@@ -64,6 +64,7 @@
     <Compile Include="Subsystem\InputSystem.cs" />
     <Compile Include="Subsystem\PhysicsSystem.cs" />
     <Compile Include="Subsystem\SpriteSystem.cs" />
+    <Compile Include="Terrain\QuadTree.cs" />
     <Compile Include="WorldContext.cs" />
   </ItemGroup>
   <ItemGroup>
