@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="TerrainQuadTree.cs" company="Acidwashed Games">
+// <copyright file="QuadTree.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ namespace Dwarves.Terrain
         /// </summary>
         public bool IsLeaf
         {
-            get { return TopLeft == null; }
+            get { return this.TopLeft == null; }
         }
 
         /// <summary>
@@ -88,12 +88,12 @@ namespace Dwarves.Terrain
         /// </summary>
         public void Split()
         {
-            Vector2 half = this.Max - this.Min;
+            Vector2 center = this.Min + ((this.Max - this.Min) / 2);
 
-            this.TopLeft = new QuadTree(this.Min, half);
-            this.TopRight = new QuadTree(new Vector2(half.X, this.Min.Y), new Vector2(this.Max.X, half.Y));
-            this.BottomLeft = new QuadTree(new Vector2(this.Min.X, half.Y), new Vector2(half.X, this.Max.Y));
-            this.BottomRight = new QuadTree(half, this.Max);
+            this.TopLeft = new QuadTree(this.Min, center);
+            this.TopRight = new QuadTree(new Vector2(center.X, this.Min.Y), new Vector2(this.Max.X, center.Y));
+            this.BottomLeft = new QuadTree(new Vector2(this.Min.X, center.Y), new Vector2(center.X, this.Max.Y));
+            this.BottomRight = new QuadTree(center, this.Max);
         }
     }
 }

@@ -6,7 +6,6 @@
 #if DEBUG
 namespace Dwarves.Debug
 {
-
     /// <summary>
     /// Contains code for loading hard-coded world setups to use for development and testing. In the final product, all
     /// levels will be loaded via the SQLite database, however to get the level into the db in the first place it is
