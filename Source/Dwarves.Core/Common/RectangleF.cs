@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Common
 {
+    using System;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -211,22 +212,73 @@ namespace Dwarves.Common
         public bool Contains(Vector2 point)
         {
             return
-                this.TopLeft.X <= point.X && this.BottomRight.X >= point.X &&
-                this.TopLeft.Y <= point.Y && this.BottomRight.Y >= point.Y;
+                point.Y >= this.Top &&
+                point.X >= this.Left &&
+                point.Y <= this.Bottom &&
+                point.X <= this.Right;
         }
 
         /// <summary>
-        /// Determine whether this rectangle intersects with the given rectangle.
+        /// Determine whether this rectangle contains the given rectangle.
         /// </summary>
-        /// <param name="rectangle">The rectangle to test.</param>
-        /// <returns>True if this rectangle intersects with the given rectangle.</returns>
-        public bool Intersects(RectangleF rectangle)
+        /// <param name="other">The rectangle to test.</param>
+        /// <returns>True if this rectangle contains the given rectangle.</returns>
+        public bool Contains(RectangleF other)
         {
             return
-                this.Bottom >= rectangle.Top &&
-                this.Top <= rectangle.Bottom &&
-                this.Right >= rectangle.Left &&
-                this.Left <= rectangle.Right;
+                other.Top >= this.Top &&
+                other.Left >= this.Left &&
+                other.Bottom <= this.Bottom &&
+                other.Right <= this.Right;
+        }
+
+        /// <summary>
+        /// Determine whether this rectangle intersects the given rectangle.
+        /// </summary>
+        /// <param name="other">The rectangle to test.</param>
+        /// <returns>True if this rectangle intersects the given rectangle.</returns>
+        public bool Intersects(RectangleF other)
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a rectangle for the top-left quadrant of this rectangle.
+        /// </summary>
+        /// <returns></returns>
+        public RectangleF GetTopLeftQuadrant()
+        {
+            return new RectangleF(this.TopLeft, this.Center);
+        }
+
+        /// <summary>
+        /// Gets a rectangle for the top-right quadrant of this rectangle.
+        /// </summary>
+        /// <returns></returns>
+        public RectangleF GetTopRightQuadrant()
+        {
+            Vector2 center = this.Center;
+            return new RectangleF(new Vector2(center.X, this.BottomRight.Y), new Vector2(this.TopLeft.X, center.Y));
+        }
+
+        /// <summary>
+        /// Gets a rectangle for the bottom-left quadrant of this rectangle.
+        /// </summary>
+        /// <returns></returns>
+        public RectangleF GetBottomLeftQuadrant()
+        {
+            Vector2 center = this.Center;
+            return new RectangleF(new Vector2(this.BottomRight.X, center.Y), new Vector2(center.X, this.TopLeft.Y));
+        }
+
+        /// <summary>
+        /// Gets a rectangle for the bottom-right quadrant of this rectangle.
+        /// </summary>
+        /// <returns></returns>
+        public RectangleF GetBottomRightQuadrant()
+        {
+            return new RectangleF(this.Center, this.BottomRight);
         }
 
         #endregion

@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Assembler\Body\HumanoidAssemblerArgs.cs" />
     <Compile Include="Assembler\Body\HumanoidAssembler.cs" />
+    <Compile Include="Common\QuadTreeItem.cs" />
     <Compile Include="Common\RectangleF.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
