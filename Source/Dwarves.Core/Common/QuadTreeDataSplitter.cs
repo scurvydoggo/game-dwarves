@@ -13,12 +13,12 @@ namespace Dwarves.Common
     {
         /// <summary>
         /// Split the <typeparamref name="T"/> data into four values corresponding to four equally sized sub-quadrants
-        /// of the given rectangle.
+        /// of the given square.
         /// </summary>
         /// <param name="data">The data to split.</param>
         /// <param name="bounds">The bounds of the data.</param>
         /// <returns>The split values.</returns>
-        public abstract Result Split(T data, RectangleF bounds);
+        public abstract Result Split(T data, Square bounds);
 
         /// <summary>
         /// The result of the split.

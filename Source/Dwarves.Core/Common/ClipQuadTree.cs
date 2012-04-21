@@ -32,8 +32,13 @@ namespace Dwarves.Common
         /// Initializes a new instance of the ClipQuadTree class.
         /// </summary>
         /// <param name="bounds">The bounds of this quad tree node.</param>
-        public ClipQuadTree(RectangleF bounds)
+        public ClipQuadTree(Square bounds)
         {
+            if (!this.IsPowerOf2(bounds.Length))
+            {
+                throw new ArgumentException("Length of quad tree bounds must be a power of 2.");
+            }
+
             this.Bounds = bounds;
         }
 
@@ -44,7 +49,7 @@ namespace Dwarves.Common
         /// <summary>
         /// Gets the bounds of the node.
         /// </summary>
-        public RectangleF Bounds { get; private set; }
+        public Square Bounds { get; private set; }
 
         /// <summary>
         /// Gets the top-left quadrant.
@@ -139,7 +144,7 @@ namespace Dwarves.Common
         /// exception to be thrown if a data split is required.</param>
         /// <returns>True if the data was set; False the given bounds lies outside the bounds of this node.
         /// </returns>
-        public bool SetData(T data, RectangleF bounds, QuadTreeDataSplitter<T> dataSplitter)
+        public bool SetData(T data, Square bounds, QuadTreeDataSplitter<T> dataSplitter)
         {
             if (!this.Bounds.Contains(bounds))
             {
@@ -173,7 +178,7 @@ namespace Dwarves.Common
         /// </param>
         /// <returns>True if the data was retrieved; False if the point lies outside the bounds of this node.
         /// </returns>
-        public bool GetData(Vector2 point, out T data)
+        public bool GetData(Point point, out T data)
         {
             if (this.Bounds.Contains(point))
             {
@@ -216,7 +221,7 @@ namespace Dwarves.Common
         /// <returns>True if the data was set in a child quadrant; False if the data was not set because the given
         /// bounds do not exist within the bounds of a child quadrant.
         /// </returns>
-        protected bool SetChildData(T data, RectangleF bounds, QuadTreeDataSplitter<T> dataSplitter)
+        protected bool SetChildData(T data, Square bounds, QuadTreeDataSplitter<T> dataSplitter)
         {
             if (!this.IsLeaf)
             {
@@ -258,12 +263,17 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Split the rectangle into four even sub-quadrants.
+        /// Split the square into four even sub-quadrants.
         /// </summary>
         /// <param name="dataSplitter">The object for splitting any existing leaf-node data; Null value will causean
         /// exception to be thrown if a data split is required.</param>
         protected void Split(QuadTreeDataSplitter<T> dataSplitter)
         {
+            if (this.Bounds.Length <= 1)
+            {
+                throw new ApplicationException("Cannot split quad tree node as it is the smallest size possible.");
+            }
+
             // Split any existing data
             QuadTreeDataSplitter<T>.Result splitData = null;
             if (!EqualityComparer<T>.Default.Equals(this.Data, default(T)))
@@ -284,7 +294,7 @@ namespace Dwarves.Common
                 }
             }
 
-            // Create the new quadrants
+            // Create the quadrants
             this.TopLeft = new ClipQuadTree<T>(this.Bounds.GetTopLeftQuadrant());
             this.TopRight = new ClipQuadTree<T>(this.Bounds.GetTopRightQuadrant());
             this.BottomLeft = new ClipQuadTree<T>(this.Bounds.GetBottomLeftQuadrant());
@@ -298,6 +308,20 @@ namespace Dwarves.Common
                 this.BottomLeft.Data = splitData.BottomLeft;
                 this.BottomRight.Data = splitData.BottomRight;
             }
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Determine if the given number is a power of 2.
+        /// </summary>
+        /// <param name="x">The number to check.</param>
+        /// <returns>True if the number is a power of 2.</returns>
+        private bool IsPowerOf2(int x)
+        {
+            return (x > 0) && ((x & (x - 1)) == 0);
         }
 
         #endregion
