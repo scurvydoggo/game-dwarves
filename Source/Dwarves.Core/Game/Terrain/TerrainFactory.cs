@@ -19,26 +19,22 @@ namespace Dwarves.Game.Terrain
         /// <summary>
         /// Create a terrain object from the given terrain bitmap.
         /// </summary>
-        /// <param name="x">The top left X position in world coordinates.</param>
-        /// <param name="y">The top-left Y position in world coordinates.</param>
-        /// <param name="scale">The ratio for scaling quad tree coordinates to world coordinates.</param>
         /// <param name="bitmap">The bitmap defining the terrain.</param>
         /// <returns>The terrain object.</returns>
-        public Terrain CreateTerrain(float x, float y, float scale, Texture2D bitmap)
+        public ClipQuadTree<TerrainType> CreateTerrainQuadTree(Texture2D bitmap)
         {
             // Create the quad tree
-            var bounds =
-                new Square(0, 0, this.GetUpperPowerOf2(bitmap.Height > bitmap.Width ? bitmap.Height : bitmap.Width));
-            var quadTree = new ClipQuadTree<TerrainType>(bounds);
+            var quadTree = new ClipQuadTree<TerrainType>(
+                new Square(0, 0, this.GetUpperPowerOf2(bitmap.Height > bitmap.Width ? bitmap.Height : bitmap.Width)));
 
             // Read the bitmap data
             var bitmapData = new Color[bitmap.Width * bitmap.Height];
             bitmap.GetData<Color>(bitmapData);
 
-            // Populate the quad tree from the bitmap data
+            // Populate the terrain's quad tree from the bitmap data
             this.PopulateQuadTree(quadTree, bitmapData, bitmap.Width);
 
-            return null;
+            return quadTree;
         }
 
         #endregion

@@ -7,6 +7,8 @@
 namespace Dwarves.Debug
 {
     using Dwarves.Assembler.Body;
+    using Dwarves.Common;
+    using Dwarves.Component.Game;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
     using Dwarves.Game.Terrain;
@@ -34,14 +36,9 @@ namespace Dwarves.Debug
             Entity entity = world.EntityManager.CreateEntity();
 
             // Create the components
-            var camera = new CameraComponent();
-            var position = new PositionComponent(new Vector2(centerX, centerY));
-            var scale = new ScaleComponent(zoom);
-
-            // Add the components
-            world.EntityManager.AddComponent(entity, camera);
-            world.EntityManager.AddComponent(entity, position);
-            world.EntityManager.AddComponent(entity, scale);
+            world.EntityManager.AddComponent(entity, new CameraComponent());
+            world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(centerX, centerY)));
+            world.EntityManager.AddComponent(entity, new ScaleComponent(zoom));
 
             return entity;
         }
@@ -57,6 +54,7 @@ namespace Dwarves.Debug
         {
             Entity entity = world.EntityManager.CreateEntity();
 
+            // Prepare the args for the humanoid assembler
             var neckJoint = new HumanoidAssemblerArgs.RevoluteJoint(
                 new Vector2(0, 11) * Const.PixelsToMeters,
                 true,
@@ -78,7 +76,6 @@ namespace Dwarves.Debug
                 MathHelper.Pi / 4,
                 false,
                 0);
-
             var args = new HumanoidAssemblerArgs(
                 "dwarf",
                 Const.CollisionGroupDwarf,
@@ -93,6 +90,7 @@ namespace Dwarves.Debug
                 shoulderJoint,                              // Shoulder joint
                 hipJoint);                                  // Hip joint
 
+            // Assemble the body
             var bodyAssembler = new HumanoidAssembler(world);
             bodyAssembler.AssembleBody(entity, args);
 
@@ -100,46 +98,38 @@ namespace Dwarves.Debug
         }
 
         /// <summary>
-        /// Create a terrain entity.
+        /// Create a terrain entity from a bitmap image.
         /// </summary>
         /// <param name="world">The world context.</param>
         /// <param name="x">The top-left X position in world-coordinates.</param>
         /// <param name="y">The top-left Y position in world-coordinates.</param>
         /// <param name="scale">The scale ratio for the terrain.</param>
-        /// <param name="terrainImageName">The name of the terrain image.</param>
+        /// <param name="isCollidable">Indicates whether the terrain can be collided with.</param>
+        /// <param name="terrainBitmapName">The name of the terrain bitmap.</param>
         /// <returns>The entity.</returns>
-        public Entity CreateTerrain(WorldContext world, float x, float y, float scale, string terrainImageName)
+        public Entity CreateTerrain(
+            WorldContext world,
+            float x,
+            float y,
+            float scale,
+            bool isCollidable,
+            string terrainBitmapName)
         {
-            // Create terrain
-            Entity terrainEntity = world.EntityManager.CreateEntity();
+            Entity entity = world.EntityManager.CreateEntity();
 
             // Load the terrain texture
-            Texture2D texture = world.Resources.Load<Texture2D>(terrainImageName);
+            Texture2D texture = world.Resources.Load<Texture2D>(terrainBitmapName);
 
+            // Create the terrain quad tree
             var terrainFactory = new TerrainFactory();
-            var terrain = terrainFactory.CreateTerrain(x, y, scale, texture);
+            ClipQuadTree<TerrainType> terrainQuadTree = terrainFactory.CreateTerrainQuadTree(texture);
 
-            ////// Create terrain object
-            ////const int PPU = 1;
-            ////var terrainLowerRight = new Vector2(
-            ////    (x + texture.Width) * (PPU / (Const.PixelsToMeters * scale)),
-            ////    (y + texture.Height) * (PPU / (Const.PixelsToMeters * scale)));
-            ////var terrain = new MSTerrain(world.Physics, new AABB(new Vector2(x, y), terrainLowerRight))
-            ////{
-            ////    PointsPerUnit = (int)(PPU / (Const.PixelsToMeters * scale)),
-            ////    CellSize = 50,
-            ////    SubCellSize = 1,
-            ////    Decomposer = Decomposer.Earclip,
-            ////    Iterations = 2,
-            ////};
+            // Add terrain component
+            world.EntityManager.AddComponent(entity, new TerrainComponent(terrainQuadTree, isCollidable));
+            world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
+            world.EntityManager.AddComponent(entity, new ScaleComponent(scale));
 
-            ////terrain.Initialize();
-            ////terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
-
-            ////// Add terrain component
-            ////world.EntityManager.AddComponent(terrainEntity, new TerrainComponent(terrain));
-
-            return terrainEntity;
+            return entity;
         }
 
         #endregion
