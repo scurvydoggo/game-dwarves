@@ -16,8 +16,8 @@ namespace Dwarves.Game
         /// <summary>
         /// Create a terrain object from the given terrain bitmap.
         /// </summary>
-        /// <param name="x">The top-left X position in world-coordinates.</param>
-        /// <param name="y">The top-left Y position in world-coordinates.</param>
+        /// <param name="x">The top left X position in world coordinates.</param>
+        /// <param name="y">The top-left Y position in world coordinates.</param>
         /// <param name="scale">The ratio for scaling quad tree coordinates to world coordinates.</param>
         /// <param name="bitmap">The bitmap defining the terrain.</param>
         /// <returns>The terrain object.</returns>

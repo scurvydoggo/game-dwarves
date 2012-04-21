@@ -13,12 +13,12 @@ namespace Dwarves.Component.Screen
     public class CameraComponent : IComponent
     {
         /// <summary>
-        /// The default width (in game-world meters) of the camera projection.
+        /// The default width (in game world meters) of the camera projection.
         /// </summary>
         public const float DefaultProjectionWidth = 80.0f;
 
         /// <summary>
-        /// The default height (in game-world meters) of the camera projection.
+        /// The default height (in game world meters) of the camera projection.
         /// </summary>
         public const float DefaultProjectionHeight = 48.0f;
 
@@ -38,8 +38,8 @@ namespace Dwarves.Component.Screen
         /// <summary>
         /// Initializes a new instance of the CameraComponent class.
         /// </summary>
-        /// <param name="projectionWidth">The width (in game-world meters) of the camera projection.</param>
-        /// <param name="projectionHeight">The height (in game-world meters) of the camera projection.</param>
+        /// <param name="projectionWidth">The width (in game world meters) of the camera projection.</param>
+        /// <param name="projectionHeight">The height (in game world meters) of the camera projection.</param>
         /// <param name="zoomStepSize">The size of a single zoom step.</param>
         public CameraComponent(float projectionWidth, float projectionHeight, float zoomStepSize)
         {
@@ -49,12 +49,12 @@ namespace Dwarves.Component.Screen
         }
 
         /// <summary>
-        /// Gets or sets the width (in game-world meters) of the camera projection.
+        /// Gets or sets the width (in game world meters) of the camera projection.
         /// </summary>
         public float ProjectionWidth { get; set; }
 
         /// <summary>
-        /// Gets or sets the height (in game-world meters) of the camera projection.
+        /// Gets or sets the height (in game world meters) of the camera projection.
         /// </summary>
         public float ProjectionHeight { get; set; }
 

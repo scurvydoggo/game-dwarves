@@ -16,7 +16,7 @@ namespace Dwarves.Game
         /// <summary>
         /// Initializes a new instance of the Terrain class.
         /// </summary>
-        /// <param name="position">The top-left position in world-coordinates.</param>
+        /// <param name="position">The top left position in world coordinates.</param>
         /// <param name="scale">The ratio for scaling quad tree coordinates to world coordinates.</param>
         /// <param name="bounds">The bounds of the terrain.</param>
         public Terrain(Vector2 position, float scale, Square bounds)
@@ -28,7 +28,7 @@ namespace Dwarves.Game
         }
 
         /// <summary>
-        /// Gets or sets the top-left position of the terrain in world coordinates.
+        /// Gets or sets the top left position of the terrain in world coordinates.
         /// </summary>
         public Vector2 Position { get; set; }
 

@@ -80,7 +80,7 @@ namespace Dwarves.Subsystem
 
                     var spriteRectangle = this.resources.GetSpriteRectangle(sprite.SpriteName);
 
-                    // Transform from game-coordinates into screen coordinates
+                    // Transform from game coordinates into screen coordinates
                     Vector2 screenPos;
                     Vector2 spriteScale;
                     if (spritePos.IsScreenCoordinates)
@@ -95,11 +95,11 @@ namespace Dwarves.Subsystem
                         float screenScaleX = (float)this.graphics.Viewport.Width / cameraComponent.ProjectionWidth;
                         float screenScaleY = (float)this.graphics.Viewport.Height / cameraComponent.ProjectionHeight;
 
-                        // Transform from game-coordinates to camera-coordinates
+                        // Transform from game coordinates to camera coordinates
                         x = (x - cameraPos.Position.X) * cameraZoom.Scale;
                         y = (cameraPos.Position.Y - y) * cameraZoom.Scale;
 
-                        // Transform from camera-coordinates to screen-coordinates
+                        // Transform from camera coordinates to screen coordinates
                         x *= screenScaleX;
                         y *= screenScaleY;
 

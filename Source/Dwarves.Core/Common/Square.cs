@@ -33,12 +33,12 @@ namespace Dwarves.Common
         #region Properties
 
         /// <summary>
-        /// Gets or sets the top-left x coordinate of the square.
+        /// Gets or sets the top left x-coordinate of the square.
         /// </summary>
         public int X { get; set; }
 
         /// <summary>
-        /// Gets or sets the top-left y coordinate of the square.
+        /// Gets or sets the top left y-coordinate of the square.
         /// </summary>
         public int Y { get; set; }
 
@@ -211,7 +211,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Gets a square for the top-left quadrant.
+        /// Gets a square for the top left quadrant.
         /// </summary>
         /// <returns>The square.</returns>
         public Square GetTopLeftQuadrant()
@@ -220,7 +220,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Gets a square for the top-right quadrant.
+        /// Gets a square for the top right quadrant.
         /// </summary>
         /// <returns>The square.</returns>
         public Square GetTopRightQuadrant()
@@ -230,7 +230,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Gets a square for the bottom-left quadrant.
+        /// Gets a square for the bottom left quadrant.
         /// </summary>
         /// <returns>The square.</returns>
         public Square GetBottomLeftQuadrant()
@@ -240,7 +240,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Gets a square for the bottom-right quadrant.
+        /// Gets a square for the bottom right quadrant.
         /// </summary>
         /// <returns>The square.</returns>
         public Square GetBottomRightQuadrant()

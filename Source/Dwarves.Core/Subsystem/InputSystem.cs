@@ -109,11 +109,11 @@ namespace Dwarves.Subsystem
                     float deltaX = mouseState.X - this.prevMouseState.Value.X;
                     float deltaY = mouseState.Y - this.prevMouseState.Value.Y;
 
-                    // Transform from screen coordinates to game-world coordinates
+                    // Transform from screen coordinates to game world coordinates
                     deltaX *= cameraComponent.ProjectionWidth / (float)this.graphics.Viewport.Width;
                     deltaY *= cameraComponent.ProjectionHeight / (float)this.graphics.Viewport.Height;
 
-                    // Transform from game-world coordinates to camera-relative coordinates
+                    // Transform from game world coordinates to camera-relative coordinates
                     deltaX /= cameraZoom.Scale;
                     deltaY /= cameraZoom.Scale;
 
@@ -206,7 +206,7 @@ namespace Dwarves.Subsystem
                 }
                 else
                 {
-                    // Translate the region to the entity's game-world position
+                    // Translate the region to the entity's game world position
                     float translateX = entityPos.Position.X;
                     float translateY = entityPos.Position.Y;
 

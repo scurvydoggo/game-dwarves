@@ -26,22 +26,22 @@ namespace Dwarves.Common
         public class Result
         {
             /// <summary>
-            /// Gets the data for the top-left quadrant.
+            /// Gets the data for the top left quadrant.
             /// </summary>
             public T TopLeft { get; private set; }
 
             /// <summary>
-            /// Gets the data for the top-right quadrant.
+            /// Gets the data for the top right quadrant.
             /// </summary>
             public T TopRight { get; private set; }
 
             /// <summary>
-            /// Gets the data for the bottom-left quadrant.
+            /// Gets the data for the bottom left quadrant.
             /// </summary>
             public T BottomLeft { get; private set; }
 
             /// <summary>
-            /// Gets the data for the bottom-right quadrant.
+            /// Gets the data for the bottom right quadrant.
             /// </summary>
             public T BottomRight { get; private set; }
         }

@@ -52,22 +52,22 @@ namespace Dwarves.Common
         public Square Bounds { get; private set; }
 
         /// <summary>
-        /// Gets the top-left quadrant.
+        /// Gets the top left quadrant.
         /// </summary>
         public ClipQuadTree<T> TopLeft { get; private set; }
 
         /// <summary>
-        /// Gets the top-right quadrant.
+        /// Gets the top right quadrant.
         /// </summary>
         public ClipQuadTree<T> TopRight { get; private set; }
 
         /// <summary>
-        /// Gets the bottom-left quadrant.
+        /// Gets the bottom left quadrant.
         /// </summary>
         public ClipQuadTree<T> BottomLeft { get; private set; }
 
         /// <summary>
-        /// Gets the bottom-right quadrant.
+        /// Gets the bottom right quadrant.
         /// </summary>
         public ClipQuadTree<T> BottomRight { get; private set; }
 
