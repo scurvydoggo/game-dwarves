@@ -135,38 +135,14 @@ namespace Dwarves.Common
         /// Gets the items contained within the given bounds.
         /// </summary>
         /// <param name="bounds">The bounds.</param>
+        /// <param name="includePartial">Indicates whether items that are only partially in the bounds should be
+        /// included.</param>
         /// <returns>The items contained in the bounds.</returns>
-        public QuadTreeItem<T>[] GetItems(RectangleF bounds)
+        public QuadTreeItem<T>[] GetItems(RectangleF bounds, bool includePartial = false)
         {
-            if (!this.Rectangle.Intersects(bounds))
-            {
-                // Bounds does not intersect this rectangle
-                return new QuadTreeItem<T>[0];
-            }
-
-            if (this.IsLeaf)
-            {
-                return this.items.ToArray();
-            }
-            else
-            {
-                QuadTreeItem<T>[] itemsQ1 = this.TopLeft.GetItems(bounds);
-                QuadTreeItem<T>[] itemsQ2 = this.TopRight.GetItems(bounds);
-                QuadTreeItem<T>[] itemsQ3 = this.BottomLeft.GetItems(bounds);
-                QuadTreeItem<T>[] itemsQ4 = this.BottomRight.GetItems(bounds);
-
-                var items = new QuadTreeItem<T>[itemsQ1.Length + itemsQ2.Length + itemsQ3.Length + itemsQ4.Length];
-                int index = 0;
-                itemsQ1.CopyTo(items, index);
-                index += itemsQ1.Length;
-                itemsQ2.CopyTo(items, index);
-                index += itemsQ2.Length;
-                itemsQ3.CopyTo(items, index);
-                index += itemsQ3.Length;
-                itemsQ4.CopyTo(items, index);
-
-                return items;
-            }
+            var items = new List<QuadTreeItem<T>>();
+            this.PopulateItems(items, bounds, includePartial);
+            return items.ToArray();
         }
 
         #endregion
@@ -228,6 +204,56 @@ namespace Dwarves.Common
             this.TopRight = new TightQuadTree<T>(this.Rectangle.GetTopRightQuadrant());
             this.BottomLeft = new TightQuadTree<T>(this.Rectangle.GetBottomLeftQuadrant());
             this.BottomRight = new TightQuadTree<T>(this.Rectangle.GetBottomRightQuadrant());
+        }
+
+        #endregion
+
+        #region Get
+
+        /// <summary>
+        /// Populate the list with the items contained within the given bounds.
+        /// </summary>
+        /// <param name="items">The list to populate.</param>
+        /// <param name="bounds">The bounds.</param>
+        /// <param name="includePartial">Indicates whether items that are only partially in the bounds should be
+        /// included.</param>
+        protected void PopulateItems(List<QuadTreeItem<T>> items, RectangleF bounds, bool includePartial)
+        {
+            if (!this.Rectangle.Intersects(bounds))
+            {
+                // Bounds does not intersect this rectangle
+                return;
+            }
+
+            if (this.IsLeaf)
+            {
+                // This is a leaf node so add any items in the bounds
+                foreach (QuadTreeItem<T> item in this.items)
+                {
+                    if (includePartial)
+                    {
+                        if (bounds.Intersects(item.Bounds))
+                        {
+                            items.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        if (bounds.Contains(item.Bounds))
+                        {
+                            items.Add(item);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Only leaf nodes can contain items so recursively call children
+                this.TopLeft.PopulateItems(items, bounds, includePartial);
+                this.TopRight.PopulateItems(items, bounds, includePartial);
+                this.BottomLeft.PopulateItems(items, bounds, includePartial);
+                this.BottomRight.PopulateItems(items, bounds, includePartial);
+            }
         }
 
         #endregion
