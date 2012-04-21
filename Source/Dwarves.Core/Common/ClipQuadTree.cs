@@ -110,11 +110,14 @@ namespace Dwarves.Common
             {
                 if (this.IsLeaf)
                 {
-                    this.data = value;
+                    if (!EqualityComparer<T>.Default.Equals(this.data, value))
+                    {
+                        this.data = value;
+                    }
                 }
                 else
                 {
-                    throw new ApplicationException("Cannot set data for a non-leaf ClipQuadTree node.");
+                    throw new ApplicationException("Cannot set data value for a non-leaf ClipQuadTree node.");
                 }
             }
         }

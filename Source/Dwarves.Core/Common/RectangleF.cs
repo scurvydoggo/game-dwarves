@@ -178,6 +178,28 @@ namespace Dwarves.Common
         }
 
         /// <summary>
+        /// Gets the x-coordinate of the rectangle.
+        /// </summary>
+        public float X
+        {
+            get
+            {
+                return this.topLeft.X;
+            }
+        }
+
+        /// <summary>
+        /// Gets the y-coordinate of the rectangle.
+        /// </summary>
+        public float Y
+        {
+            get
+            {
+                return this.topLeft.Y;
+            }
+        }
+
+        /// <summary>
         /// Gets the width.
         /// </summary>
         public float Width
