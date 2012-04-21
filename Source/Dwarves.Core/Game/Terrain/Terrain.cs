@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Game
+namespace Dwarves.Game.Terrain
 {
     using Dwarves.Common;
     using Microsoft.Xna.Framework;

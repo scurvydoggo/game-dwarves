@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Common
 {
+    using System;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -12,6 +13,15 @@ namespace Dwarves.Common
     /// </summary>
     public struct Square
     {
+        #region Private Variables
+
+        /// <summary>
+        /// The length of the square.
+        /// </summary>
+        private int length;
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
@@ -45,7 +55,23 @@ namespace Dwarves.Common
         /// <summary>
         /// Gets or sets the length of the square.
         /// </summary>
-        public int Length { get; set; }
+        public int Length
+        {
+            get
+            {
+                return this.length;
+            }
+
+            set
+            {
+                if (this.length < 0)
+                {
+                    throw new ArgumentOutOfRangeException("Length cannot be less than zero.");
+                }
+
+                this.length = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the top left position of the square.

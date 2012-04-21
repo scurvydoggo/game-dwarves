@@ -9,7 +9,7 @@ namespace Dwarves.Debug
     using Dwarves.Assembler.Body;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
-    using Dwarves.Game;
+    using Dwarves.Game.Terrain;
     using EntitySystem;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
