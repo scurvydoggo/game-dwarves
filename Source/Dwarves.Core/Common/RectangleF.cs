@@ -5,7 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Common
 {
-    using System;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -239,14 +238,17 @@ namespace Dwarves.Common
         /// <returns>True if this rectangle intersects the given rectangle.</returns>
         public bool Intersects(RectangleF other)
         {
-            // TODO
-            throw new NotImplementedException();
+            return
+                !(this.Bottom < other.Top ||
+                this.Top > other.Bottom ||
+                this.Right < other.Left ||
+                this.Left > other.Right);
         }
 
         /// <summary>
         /// Gets a rectangle for the top-left quadrant of this rectangle.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The rectangle.</returns>
         public RectangleF GetTopLeftQuadrant()
         {
             return new RectangleF(this.TopLeft, this.Center);
@@ -255,7 +257,7 @@ namespace Dwarves.Common
         /// <summary>
         /// Gets a rectangle for the top-right quadrant of this rectangle.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The rectangle.</returns>
         public RectangleF GetTopRightQuadrant()
         {
             Vector2 center = this.Center;
@@ -265,7 +267,7 @@ namespace Dwarves.Common
         /// <summary>
         /// Gets a rectangle for the bottom-left quadrant of this rectangle.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The rectangle.</returns>
         public RectangleF GetBottomLeftQuadrant()
         {
             Vector2 center = this.Center;
@@ -275,7 +277,7 @@ namespace Dwarves.Common
         /// <summary>
         /// Gets a rectangle for the bottom-right quadrant of this rectangle.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The rectangle.</returns>
         public RectangleF GetBottomRightQuadrant()
         {
             return new RectangleF(this.Center, this.BottomRight);

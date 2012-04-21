@@ -8,6 +8,7 @@ namespace Dwarves.Common
     /// <summary>
     /// An item that can be inserted into a quadtree.
     /// </summary>
+    /// <typeparam name="T">The type of data stored in the quad tree.</typeparam>
     public class QuadTreeItem<T>
     {
         /// <summary>

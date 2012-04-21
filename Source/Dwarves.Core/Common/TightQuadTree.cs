@@ -231,9 +231,5 @@ namespace Dwarves.Common
         }
 
         #endregion
-
-        #region Get
-
-        #endregion
     }
 }
