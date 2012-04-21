@@ -10,7 +10,7 @@ namespace Dwarves.Common
     /// <summary>
     /// A floating-point rectangle.
     /// </summary>
-    public class RectangleF
+    public struct RectangleF
     {
         #region Private Variables
 
@@ -29,7 +29,7 @@ namespace Dwarves.Common
         #region Constructor
 
         /// <summary>
-        /// Initializes a new instance of the RectangleF class.
+        /// Initializes a new instance of the RectangleF struct.
         /// </summary>
         /// <param name="topLeft">The top left position.</param>
         /// <param name="bottomRight">The bottom right position.</param>
@@ -40,7 +40,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Initializes a new instance of the RectangleF class.
+        /// Initializes a new instance of the RectangleF struct.
         /// </summary>
         /// <param name="x">The top left x-coordinate.</param>
         /// <param name="y">The top left y-coordinate.</param>
