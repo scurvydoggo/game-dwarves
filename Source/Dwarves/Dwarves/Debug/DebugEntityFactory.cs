@@ -105,7 +105,7 @@ namespace Dwarves.Debug
         /// <param name="world">The world context.</param>
         /// <param name="x">The top-left X position in world-coordinates.</param>
         /// <param name="y">The top-left Y position in world-coordinates.</param>
-        /// <param name="scale">The scale ratio for the terrain image.</param>
+        /// <param name="scale">The scale ratio for the terrain.</param>
         /// <param name="terrainImageName">The name of the terrain image.</param>
         /// <returns>The entity.</returns>
         public Entity CreateTerrain(WorldContext world, float x, float y, float scale, string terrainImageName)
@@ -117,7 +117,7 @@ namespace Dwarves.Debug
             Texture2D texture = world.Resources.Load<Texture2D>(terrainImageName);
 
             var terrainFactory = new TerrainFactory();
-            var terrain = terrainFactory.CreateTerrain(texture, scale);
+            var terrain = terrainFactory.CreateTerrain(x, y, scale, texture);
 
             ////// Create terrain object
             ////const int PPU = 1;
