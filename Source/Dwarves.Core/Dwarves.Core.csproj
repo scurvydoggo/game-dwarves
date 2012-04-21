@@ -44,7 +44,7 @@
   <ItemGroup>
     <Compile Include="Assembler\Body\HumanoidAssemblerArgs.cs" />
     <Compile Include="Assembler\Body\HumanoidAssembler.cs" />
-    <Compile Include="Common\QuadTreeItem.cs" />
+    <Compile Include="Common\QuadTreeDataSplitter.cs" />
     <Compile Include="Common\RectangleF.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
@@ -66,7 +66,7 @@
     <Compile Include="Subsystem\InputSystem.cs" />
     <Compile Include="Subsystem\PhysicsSystem.cs" />
     <Compile Include="Subsystem\SpriteSystem.cs" />
-    <Compile Include="Common\TightQuadTree.cs" />
+    <Compile Include="Common\ClipQuadTree.cs" />
     <Compile Include="WorldContext.cs" />
   </ItemGroup>
   <ItemGroup>

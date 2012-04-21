@@ -201,6 +201,51 @@ namespace Dwarves.Common
 
         #endregion
 
+        #region Method Overrides
+
+        /// <summary>
+        /// Gets a value indicating whether the two rectangles are equal.
+        /// </summary>
+        /// <param name="r1">The first rectangle.</param>
+        /// <param name="r2">The second rectangle.</param>
+        /// <returns>True if the rectangles are equal.</returns>
+        public static bool operator ==(RectangleF r1, RectangleF r2)
+        {
+            return r1.topLeft == r2.topLeft && r1.bottomRight == r2.bottomRight;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the two rectangles are not equal.
+        /// </summary>
+        /// <param name="r1">The first rectangle.</param>
+        /// <param name="r2">The second rectangle.</param>
+        /// <returns>True if the rectangles are not equal.</returns>
+        public static bool operator !=(RectangleF r1, RectangleF r2)
+        {
+            return !(r1 == r2);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this rectangle is equal to the given object.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <returns>True if the object is equal to this rectangle.</returns>
+        public override bool Equals(object obj)
+        {
+            return obj is RectangleF && this == (RectangleF)obj;
+        }
+
+        /// <summary>
+        /// Gets the hash code for this struct.
+        /// </summary>
+        /// <returns> A 32-bit signed integer that is the hash code for this instance.</returns>
+        public override int GetHashCode()
+        {
+            return this.topLeft.GetHashCode() & this.bottomRight.GetHashCode();
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
