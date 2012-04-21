@@ -11,7 +11,7 @@ namespace Dwarves
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class DwarvesGame : Game
+    public class DwarvesGame : Microsoft.Xna.Framework.Game
     {
         /// <summary>
         /// The game world.

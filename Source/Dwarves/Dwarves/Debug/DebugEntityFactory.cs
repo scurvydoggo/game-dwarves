@@ -7,12 +7,10 @@
 namespace Dwarves.Debug
 {
     using Dwarves.Assembler.Body;
-    using Dwarves.Component.Physics;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
+    using Dwarves.Game;
     using EntitySystem;
-    using FarseerPhysics.Collision;
-    using FarseerPhysics.Common;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -112,32 +110,34 @@ namespace Dwarves.Debug
         /// <returns>The entity.</returns>
         public Entity CreateTerrain(WorldContext world, float x, float y, float scale, string terrainImageName)
         {
-            const int PPU = 1;
-
             // Create terrain
             Entity terrainEntity = world.EntityManager.CreateEntity();
 
             // Load the terrain texture
             Texture2D texture = world.Resources.Load<Texture2D>(terrainImageName);
 
-            // Create terrain object
-            var terrainLowerRight = new Vector2(
-                (x + texture.Width) * (PPU / (Const.PixelsToMeters * scale)),
-                (y + texture.Height) * (PPU / (Const.PixelsToMeters * scale)));
-            var terrain = new MSTerrain(world.Physics, new AABB(new Vector2(x, y), terrainLowerRight))
-            {
-                PointsPerUnit = (int)(PPU / (Const.PixelsToMeters * scale)),
-                CellSize = 50,
-                SubCellSize = 1,
-                Decomposer = Decomposer.Earclip,
-                Iterations = 2,
-            };
+            var terrainFactory = new TerrainFactory();
+            var terrain = terrainFactory.CreateTerrain(texture, scale);
 
-            terrain.Initialize();
-            terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
+            ////// Create terrain object
+            ////const int PPU = 1;
+            ////var terrainLowerRight = new Vector2(
+            ////    (x + texture.Width) * (PPU / (Const.PixelsToMeters * scale)),
+            ////    (y + texture.Height) * (PPU / (Const.PixelsToMeters * scale)));
+            ////var terrain = new MSTerrain(world.Physics, new AABB(new Vector2(x, y), terrainLowerRight))
+            ////{
+            ////    PointsPerUnit = (int)(PPU / (Const.PixelsToMeters * scale)),
+            ////    CellSize = 50,
+            ////    SubCellSize = 1,
+            ////    Decomposer = Decomposer.Earclip,
+            ////    Iterations = 2,
+            ////};
 
-            // Add terrain component
-            world.EntityManager.AddComponent(terrainEntity, new TerrainComponent(terrain));
+            ////terrain.Initialize();
+            ////terrain.ApplyTexture(texture, new Vector2(0, 0), (c) => { return c == Color.Black; });
+
+            ////// Add terrain component
+            ////world.EntityManager.AddComponent(terrainEntity, new TerrainComponent(terrain));
 
             return terrainEntity;
         }
