@@ -101,17 +101,6 @@ namespace Dwarves.Common
         /// Insert an item to the quad tree into the smallest quadrant size possible for the given bounds.
         /// </summary>
         /// <param name="item">The item to insert.</param>
-        /// <param name="bounds">The bounds of the item.</param>
-        /// <returns>True if the item was inserted; False if the item does not fit into the quadrant.</returns>
-        public bool Insert(T item, RectangleF bounds)
-        {
-            return this.Insert(new QuadTreeItem<T>(item, bounds));
-        }
-
-        /// <summary>
-        /// Insert an item to the quad tree into the smallest quadrant size possible for the given bounds.
-        /// </summary>
-        /// <param name="item">The item to insert.</param>
         /// <returns>True if the item was inserted; False if the item does not fit into the quadrant.</returns>
         public bool Insert(QuadTreeItem<T> item)
         {
@@ -129,6 +118,17 @@ namespace Dwarves.Common
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Insert an item to the quad tree into the smallest quadrant size possible for the given bounds.
+        /// </summary>
+        /// <param name="item">The item to insert.</param>
+        /// <param name="bounds">The bounds of the item.</param>
+        /// <returns>True if the item was inserted; False if the item does not fit into the quadrant.</returns>
+        public bool Insert(T item, RectangleF bounds)
+        {
+            return this.Insert(new QuadTreeItem<T>(item, bounds));
         }
 
         /// <summary>
