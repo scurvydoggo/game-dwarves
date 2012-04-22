@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Assembler\Body\HumanoidAssemblerArgs.cs" />
     <Compile Include="Assembler\Body\HumanoidAssembler.cs" />
+    <Compile Include="Common\QuadTreeData.cs" />
     <Compile Include="Common\QuadTreeDataSplitter.cs" />
     <Compile Include="Common\Square.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
