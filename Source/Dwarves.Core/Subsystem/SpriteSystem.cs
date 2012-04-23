@@ -6,9 +6,12 @@
 namespace Dwarves.Subsystem
 {
     using System;
+    using Dwarves.Common;
+    using Dwarves.Component.Game;
     using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
+    using Dwarves.Game.Terrain;
     using EntitySystem;
     using EntitySystem.Subsystem;
     using Microsoft.Xna.Framework;
@@ -82,11 +85,11 @@ namespace Dwarves.Subsystem
 
                     // Transform from game coordinates into screen coordinates
                     Vector2 screenPos;
-                    Vector2 spriteScale;
+                    Vector2 screenScale;
                     if (spritePos.IsScreenCoordinates)
                     {
                         screenPos = spritePos.Position;
-                        spriteScale = new Vector2(1.0f);
+                        screenScale = new Vector2(1.0f);
                     }
                     else
                     {
@@ -95,23 +98,18 @@ namespace Dwarves.Subsystem
                         float screenScaleX = (float)this.graphics.Viewport.Width / cameraComponent.ProjectionWidth;
                         float screenScaleY = (float)this.graphics.Viewport.Height / cameraComponent.ProjectionHeight;
 
-                        // Transform from game coordinates to camera coordinates
-                        x = (x - cameraPos.Position.X) * cameraZoom.Scale;
-                        y = (cameraPos.Position.Y - y) * cameraZoom.Scale;
+                        // Calculate the screen scale vector
+                        screenScale = new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale;
 
-                        // Transform from camera coordinates to screen coordinates
-                        x *= screenScaleX;
-                        y *= screenScaleY;
+                        // Transform from game coordinates to screen coordinates
+                        x = (x - cameraPos.Position.X) * screenScale.X;
+                        y = (cameraPos.Position.Y - y) * screenScale.Y;
 
                         // Offset from the camera which points to the center of the viewport
                         x += ((float)this.graphics.Viewport.Width) / 2;
                         y += ((float)this.graphics.Viewport.Height) / 2;
 
                         screenPos = new Vector2(x, y);
-
-                        // Calculate the sprite scale vector
-                        spriteScale =
-                            new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale * Const.PixelsToMeters;
                     }
 
                     // Draw the sprite
@@ -122,9 +120,94 @@ namespace Dwarves.Subsystem
                         Color.White,
                         -spritePos.Rotation,
                         Vector2.Zero,
-                        spriteScale,
+                        screenScale * Const.PixelsToMeters,
                         SpriteEffects.None,
                         0);
+                }
+
+                // TODO: Remove this!
+                // Test code to ensure terrain is built correctly
+                foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
+                {
+                    var terrain =
+                        (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
+                    var terrainPos =
+                        (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                    var terrainScale =
+                        (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
+
+                    // Calculate the position and scaling ratio for converting world-coordinates to screen-coordinates
+                    Vector2 basePosition;
+                    Vector2 baseScale;
+                    if (terrainPos.IsScreenCoordinates)
+                    {
+                        basePosition = terrainPos.Position;
+                        baseScale = new Vector2(1.0f);
+                    }
+                    else
+                    {
+                        float x = terrainPos.Position.X;
+                        float y = terrainPos.Position.Y;
+                        float screenScaleX = (float)this.graphics.Viewport.Width / cameraComponent.ProjectionWidth;
+                        float screenScaleY = (float)this.graphics.Viewport.Height / cameraComponent.ProjectionHeight;
+
+                        // Calculate the base scale vector
+                        baseScale = new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale;
+
+                        // Transform from game coordinates to camera coordinates
+                        x = (x - cameraPos.Position.X) * baseScale.X;
+                        y = (cameraPos.Position.Y - y) * baseScale.Y;
+
+                        // Offset from the camera which points to the center of the viewport
+                        x += ((float)this.graphics.Viewport.Width) / 2;
+                        y += ((float)this.graphics.Viewport.Height) / 2;
+
+                        basePosition = new Vector2(x, y);
+                    }
+
+                    // Apply the terrain scaling ratio
+                    baseScale *= terrainScale.Scale * Const.PixelsToMeters;
+
+                    // Step through each terrain block
+                    foreach (QuadTreeData<TerrainType> data in terrain.QuadTree)
+                    {
+                        TerrainType terrainType = data.Data;
+                        Square bounds = data.Bounds;
+
+                        // Don't draw anything if no terrain exists here
+                        if (terrainType == TerrainType.None)
+                        {
+                            continue;
+                        }
+
+                        // Calculate the terrain block size
+                        int width = (int)Math.Round(bounds.Length * baseScale.X);
+                        int height = (int)Math.Round(bounds.Length * baseScale.Y);
+                        if (width > 0 && height > 0)
+                        {
+                            // Translate and scale the block position
+                            Vector2 position =
+                                basePosition + new Vector2(bounds.X * baseScale.X, bounds.Y * baseScale.Y);
+                            if (position.X + width + 1 <= this.graphics.Viewport.Width &&
+                                position.Y + height + 1 <= this.graphics.Viewport.Height)
+                            {
+                                var texture = new Texture2D(this.graphics, width, height);
+
+                                // Fill with green for test
+                                var textureData = new Color[width * height];
+                                for (int i = 0; i < textureData.Length; i++)
+                                {
+                                    textureData[i] = Color.PaleGreen;
+                                }
+
+                                // Set the texture data
+                                texture.SetData(textureData);
+
+                                // Draw the square
+                                spriteBatch.Draw(texture, position, Color.White);
+                            }
+                        }
+                    }
                 }
 
                 spriteBatch.End();

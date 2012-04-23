@@ -372,7 +372,7 @@ namespace Dwarves.Common
             public ClipQuadTreeEnumerator(ClipQuadTree<T> node)
             {
                 this.rootNode = node;
-                this.context = null;
+                this.Reset();
             }
 
             /// <summary>
