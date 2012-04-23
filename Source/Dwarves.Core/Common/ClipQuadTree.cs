@@ -15,7 +15,7 @@ namespace Dwarves.Common
     /// rather the data is 'clipped' to the bounds of the quadrant in which it belongs.
     /// </summary>
     /// <typeparam name="T">The type of data stored in the quad tree.</typeparam>
-    public class ClipQuadTree<T>
+    public class ClipQuadTree<T> : IEnumerable<QuadTreeData<T>>
     {
         #region Private Variables
 
@@ -208,6 +208,28 @@ namespace Dwarves.Common
 
         #endregion
 
+        #region IEnumerable Members
+
+        /// <summary>
+        /// Get an enumerator that iterates through all data in the quad tree.
+        /// </summary>
+        /// <returns>An enumerator object.</returns>
+        public IEnumerator<QuadTreeData<T>> GetEnumerator()
+        {
+            return new ClipQuadTreeEnumerator(this);
+        }
+
+        /// <summary>
+        /// Get an enumerator that iterates through all data in the quad tree.
+        /// </summary>
+        /// <returns>An enumerator object.</returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
@@ -322,6 +344,205 @@ namespace Dwarves.Common
         private bool IsPowerOf2(int x)
         {
             return (x > 0) && ((x & (x - 1)) == 0);
+        }
+
+        #endregion
+
+        #region Inner Classes
+
+        /// <summary>
+        /// Iterates through all data in a quad tree.
+        /// </summary>
+        private class ClipQuadTreeEnumerator : IEnumerator<QuadTreeData<T>>
+        {
+            /// <summary>
+            /// The quad tree being enumerated.
+            /// </summary>
+            private ClipQuadTree<T> rootNode;
+
+            /// <summary>
+            /// The current enumeration context.
+            /// </summary>
+            private Context context;
+
+            /// <summary>
+            /// Initializes a new instance of the ClipQuadTreeEnumerator class.
+            /// </summary>
+            /// <param name="node">The quad tree being enumerated.</param>
+            public ClipQuadTreeEnumerator(ClipQuadTree<T> node)
+            {
+                this.rootNode = node;
+                this.context = null;
+            }
+
+            /// <summary>
+            /// Gets the element in the collection at the current position of the enumerator.
+            /// </summary>
+            public QuadTreeData<T> Current
+            {
+                get
+                {
+                    if (this.context != null)
+                    {
+                        return new QuadTreeData<T>(this.context.Node.Data, this.context.Node.Bounds);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            "Enumerator is before the first or after the last element in the collection.");
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets the element in the collection at the current position of the enumerator.
+            /// </summary>
+            object System.Collections.IEnumerator.Current
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            /// <summary>
+            /// Advances the enumerator to the next element of the collection.
+            /// </summary>
+            /// <returns>True if the enumerator was successfully advanced to the next element.</returns>
+            public bool MoveNext()
+            {
+                if (this.context == null)
+                {
+                    return false;
+                }
+
+                switch (this.context.LastMovement)
+                {
+                    case Context.Movement.None:
+                        // No action has been performed yet
+                        if (this.context.Node.IsLeaf)
+                        {
+                            // Enumerator is at a leaf node so return true since data can be read
+                            this.context.LastMovement = Context.Movement.ReadLeaf;
+                            return true;
+                        }
+                        else
+                        {
+                            // Enumerator is at a leaf node so move into the top-left sub-quadrant
+                            this.context.LastMovement = Context.Movement.TopLeft;
+                            this.context = new Context(this.context.Node.TopLeft, this.context);
+                            return this.MoveNext();
+                        }
+
+                    case Context.Movement.TopLeft:
+                        // Move to the next sub-quadrant
+                        this.context.LastMovement = Context.Movement.TopRight;
+                        this.context = new Context(this.context.Node.TopRight, this.context);
+                        return this.MoveNext();
+
+                    case Context.Movement.TopRight:
+                        // Move to the next sub-quadrant
+                        this.context.LastMovement = Context.Movement.BottomLeft;
+                        this.context = new Context(this.context.Node.BottomLeft, this.context);
+                        return this.MoveNext();
+
+                    case Context.Movement.BottomLeft:
+                        // Move to the next sub-quadrant
+                        this.context.LastMovement = Context.Movement.BottomRight;
+                        this.context = new Context(this.context.Node.BottomRight, this.context);
+                        return this.MoveNext();
+
+                    case Context.Movement.BottomRight:
+                    case Context.Movement.ReadLeaf:
+                        // No more actions can be performed on the current node, move back to the parent
+                        this.context = this.context.Parent;
+                        return this.MoveNext();
+
+                    default:
+                        throw new InvalidOperationException("Unexpected ClipQuadTreeEnumerator context state.");
+
+                }
+            }
+
+            /// <summary>
+            /// Sets the enumerator to its initial position, which is before the first element in the collection.
+            /// </summary>
+            public void Reset()
+            {
+                this.context = new Context(this.rootNode, null);
+            }
+
+            /// <summary>
+            /// Dispose the enumerator.
+            /// </summary>
+            public void Dispose()
+            {
+            }
+
+            /// <summary>
+            /// The enumerator context.
+            /// </summary>
+            private class Context
+            {
+                /// <summary>
+                /// Initializes a new instance of the Context class.
+                /// </summary>
+                /// <param name="node">The quad tree node being enumerated.</param>
+                /// <param name="parent">The parent context.</param>
+                public Context(ClipQuadTree<T> node, Context parent)
+                {
+                    this.Node = node;
+                    this.Parent = parent;
+                }
+
+                /// <summary>
+                /// Enumerator movement types.
+                /// </summary>
+                public enum Movement
+                {
+                    /// <summary>
+                    /// Indicates no quadrant.
+                    /// </summary>
+                    None,
+
+                    /// <summary>
+                    /// Indicates that the leaf data was read.
+                    /// </summary>
+                    ReadLeaf,
+
+                    /// <summary>
+                    /// Indicates that enumeration moved into the top left sub-quadrant.
+                    /// </summary>
+                    TopLeft,
+
+                    /// <summary>
+                    /// Indicates that enumeration moved into the top right sub-quadrant.
+                    /// </summary>
+                    TopRight,
+
+                    /// <summary>
+                    /// Indicates that enumeration moved into the bottom left sub-quadrant.
+                    /// </summary>
+                    BottomLeft,
+
+                    /// <summary>
+                    /// Indicates that enumeration moved into the bottom right sub-quadrant.
+                    /// </summary>
+                    BottomRight
+                }
+
+                /// <summary>
+                /// Gets the quad tree node being enumerated.
+                /// </summary>
+                public ClipQuadTree<T> Node { get; private set; }
+
+                /// <summary>
+                /// Gets the parent context.
+                /// </summary>
+                public Context Parent { get; private set; }
+
+                /// <summary>
+                /// Gets or sets the movement that was performed in this context.
+                /// </summary>
+                public Movement LastMovement { get; set; }
+            }
         }
 
         #endregion
