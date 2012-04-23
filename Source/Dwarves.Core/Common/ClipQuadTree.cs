@@ -457,7 +457,6 @@ namespace Dwarves.Common
 
                     default:
                         throw new InvalidOperationException("Unexpected ClipQuadTreeEnumerator context state.");
-
                 }
             }
 
