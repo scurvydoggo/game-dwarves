@@ -1,4 +1,11 @@
 ﻿// ----------------------------------------------------------------------------
+// <copyright file="SpriteSystem.cs" company="Dematic">
+//     Copyright © 2009-2012 Dematic. All rights reserved.
+// </copyright>
+// <Summary>
+// </Summary>
+// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // <copyright file="SpriteSystem.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
@@ -6,6 +13,7 @@
 namespace Dwarves.Subsystem
 {
     using System;
+    using System.Collections.Generic;
     using Dwarves.Common;
     using Dwarves.Component.Game;
     using Dwarves.Component.Render;
@@ -45,6 +53,8 @@ namespace Dwarves.Subsystem
             this.graphics = graphics;
         }
 
+        #region Public Methods
+
         /// <summary>
         /// Perform the system's processing.
         /// </summary>
@@ -53,12 +63,20 @@ namespace Dwarves.Subsystem
         {
             // Get the camera components, since this needs to be taken into account with determining location
             Entity cameraEntity = this.GetCameraEntity();
-            var cameraComponent =
+            var camera =
                 (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
             var cameraZoom =
                 (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
             var cameraPos =
                 (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
+
+            // Calculate the origin and scale vector for the current camera position
+            var scale = new Vector2(
+                (float)this.graphics.Viewport.Width / camera.ProjectionWidth * cameraZoom.Scale,
+                (float)this.graphics.Viewport.Height / camera.ProjectionHeight * cameraZoom.Scale);
+            var origin = new Vector2(
+                (cameraPos.Position.X * scale.X) - ((float)this.graphics.Viewport.Width) / 2,
+                (cameraPos.Position.Y * scale.Y) + ((float)this.graphics.Viewport.Height) / 2);
 
             // Draw the sprites in a single batch
             using (var spriteBatch = new SpriteBatch(this.graphics))
@@ -70,149 +88,175 @@ namespace Dwarves.Subsystem
                     DepthStencilState.None,
                     RasterizerState.CullCounterClockwise);
 
-                foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(SpriteComponent)))
-                {
-                    // Get the sprite components
-                    var sprite = (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
-                    var spritePos =
-                        (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                    if (sprite == null || spritePos == null)
-                    {
-                        continue;
-                    }
+                // Draw the sprite components
+                this.DrawSpriteComponents(spriteBatch, origin, scale);
 
-                    var spriteRectangle = this.resources.GetSpriteRectangle(sprite.SpriteName);
-
-                    // Transform from game coordinates into screen coordinates
-                    Vector2 screenPos;
-                    Vector2 screenScale;
-                    if (spritePos.IsScreenCoordinates)
-                    {
-                        screenPos = spritePos.Position;
-                        screenScale = new Vector2(1.0f);
-                    }
-                    else
-                    {
-                        float x = spritePos.Position.X;
-                        float y = spritePos.Position.Y;
-                        float screenScaleX = (float)this.graphics.Viewport.Width / cameraComponent.ProjectionWidth;
-                        float screenScaleY = (float)this.graphics.Viewport.Height / cameraComponent.ProjectionHeight;
-
-                        // Calculate the screen scale vector
-                        screenScale = new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale;
-
-                        // Transform from game coordinates to screen coordinates
-                        x = (x - cameraPos.Position.X) * screenScale.X;
-                        y = (cameraPos.Position.Y - y) * screenScale.Y;
-
-                        // Offset from the camera which points to the center of the viewport
-                        x += ((float)this.graphics.Viewport.Width) / 2;
-                        y += ((float)this.graphics.Viewport.Height) / 2;
-
-                        screenPos = new Vector2(x, y);
-                    }
-
-                    // Draw the sprite
-                    spriteBatch.Draw(
-                        this.resources.SpriteSheet,
-                        screenPos,
-                        this.resources.GetSpriteRectangle(sprite.SpriteName),
-                        Color.White,
-                        -spritePos.Rotation,
-                        Vector2.Zero,
-                        screenScale * Const.PixelsToMeters,
-                        SpriteEffects.None,
-                        0);
-                }
-
-                // TODO: Remove this!
-                // Test code to ensure terrain is built correctly
-                foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
-                {
-                    var terrain =
-                        (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
-                    var terrainPos =
-                        (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                    var terrainScale =
-                        (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
-
-                    // Calculate the position and scaling ratio for converting world-coordinates to screen-coordinates
-                    Vector2 basePosition;
-                    Vector2 baseScale;
-                    if (terrainPos.IsScreenCoordinates)
-                    {
-                        basePosition = terrainPos.Position;
-                        baseScale = new Vector2(1.0f);
-                    }
-                    else
-                    {
-                        float x = terrainPos.Position.X;
-                        float y = terrainPos.Position.Y;
-                        float screenScaleX = (float)this.graphics.Viewport.Width / cameraComponent.ProjectionWidth;
-                        float screenScaleY = (float)this.graphics.Viewport.Height / cameraComponent.ProjectionHeight;
-
-                        // Calculate the base scale vector
-                        baseScale = new Vector2(screenScaleX, screenScaleY) * cameraZoom.Scale;
-
-                        // Transform from game coordinates to camera coordinates
-                        x = (x - cameraPos.Position.X) * baseScale.X;
-                        y = (cameraPos.Position.Y - y) * baseScale.Y;
-
-                        // Offset from the camera which points to the center of the viewport
-                        x += ((float)this.graphics.Viewport.Width) / 2;
-                        y += ((float)this.graphics.Viewport.Height) / 2;
-
-                        basePosition = new Vector2(x, y);
-                    }
-
-                    // Apply the terrain scaling ratio
-                    baseScale *= terrainScale.Scale * Const.PixelsToMeters;
-
-                    // Step through each terrain block
-                    foreach (QuadTreeData<TerrainType> data in terrain.QuadTree)
-                    {
-                        TerrainType terrainType = data.Data;
-                        Square bounds = data.Bounds;
-
-                        // Don't draw anything if no terrain exists here
-                        if (terrainType == TerrainType.None)
-                        {
-                            continue;
-                        }
-
-                        // Calculate the terrain block size
-                        int width = (int)Math.Round(bounds.Length * baseScale.X);
-                        int height = (int)Math.Round(bounds.Length * baseScale.Y);
-                        if (width > 0 && height > 0)
-                        {
-                            // Translate and scale the block position
-                            Vector2 position =
-                                basePosition + new Vector2(bounds.X * baseScale.X, bounds.Y * baseScale.Y);
-                            if (position.X + width + 1 <= this.graphics.Viewport.Width &&
-                                position.Y + height + 1 <= this.graphics.Viewport.Height)
-                            {
-                                var texture = new Texture2D(this.graphics, width, height);
-
-                                // Fill with green for test
-                                var textureData = new Color[width * height];
-                                for (int i = 0; i < textureData.Length; i++)
-                                {
-                                    textureData[i] = Color.PaleGreen;
-                                }
-
-                                // Set the texture data
-                                texture.SetData(textureData);
-
-                                // Draw the square
-                                spriteBatch.Draw(texture, position, Color.White);
-                            }
-                        }
-                    }
-                }
+                // Draw the terrain components
+                this.DrawTerrainComponents(spriteBatch, origin, scale);
 
                 spriteBatch.End();
             }
         }
+
+        #endregion
+
+        #region Draw Methods
+
+        /// <summary>
+        /// Draw the SpriteComponent sprites.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
+        /// <param name="cameraOrigin">The origin of the camera.</param>
+        /// <param name="cameraScale">The scale factor of the camera.</param>
+        private void DrawSpriteComponents(SpriteBatch spriteBatch, Vector2 cameraOrigin, Vector2 cameraScale)
+        {
+            foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(SpriteComponent)))
+            {
+                // Get the sprite components
+                var cSprite = (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
+                var cPosition =
+                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+
+                // Calculate the sprite position and scale factor
+                Vector2 origin;
+                Vector2 spriteScale;
+                if (cPosition.IsScreenCoordinates)
+                {
+                    origin = cPosition.Position;
+                    spriteScale = new Vector2(Const.PixelsToMeters);
+                }
+                else
+                {
+                    origin = new Vector2(
+                        cPosition.Position.X * cameraScale.X - cameraOrigin.X,
+                        cameraOrigin.Y - cPosition.Position.Y * cameraScale.Y);
+                    spriteScale = cameraScale * Const.PixelsToMeters;
+                }
+
+                // Draw the sprite
+                spriteBatch.Draw(
+                    this.resources.SpriteSheet,
+                    origin,
+                    this.resources.GetSpriteRectangle(cSprite.SpriteName),
+                    Color.White,
+                    -cPosition.Rotation,
+                    Vector2.Zero,
+                    spriteScale,
+                    SpriteEffects.None,
+                    0);
+            }
+        }
+
+        /// <summary>
+        /// Draw the TerrainComponent sprites.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
+        /// <param name="cameraOrigin">The origin of the camera.</param>
+        /// <param name="cameraScale">The scale factor of the camera.</param>
+        private void DrawTerrainComponents(SpriteBatch spriteBatch, Vector2 cameraOrigin, Vector2 cameraScale)
+        {
+            foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
+            {
+                var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
+                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
+
+                // Calculate the terrain origin and sprite scale factor
+                Vector2 origin;
+                Vector2 spriteScale;
+                if (cPosition.IsScreenCoordinates)
+                {
+                    origin = cPosition.Position;
+                    spriteScale = new Vector2(Const.PixelsToMeters);
+                }
+                else
+                {
+                    origin = new Vector2(
+                        cPosition.Position.X * cameraScale.X - cameraOrigin.X,
+                        cameraOrigin.Y - cPosition.Position.Y * cameraScale.Y);
+                    spriteScale = cameraScale * Const.PixelsToMeters;
+                }
+
+                // Calculate the scale factor for the terrain blocks
+                Vector2 blockScale = spriteScale * cScale.Scale;
+
+                // Step through each terrain block
+                foreach (QuadTreeData<TerrainType> data in cTerrain.QuadTree)
+                {
+                    // Don't draw anything if no terrain exists here
+                    TerrainType terrainType = data.Data;
+                    if (terrainType == TerrainType.None)
+                    {
+                        continue;
+                    }
+
+                    // Calculate the bounds of this terrain block in on-screen coordinates
+                    var bounds = new Rectangle(
+                        (int)(origin.X + data.Bounds.X * blockScale.X + 0.5),
+                        (int)(origin.Y + data.Bounds.Y * blockScale.Y + 0.5),
+                        (int)(data.Bounds.Length * blockScale.X + 0.5),
+                        (int)(data.Bounds.Length * blockScale.Y + 0.5));
+
+                    // Check if the terrain block intersects with the viewport
+                    if (!(bounds.Right < 0 ||
+                        bounds.Left > this.graphics.Viewport.Width ||
+                        bounds.Bottom < 0 ||
+                        bounds.Top > this.graphics.Viewport.Height))
+                    {
+                        // Tile the terrain within the bounds
+                        this.DrawTiledTerrain(spriteBatch, terrainType, bounds, spriteScale);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Draw a tiled terrain within the given bounds.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
+        /// <param name="terrain">The terrain type.</param>
+        /// <param name="bounds">The bounds within which terrain is tiled.</param>
+        /// <param name="scale">The sprite scale vector.</param>
+        private void DrawTiledTerrain(SpriteBatch spriteBatch, TerrainType terrain, Rectangle bounds, Vector2 scale)
+        {
+            // Get the variations of this terrain type
+            // TODO: Use the TerrainType value, rather than just using mud here
+            var spriteNames = new Dictionary<int, string>();
+            foreach (int variation in this.resources.GetSpriteVariations("terrain", "earth", "mud"))
+            {
+                spriteNames.Add(variation, this.resources.GetSpriteName("terrain", "earth", "mud", variation));
+            }
+
+            // Calculate the scaled tile width/height
+            int tileWidth = (int)(ResourceManager.TileSize * scale.X + 0.5);
+            int tileHeight = (int)(ResourceManager.TileSize * scale.Y + 0.5);
+
+            // Calculate the tile offset
+            int offsetX = bounds.X % tileWidth;
+            int offsetY = bounds.Y % tileWidth;
+
+            for (int x = bounds.X; x < bounds.Right + tileWidth; x += tileWidth)
+            {
+                for (int y = bounds.Y; y < bounds.Bottom + tileHeight; y += tileHeight)
+                {
+                    // Clip the tile rectangle, as it may go outside the bounds of the bounds
+                    int clipWidth = x + tileWidth < bounds.Right ? tileWidth : bounds.Right - x + 1;
+                    int clipHeight = y + tileHeight < bounds.Bottom ? tileHeight : bounds.Bottom - y + 1;
+                    var tileRectangle = new Rectangle(x, y, clipWidth, clipHeight);
+
+                    // Draw the sprite
+                    spriteBatch.Draw(
+                        this.resources.SpriteSheet,
+                        tileRectangle,
+                        this.resources.GetSpriteRectangle(spriteNames[1]),
+                        Color.White);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Helper Methods
 
         /// <summary>
         /// Get the camera entity.
@@ -229,5 +273,7 @@ namespace Dwarves.Subsystem
 
             return enumerator.Current;
         }
+
+        #endregion
     }
 }

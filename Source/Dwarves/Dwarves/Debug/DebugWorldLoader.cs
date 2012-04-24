@@ -36,7 +36,7 @@ namespace Dwarves.Debug
             this.entityFactory.CreateCamera(world, 1, 1, 1);
 
             // Add terrain
-            this.entityFactory.CreateTerrain(world, 0, 0, 4, true, "Terrain\\Test1_Terrain");
+            this.entityFactory.CreateTerrain(world, 0, 0, 1, true, "Terrain\\Test1_Terrain");
 
             // Add a dwarf
             this.entityFactory.CreateDwarf(world, 0, 0);

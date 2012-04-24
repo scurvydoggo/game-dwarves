@@ -21,6 +21,11 @@ namespace Dwarves
         #region Constants
 
         /// <summary>
+        /// The pixel size of tile sprites.
+        /// </summary>
+        public const int TileSize = 16;
+
+        /// <summary>
         /// Regex for parsing sprite info.
         /// </summary>
         private readonly Regex regexSpriteInfo =
