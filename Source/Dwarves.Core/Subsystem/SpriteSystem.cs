@@ -75,8 +75,8 @@ namespace Dwarves.Subsystem
                 (float)this.graphics.Viewport.Width / camera.ProjectionWidth * cameraZoom.Scale,
                 (float)this.graphics.Viewport.Height / camera.ProjectionHeight * cameraZoom.Scale);
             var origin = new Vector2(
-                (cameraPos.Position.X * scale.X) - ((float)this.graphics.Viewport.Width) / 2,
-                (cameraPos.Position.Y * scale.Y) + ((float)this.graphics.Viewport.Height) / 2);
+                (cameraPos.Position.X * scale.X) - (((float)this.graphics.Viewport.Width) / 2),
+                (cameraPos.Position.Y * scale.Y) + (((float)this.graphics.Viewport.Height) / 2));
 
             // Draw the sprites in a single batch
             using (var spriteBatch = new SpriteBatch(this.graphics))
@@ -88,11 +88,11 @@ namespace Dwarves.Subsystem
                     DepthStencilState.None,
                     RasterizerState.CullCounterClockwise);
 
-                // Draw the sprite components
-                this.DrawSpriteComponents(spriteBatch, origin, scale);
-
                 // Draw the terrain components
                 this.DrawTerrainComponents(spriteBatch, origin, scale);
+
+                // Draw the sprite components
+                this.DrawSpriteComponents(spriteBatch, origin, scale);
 
                 spriteBatch.End();
             }
@@ -128,8 +128,8 @@ namespace Dwarves.Subsystem
                 else
                 {
                     origin = new Vector2(
-                        cPosition.Position.X * cameraScale.X - cameraOrigin.X,
-                        cameraOrigin.Y - cPosition.Position.Y * cameraScale.Y);
+                        (cPosition.Position.X * cameraScale.X) - cameraOrigin.X,
+                        cameraOrigin.Y - (cPosition.Position.Y * cameraScale.Y));
                     spriteScale = cameraScale * Const.PixelsToMeters;
                 }
 
@@ -172,8 +172,8 @@ namespace Dwarves.Subsystem
                 else
                 {
                     origin = new Vector2(
-                        cPosition.Position.X * cameraScale.X - cameraOrigin.X,
-                        cameraOrigin.Y - cPosition.Position.Y * cameraScale.Y);
+                        (cPosition.Position.X * cameraScale.X) - cameraOrigin.X,
+                        cameraOrigin.Y - (cPosition.Position.Y * cameraScale.Y));
                     spriteScale = cameraScale * Const.PixelsToMeters;
                 }
 
@@ -192,10 +192,10 @@ namespace Dwarves.Subsystem
 
                     // Calculate the bounds of this terrain block in on-screen coordinates
                     var bounds = new Rectangle(
-                        (int)(origin.X + data.Bounds.X * blockScale.X + 0.5),
-                        (int)(origin.Y + data.Bounds.Y * blockScale.Y + 0.5),
-                        (int)(data.Bounds.Length * blockScale.X + 0.5),
-                        (int)(data.Bounds.Length * blockScale.Y + 0.5));
+                        (int)Math.Ceiling(origin.X + (data.Bounds.X * blockScale.X)),
+                        (int)Math.Ceiling(origin.Y + (data.Bounds.Y * blockScale.Y)),
+                        (int)Math.Ceiling(data.Bounds.Length * blockScale.X),
+                        (int)Math.Ceiling(data.Bounds.Length * blockScale.Y));
 
                     // Check if the terrain block intersects with the viewport
                     if (!(bounds.Right < 0 ||
@@ -221,35 +221,40 @@ namespace Dwarves.Subsystem
         {
             // Get the variations of this terrain type
             // TODO: Use the TerrainType value, rather than just using mud here
-            var spriteNames = new Dictionary<int, string>();
+            var spriteRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "earth", "mud"))
             {
-                spriteNames.Add(variation, this.resources.GetSpriteName("terrain", "earth", "mud", variation));
+                string name = this.resources.GetSpriteName("terrain", "earth", "mud", variation);
+                spriteRects.Add(variation, this.resources.GetSpriteRectangle(name));
             }
 
-            // Calculate the scaled tile width/height
-            int tileWidth = (int)(ResourceManager.TileSize * scale.X + 0.5);
-            int tileHeight = (int)(ResourceManager.TileSize * scale.Y + 0.5);
+            // Draw test block
+            spriteBatch.Draw(
+                this.resources.SpriteSheet,
+                bounds,
+                spriteRects[1],
+                Color.White);
 
-            // Calculate the tile offset
-            int offsetX = bounds.X % tileWidth;
-            int offsetY = bounds.Y % tileWidth;
+            // Calculate the scaled tile size (in relation to camera zoom and screen-proportions)
+            int tileWidthScaled = (int)Math.Round(ResourceManager.TileSize * scale.X);
+            int tileHeightScaled = (int)Math.Round(ResourceManager.TileSize * scale.Y);
 
-            for (int x = bounds.X; x < bounds.Right + tileWidth; x += tileWidth)
+            for (int x = bounds.Left; x < bounds.Right; x += tileWidthScaled)
             {
-                for (int y = bounds.Y; y < bounds.Bottom + tileHeight; y += tileHeight)
+                for (int y = bounds.Top; y < bounds.Bottom; y += tileHeightScaled)
                 {
-                    // Clip the tile rectangle, as it may go outside the bounds of the bounds
-                    int clipWidth = x + tileWidth < bounds.Right ? tileWidth : bounds.Right - x + 1;
-                    int clipHeight = y + tileHeight < bounds.Bottom ? tileHeight : bounds.Bottom - y + 1;
-                    var tileRectangle = new Rectangle(x, y, clipWidth, clipHeight);
+                    // Clip the width/height of the tile if it will go outside the bounds
+                    int width = (x + tileWidthScaled <= bounds.Right) ? tileWidthScaled : bounds.Right - x;
+                    int height = (y + tileHeightScaled <= bounds.Bottom) ? tileHeightScaled : bounds.Bottom - y;
 
-                    // Draw the sprite
+                    /*
+                    // Draw test block
                     spriteBatch.Draw(
                         this.resources.SpriteSheet,
-                        tileRectangle,
-                        this.resources.GetSpriteRectangle(spriteNames[1]),
+                        new Rectangle(x, y, width, height),
+                        spriteRects[1],
                         Color.White);
+                     */
                 }
             }
         }
