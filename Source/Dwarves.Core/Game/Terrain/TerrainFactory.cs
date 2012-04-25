@@ -147,15 +147,24 @@ namespace Dwarves.Game.Terrain
             else
             {
                 // Get the terrain type at this pixel
-                int dataIndex = bounds.X + (bounds.Y * bitmapWidth);
-                if (dataIndex < bitmapData.Length)
+                if (bounds.X < bitmapWidth)
                 {
-                    return TerrainTypeConverter.GetValue(bitmapData[dataIndex]);
+                    int dataIndex = bounds.X + (bounds.Y * bitmapWidth);
+                    if (dataIndex < bitmapData.Length)
+                    {
+                        return TerrainTypeConverter.GetValue(bitmapData[dataIndex]);
+                    }
+                    else
+                    {
+                        // The index is out of bounds for this quadrant. This will happen if the bitmap image is not a
+                        // square with a power-of-2 length. Just return TerrainType.None
+                        return TerrainType.None;
+                    }
                 }
                 else
                 {
                     // The index is out of bounds for this quadrant. This will happen if the bitmap image is not a
-                    // square with a power-of-2 length. Just return TerrainType.bitmapData[]None
+                    // square with a power-of-2 length. Just return TerrainType.None
                     return TerrainType.None;
                 }
             }
