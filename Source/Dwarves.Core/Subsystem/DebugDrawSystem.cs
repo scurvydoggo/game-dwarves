@@ -66,15 +66,18 @@ namespace Dwarves.Subsystem
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(CameraComponent)))
             {
                 // Get the entity components
-                var camera = (CameraComponent)this.EntityManager.GetComponent(entity, typeof(CameraComponent));
-                var position = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                var scale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
+                var cCamera =
+                    (CameraComponent)this.EntityManager.GetComponent(entity, typeof(CameraComponent));
+                var cCameraPosition =
+                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cCameraScale =
+                    (ScaleSpatialComponent)this.EntityManager.GetComponent(entity, typeof(ScaleSpatialComponent));
 
                 // Calculate the projection matrix
-                Matrix projection = this.CalculateProjection(camera.ProjectionWidth, camera.ProjectionHeight);
+                Matrix projection = this.CalculateProjection(cCamera.ProjectionWidth, cCamera.ProjectionHeight);
 
                 // Calculate the view matrix
-                Matrix view = this.CalculateView(position.Position, scale.Scale);
+                Matrix view = this.CalculateView(cCameraPosition.Position, cCameraScale.Scale);
 
                 // Render the view
                 this.debugView.RenderDebugData(ref projection, ref view);

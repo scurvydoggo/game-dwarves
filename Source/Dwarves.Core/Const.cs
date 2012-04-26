@@ -13,7 +13,7 @@ namespace Dwarves
         /// <summary>
         /// The pixel size of tile sprites.
         /// </summary>
-        public const int TileSize = 16;
+        public const int TileSize = 32;
 
         /// <summary>
         /// The scaling factor for converting pixels to meters in the physics world.

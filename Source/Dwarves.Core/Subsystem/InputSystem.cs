@@ -73,12 +73,12 @@ namespace Dwarves.Subsystem
 
             // Get the camera components, since this needs to be taken into account with determining location
             Entity cameraEntity = this.GetCameraEntity();
-            var cameraComponent =
+            var cCamera =
                 (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
-            var cameraZoom =
-                (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
-            var cameraPos =
+            var cCameraPosition =
                 (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
+            var cCameraScale =
+                (ScaleSpatialComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleSpatialComponent));
 
             int? entityOnTouchPoint = null;
             if (isSingleTouch)
@@ -92,7 +92,7 @@ namespace Dwarves.Subsystem
                 {
                     // Get the entities that are touched
                     IEnumerable<Entity> touchedEntities = this.GetEntitiesOnPoint(
-                        mouseState.X, mouseState.Y, cameraZoom.Scale, cameraPos.Position);
+                        mouseState.X, mouseState.Y, cCameraScale.Scale, cCameraPosition.Position);
 
                     // TODO: Pick which entity to focus
                     entityOnTouchPoint = -1;
@@ -110,12 +110,12 @@ namespace Dwarves.Subsystem
                     float deltaY = mouseState.Y - this.prevMouseState.Value.Y;
 
                     // Transform from screen coordinates to game world coordinates
-                    deltaX *= cameraComponent.ProjectionWidth / (float)this.graphics.Viewport.Width;
-                    deltaY *= cameraComponent.ProjectionHeight / (float)this.graphics.Viewport.Height;
+                    deltaX *= cCamera.ProjectionWidth / (float)this.graphics.Viewport.Width;
+                    deltaY *= cCamera.ProjectionHeight / (float)this.graphics.Viewport.Height;
 
                     // Transform from game world coordinates to camera-relative coordinates
-                    deltaX /= cameraZoom.Scale;
-                    deltaY /= cameraZoom.Scale;
+                    deltaX /= cCameraScale.Scale;
+                    deltaY /= cCameraScale.Scale;
 
                     // Get the number of zoom steps from the mousewheel movement
                     float zoomSteps = mouseState.ScrollWheelValue - this.prevMouseState.Value.ScrollWheelValue;
@@ -124,13 +124,13 @@ namespace Dwarves.Subsystem
                     zoomSteps /= MousewheelStepValue;
 
                     // Update the camera position and zoom scale
-                    cameraPos.Position = new Vector2(cameraPos.Position.X - deltaX, cameraPos.Position.Y + deltaY);
-                    cameraZoom.Scale += zoomSteps * cameraComponent.ZoomStepSize;
+                    cCameraPosition.Position = new Vector2(cCameraPosition.Position.X - deltaX, cCameraPosition.Position.Y + deltaY);
+                    cCameraScale.Scale += zoomSteps * cCamera.ZoomStepSize;
 
                     // Camera zoom can't go below zero
-                    if (cameraZoom.Scale <= 0.0f)
+                    if (cCameraScale.Scale <= 0.0f)
                     {
-                        cameraZoom.Scale = cameraComponent.ZoomStepSize;
+                        cCameraScale.Scale = cCamera.ZoomStepSize;
                     }
                 }
             }
@@ -188,27 +188,25 @@ namespace Dwarves.Subsystem
 
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(InputRegionComponent)))
             {
-                // Get the input region
-                var inputRegion =
+                // Get the components
+                var cPosition =
+                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cInputRegion =
                     (InputRegionComponent)this.EntityManager.GetComponent(entity, typeof(InputRegionComponent));
 
-                // Get the entity position
-                var entityPos =
-                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-
                 // Transform the region from entity-relative coordinates to screen coordinates
-                Rectangle rect = inputRegion.Region;
-                if (entityPos.IsScreenCoordinates)
+                Rectangle rect = cInputRegion.Region;
+                if (cPosition.IsScreenCoordinates)
                 {
                     // Move the region to the on-screen position
-                    rect.X += (int)Math.Round(entityPos.Position.X);
-                    rect.Y += (int)Math.Round(entityPos.Position.Y);
+                    rect.X += (int)Math.Round(cPosition.Position.X);
+                    rect.Y += (int)Math.Round(cPosition.Position.Y);
                 }
                 else
                 {
                     // Translate the region to the entity's game world position
-                    float translateX = entityPos.Position.X;
-                    float translateY = entityPos.Position.Y;
+                    float translateX = cPosition.Position.X;
+                    float translateY = cPosition.Position.Y;
 
                     // Translate the region to the camera-position
                     translateX -= cameraPos.X;

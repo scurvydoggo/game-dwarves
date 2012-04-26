@@ -9,6 +9,7 @@ namespace Dwarves.Debug
     using Dwarves.Assembler.Body;
     using Dwarves.Common;
     using Dwarves.Component.Game;
+    using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
     using Dwarves.Game.Terrain;
@@ -38,7 +39,7 @@ namespace Dwarves.Debug
             // Create the components
             world.EntityManager.AddComponent(entity, new CameraComponent());
             world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(centerX, centerY)));
-            world.EntityManager.AddComponent(entity, new ScaleComponent(zoom));
+            world.EntityManager.AddComponent(entity, new ScaleSpatialComponent(zoom));
 
             return entity;
         }
@@ -127,7 +128,8 @@ namespace Dwarves.Debug
             // Add terrain component
             world.EntityManager.AddComponent(entity, new TerrainComponent(terrainQuadTree, isCollidable));
             world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
-            world.EntityManager.AddComponent(entity, new ScaleComponent(scale));
+            world.EntityManager.AddComponent(entity, new ScaleSpatialComponent(scale));
+            world.EntityManager.AddComponent(entity, new ScaleRenderComponent(Const.PixelsToMeters));
 
             return entity;
         }

@@ -62,22 +62,30 @@ namespace Dwarves.Subsystem
         /// <param name="delta">The number of milliseconds since the last processing occurred.</param>
         public override void Process(int delta)
         {
-            Matrix view = this.CreateViewMatrix();
+            // Get the camera components
+            Entity cameraEntity = this.GetCameraEntity();
+            var cCamera =
+                (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
+            var cCameraScale =
+                (ScaleSpatialComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleSpatialComponent));
+            var cCameraPosition =
+                (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
 
-            // Draw the sprites in a single batch
-            using (var spriteBatch = new SpriteBatch(this.graphics))
+            // Calculate the camera translation and scale values
+            float scaleX = ((float)this.graphics.Viewport.Width / cCamera.ProjectionWidth) * cCameraScale.Scale;
+            float scaleY = ((float)this.graphics.Viewport.Height / cCamera.ProjectionHeight) * cCameraScale.Scale;
+            float translateX =
+                (float)(((float)this.graphics.Viewport.Width * 0.5) / scaleX) - cCameraPosition.Position.X;
+            float translateY =
+                (float)(((float)this.graphics.Viewport.Height * 0.5) / scaleY) + cCameraPosition.Position.Y;
+
+            using (SpriteBatch spriteBatch = new SpriteBatch(this.graphics))
             {
-                // Begin the sprite batch
-                spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, view);
-
                 // Draw the terrain components
-                this.DrawTerrainComponents(spriteBatch);
+                this.DrawTerrainComponents(spriteBatch, translateX, translateY, scaleX, scaleY);
 
                 // Draw the sprite components
-                this.DrawSpriteComponents(spriteBatch);
-
-                // End the sprite batch
-                spriteBatch.End();
+                this.DrawSpriteComponents(spriteBatch, translateX, translateY, scaleX, scaleY);
             }
         }
 
@@ -88,15 +96,35 @@ namespace Dwarves.Subsystem
         /// <summary>
         /// Draw the SpriteComponent sprites.
         /// </summary>
-        /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
-        private void DrawSpriteComponents(SpriteBatch spriteBatch)
+        /// <param name="spriteBatch">The sprite batch.</param>
+        /// <param name="cameraTranslateX">The camera x translation value.</param>
+        /// <param name="cameraTranslateY">The camera y translation value.</param>
+        /// <param name="cameraScaleX">The camera x scale value.</param>
+        /// <param name="cameraScaleY">The camera y scale value.</param>
+        private void DrawSpriteComponents(
+            SpriteBatch spriteBatch,
+            float cameraTranslateX,
+            float cameraTranslateY,
+            float cameraScaleX,
+            float cameraScaleY)
         {
+            // Create the transform matrix
+            Matrix transform =
+                Matrix.Identity *
+                Matrix.CreateTranslation(cameraTranslateX, cameraTranslateY, 0) *
+                Matrix.CreateScale(cameraScaleX, cameraScaleY, 0);
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
+
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(SpriteComponent)))
             {
                 // Get the sprite components
-                var cSprite = (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
-                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
+                var cSprite =
+                    (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
+                var cPosition =
+                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cScale =
+                    (ScaleRenderComponent)this.EntityManager.GetComponent(entity, typeof(ScaleRenderComponent));
 
                 // Draw the sprite
                 spriteBatch.Draw(
@@ -110,19 +138,45 @@ namespace Dwarves.Subsystem
                     SpriteEffects.None,
                     0);
             }
+
+            spriteBatch.End();
         }
 
         /// <summary>
         /// Draw the TerrainComponent sprites.
         /// </summary>
-        /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
-        private void DrawTerrainComponents(SpriteBatch spriteBatch)
+        /// <param name="spriteBatch">The sprite batch.</param>
+        /// <param name="cameraTranslateX">The camera x translation value.</param>
+        /// <param name="cameraTranslateY">The camera y translation value.</param>
+        /// <param name="cameraScaleX">The camera x scale value.</param>
+        /// <param name="cameraScaleY">The camera y scale value.</param>
+        private void DrawTerrainComponents(
+            SpriteBatch spriteBatch,
+            float cameraTranslateX,
+            float cameraTranslateY,
+            float cameraScaleX,
+            float cameraScaleY)
         {
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
             {
-                var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
-                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
+                var cTerrain =
+                    (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
+                var cPosition =
+                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cScaleSpace =
+                    (ScaleSpatialComponent)this.EntityManager.GetComponent(entity, typeof(ScaleSpatialComponent));
+                var cScaleRender =
+                    (ScaleRenderComponent)this.EntityManager.GetComponent(entity, typeof(ScaleRenderComponent));
+
+                // Create the transform matrix
+                Matrix transform =
+                    Matrix.Identity *
+                    Matrix.CreateTranslation(cameraTranslateX / cScaleRender.Scale, cameraTranslateY / cScaleRender.Scale, 0) *
+                    Matrix.CreateTranslation(-cPosition.Position.X, cPosition.Position.Y, 0) *
+                    Matrix.CreateScale(cameraScaleX, cameraScaleY, 0) *
+                    Matrix.CreateScale(cScaleRender.Scale, cScaleRender.Scale, 0);
+
+                spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
 
                 // Step through each terrain block
                 foreach (QuadTreeData<TerrainType> data in cTerrain.QuadTree)
@@ -136,10 +190,10 @@ namespace Dwarves.Subsystem
 
                     // Calculate the bounds of this terrain block in on-screen coordinates
                     var bounds = new Rectangle(
-                        (int)Math.Round(data.Bounds.X * cScale.Scale),
-                        (int)Math.Round(data.Bounds.Y * cScale.Scale),
-                        (int)Math.Round(data.Bounds.Length * cScale.Scale),
-                        (int)Math.Round(data.Bounds.Length * cScale.Scale));
+                        (int)Math.Round(data.Bounds.X * cScaleSpace.Scale),
+                        (int)Math.Round(data.Bounds.Y * cScaleSpace.Scale),
+                        (int)Math.Round(data.Bounds.Length * cScaleSpace.Scale),
+                        (int)Math.Round(data.Bounds.Length * cScaleSpace.Scale));
 
                     // Check if the terrain block intersects with the viewport
                     if (!(bounds.Right < 0 ||
@@ -151,6 +205,8 @@ namespace Dwarves.Subsystem
                         this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
                     }
                 }
+
+                spriteBatch.End();
             }
         }
 
@@ -228,34 +284,6 @@ namespace Dwarves.Subsystem
         #endregion
 
         #region Helper Methods
-
-        /// <summary>
-        /// Create the view matrix for the current camera settings.
-        /// </summary>
-        /// <returns>A view matrix.</returns>
-        private Matrix CreateViewMatrix()
-        {
-            // Get the camera components
-            Entity cameraEntity = this.GetCameraEntity();
-            var camera =
-                (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
-            var cameraZoom =
-                (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
-            var cameraPos =
-                (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
-
-            // Calculate the camera translation and scale values
-            float scaleX = ((float)this.graphics.Viewport.Width / camera.ProjectionWidth) * cameraZoom.Scale;
-            float scaleY = ((float)this.graphics.Viewport.Height / camera.ProjectionHeight) * cameraZoom.Scale;
-            float translateX = (float)(((float)this.graphics.Viewport.Width * 0.5) / scaleX) - cameraPos.Position.X;
-            float translateY = (float)(((float)this.graphics.Viewport.Height * 0.5) / scaleY) + cameraPos.Position.Y;
-
-            // Create the matrix
-            return
-                Matrix.Identity *
-                Matrix.CreateTranslation(translateX, translateY, 0) *
-                Matrix.CreateScale(scaleX, scaleY, 0);
-        }
 
         /// <summary>
         /// Get the camera entity.

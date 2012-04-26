@@ -242,7 +242,7 @@ namespace Dwarves.Assembler.Body
             this.world.EntityManager.AddComponent(entity, new PositionComponent(body, position));
 
             // Add the scale component
-            this.world.EntityManager.AddComponent(entity, new ScaleComponent(Const.PixelsToMeters));
+            this.world.EntityManager.AddComponent(entity, new ScaleRenderComponent(Const.PixelsToMeters));
 
             return new BodyPartInfo(entity, bodyPartComponent, physicsComponent);
         }
