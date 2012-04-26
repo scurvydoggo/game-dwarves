@@ -170,12 +170,92 @@ namespace Dwarves.Subsystem
                 spriteRects.Add(variation, this.resources.GetSpriteRectangle(name));
             }
 
-            // Draw test block
-            spriteBatch.Draw(
-                this.resources.SpriteSheet,
-                bounds,
-                spriteRects[1],
-                Color.White);
+            byte A = 255;
+
+            // Calculate the scaled tile size and determine the offset of the top-right corner of the tile
+            int tileSize = (int)(Const.TileSize);// * Const.PixelsToMeters);
+            int offsetX = bounds.X % tileSize;
+            int offsetY = bounds.Y % tileSize;
+            for (int x = bounds.Left; x < bounds.Right; x += tileSize)
+            {
+                for (int y = bounds.Top; y < bounds.Bottom; y += tileSize)
+                {
+                    A -= 5;
+                    if (A < 125)
+                    {
+                        A = 255;
+                    }
+
+                    // Get the rect at this location
+                    Rectangle srcRect = spriteRects[1];
+
+                    // Calculate the top-left position of the tile
+                    int tileX = x - offsetX;
+                    int tileY = y - offsetY;
+
+                    // Clip the left bounds
+                    if (tileX < bounds.Left)
+                    {
+                        int diff = bounds.Left - tileX;
+                        int diffPx = (int)((float)diff);// / Const.PixelsToMeters);
+                        srcRect.X += diffPx;
+                        srcRect.Width -= diffPx;
+                        tileX += diff;
+                    }
+
+                    // Clip the top bounds
+                    if (tileY < bounds.Top)
+                    {
+                        int diff = bounds.Top - tileY;
+                        int diffPx = (int)((float)diff);// / Const.PixelsToMeters);
+                        srcRect.Y += diffPx;
+                        srcRect.Height -= diffPx;
+                        tileY += diff;
+                    }
+
+                    // Clip the right bounds
+                    int scaledWidth = (int)(srcRect.Width);// * Const.PixelsToMeters);
+                    if (x + scaledWidth > bounds.Right)
+                    {
+                        srcRect.Width = (int)(((float)(bounds.Right - x)));// / Const.PixelsToMeters);
+                    }
+
+                    // Clip the bottom bounds
+                    int scaledHeight = (int)(srcRect.Height);// * Const.PixelsToMeters);
+                    if (scaledHeight > bounds.Bottom)
+                    {
+                        srcRect.Height = (int)(((float)(bounds.Bottom - y)));// / Const.PixelsToMeters);
+                    }
+
+                    // Create the dest rectangle
+                    var destRect = new Rectangle(
+                        tileX,
+                        tileY,
+                        (int)(srcRect.Width),// * Const.PixelsToMeters),
+                        (int)(srcRect.Height));// * Const.PixelsToMeters));
+
+                    Color color;
+                    if (x == bounds.X && y == bounds.Y)
+                    {
+                        color = Color.FromNonPremultiplied(255, 0, 0, 255);
+                    }
+                    else if (x + tileSize >= bounds.Right && y + tileSize >= bounds.Bottom)
+                    {
+                        color = Color.FromNonPremultiplied(0, 0, 0, 255);
+                    }
+                    else
+                    {
+                        color = Color.FromNonPremultiplied(255, 255, 255, A);
+                    }
+
+                    // Draw the sprite
+                    spriteBatch.Draw(
+                        this.resources.SpriteSheet,
+                        destRect,
+                        srcRect,
+                        color);
+                }
+            }
         }
 
         #endregion

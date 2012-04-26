@@ -19,5 +19,10 @@ namespace Dwarves
         /// Collision group.
         /// </summary>
         public const short CollisionGroupDwarf = -2;
+
+        /// <summary>
+        /// The pixel size of tile sprites.
+        /// </summary>
+        public const int TileSize = 16;
     }
 }
