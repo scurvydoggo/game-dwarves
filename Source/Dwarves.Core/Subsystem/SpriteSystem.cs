@@ -172,7 +172,7 @@ namespace Dwarves.Subsystem
                 Matrix transform =
                     Matrix.Identity *
                     Matrix.CreateTranslation(cameraTranslateX / cScaleRender.Scale, cameraTranslateY / cScaleRender.Scale, 0) *
-                    Matrix.CreateTranslation(-cPosition.Position.X, cPosition.Position.Y, 0) *
+                    Matrix.CreateTranslation(cPosition.Position.X, cPosition.Position.Y, 0) *
                     Matrix.CreateScale(cameraScaleX, cameraScaleY, 0) *
                     Matrix.CreateScale(cScaleRender.Scale, cScaleRender.Scale, 0);
 
@@ -195,15 +195,8 @@ namespace Dwarves.Subsystem
                         (int)Math.Round(data.Bounds.Length * cScaleSpace.Scale),
                         (int)Math.Round(data.Bounds.Length * cScaleSpace.Scale));
 
-                    // Check if the terrain block intersects with the viewport
-                    if (!(bounds.Right < 0 ||
-                        bounds.Left > this.graphics.Viewport.Width ||
-                        bounds.Bottom < 0 ||
-                        bounds.Top > this.graphics.Viewport.Height))
-                    {
-                        // Tile the terrain within the bounds
-                        this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
-                    }
+                    // Tile the terrain within the bounds
+                    this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
                 }
 
                 spriteBatch.End();
