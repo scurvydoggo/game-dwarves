@@ -14,6 +14,7 @@ namespace Dwarves.Subsystem
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Dwarves.Common;
     using Dwarves.Component.Game;
     using Dwarves.Component.Render;
@@ -177,12 +178,13 @@ namespace Dwarves.Subsystem
             {
                 for (int y = bounds.Top; y < bounds.Bottom; y += Const.TileSize)
                 {
-                    // Get the rect at this location
-                    Rectangle srcRect = spriteRects[1];
-
                     // Calculate the top-left position of the tile
                     int tileX = x - offsetX;
                     int tileY = y - offsetY;
+
+                    // Get a random sprite seeded by the x/y tile coordinate
+                    int rectIndex = new Random(tileX ^ tileY).Next(0, spriteRects.Count);
+                    Rectangle srcRect = spriteRects.ElementAt(rectIndex).Value;
 
                     // Clip the left bounds
                     if (tileX < bounds.Left)
