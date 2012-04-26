@@ -11,6 +11,11 @@ namespace Dwarves
     public static class Const
     {
         /// <summary>
+        /// The pixel size of tile sprites.
+        /// </summary>
+        public const int TileSize = 16;
+
+        /// <summary>
         /// The scaling factor for converting pixels to meters in the physics world.
         /// </summary>
         public const float PixelsToMeters = 0.2f;
@@ -19,10 +24,5 @@ namespace Dwarves
         /// Collision group.
         /// </summary>
         public const short CollisionGroupDwarf = -2;
-
-        /// <summary>
-        /// The pixel size of tile sprites.
-        /// </summary>
-        public const int TileSize = 16;
     }
 }

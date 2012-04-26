@@ -94,8 +94,8 @@ namespace Dwarves.Subsystem
             {
                 // Get the sprite components
                 var cSprite = (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
-                var cPosition =
-                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
 
                 // Draw the sprite
                 spriteBatch.Draw(
@@ -105,7 +105,7 @@ namespace Dwarves.Subsystem
                     Color.White,
                     -cPosition.Rotation,
                     Vector2.Zero,
-                    new Vector2(Const.PixelsToMeters),
+                    cScale != null ? cScale.Scale : 1,
                     SpriteEffects.None,
                     0);
             }
@@ -170,22 +170,13 @@ namespace Dwarves.Subsystem
                 spriteRects.Add(variation, this.resources.GetSpriteRectangle(name));
             }
 
-            byte A = 255;
-
             // Calculate the scaled tile size and determine the offset of the top-right corner of the tile
-            int tileSize = (int)(Const.TileSize);// * Const.PixelsToMeters);
-            int offsetX = bounds.X % tileSize;
-            int offsetY = bounds.Y % tileSize;
-            for (int x = bounds.Left; x < bounds.Right; x += tileSize)
+            int offsetX = bounds.X % Const.TileSize;
+            int offsetY = bounds.Y % Const.TileSize;
+            for (int x = bounds.Left; x < bounds.Right; x += Const.TileSize)
             {
-                for (int y = bounds.Top; y < bounds.Bottom; y += tileSize)
+                for (int y = bounds.Top; y < bounds.Bottom; y += Const.TileSize)
                 {
-                    A -= 5;
-                    if (A < 125)
-                    {
-                        A = 255;
-                    }
-
                     // Get the rect at this location
                     Rectangle srcRect = spriteRects[1];
 
@@ -197,9 +188,8 @@ namespace Dwarves.Subsystem
                     if (tileX < bounds.Left)
                     {
                         int diff = bounds.Left - tileX;
-                        int diffPx = (int)((float)diff);// / Const.PixelsToMeters);
-                        srcRect.X += diffPx;
-                        srcRect.Width -= diffPx;
+                        srcRect.X += diff;
+                        srcRect.Width -= diff;
                         tileX += diff;
                     }
 
@@ -207,53 +197,28 @@ namespace Dwarves.Subsystem
                     if (tileY < bounds.Top)
                     {
                         int diff = bounds.Top - tileY;
-                        int diffPx = (int)((float)diff);// / Const.PixelsToMeters);
-                        srcRect.Y += diffPx;
-                        srcRect.Height -= diffPx;
+                        srcRect.Y += diff;
+                        srcRect.Height -= diff;
                         tileY += diff;
                     }
 
                     // Clip the right bounds
-                    int scaledWidth = (int)(srcRect.Width);// * Const.PixelsToMeters);
-                    if (x + scaledWidth > bounds.Right)
+                    if (x + srcRect.Width > bounds.Right)
                     {
-                        srcRect.Width = (int)(((float)(bounds.Right - x)));// / Const.PixelsToMeters);
+                        srcRect.Width = bounds.Right - x;
                     }
 
                     // Clip the bottom bounds
-                    int scaledHeight = (int)(srcRect.Height);// * Const.PixelsToMeters);
-                    if (scaledHeight > bounds.Bottom)
+                    if (srcRect.Height > bounds.Bottom)
                     {
-                        srcRect.Height = (int)(((float)(bounds.Bottom - y)));// / Const.PixelsToMeters);
+                        srcRect.Height = bounds.Bottom - y;
                     }
 
                     // Create the dest rectangle
-                    var destRect = new Rectangle(
-                        tileX,
-                        tileY,
-                        (int)(srcRect.Width),// * Const.PixelsToMeters),
-                        (int)(srcRect.Height));// * Const.PixelsToMeters));
-
-                    Color color;
-                    if (x == bounds.X && y == bounds.Y)
-                    {
-                        color = Color.FromNonPremultiplied(255, 0, 0, 255);
-                    }
-                    else if (x + tileSize >= bounds.Right && y + tileSize >= bounds.Bottom)
-                    {
-                        color = Color.FromNonPremultiplied(0, 0, 0, 255);
-                    }
-                    else
-                    {
-                        color = Color.FromNonPremultiplied(255, 255, 255, A);
-                    }
+                    var destRect = new Rectangle(tileX, tileY, srcRect.Width, srcRect.Height);
 
                     // Draw the sprite
-                    spriteBatch.Draw(
-                        this.resources.SpriteSheet,
-                        destRect,
-                        srcRect,
-                        color);
+                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
                 }
             }
         }

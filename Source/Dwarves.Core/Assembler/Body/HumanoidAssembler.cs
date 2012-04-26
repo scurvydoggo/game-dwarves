@@ -238,8 +238,11 @@ namespace Dwarves.Assembler.Body
             var physicsComponent = new PhysicsComponent(body);
             this.world.EntityManager.AddComponent(entity, physicsComponent);
 
-            // Create the position component
+            // Add the position component
             this.world.EntityManager.AddComponent(entity, new PositionComponent(body, position));
+
+            // Add the scale component
+            this.world.EntityManager.AddComponent(entity, new ScaleComponent(Const.PixelsToMeters));
 
             return new BodyPartInfo(entity, bodyPartComponent, physicsComponent);
         }

@@ -79,16 +79,16 @@ namespace Dwarves.Debug
             var args = new HumanoidAssemblerArgs(
                 "dwarf",
                 Const.CollisionGroupDwarf,
-                new Vector2(x, y),                          // Body position
-                new Vector2(4, 0) * Const.PixelsToMeters,   // Right-left offset
-                new Vector2(-5, 11) * Const.PixelsToMeters, // Torso
-                new Vector2(-2, 19) * Const.PixelsToMeters, // Head
-                new Vector2(-3, 9) * Const.PixelsToMeters,  // Arm
-                new Vector2(-2, 3) * Const.PixelsToMeters,  // Leg
-                new Vector2(-3, 20) * Const.PixelsToMeters, // Beard
-                neckJoint,                                  // Neck joint
-                shoulderJoint,                              // Shoulder joint
-                hipJoint);                                  // Hip joint
+                new Vector2(x, y),                                  // Body position
+                new Vector2(4, 0) * Const.PixelsToMeters,    // Right-left offset
+                new Vector2(-5, 11) * Const.PixelsToMeters,  // Torso
+                new Vector2(-2, 19) * Const.PixelsToMeters,  // Head
+                new Vector2(-3, 9) * Const.PixelsToMeters,   // Arm
+                new Vector2(-2, 3) * Const.PixelsToMeters,   // Leg
+                new Vector2(-3, 20) * Const.PixelsToMeters,  // Beard
+                neckJoint,                                          // Neck joint
+                shoulderJoint,                                      // Shoulder joint
+                hipJoint);                                          // Hip joint
 
             // Assemble the body
             var bodyAssembler = new HumanoidAssembler(world);
