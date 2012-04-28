@@ -131,7 +131,27 @@ namespace Dwarves.Debug
             world.EntityManager.AddComponent(entity, new ScaleSpatialComponent(scale));
             world.EntityManager.AddComponent(entity, new ScaleRenderComponent(Const.PixelsToMeters));
 
+            // TODO: Remove this A-star pathfinding test algorithm
+            this.TestAStarAlgorithm(world, terrainQuadTree);
+
             return entity;
+        }
+
+        private void TestAStarAlgorithm(WorldContext world, ClipQuadTree<TerrainType> terrain)
+        {
+            var testEntity = world.EntityManager.CreateEntity();
+
+            // Create the path component
+            var path = new PathComponent();
+
+            // Define start and end points
+            Point start = new Point(640, 355);
+            Point goal = new Point(773, 357);
+
+            // TODO
+            path.Nodes = new Point[] { start, goal };
+
+            world.EntityManager.AddComponent(testEntity, path);
         }
 
         #endregion

@@ -49,6 +49,7 @@
     <Compile Include="Common\Square.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />
     <Compile Include="Component\Game\DwarfComponent.cs" />
+    <Compile Include="Component\Game\PathComponent.cs" />
     <Compile Include="Component\Input\InputFocusComponent.cs" />
     <Compile Include="Component\Input\InputPositionComponent.cs" />
     <Compile Include="Component\Input\InputRegionComponent.cs" />

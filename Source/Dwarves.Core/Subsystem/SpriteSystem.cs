@@ -1,11 +1,4 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="SpriteSystem.cs" company="Dematic">
-//     Copyright © 2009-2012 Dematic. All rights reserved.
-// </copyright>
-// <Summary>
-// </Summary>
-// ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
 // <copyright file="SpriteSystem.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
@@ -197,6 +190,24 @@ namespace Dwarves.Subsystem
 
                     // Tile the terrain within the bounds
                     this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
+                }
+
+                // TODO: Delete this test code
+                // Draw path components in red
+                Texture2D debugTexture = new Texture2D(this.graphics, 1, 1);
+                debugTexture.SetData<Color>(new Color[] { Color.Red });
+                foreach (PathComponent path in this.EntityManager.GetComponents(typeof(PathComponent)))
+                {
+                    for (int i = 0; i < path.Nodes.Length - 1; i++)
+                    {
+                        Point p1 = path.Nodes[i];
+                        Point p2 = path.Nodes[i + 1];
+
+                        spriteBatch.Draw(
+                            debugTexture,
+                            new Rectangle(p1.X, p1.Y, 1 + Math.Abs(p2.X - p1.X), 1 + Math.Abs(p2.Y - p1.Y)),
+                            Color.Red);
+                    }
                 }
 
                 spriteBatch.End();
