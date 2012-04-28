@@ -260,7 +260,7 @@ namespace Dwarves.Subsystem
                     }
 
                     // Clip the bottom bounds
-                    if (srcRect.Height > bounds.Bottom)
+                    if (y + srcRect.Height > bounds.Bottom)
                     {
                         srcRect.Height = bounds.Bottom - y;
                     }
