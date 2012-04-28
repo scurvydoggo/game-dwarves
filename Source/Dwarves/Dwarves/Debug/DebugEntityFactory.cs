@@ -152,6 +152,7 @@ namespace Dwarves.Debug
             // Create the path finder
             var pathFinder = new AStarPathFinder(terrain);
 
+            // Find the nodes along the path
             path.Nodes = pathFinder.FindPath(start, goal);
 
             world.EntityManager.AddComponent(testEntity, path);
