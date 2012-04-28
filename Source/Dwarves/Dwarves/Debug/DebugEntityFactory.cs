@@ -13,6 +13,7 @@ namespace Dwarves.Debug
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
     using Dwarves.Game.Terrain;
+    using Dwarves.Game.Terrain.Path;
     using EntitySystem;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -148,8 +149,10 @@ namespace Dwarves.Debug
             Point start = new Point(640, 355);
             Point goal = new Point(773, 357);
 
-            // TODO
-            path.Nodes = new Point[] { start, goal };
+            // Create the path finder
+            var pathFinder = new AStarPathFinder(terrain);
+
+            path.Nodes = pathFinder.FindPath(start, goal);
 
             world.EntityManager.AddComponent(testEntity, path);
         }
