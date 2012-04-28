@@ -180,28 +180,109 @@ namespace Dwarves.Common
         /// </returns>
         public bool GetData(Point point, out T data)
         {
-            if (this.Bounds.Contains(point))
+            ClipQuadTree<T> node;
+            if (this.GetNode(point, out node))
             {
-                if (this.IsLeaf)
-                {
-                    // This is a leaf node so return the data
-                    data = this.Data;
-                    return true;
-                }
-                else
-                {
-                    // This is not a leaf node so get the data from one of the child quadrants
-                    return
-                        this.TopLeft.GetData(point, out data) ||
-                        this.TopRight.GetData(point, out data) ||
-                        this.BottomLeft.GetData(point, out data) ||
-                        this.BottomRight.GetData(point, out data);
-                }
+                data = node.data;
+                return true;
             }
             else
             {
                 // The point lies outside the bounds of this node
                 data = default(T);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get the <typeparamref name="T"/> data of the nodes which intersect the given rectangle.
+        /// </summary>
+        /// <param name="rect">The rectangle.</param>
+        /// <returns>An array of data objects.</returns>
+        public QuadTreeData<T>[] GetData(Rectangle rect)
+        {
+            ClipQuadTree<T> node;
+            if (this.GetNode(rect, out node))
+            {
+                var dataList = new List<QuadTreeData<T>>();
+                foreach (QuadTreeData<T> data in node)
+                {
+                    dataList.Add(data);
+                }
+
+                return dataList.ToArray();
+            }
+            else
+            {
+                return new QuadTreeData<T>[0];
+            }
+        }
+
+        /// <summary>
+        /// Gets the node of the quad tree which fully contains the given point.
+        /// </summary>
+        /// <param name="point">The point.</param>
+        /// <param name="node">The node at the point. Null if no node was not found.</param>
+        /// <returns>True if the node was retrieved; False if the point lies outside the bounds of this node.</returns>
+        public bool GetNode(Point point, out ClipQuadTree<T> node)
+        {
+            if (this.Bounds.Contains(point))
+            {
+                if (this.IsLeaf)
+                {
+                    // Cannot go any smaller than a leaf node
+                    node = this;
+                    return true;
+                }
+                else
+                {
+                    // Try and see if the point lies in one of the sub-quadrants
+                    return
+                        this.TopLeft.GetNode(point, out node) ||
+                        this.TopRight.GetNode(point, out node) ||
+                        this.BottomLeft.GetNode(point, out node) ||
+                        this.BottomRight.GetNode(point, out node);
+                }
+            }
+            else
+            {
+                // The point doesn't fit in this node
+                node = null;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the node of the quad tree which fully contains the given rectangle.
+        /// </summary>
+        /// <param name="rect">The rectangle.</param>
+        /// <param name="node">The node at the point. Null if no node was not found.</param>
+        /// <returns>True if the node was retrieved; False if the rectangle lies outside the bounds of this node.
+        /// </returns>
+        public bool GetNode(Rectangle rect, out ClipQuadTree<T> node)
+        {
+            if (this.Bounds.Contains(rect))
+            {
+                if (this.IsLeaf)
+                {
+                    // Cannot go any smaller than a leaf node
+                    node = this;
+                    return true;
+                }
+                else
+                {
+                    // Try and see if the rectangle fits in one of the sub-quadrants
+                    return
+                        this.TopLeft.GetNode(rect, out node) ||
+                        this.TopRight.GetNode(rect, out node) ||
+                        this.BottomLeft.GetNode(rect, out node) ||
+                        this.BottomRight.GetNode(rect, out node);
+                }
+            }
+            else
+            {
+                // The rect doesn't fit in this node
+                node = null;
                 return false;
             }
         }

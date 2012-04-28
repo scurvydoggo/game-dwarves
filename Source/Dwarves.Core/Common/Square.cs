@@ -223,11 +223,39 @@ namespace Dwarves.Common
         }
 
         /// <summary>
+        /// Determine whether this square contains the given rectangle.
+        /// </summary>
+        /// <param name="other">The rectangle to test.</param>
+        /// <returns>True if this square contains the given rectangle.</returns>      
+        public bool Contains(Rectangle other)
+        {
+            return
+                other.Top >= this.Top &&
+                other.Left >= this.Left &&
+                other.Bottom <= this.Bottom &&
+                other.Right <= this.Right;
+        }
+
+        /// <summary>
         /// Determine whether this square intersects the given square.
         /// </summary>
         /// <param name="other">The square to test.</param>
         /// <returns>True if this square intersects the given square.</returns>
         public bool Intersects(Square other)
+        {
+            return
+                !(this.Bottom < other.Top ||
+                this.Top > other.Bottom ||
+                this.Right < other.Left ||
+                this.Left > other.Right);
+        }
+
+        /// <summary>
+        /// Determine whether this square intersects the given rectangle.
+        /// </summary>
+        /// <param name="other">The rectangle to test.</param>
+        /// <returns>True if this square intersects the given rectangle.</returns>
+        public bool Intersects(Rectangle other)
         {
             return
                 !(this.Bottom < other.Top ||
