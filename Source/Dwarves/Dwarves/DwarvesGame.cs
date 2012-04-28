@@ -6,6 +6,7 @@
 namespace Dwarves
 {
     using System;
+    using Dwarves.Debug;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -33,12 +34,13 @@ namespace Dwarves
                 this.graphics = new GraphicsDeviceManager(this);
                 this.graphics.PreferMultiSampling = true;
                 this.graphics.SynchronizeWithVerticalRetrace = false;
-
                 this.Content.RootDirectory = "Content";
-
                 this.IsMouseVisible = true;
-
                 this.IsFixedTimeStep = true;
+
+#if DEBUG
+                Components.Add(new StatisticsComponent(this, new Vector2(25, 25), Color.White));
+#endif
             }
             catch (Exception ex)
             {
