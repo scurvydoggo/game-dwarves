@@ -196,26 +196,31 @@ namespace Dwarves.Common
         /// Get the <typeparamref name="T"/> data of the nodes which intersect the given rectangle.
         /// </summary>
         /// <param name="rect">The rectangle.</param>
-        /// <param name="data">The data within the rectangle.</param>
+        /// <param name="dataArray">The data within the rectangle.</param>
         /// <returns>True if the data was retrieved; False if the rectangle lies outside the bounds of this node.
         /// </returns>
-        public bool GetData(Rectangle rect, out QuadTreeData<T>[] data)
+        public bool GetData(Rectangle rect, out QuadTreeData<T>[] dataArray)
         {
             ClipQuadTree<T> node;
             if (this.GetNode(rect, out node))
             {
                 var dataList = new List<QuadTreeData<T>>();
-                foreach (QuadTreeData<T> dataItem in node)
+                foreach (QuadTreeData<T> data in node)
                 {
-                    dataList.Add(dataItem);
+                    // Check that this data item exists in the rectangle
+                    var dataRect = new Rectangle(data.Bounds.X, data.Bounds.Y, data.Bounds.Length, data.Bounds.Length);
+                    if (rect.Intersects(dataRect))
+                    {
+                        dataList.Add(data);
+                    }
                 }
 
-                data = dataList.ToArray();
+                dataArray = dataList.ToArray();
                 return true;
             }
             else
             {
-                data = new QuadTreeData<T>[0];
+                dataArray = new QuadTreeData<T>[0];
                 return false;
             }
         }

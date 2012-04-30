@@ -33,7 +33,7 @@ namespace Dwarves.Game.Terrain.Path
         /// <summary>
         /// The closed list.
         /// </summary>
-        private List<Node> closed;
+        private Dictionary<Point, Node> closed;
 
         /// <summary>
         /// The goal node.
@@ -62,62 +62,124 @@ namespace Dwarves.Game.Terrain.Path
         {
             // Reset open/closed lists
             this.open = new List<Node>();
-            this.closed = new List<Node>();
+            this.closed = new Dictionary<Point, Node>();
             this.goal = goal;
 
             // Check that the start and goal nodes are valid
-            if (!IsOpenSpace(new Rectangle(start.X, start.Y, nodeWidth, nodeHeight)) ||
-                !IsOpenSpace(new Rectangle(goal.X, goal.Y, nodeWidth, nodeHeight)))
+            if (!IsOpenSpace(this.GetNodeRectangle(start.X, start.Y, nodeWidth, nodeHeight)) ||
+                !IsOpenSpace(this.GetNodeRectangle(goal.X, goal.Y, nodeWidth, nodeHeight)))
             {
                 path = new Point[0];
                 return false;
             }
 
             // Add the start point to the open list
-            this.open.Add(new Node(start, this.CalculateH(start)));
+            this.open.Add(new Node(start, this.CalculateH(start), 0));
 
             // Keep searching the open list
+            Node goalNode = null;
             while (this.open.Count > 0)
             {
                 // Take the node from the open list with the lowest cost
-                Node currentNode = this.open[0];
+                Node current = this.open[0];
                 for (int i = 1; i < this.open.Count; i++)
                 {
-                    if (this.open[i].F < currentNode.F)
+                    if (this.open[i].F < current.F)
                     {
-                        currentNode = this.open[i];
+                        current = this.open[i];
                     }
                 }
 
+                // Move node to the closed list
+                this.open.Remove(current);
+                this.closed.Add(current.Point, current);
+
+                // The goal node was just added to the closed list so the search is complete
+                if (current.Point.Equals(goal))
+                {
+                    goalNode = current;
+                    break;
+                }
+
+                // Add the adjacent nodes to the open list
+                for (int y = current.Point.Y - 1; y < current.Point.Y + 1; y++)
+                {
+                    // The G value for this node
+                    int g = current.G + this.CalculateGIncrement(current.Point.Y - y);
+
+                    // Add the left node (if it isn't already in the closed list or blocked)
+                    Point left = new Point(current.Point.X - 1, y);
+                    if (!this.closed.ContainsKey(left))
+                    {
+                        if (this.IsOpenSpace(this.GetNodeRectangle(left.X, y, nodeWidth, nodeHeight)))
+                        {
+                            this.UpdateOpenNode(new Node(left, this.CalculateH(left), g, current));
+                        }
+                    }
+
+                    // Add the right node (if it isn't already in the closed list or blocked)
+                    var right = new Point(current.Point.X + nodeWidth, y);
+                    if (!this.closed.ContainsKey(right))
+                    {
+                        if (this.IsOpenSpace(this.GetNodeRectangle(right.X, y, nodeWidth, nodeHeight)))
+                        {
+                            this.UpdateOpenNode(new Node(right, this.CalculateH(right), g, current));
+                        }
+                    }
+                }
             }
 
-            path = new Point[0];
-            return false;
+            // If the goal node was found, iterate backwards through the parent nodes for the path
+            if (goalNode != null)
+            {
+                var pathList = new List<Point>();
+
+                Node current = goalNode;
+                while (current != null)
+                {
+                    pathList.Add(current.Point);
+                    current = current.Parent;
+                }
+
+                path = pathList.ToArray();
+                return true;
+            }
+            else
+            {
+                path = new Point[0];
+                return false;
+            }
         }
 
         /// <summary>
-        /// Determine whether the the given rectangle is free of obstructing terrain.
+        /// Add the node to the open list; if the point already exists in the open list and this node has a better G
+        /// cost, update the parent and G cost of the existing node.
         /// </summary>
-        /// <param name="rect">The rectangle to test.</param>
-        /// <returns>True if the rectangle doesn't contain any terrain; False if the rectangle contains obstructing
-        /// terrain or the rectangle is outside the bounds of the terrain quad tree.</returns>
-        private bool IsOpenSpace(Rectangle rect)
+        /// <param name="node">The node.</param>
+        private void UpdateOpenNode(Node node)
         {
-            QuadTreeData<TerrainType>[] data;
-            if (this.Terrain.GetData(rect, out data))
+            // Check if this node exists
+            bool exists = false;
+            foreach (Node existing in this.open)
             {
-                foreach (QuadTreeData<TerrainType> terrainType in data)
+                if (existing.Point.Equals(node.Point))
                 {
-                    if (terrainType.Data != TerrainType.None)
+                    if (node.G < existing.G)
                     {
-                        return false;
+                        existing.Parent = node;
+                        existing.G = node.G;
                     }
-                }
 
-                return true;
+                    exists = true;
+                    break;
+                }
             }
 
-            return false;
+            // If the node doesn't already exist, add it to the open list
+            if (!exists)
+            {
+                this.open.Add(node);
+            }
         }
 
         /// <summary>
@@ -131,6 +193,29 @@ namespace Dwarves.Game.Terrain.Path
         }
 
         /// <summary>
+        /// Calculate the amount to increment G for a single step with the given X or Y offset.
+        /// </summary>
+        /// <param name="offset">The distance that the node is offset from the origin by X or Y.</param>
+        /// <returns>The amount to increment G.</returns>
+        private int CalculateGIncrement(int offset)
+        {
+            return (int)Math.Sqrt(1 + (offset * offset));
+        }
+
+        /// <summary>
+        /// Gets a rectangle for the given node with the node point at the middle of the bottom edge.
+        /// </summary>
+        /// <param name="x">The x position of the node.</param>
+        /// <param name="y">The y position of the node.</param>
+        /// <param name="width">The width of the node's bounds.</param>
+        /// <param name="height">The height of the node's bounds.</param>
+        /// <returns>The node rectangle.</returns>
+        private Rectangle GetNodeRectangle(int x, int y, int width, int height)
+        {
+            return new Rectangle(x - (width / 2), y - height, width, height);
+        }
+
+        /// <summary>
         /// Represents a node in the A-star algorithm.
         /// </summary>
         public class Node
@@ -140,10 +225,25 @@ namespace Dwarves.Game.Terrain.Path
             /// </summary>
             /// <param name="node">The point for this node.</param>
             /// <param name="h">The heuristic estimate of the distance to the goal from this node.</param>
-            public Node(Point node, int h)
+            /// <param name="g">The cost from the starting node to the this node.</param>
+            public Node(Point node, int h, int g)
+                : this(node, h, g, null)
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the Node class.
+            /// </summary>
+            /// <param name="node">The point for this node.</param>
+            /// <param name="h">The heuristic estimate of the distance to the goal from this node.</param>
+            /// <param name="g">The cost from the starting node to the this node.</param>
+            /// <param name="parent">The parent node in the direction of the start node.</param>
+            public Node(Point node, int h, int g, Node parent)
             {
                 this.Point = node;
                 this.H = h;
+                this.G = g;
+                this.Parent = parent;
             }
 
             /// <summary>
@@ -152,7 +252,7 @@ namespace Dwarves.Game.Terrain.Path
             public Point Point { get; private set; }
 
             /// <summary>
-            /// Gets or sets the parent node towards the start.
+            /// Gets or sets the parent node in the direction of the start node.
             /// </summary>
             public Node Parent { get; set; }
 

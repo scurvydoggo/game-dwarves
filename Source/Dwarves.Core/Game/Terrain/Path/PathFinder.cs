@@ -38,5 +38,30 @@ namespace Dwarves.Game.Terrain.Path
         /// <param name="path">The array of points in the path.</param>
         /// <returns>True if a path was established.</returns>
         public abstract bool FindPath(Point start, Point goal, int nodeWidth, int nodeHeight, out Point[] path);
+
+        /// <summary>
+        /// Determine whether the the given rectangle is free of obstructing terrain.
+        /// </summary>
+        /// <param name="rect">The rectangle to test.</param>
+        /// <returns>True if the rectangle doesn't contain any terrain; False if the rectangle contains obstructing
+        /// terrain or the rectangle is outside the bounds of the terrain quad tree.</returns>
+        protected virtual bool IsOpenSpace(Rectangle rect)
+        {
+            QuadTreeData<TerrainType>[] data;
+            if (this.Terrain.GetData(rect, out data))
+            {
+                foreach (QuadTreeData<TerrainType> terrainType in data)
+                {
+                    if (terrainType.Data != TerrainType.None)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
     }
 }
