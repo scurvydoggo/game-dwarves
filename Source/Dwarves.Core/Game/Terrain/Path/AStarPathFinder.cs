@@ -54,19 +54,61 @@ namespace Dwarves.Game.Terrain.Path
         /// </summary>
         /// <param name="start">The start point of the path to search from.</param>
         /// <param name="goal">The goal point of the path.</param>
-        /// <returns>The path; Null if a path not be established.</returns>
-        public override Point[] FindPath(Point start, Point goal)
+        /// <param name="nodeWidth">The width of each node along the path in terrain units.</param>
+        /// <param name="nodeHeight">The height in of each node along the path in terrain units.</param>
+        /// <param name="path">The array of points.</param>
+        /// <returns>True if a path was established.</returns>
+        public override bool FindPath(Point start, Point goal, int nodeWidth, int nodeHeight, out Point[] path)
         {
             // Reset open/closed lists
             this.open = new List<Node>();
             this.closed = new List<Node>();
             this.goal = goal;
 
+            // Check that the start and goal nodes are valid
+            if (!IsOpenSpace(new Rectangle(start.X, start.Y, nodeWidth, nodeHeight)) ||
+                !IsOpenSpace(new Rectangle(goal.X, goal.Y, nodeWidth, nodeHeight)))
+            {
+                path = new Point[0];
+                return false;
+            }
+
             // Add the start point to the open list
             this.open.Add(new Node(start, this.CalculateH(start)));
 
-            // TODO
-            return null;
+            // Keep searching the open list
+            while (this.open.Count > 0)
+            {
+                // TODO
+            }
+
+            path = new Point[0];
+            return false;
+        }
+
+        /// <summary>
+        /// Determine whether the the given rectangle is free of obstructing terrain.
+        /// </summary>
+        /// <param name="rect">The rectangle to test.</param>
+        /// <returns>True if the rectangle doesn't contain any terrain; False if the rectangle contains obstructing
+        /// terrain or the rectangle is outside the bounds of the terrain quad tree.</returns>
+        private bool IsOpenSpace(Rectangle rect)
+        {
+            QuadTreeData<TerrainType>[] data;
+            if (this.Terrain.GetData(rect, out data))
+            {
+                foreach (QuadTreeData<TerrainType> terrainType in data)
+                {
+                    if (terrainType.Data != TerrainType.None)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

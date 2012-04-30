@@ -142,8 +142,7 @@ namespace Dwarves.Common
         /// <param name="bounds">The bounds of the data to set.</param>
         /// <param name="dataSplitter">The object for splitting any existing leaf-node data; Null value will cause an
         /// exception to be thrown if a data split is required.</param>
-        /// <returns>True if the data was set; False the given bounds lies outside the bounds of this node.
-        /// </returns>
+        /// <returns>True if the data was set; False the given bounds lies outside the bounds of this node.</returns>
         public bool SetData(T data, Square bounds, QuadTreeDataSplitter<T> dataSplitter)
         {
             if (!this.Bounds.Contains(bounds))
@@ -176,8 +175,7 @@ namespace Dwarves.Common
         /// <param name="data">The data at the point; default(<typeparamref name="T"/>) if the point lies outside the
         /// bounds of this node.
         /// </param>
-        /// <returns>True if the data was retrieved; False if the point lies outside the bounds of this node.
-        /// </returns>
+        /// <returns>True if the data was retrieved; False if the point lies outside the bounds of this node.</returns>
         public bool GetData(Point point, out T data)
         {
             ClipQuadTree<T> node;
@@ -198,23 +196,27 @@ namespace Dwarves.Common
         /// Get the <typeparamref name="T"/> data of the nodes which intersect the given rectangle.
         /// </summary>
         /// <param name="rect">The rectangle.</param>
-        /// <returns>An array of data objects.</returns>
-        public QuadTreeData<T>[] GetData(Rectangle rect)
+        /// <param name="data">The data within the rectangle.</param>
+        /// <returns>True if the data was retrieved; False if the rectangle lies outside the bounds of this node.
+        /// </returns>
+        public bool GetData(Rectangle rect, out QuadTreeData<T>[] data)
         {
             ClipQuadTree<T> node;
             if (this.GetNode(rect, out node))
             {
                 var dataList = new List<QuadTreeData<T>>();
-                foreach (QuadTreeData<T> data in node)
+                foreach (QuadTreeData<T> dataItem in node)
                 {
-                    dataList.Add(data);
+                    dataList.Add(dataItem);
                 }
 
-                return dataList.ToArray();
+                data = dataList.ToArray();
+                return true;
             }
             else
             {
-                return new QuadTreeData<T>[0];
+                data = new QuadTreeData<T>[0];
+                return false;
             }
         }
 
@@ -272,11 +274,19 @@ namespace Dwarves.Common
                 else
                 {
                     // Try and see if the rectangle fits in one of the sub-quadrants
-                    return
+                    bool existsInChild =
                         this.TopLeft.GetNode(rect, out node) ||
                         this.TopRight.GetNode(rect, out node) ||
                         this.BottomLeft.GetNode(rect, out node) ||
                         this.BottomRight.GetNode(rect, out node);
+
+                    // If the rectangle doesn't fit in a sub-quadrant, this node is the smallest fit
+                    if (!existsInChild)
+                    {
+                        node = this;
+                    }
+
+                    return true;
                 }
             }
             else

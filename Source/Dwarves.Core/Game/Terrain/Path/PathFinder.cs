@@ -33,7 +33,10 @@ namespace Dwarves.Game.Terrain.Path
         /// </summary>
         /// <param name="start">The start point of the path to search from.</param>
         /// <param name="goal">The goal point of the path.</param>
-        /// <returns>The path; Null if a path not be established.</returns>
-        public abstract Point[] FindPath(Point start, Point goal);
+        /// <param name="nodeWidth">The width of each node along the path in terrain units.</param>
+        /// <param name="nodeHeight">The height in of each node along the path in terrain units.</param>
+        /// <param name="path">The array of points in the path.</param>
+        /// <returns>True if a path was established.</returns>
+        public abstract bool FindPath(Point start, Point goal, int nodeWidth, int nodeHeight, out Point[] path);
     }
 }

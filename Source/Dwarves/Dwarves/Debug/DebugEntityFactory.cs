@@ -142,9 +142,6 @@ namespace Dwarves.Debug
         {
             var testEntity = world.EntityManager.CreateEntity();
 
-            // Create the path component
-            var path = new PathComponent();
-
             // Define start and end points
             Point start = new Point(640, 355);
             Point goal = new Point(773, 357);
@@ -153,9 +150,12 @@ namespace Dwarves.Debug
             var pathFinder = new AStarPathFinder(terrain);
 
             // Find the nodes along the path
-            path.Nodes = pathFinder.FindPath(start, goal);
-
-            world.EntityManager.AddComponent(testEntity, path);
+            Point[] path;
+            if (pathFinder.FindPath(start, goal, 5, 10, out path))
+            {
+                // Create the path component
+                world.EntityManager.AddComponent(testEntity, new PathComponent(path));
+            }
         }
 
         #endregion
