@@ -79,7 +79,16 @@ namespace Dwarves.Game.Terrain.Path
             // Keep searching the open list
             while (this.open.Count > 0)
             {
-                // TODO
+                // Take the node from the open list with the lowest cost
+                Node currentNode = this.open[0];
+                for (int i = 1; i < this.open.Count; i++)
+                {
+                    if (this.open[i].F < currentNode.F)
+                    {
+                        currentNode = this.open[i];
+                    }
+                }
+
             }
 
             path = new Point[0];
