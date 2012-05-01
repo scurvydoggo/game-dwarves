@@ -228,7 +228,8 @@ namespace Dwarves.Game.Terrain.Path
         /// <returns>The heuristic distance estimate from the given point to the end point.</returns>
         private int CalculateH(Point point)
         {
-            return Math.Abs(point.X - this.goal.X) + Math.Abs(point.Y - this.goal.Y);
+            // Multiply by 10 so as to use the same scale as G values
+            return (Math.Abs(point.X - this.goal.X) + Math.Abs(point.Y - this.goal.Y)) * 10;
         }
 
         /// <summary>
