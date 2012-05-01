@@ -26,14 +26,19 @@ namespace Dwarves.Game.Terrain.Path
         private const int DiagonalStepCost = 14;
 
         /// <summary>
-        /// The open list.
+        /// The ordered open list.
         /// </summary>
-        private List<Node> open;
+        private PriorityQueue<Node> openSetOrdered;
 
         /// <summary>
-        /// The closed list.
+        /// The open list mapped by point coordinates.
         /// </summary>
-        private Dictionary<Point, Node> closed;
+        private Dictionary<Point, Node> openSet;
+
+        /// <summary>
+        /// The closed list mapped by point coordinates.
+        /// </summary>
+        private Dictionary<Point, Node> closedSet;
 
         /// <summary>
         /// The goal node.
@@ -61,8 +66,9 @@ namespace Dwarves.Game.Terrain.Path
         public override bool FindPath(Point start, Point goal, int nodeWidth, int nodeHeight, out Point[] path)
         {
             // Reset open/closed lists
-            this.open = new List<Node>();
-            this.closed = new Dictionary<Point, Node>();
+            this.openSetOrdered = new PriorityQueue<Node>(Comparer<Node>.Default);
+            this.openSet = new Dictionary<Point, Node>();
+            this.closedSet = new Dictionary<Point, Node>();
             this.goal = goal;
 
             // Check that the start and goal nodes are valid
@@ -73,61 +79,16 @@ namespace Dwarves.Game.Terrain.Path
                 return false;
             }
 
-            // Add the start point to the open list
-            this.open.Add(new Node(start, this.CalculateH(start), 0));
+            // Add the start node to the open list
+            this.AddOpenNode(new Node(start, this.CalculateH(start), 0));
 
-            // Keep searching the open list
-            Node goalNode = null;
-            while (this.open.Count > 0)
-            {
-                // Take the node from the open list with the lowest cost
-                Node current = this.open[0];
-                for (int i = 1; i < this.open.Count; i++)
-                {
-                    if (this.open[i].F < current.F)
-                    {
-                        current = this.open[i];
-                    }
-                }
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 
-                // Move node to the closed list
-                this.open.Remove(current);
-                this.closed.Add(current.Point, current);
-
-                // The goal node was just added to the closed list so the search is complete
-                if (current.Point.Equals(goal))
-                {
-                    goalNode = current;
-                    break;
-                }
-
-                // Add the adjacent nodes to the open list
-                for (int y = current.Point.Y - 1; y < current.Point.Y + 1; y++)
-                {
-                    // The G value for this node
-                    int g = current.G + this.CalculateGIncrement(current.Point.Y - y);
-
-                    // Add the left node (if it isn't already in the closed list or blocked)
-                    Point left = new Point(current.Point.X - 1, y);
-                    if (!this.closed.ContainsKey(left))
-                    {
-                        if (this.IsOpenSpace(this.GetNodeRectangle(left.X, y, nodeWidth, nodeHeight)))
-                        {
-                            this.UpdateOpenNode(new Node(left, this.CalculateH(left), g, current));
-                        }
-                    }
-
-                    // Add the right node (if it isn't already in the closed list or blocked)
-                    var right = new Point(current.Point.X + nodeWidth, y);
-                    if (!this.closed.ContainsKey(right))
-                    {
-                        if (this.IsOpenSpace(this.GetNodeRectangle(right.X, y, nodeWidth, nodeHeight)))
-                        {
-                            this.UpdateOpenNode(new Node(right, this.CalculateH(right), g, current));
-                        }
-                    }
-                }
-            }
+            // Search for the path to the goal node
+            watch.Start();
+            Node goalNode = this.FindGoalNode(nodeWidth, nodeHeight);
+            watch.Stop();
+            System.Console.Write("Test path took " + watch.ElapsedMilliseconds + "ms.");
 
             // If the goal node was found, iterate backwards through the parent nodes for the path
             if (goalNode != null)
@@ -152,33 +113,111 @@ namespace Dwarves.Game.Terrain.Path
         }
 
         /// <summary>
+        /// Find the goal node from the existing open set.
+        /// </summary>
+        /// <param name="nodeWidth">The width of each node along the path in terrain units.</param>
+        /// <param name="nodeHeight">The height in of each node along the path in terrain units.</param>
+        /// <returns>The goal node.</returns>
+        private Node FindGoalNode(int nodeWidth, int nodeHeight)
+        {
+            Node goalNode = null;
+
+            // Keep searching the open list
+            while (this.openSetOrdered.Count > 0)
+            {
+                // Take the node from the open list with the lowest cost and move to the closed list
+                Node current = this.openSetOrdered.Pop();
+                this.openSet.Remove(current.Point);
+                this.closedSet.Add(current.Point, current);
+
+                // The goal node was just added to the closed list so the search is complete
+                if (current.Point.Equals(goal))
+                {
+                    goalNode = current;
+                    break;
+                }
+
+                // Add the adjacent Y-nodes to the open list
+                for (int y = current.Point.Y - 1; y < current.Point.Y + 1; y++)
+                {
+                    // The G value for this node
+                    int g = current.G + this.CalculateGIncrement(current.Point.Y - y);
+
+                    // Add the left node (if it isn't already in the closed list or blocked)
+                    Point left = new Point(current.Point.X - 1, y);
+                    if (!this.closedSet.ContainsKey(left))
+                    {
+                        if (this.IsOpenSpace(this.GetNodeRectangle(left.X, y, nodeWidth, nodeHeight)))
+                        {
+                            this.AddOpenNode(new Node(left, this.CalculateH(left), g, current));
+                        }
+                    }
+
+                    // Add the right node (if it isn't already in the closed list or blocked)
+                    var right = new Point(current.Point.X + nodeWidth, y);
+                    if (!this.closedSet.ContainsKey(right))
+                    {
+                        if (this.IsOpenSpace(this.GetNodeRectangle(right.X, y, nodeWidth, nodeHeight)))
+                        {
+                            this.AddOpenNode(new Node(right, this.CalculateH(right), g, current));
+                        }
+                    }
+                }
+
+                // Add the adjacent X-nodes to the open list
+                for (int x = current.Point.X - 1; x < current.Point.X + 1; x++)
+                {
+                    // The G value for this node
+                    int g = current.G + this.CalculateGIncrement(current.Point.X - x);
+
+                    // Add the left node (if it isn't already in the closed list or blocked)
+                    Point top = new Point(x, current.Point.Y - 1);
+                    if (!this.closedSet.ContainsKey(top))
+                    {
+                        if (this.IsOpenSpace(this.GetNodeRectangle(x, top.Y, nodeWidth, nodeHeight)))
+                        {
+                            this.AddOpenNode(new Node(top, this.CalculateH(top), g, current));
+                        }
+                    }
+
+                    // Add the right node (if it isn't already in the closed list or blocked)
+                    var bottom = new Point(x, current.Point.Y + nodeHeight);
+                    if (!this.closedSet.ContainsKey(bottom))
+                    {
+                        if (this.IsOpenSpace(this.GetNodeRectangle(x, bottom.Y, nodeWidth, nodeHeight)))
+                        {
+                            this.AddOpenNode(new Node(bottom, this.CalculateH(bottom), g, current));
+                        }
+                    }
+                }
+            }
+
+            return goalNode;
+        }
+
+        /// <summary>
         /// Add the node to the open list; if the point already exists in the open list and this node has a better G
         /// cost, update the parent and G cost of the existing node.
         /// </summary>
         /// <param name="node">The node.</param>
-        private void UpdateOpenNode(Node node)
+        private void AddOpenNode(Node node)
         {
             // Check if this node exists
-            bool exists = false;
-            foreach (Node existing in this.open)
+            Node existing;
+            if (this.openSet.TryGetValue(node.Point, out existing))
             {
-                if (existing.Point.Equals(node.Point))
+                // If this node has a better cost than the existing node, update the existing node's parent and G score
+                if (node.G < existing.G)
                 {
-                    if (node.G < existing.G)
-                    {
-                        existing.Parent = node;
-                        existing.G = node.G;
-                    }
-
-                    exists = true;
-                    break;
+                    existing.Parent = node;
+                    existing.G = node.G;
                 }
             }
-
-            // If the node doesn't already exist, add it to the open list
-            if (!exists)
+            else
             {
-                this.open.Add(node);
+                // If the node doesn't already exist, add it to the open list
+                this.openSetOrdered.Push(node);
+                this.openSet.Add(node.Point, node);
             }
         }
 
@@ -199,7 +238,9 @@ namespace Dwarves.Game.Terrain.Path
         /// <returns>The amount to increment G.</returns>
         private int CalculateGIncrement(int offset)
         {
-            return (int)Math.Sqrt(1 + (offset * offset));
+            // Multiply by 10 such that the first sqrt decimal isn't rounded off
+            offset *= 10;
+            return (int)Math.Sqrt(100 + (offset * offset));
         }
 
         /// <summary>
@@ -218,7 +259,7 @@ namespace Dwarves.Game.Terrain.Path
         /// <summary>
         /// Represents a node in the A-star algorithm.
         /// </summary>
-        public class Node
+        public class Node : IIndexedObject, IComparable<Node>
         {
             /// <summary>
             /// Initializes a new instance of the Node class.
@@ -276,6 +317,32 @@ namespace Dwarves.Game.Terrain.Path
             /// Gets or sets the cost from the starting node to the this node.
             /// </summary>
             public int G { get; set; }
+
+            /// <summary>
+            /// Gets or sets the index.
+            /// </summary>
+            public int Index { get; set; }
+
+            /// <summary>
+            /// Compare the F value of this node to another node.
+            /// </summary>
+            /// <param name="other">The other node.</param>
+            /// <returns>The relative comparative value.</returns>
+            public int CompareTo(Node other)
+            {
+                if (this.F < other.F)
+                {
+                    return -1;
+                }
+                else if (this.F > other.F)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
         }
     }
 }
