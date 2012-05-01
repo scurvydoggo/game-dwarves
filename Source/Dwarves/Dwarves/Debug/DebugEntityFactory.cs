@@ -12,8 +12,8 @@ namespace Dwarves.Debug
     using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
+    using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
-    using Dwarves.Game.Terrain.Path;
     using EntitySystem;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;

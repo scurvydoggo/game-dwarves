@@ -65,8 +65,9 @@
     <Compile Include="Data\DwarvesDataAdapter.cs" />
     <Compile Include="DwarvesConfig.cs" />
     <Compile Include="Const.cs" />
-    <Compile Include="Game\Terrain\Path\AStarPathFinder.cs" />
-    <Compile Include="Game\Terrain\Path\PathFinder.cs" />
+    <Compile Include="Game\Path\AStarPathFinder.cs" />
+    <Compile Include="Game\Path\PathFinder.cs" />
+    <Compile Include="Game\Path\PathNode.cs" />
     <Compile Include="Game\Terrain\TerrainFactory.cs" />
     <Compile Include="Game\Terrain\TerrainTypeConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
