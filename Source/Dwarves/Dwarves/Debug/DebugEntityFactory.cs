@@ -6,6 +6,7 @@
 #if DEBUG
 namespace Dwarves.Debug
 {
+    using System.Collections.Generic;
     using Dwarves.Assembler.Body;
     using Dwarves.Common;
     using Dwarves.Component.Game;
@@ -126,8 +127,11 @@ namespace Dwarves.Debug
             var terrainFactory = new TerrainFactory();
             ClipQuadTree<TerrainType> terrainQuadTree = terrainFactory.CreateTerrainQuadTree(texture);
 
+            // Generate the terrain path nodes
+            Dictionary<Point, PathNode> pathNodes = terrainFactory.CreateTerrainPathNodes(terrainQuadTree);
+
             // Add terrain component
-            world.EntityManager.AddComponent(entity, new TerrainComponent(terrainQuadTree, isCollidable));
+            world.EntityManager.AddComponent(entity, new TerrainComponent(terrainQuadTree, isCollidable, pathNodes));
             world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
             world.EntityManager.AddComponent(entity, new ScaleSpatialComponent(scale));
             world.EntityManager.AddComponent(entity, new ScaleRenderComponent(Const.PixelsToMeters));

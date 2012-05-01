@@ -5,9 +5,12 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Game
 {
+    using System.Collections.Generic;
     using Dwarves.Common;
+    using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
     using EntitySystem.Component;
+    using Microsoft.Xna.Framework;
 
     /// <summary>
     /// Destructible terrain.
@@ -19,9 +22,15 @@ namespace Dwarves.Component.Game
         /// </summary>
         /// <param name="terrain">The terrain quad tree.</param>
         /// <param name="isCollidable">Indicates whether the terrain can be collided with.</param>
-        public TerrainComponent(ClipQuadTree<TerrainType> terrain, bool isCollidable)
+        /// <param name="pathNodes">The pathfinding nodes of the terrain.</param>
+        public TerrainComponent(
+            ClipQuadTree<TerrainType> terrain,
+            bool isCollidable,
+            Dictionary<Point, PathNode> pathNodes)
         {
             this.QuadTree = terrain;
+            this.IsCollidable = isCollidable;
+            this.PathNodes = pathNodes;
         }
 
         /// <summary>
@@ -33,5 +42,10 @@ namespace Dwarves.Component.Game
         /// Gets or sets a value indicating whether this terrain can be collided with.
         /// </summary>
         public bool IsCollidable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the pathfinding nodes of the terrain.
+        /// </summary>
+        private Dictionary<Point, PathNode> PathNodes { get; set; }
     }
 }

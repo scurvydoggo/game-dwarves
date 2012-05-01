@@ -132,7 +132,7 @@ namespace Dwarves.Game.Path
                 this.closedSet.Add(current.Point, current);
 
                 // The goal node was just added to the closed list so the search is complete
-                if (current.Point.Equals(goal))
+                if (current.Point.Equals(this.goal))
                 {
                     goalNode = current;
                     break;

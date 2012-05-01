@@ -5,8 +5,12 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Game.Path
 {
+    using System.Collections.Generic;
     using Microsoft.Xna.Framework;
 
+    /// <summary>
+    /// Indicates the type of node.
+    /// </summary>
     public enum PathNodeType : byte
     {
         /// <summary>
@@ -20,31 +24,31 @@ namespace Dwarves.Game.Path
         Jump,
 
         /// <summary>
-        /// The node is only accessible by climbing/descending a ladder/rope.
-        /// </summary>
-        ClimbRope,
-
-        /// <summary>
         /// The node is only accessible by climbing/descending a wall.
         /// </summary>
-        ClimbWall
+        ClimbWall,
+
+        /// <summary>
+        /// The node is only accessible by climbing/descending a ladder/rope.
+        /// </summary>
+        ClimbRope
     }
 
     /// <summary>
     /// A pathfinding node which can be navigated to.
     /// </summary>
-    public struct PathNode
+    public class PathNode
     {
         /// <summary>
-        /// Initializes a new instance of the Node class.
+        /// Initializes a new instance of the PathNode class.
         /// </summary>
         /// <param name="point">The point for this node.</param>
         /// <param name="type">The type of this node.</param>
         public PathNode(Point point, PathNodeType type)
-            : this()
         {
             this.Point = point;
             this.Type = type;
+            this.AdjacentNodes = new List<PathNode>();
         }
 
         /// <summary>
@@ -56,5 +60,10 @@ namespace Dwarves.Game.Path
         /// Gets the type of this node.
         /// </summary>
         public PathNodeType Type { get; private set; }
+
+        /// <summary>
+        /// Gets the list of adjacent path nodes.
+        /// </summary>
+        public List<PathNode> AdjacentNodes { get; private set; }
     }
 }
