@@ -26,7 +26,7 @@ namespace Dwarves.Component.Game
         public TerrainComponent(
             ClipQuadTree<TerrainType> terrain,
             bool isCollidable,
-            Dictionary<Point, PathNode> pathNodes)
+            Dictionary<Point, LinkedPathNode> pathNodes)
         {
             this.QuadTree = terrain;
             this.IsCollidable = isCollidable;
@@ -46,6 +46,6 @@ namespace Dwarves.Component.Game
         /// <summary>
         /// Gets or sets the pathfinding nodes of the terrain.
         /// </summary>
-        public Dictionary<Point, PathNode> PathNodes { get; set; }
+        public Dictionary<Point, LinkedPathNode> PathNodes { get; set; }
     }
 }

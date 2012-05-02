@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Game
 {
+    using Dwarves.Game.Path;
     using EntitySystem.Component;
-    using Microsoft.Xna.Framework;
 
     /// <summary>
     /// Represents a path entity.
@@ -17,7 +17,7 @@ namespace Dwarves.Component.Game
         /// Initializes a new instance of the PathComponent class.
         /// </summary>
         /// <param name="nodes">The path nodes.</param>
-        public PathComponent(Point[] nodes)
+        public PathComponent(PathNode[] nodes)
         {
             this.Nodes = nodes;
         }
@@ -25,6 +25,6 @@ namespace Dwarves.Component.Game
         /// <summary>
         /// Gets or sets the path nodes.
         /// </summary>
-        public Point[] Nodes { get; set; }
+        public PathNode[] Nodes { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace Dwarves.Subsystem
     using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
+    using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
     using EntitySystem;
     using EntitySystem.Subsystem;
@@ -200,13 +201,19 @@ namespace Dwarves.Subsystem
                 {
                     for (int i = 0; i < path.Nodes.Length - 1; i++)
                     {
-                        Point p1 = path.Nodes[i];
-                        Point p2 = path.Nodes[i + 1];
+                        PathNode p1 = path.Nodes[i];
+                        PathNode p2 = path.Nodes[i + 1];
+
+                        int width = Math.Abs(p2.X - p1.X);
+                        if (width == 0) width = 1;
+
+                        int height = Math.Abs(p2.Y - p1.Y);
+                        if (height == 0) height = 1;
 
                         spriteBatch.Draw(
                             debugTexture,
-                            new Rectangle(p1.X, p1.Y, 1 + Math.Abs(p2.X - p1.X), 1 + Math.Abs(p2.Y - p1.Y)),
-                            Color.Red);
+                            new Rectangle(p1.X, p1.Y, width, height),
+                            p2.Type == PathNodeType.Normal ? Color.Red : Color.Green);
                     }
                 }
 

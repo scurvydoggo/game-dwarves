@@ -35,17 +35,17 @@ namespace Dwarves.Game.Path
         /// <summary>
         /// The open list mapped by point coordinates.
         /// </summary>
-        private Dictionary<Point, AStarNode> openSet;
+        private Dictionary<PathNode, AStarNode> openSet;
 
         /// <summary>
         /// The closed list mapped by point coordinates.
         /// </summary>
-        private Dictionary<Point, AStarNode> closedSet;
+        private Dictionary<PathNode, AStarNode> closedSet;
 
         /// <summary>
         /// The goal node.
         /// </summary>
-        private PathNode goal;
+        private LinkedPathNode goal;
 
         /// <summary>
         /// Initializes a new instance of the PathFinder class.
@@ -70,27 +70,27 @@ namespace Dwarves.Game.Path
         /// <param name="nodeHeight">The height in of each node along the path in terrain units.</param>
         /// <param name="path">The array of points.</param>
         /// <returns>True if a path was established.</returns>
-        public bool FindPath(Point start, Point goal, int nodeWidth, int nodeHeight, out Point[] path)
+        public bool FindPath(Point start, Point goal, int nodeWidth, int nodeHeight, out PathNode[] path)
         {
             // Reset open/closed lists
             this.openSetOrdered = new PriorityQueue<AStarNode>(Comparer<AStarNode>.Default);
-            this.openSet = new Dictionary<Point, AStarNode>();
-            this.closedSet = new Dictionary<Point, AStarNode>();
+            this.openSet = new Dictionary<PathNode, AStarNode>();
+            this.closedSet = new Dictionary<PathNode, AStarNode>();
 
             // Get the path node for the start and goal points. Also test that the start and goal points have valid
             // rectangles
-            PathNode startNode;
+            LinkedPathNode startNode;
             if (!this.Terrain.PathNodes.TryGetValue(start, out startNode) ||
                 !this.Terrain.PathNodes.TryGetValue(goal, out this.goal) ||
-                !IsOpenSpace(this.GetNodeRectangle(start, nodeWidth, nodeHeight)) ||
-                !IsOpenSpace(this.GetNodeRectangle(goal, nodeWidth, nodeHeight)))
+                !this.IsOpenSpace(this.GetNodeRectangle(start.X, start.Y, nodeWidth, nodeHeight)) ||
+                !this.IsOpenSpace(this.GetNodeRectangle(goal.X, goal.Y, nodeWidth, nodeHeight)))
             {
-                path = new Point[0];
+                path = new PathNode[0];
                 return false;
             }
 
             // Add the start node to the open list
-            this.AddOpenNode(new AStarNode(startNode, this.CalculateH(start), 0));
+            this.AddOpenNode(new AStarNode(startNode, this.CalculateH(startNode.Node), 0));
 
             // Search for the path to the goal node
             System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
@@ -102,12 +102,12 @@ namespace Dwarves.Game.Path
             // If the goal node was found, iterate backwards through the parent nodes for the path
             if (goalNode != null)
             {
-                var pathList = new List<Point>();
+                var pathList = new List<PathNode>();
 
                 AStarNode current = goalNode;
                 while (current != null)
                 {
-                    pathList.Add(current.PathNode.Point);
+                    pathList.Add(current.PathNode.Node);
                     current = current.Parent;
                 }
 
@@ -116,7 +116,7 @@ namespace Dwarves.Game.Path
             }
             else
             {
-                path = new Point[0];
+                path = new PathNode[0];
                 return false;
             }
         }
@@ -136,32 +136,33 @@ namespace Dwarves.Game.Path
             {
                 // Take the node from the open list with the lowest cost and move to the closed list
                 AStarNode current = this.openSetOrdered.Pop();
-                this.openSet.Remove(current.PathNode.Point);
-                this.closedSet.Add(current.PathNode.Point, current);
+                this.openSet.Remove(current.PathNode.Node);
+                this.closedSet.Add(current.PathNode.Node, current);
 
                 // The goal node was just added to the closed list so the search is complete
-                if (current.PathNode.Point.Equals(this.goal.Point))
+                if (current.PathNode.Node.Equals(this.goal.Node))
                 {
                     goalNode = current;
                     break;
                 }
 
                 // Add the adjacent nodes to the open list
-                foreach (PathNode adjacentNode in current.PathNode.AdjacentNodes)
+                foreach (LinkedPathNode adjacent in current.PathNode.AdjacentNodes)
                 {
                     // Add the left node (if it isn't already in the closed list or blocked)
-                    if (!this.closedSet.ContainsKey(adjacentNode.Point))
+                    if (!this.closedSet.ContainsKey(adjacent.Node))
                     {
-                        if (this.IsOpenSpace(this.GetNodeRectangle(adjacentNode.Point, nodeWidth, nodeHeight)))
+                        if (this.IsOpenSpace(
+                            this.GetNodeRectangle(adjacent.Node.X, adjacent.Node.Y, nodeWidth, nodeHeight)))
                         {
                             // Calculate the H and G value for the adjacent node
                             int g = current.G + this.CalculateGIncrement(
-                                adjacentNode.Point.X - current.PathNode.Point.X,
-                                adjacentNode.Point.Y - current.PathNode.Point.Y);
-                            int h = this.CalculateH(adjacentNode.Point);
+                                adjacent.Node.X - current.PathNode.Node.X,
+                                adjacent.Node.Y - current.PathNode.Node.Y);
+                            int h = this.CalculateH(adjacent.Node);
 
                             // Add the adjacent node to the open list
-                            this.AddOpenNode(new AStarNode(adjacentNode, h, g, current));
+                            this.AddOpenNode(new AStarNode(adjacent, h, g, current));
                         }
                     }
                 }
@@ -179,7 +180,7 @@ namespace Dwarves.Game.Path
         {
             // Check if this node exists
             AStarNode existing;
-            if (this.openSet.TryGetValue(node.PathNode.Point, out existing))
+            if (this.openSet.TryGetValue(node.PathNode.Node, out existing))
             {
                 // If this node has a better cost than the existing node, update the existing node's parent and G score
                 if (node.G < existing.G)
@@ -192,19 +193,19 @@ namespace Dwarves.Game.Path
             {
                 // If the node doesn't already exist, add it to the open list
                 this.openSetOrdered.Push(node);
-                this.openSet.Add(node.PathNode.Point, node);
+                this.openSet.Add(node.PathNode.Node, node);
             }
         }
 
         /// <summary>
         /// Calculate the heuristic distance estimate from the given point to the end point.
         /// </summary>
-        /// <param name="point">The point for which to calculate H.</param>
+        /// <param name="point">The node for which to calculate H.</param>
         /// <returns>The heuristic distance estimate from the given point to the end point.</returns>
-        private int CalculateH(Point point)
+        private int CalculateH(PathNode point)
         {
             // Multiply by 10 so as to use the same scale as G values
-            return (Math.Abs(point.X - this.goal.Point.X) + Math.Abs(point.Y - this.goal.Point.Y)) * 10;
+            return (Math.Abs(point.X - this.goal.Node.X) + Math.Abs(point.Y - this.goal.Node.Y)) * 10;
         }
 
         /// <summary>
@@ -224,13 +225,14 @@ namespace Dwarves.Game.Path
         /// <summary>
         /// Gets a rectangle for the given node with the node point at the middle of the bottom edge.
         /// </summary>
-        /// <param name="point">The position of the node.</param>
+        /// <param name="x">The center x position of the node.</param>
+        /// <param name="y">The bottom y position of the node.</param>
         /// <param name="width">The width of the node's bounds.</param>
         /// <param name="height">The height of the node's bounds.</param>
         /// <returns>The node rectangle.</returns>
-        private Rectangle GetNodeRectangle(Point point, int width, int height)
+        private Rectangle GetNodeRectangle(int x, int y, int width, int height)
         {
-            return new Rectangle(point.X - (width / 2), point.Y - height, width, height);
+            return new Rectangle(x - (width / 2), y - height, width, height);
         }
 
         /// <summary>
@@ -269,7 +271,7 @@ namespace Dwarves.Game.Path
             /// <param name="node">The path node.</param>
             /// <param name="h">The heuristic estimate of the distance to the goal from this node.</param>
             /// <param name="g">The cost from the starting node to the this node.</param>
-            public AStarNode(PathNode node, int h, int g)
+            public AStarNode(LinkedPathNode node, int h, int g)
                 : this(node, h, g, null)
             {
             }
@@ -281,7 +283,7 @@ namespace Dwarves.Game.Path
             /// <param name="h">The heuristic estimate of the distance to the goal from this node.</param>
             /// <param name="g">The cost from the starting node to the this node.</param>
             /// <param name="parent">The parent node in the direction of the start node.</param>
-            public AStarNode(PathNode node, int h, int g, AStarNode parent)
+            public AStarNode(LinkedPathNode node, int h, int g, AStarNode parent)
             {
                 this.PathNode = node;
                 this.H = h;
@@ -292,7 +294,7 @@ namespace Dwarves.Game.Path
             /// <summary>
             /// Gets the path node.
             /// </summary>
-            public PathNode PathNode { get; private set; }
+            public LinkedPathNode PathNode { get; private set; }
 
             /// <summary>
             /// Gets or sets the parent node in the direction of the start node.
