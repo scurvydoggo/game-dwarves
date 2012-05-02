@@ -129,7 +129,7 @@ namespace Dwarves.Debug
 
             // Build the path nodes from the terrain quad tree
             var pathBuilder = new PathBuilder();
-            Dictionary<Point, PathNode> pathNodes = pathBuilder.BuildPathNodes(terrainQuadTree);
+            Dictionary<Point, PathNode> pathNodes = pathBuilder.BuildPathNodes(terrainQuadTree, 10, 3);
 
             // Create the terrain component
             var cTerrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);

@@ -21,12 +21,7 @@ namespace Dwarves.Game.Path
         /// <summary>
         /// The node is only accessible by jumping.
         /// </summary>
-        Jump,
-
-        /// <summary>
-        /// The node is only accessible by climbing/descending a wall.
-        /// </summary>
-        ClimbWall
+        Jump
     }
 
     /// <summary>
