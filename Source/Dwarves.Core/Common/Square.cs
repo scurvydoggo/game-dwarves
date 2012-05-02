@@ -64,9 +64,9 @@ namespace Dwarves.Common
 
             set
             {
-                if (this.length < 0)
+                if (value <= 0)
                 {
-                    throw new ArgumentOutOfRangeException("Length cannot be less than zero.");
+                    throw new ArgumentOutOfRangeException("Length cannot be equal or less than zero.");
                 }
 
                 this.length = value;
@@ -97,7 +97,9 @@ namespace Dwarves.Common
         {
             get
             {
-                return new Point(this.X + (int)(this.Length / 2), this.Y + (int)(this.Length / 2));
+                return new Point(
+                    this.X + (int)((this.Length - 1) / 2),
+                    this.Y + (int)((this.Length - 1) / 2));
             }
         }
 
@@ -124,7 +126,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Gets the y-coordinate of the bottom side of the square.
+        /// Gets the y-coordinate of the bottom side of the square that is not contained in the square.
         /// </summary>
         public int Bottom
         {
@@ -135,7 +137,7 @@ namespace Dwarves.Common
         }
 
         /// <summary>
-        /// Gets the x-coordinate of the right side of the square.
+        /// Gets the x-coordinate of the right side of the square that is not contained in the square.
         /// </summary>
         public int Right
         {
@@ -204,8 +206,8 @@ namespace Dwarves.Common
             return
                 point.Y >= this.Top &&
                 point.X >= this.Left &&
-                point.Y <= this.Bottom &&
-                point.X <= this.Right;
+                point.Y < this.Bottom &&
+                point.X < this.Right;
         }
 
         /// <summary>
@@ -244,10 +246,10 @@ namespace Dwarves.Common
         public bool Intersects(Square other)
         {
             return
-                !(this.Bottom < other.Top ||
-                this.Top > other.Bottom ||
-                this.Right < other.Left ||
-                this.Left > other.Right);
+                !(this.Bottom <= other.Top ||
+                this.Top >= other.Bottom ||
+                this.Right <= other.Left ||
+                this.Left >= other.Right);
         }
 
         /// <summary>
@@ -258,10 +260,10 @@ namespace Dwarves.Common
         public bool Intersects(Rectangle other)
         {
             return
-                !(this.Bottom < other.Top ||
-                this.Top > other.Bottom ||
-                this.Right < other.Left ||
-                this.Left > other.Right);
+                !(this.Bottom <= other.Top ||
+                this.Top >= other.Bottom ||
+                this.Right <= other.Left ||
+                this.Left >= other.Right);
         }
 
         /// <summary>
