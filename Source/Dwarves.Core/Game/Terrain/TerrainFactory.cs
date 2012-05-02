@@ -5,10 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Game.Terrain
 {
-    using System;
-    using System.Collections.Generic;
     using Dwarves.Common;
-    using Dwarves.Game.Path;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -38,16 +35,6 @@ namespace Dwarves.Game.Terrain
             this.PopulateQuadTree(quadTree, bitmapData, bitmap.Width);
 
             return quadTree;
-        }
-
-        /// <summary>
-        /// Create the path nodes for the given terrain quad tree.
-        /// </summary>
-        /// <param name="quadTree">The terrain quad tree.</param>
-        /// <returns>The path nodes.</returns>
-        public Dictionary<Point, PathNode> CreateTerrainPathNodes(ClipQuadTree<TerrainType> quadTree)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion
