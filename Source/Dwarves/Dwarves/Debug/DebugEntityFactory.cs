@@ -131,19 +131,22 @@ namespace Dwarves.Debug
             var pathBuilder = new PathBuilder();
             Dictionary<Point, PathNode> pathNodes = pathBuilder.BuildPathNodes(terrainQuadTree);
 
+            // Create the terrain component
+            var cTerrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
+
+            // TODO: Remove this test code
+            this.TestAStarAlgorithm(world, cTerrain);
+
             // Add terrain component
-            world.EntityManager.AddComponent(entity, new TerrainComponent(terrainQuadTree, isCollidable, pathNodes));
+            world.EntityManager.AddComponent(entity, cTerrain);
             world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
             world.EntityManager.AddComponent(entity, new ScaleSpatialComponent(scale));
             world.EntityManager.AddComponent(entity, new ScaleRenderComponent(Const.PixelsToMeters));
 
-            // TODO: Remove this A-star pathfinding test algorithm
-            this.TestAStarAlgorithm(world, terrainQuadTree);
-
             return entity;
         }
 
-        private void TestAStarAlgorithm(WorldContext world, ClipQuadTree<TerrainType> terrain)
+        private void TestAStarAlgorithm(WorldContext world, TerrainComponent terrain)
         {
             var testEntity = world.EntityManager.CreateEntity();
 
@@ -152,7 +155,7 @@ namespace Dwarves.Debug
             Point goal = new Point(773, 357);
 
             // Create the path finder
-            var pathFinder = new AStarPathFinder(terrain);
+            var pathFinder = new PathFinder(terrain);
 
             // Find the nodes along the path
             Point[] path;

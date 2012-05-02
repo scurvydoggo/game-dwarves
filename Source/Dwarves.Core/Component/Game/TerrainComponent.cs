@@ -46,6 +46,6 @@ namespace Dwarves.Component.Game
         /// <summary>
         /// Gets or sets the pathfinding nodes of the terrain.
         /// </summary>
-        private Dictionary<Point, PathNode> PathNodes { get; set; }
+        public Dictionary<Point, PathNode> PathNodes { get; set; }
     }
 }

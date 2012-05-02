@@ -28,7 +28,7 @@ namespace Dwarves.Game.Path
             this.PopulateFlatNodes(pathNodes, quadTree);
 
             // Connect diagonal adjacent nodes
-            this.ConnectDiagonalAdjacentNodes(pathNodes);
+            this.ConnectAdjacentNodes(pathNodes);
 
             return pathNodes;
         }
@@ -49,7 +49,6 @@ namespace Dwarves.Game.Path
                 }
 
                 // Test each point 1 pixel above the top of this quad
-                PathNode prevNode = null;
                 for (int x = data.Bounds.X; x < data.Bounds.Right; x++)
                 {
                     // Get the next point above this one
@@ -74,51 +73,40 @@ namespace Dwarves.Game.Path
                     if (isWalkable)
                     {
                         // Create and add the path node
-                        PathNode node = new PathNode(pointAbove, PathNodeType.Normal);
-                        pathNodes.Add(pointAbove, node);
-
-                        // Mark this node and the previous node as adjacent to one another
-                        if (prevNode != null)
-                        {
-                            prevNode.AdjacentNodes.Add(node);
-                            node.AdjacentNodes.Add(prevNode);
-                        }
-
-                        // Set the previous node reference
-                        prevNode = node;
-                    }
-                    else
-                    {
-                        // Clear the previous node reference since this point represents an obstruction in the path
-                        prevNode = null;
+                        pathNodes.Add(pointAbove, new PathNode(pointAbove, PathNodeType.Normal));
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Connect nodes that are diagonally adjacent to one another.
+        /// Connect nodes that are directly adjacent to one another.
         /// </summary>
         /// <param name="pathNodes">The set of path nodes.</param>
-        private void ConnectDiagonalAdjacentNodes(Dictionary<Point, PathNode> pathNodes)
+        private void ConnectAdjacentNodes(Dictionary<Point, PathNode> pathNodes)
         {
-            // For each node, test the adjacent points top-left and top-right of its position
+            // For each node, test the adjacent points top-right, right and bottom-right of its position
             foreach (PathNode node in pathNodes.Values)
             {
-                PathNode topLeft;
-                if (pathNodes.TryGetValue(new Point(node.Point.Y + 1, node.Point.X - 1), out topLeft))
-                {
-                    // There is a node top-left of this one
-                    topLeft.AdjacentNodes.Add(node);
-                    node.AdjacentNodes.Add(topLeft);
-                }
-
                 PathNode topRight;
-                if (pathNodes.TryGetValue(new Point(node.Point.Y + 1, node.Point.X + 1), out topRight))
+                if (pathNodes.TryGetValue(new Point(node.Point.X + 1, node.Point.Y + 1), out topRight))
                 {
-                    // There is a node top-right of this one
                     topRight.AdjacentNodes.Add(node);
                     node.AdjacentNodes.Add(topRight);
+                }
+
+                PathNode right;
+                if (pathNodes.TryGetValue(new Point(node.Point.X + 1, node.Point.Y), out right))
+                {
+                    right.AdjacentNodes.Add(node);
+                    node.AdjacentNodes.Add(right);
+                }
+
+                PathNode bottomRight;
+                if (pathNodes.TryGetValue(new Point(node.Point.X + 1, node.Point.Y - 1), out bottomRight))
+                {
+                    bottomRight.AdjacentNodes.Add(node);
+                    node.AdjacentNodes.Add(bottomRight);
                 }
             }
         }

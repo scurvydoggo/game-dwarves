@@ -353,25 +353,32 @@ namespace Dwarves.Common
             else
             {
                 // This is a leaf node so test if this node could be split further to more tightly fit the given bounds
-                if (this.Bounds.GetTopLeftQuadrant().Contains(bounds))
+                if (this.Bounds.Length > 1)
                 {
-                    this.Split(dataSplitter);
-                    return this.TopLeft.SetData(data, bounds, dataSplitter);
-                }
-                else if (this.Bounds.GetTopRightQuadrant().Contains(bounds))
-                {
-                    this.Split(dataSplitter);
-                    return this.TopRight.SetData(data, bounds, dataSplitter);
-                }
-                else if (this.Bounds.GetBottomLeftQuadrant().Contains(bounds))
-                {
-                    this.Split(dataSplitter);
-                    return this.BottomLeft.SetData(data, bounds, dataSplitter);
-                }
-                else if (this.Bounds.GetBottomRightQuadrant().Contains(bounds))
-                {
-                    this.Split(dataSplitter);
-                    return this.BottomRight.SetData(data, bounds, dataSplitter);
+                    if (this.Bounds.GetTopLeftQuadrant().Contains(bounds))
+                    {
+                        this.Split(dataSplitter);
+                        return this.TopLeft.SetData(data, bounds, dataSplitter);
+                    }
+                    else if (this.Bounds.GetTopRightQuadrant().Contains(bounds))
+                    {
+                        this.Split(dataSplitter);
+                        return this.TopRight.SetData(data, bounds, dataSplitter);
+                    }
+                    else if (this.Bounds.GetBottomLeftQuadrant().Contains(bounds))
+                    {
+                        this.Split(dataSplitter);
+                        return this.BottomLeft.SetData(data, bounds, dataSplitter);
+                    }
+                    else if (this.Bounds.GetBottomRightQuadrant().Contains(bounds))
+                    {
+                        this.Split(dataSplitter);
+                        return this.BottomRight.SetData(data, bounds, dataSplitter);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
