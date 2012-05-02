@@ -46,6 +46,7 @@ namespace Dwarves.Game.Path
                 }
 
                 // Test each point 1 pixel above the top of this quad
+                PathNode prevNode = null;
                 for (int x = data.Bounds.X; x < data.Bounds.Right; x++)
                 {
                     // Get the next point above this one
@@ -69,7 +70,24 @@ namespace Dwarves.Game.Path
                     // If this is a walkable point, add it to the set of path nodes
                     if (isWalkable)
                     {
-                        pathNodes.Add(pointAbove, new PathNode(pointAbove, PathNodeType.Normal));
+                        // Create and add the path node
+                        PathNode node = new PathNode(pointAbove, PathNodeType.Normal);
+                        pathNodes.Add(pointAbove, node);
+
+                        // Mark this node and the previous node as adjacent to one another
+                        if (prevNode != null)
+                        {
+                            prevNode.AdjacentNodes.Add(node);
+                            node.AdjacentNodes.Add(prevNode);
+                        }
+
+                        // Set the previous node reference
+                        prevNode = node;
+                    }
+                    else
+                    {
+                        // Clear the previous node reference since this point represents an obstruction in the path
+                        prevNode = null;
                     }
                 }
             }
