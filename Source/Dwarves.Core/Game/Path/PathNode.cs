@@ -67,6 +67,42 @@ namespace Dwarves.Game.Path
         /// Gets the type of this node.
         /// </summary>
         public PathNodeType Type { get; private set; }
+
+        /// <summary>
+        /// Determine if the given object is equal to this object.
+        /// </summary>
+        /// <param name="obj">The object to test for equality.</param>
+        /// <returns>True if the given object is equal to this object.</returns>
+        public override bool Equals(object obj)
+        {
+            // Perform equality checks with Point objects too
+            return
+                (obj is PathNode &&
+                ((PathNode)obj).X == this.X &&
+                ((PathNode)obj).Y == this.Y &&
+                ((PathNode)obj).Type == this.Type) ||
+                ((obj is Point &&
+                ((Point)obj).X == this.X &&
+                ((Point)obj).Y == this.Y));
+        }
+
+        /// <summary>
+        /// Gets the hash code for this instance.
+        /// </summary>
+        /// <returns>The hash code.</returns>
+        public override int GetHashCode()
+        {
+            return this.X.GetHashCode() ^ this.Y.GetHashCode() ^ this.Type.GetHashCode();
+        }
+
+        /// <summary>
+        /// Gets the string representation of this instance.
+        /// </summary>
+        /// <returns>The string representation.</returns>
+        public override string ToString()
+        {
+            return string.Format("X:{0}, Y:{1}, Type:{2}", this.X, this.Y, this.Type);
+        }
     }
 
     /// <summary>
@@ -114,5 +150,14 @@ namespace Dwarves.Game.Path
         /// Gets the list of adjacent path nodes.
         /// </summary>
         public List<LinkedPathNode> AdjacentNodes { get; private set; }
+
+        /// <summary>
+        /// Gets the string representation of this instance.
+        /// </summary>
+        /// <returns>The string representation.</returns>
+        public override string ToString()
+        {
+            return this.Node.ToString();
+        }
     }
 }

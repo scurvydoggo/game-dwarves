@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Game.Path
 {
+    using System;
     using System.Collections.Generic;
     using Dwarves.Common;
     using Dwarves.Game.Terrain;
@@ -19,13 +20,9 @@ namespace Dwarves.Game.Path
         /// Populate the path nodes dictionary from the given terrain quad tree.
         /// </summary>
         /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpHeight">The maximum height of a jump.</param>
-        /// <param name="maxJumpWidth">The maximum width of a jump.</param>
+        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
         /// <returns>The set of path nodes.</returns>
-        public Dictionary<Point, LinkedPathNode> BuildPathNodes(
-            ClipQuadTree<TerrainType> quadTree,
-            int maxJumpHeight,
-            int maxJumpWidth)
+        public Dictionary<Point, LinkedPathNode> BuildPathNodes(ClipQuadTree<TerrainType> quadTree, int maxJumpLength)
         {
             var pathNodes = new Dictionary<Point, LinkedPathNode>();
 
@@ -33,7 +30,7 @@ namespace Dwarves.Game.Path
             this.PopulateTerrainNodes(pathNodes, quadTree);
 
             // Populate all mid-air nodes
-            this.PopulateMidAirNodes(pathNodes, quadTree, maxJumpHeight, maxJumpWidth);
+            this.PopulateMidAirNodes(pathNodes, quadTree, maxJumpLength);
 
             return pathNodes;
         }
@@ -137,22 +134,14 @@ namespace Dwarves.Game.Path
         /// </summary>
         /// <param name="pathNodes">The set of path nodes.</param>
         /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpHeight">The maximum height of a jump.</param>
-        /// <param name="maxJumpWidth">The maximum width of a jump.</param>
+        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
         private void PopulateMidAirNodes(
             Dictionary<Point, LinkedPathNode> pathNodes,
             ClipQuadTree<TerrainType> quadTree,
-            int maxJumpHeight,
-            int maxJumpWidth)
+            int maxJumpLength)
         {
-            // Sanity check
-            if (maxJumpHeight < 2)
-            {
-                return;
-            }
-
-            // Sanity check
-            if (maxJumpWidth < 1)
+            // Sanity check. A jump less than 2 is considered a normal step
+            if (maxJumpLength < 2)
             {
                 return;
             }
@@ -191,13 +180,13 @@ namespace Dwarves.Game.Path
                 // Populate the left-edge jump nodes
                 if (isLeftEdge)
                 {
-                    this.PopulateDownwardMidAirNodes(node, true, pathNodes, quadTree, maxJumpHeight, maxJumpWidth);
+                    this.PopulateDownwardMidAirNodes(node, true, pathNodes, quadTree, maxJumpLength);
                 }
 
                 // Populate the right-edge jump nodes
                 if (isRightEdge)
                 {
-                    this.PopulateDownwardMidAirNodes(node, false, pathNodes, quadTree, maxJumpHeight, maxJumpWidth);
+                    this.PopulateDownwardMidAirNodes(node, false, pathNodes, quadTree, maxJumpLength);
                 }
             }
         }
@@ -210,21 +199,19 @@ namespace Dwarves.Game.Path
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
         /// <param name="pathNodes">The set of path nodes.</param>
         /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpHeight">The maximum height of a jump.</param>
-        /// <param name="maxJumpWidth">The maximum width of a jump.</param>
+        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
         private void PopulateDownwardMidAirNodes(
             LinkedPathNode origin,
             bool left,
             Dictionary<Point, LinkedPathNode> pathNodes,
             ClipQuadTree<TerrainType> quadTree,
-            int maxJumpHeight,
-            int maxJumpWidth)
+            int maxJumpLength)
         {
             // Populate the nodes for a direct vertical 'pin drop' downwards
-            this.PopulatePinDropNodes(origin, left, pathNodes, quadTree, maxJumpHeight, maxJumpWidth);
+            ////this.PopulatePinDropNodes(origin, left, pathNodes, maxJumpLength);
 
             // Populate the nodes for parabolic jumps
-            ////this.PopulateParabolicDropNodes(origin, toLeft, pathNodes, quadTree, maxJumpHeight, maxJumpWidth);
+            this.PopulateParabolicDropNodes(origin, left, pathNodes, quadTree, maxJumpLength);
         }
 
         /// <summary>
@@ -233,16 +220,12 @@ namespace Dwarves.Game.Path
         /// <param name="origin">The point being jumped down from.</param>
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
         /// <param name="pathNodes">The set of path nodes.</param>
-        /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpHeight">The maximum height of a jump.</param>
-        /// <param name="maxJumpWidth">The maximum width of a jump.</param>
+        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
         private void PopulatePinDropNodes(
             LinkedPathNode origin,
             bool left,
             Dictionary<Point, LinkedPathNode> pathNodes,
-            ClipQuadTree<TerrainType> quadTree,
-            int maxJumpHeight,
-            int maxJumpWidth)
+            int maxJumpLength)
         {
             var nodes = new List<LinkedPathNode>();
 
@@ -258,7 +241,7 @@ namespace Dwarves.Game.Path
             // Test the remaining points until ground is hit or max jump height is reached
             LinkedPathNode groundBelow = null;
             LinkedPathNode prevNode = nodes[1];
-            for (int y = origin.Node.Y + 2; y <= origin.Node.Y + maxJumpHeight; y++)
+            for (int y = origin.Node.Y + 2; y <= origin.Node.Y + maxJumpLength; y++)
             {
                 Point point = new Point(x, y);
 
@@ -305,62 +288,52 @@ namespace Dwarves.Game.Path
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
         /// <param name="pathNodes">The set of path nodes.</param>
         /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpHeight">The maximum height of a jump.</param>
-        /// <param name="maxJumpWidth">The maximum width of a jump.</param>
+        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
         private void PopulateParabolicDropNodes(
             LinkedPathNode origin,
             bool left,
             Dictionary<Point, LinkedPathNode> pathNodes,
             ClipQuadTree<TerrainType> quadTree,
-            int maxJumpHeight,
-            int maxJumpWidth)
+            int maxJumpLength)
         {
+            if (origin.Node.X == 775 && origin.Node.Y == 357)
+            {
+
+            }
+
             var nodes = new List<LinkedPathNode>();
 
             LinkedPathNode groundBelow = null;
             LinkedPathNode prevNode = null;
-            int peakJumpY = int.MaxValue;
-            for (int deltaX = 1; deltaX <= maxJumpWidth; deltaX++)
+            int deltaX = 0;
+            int jumpNodeCount = 0;
+            bool terrainHit = false;
+            while (groundBelow == null && jumpNodeCount < maxJumpLength && !terrainHit)
             {
-                // Get the x point for this step
-                int x = left ? origin.Node.X - deltaX : origin.Node.X + deltaX;
+                // Increment/decrement the x delta
+                deltaX = left ? deltaX - 1 : deltaX + 1;
 
-                // Calculate the y point for this step
+                // Calculate the x and y point for this step
+                int x = origin.Node.X + deltaX;
                 int y = origin.Node.Y + (deltaX * deltaX);
-                if (y > maxJumpHeight)
-                {
-                    y = maxJumpHeight;
-                }
 
-                if (y < peakJumpY)
-                {
-                    peakJumpY = y;
-                }
-
-                // Compare the y point with the previous point as interpolation may be required
+                // Calculate how many points of interpolation are required and the direction
                 PathNode prevPoint = prevNode == null ? origin.Node : prevNode.Node;
+                int interpolateLength = Math.Abs(prevPoint.Y - y);
                 bool up = prevPoint.Y > y;
 
-                // Set the start y position
-                int interpolateY;
-                if (prevPoint.Y == y)
+                int deltaY = 0;
+                while (deltaY < interpolateLength)
                 {
-                    interpolateY = prevPoint.Y;
-                }
-                else if (up)
-                {
-                    interpolateY = prevPoint.Y - 1;
-                }
-                else
-                {
-                    interpolateY = prevPoint.Y + 1;
-                }
+                    // Increment/decrement the y delta
+                    deltaY = up ? deltaY - 1 : deltaY + 1;
 
-                while ((up && interpolateY >= y) || (!up && interpolateY <= y))
-                {
-                    Point point = new Point(x, interpolateY);
+                    // Calculate the y point for this interpolated step
+                    int innerY = prevPoint.Y + deltaY;
+                    Point point = new Point(x, innerY);
 
-                    // Check if this point is a terrain block. In which case the path is complete, otherwise keep iterating
+                    // Check if this point is a terrain block. In which case the path is complete, otherwise keep
+                    // iterating
                     LinkedPathNode node;
                     if (pathNodes.TryGetValue(point, out node))
                     {
@@ -370,6 +343,18 @@ namespace Dwarves.Game.Path
                     }
                     else
                     {
+                        // Test if the point is a terrain collision, in which case the path fails
+                        TerrainType terrain;
+                        if (quadTree.GetData(point, out terrain))
+                        {
+                            if (terrain != TerrainType.None)
+                            {
+                                // This point is a terrain block, so the path cannot continue
+                                terrainHit = true;
+                                break;
+                            }
+                        }
+
                         // The point is mid-air, so create the node and connect it to the previous node
                         node = new LinkedPathNode(point, PathNodeType.Jump);
                         if (prevNode != null)
@@ -381,30 +366,20 @@ namespace Dwarves.Game.Path
                         // Add the node to the list
                         nodes.Add(node);
 
+                        // Increment the jump nodes count and check whether the limit has been reached
+                        if (++jumpNodeCount >= maxJumpLength)
+                        {
+                            break;
+                        }
+
                         // Set the previous node
                         prevNode = node;
                     }
-
-                    // Increment/decrement y
-                    if (up)
-                    {
-                        interpolateY--;
-                    }
-                    else
-                    {
-                        interpolateY++;
-                    }
-                }
-
-                // Stop iterating if the ground has been hit or max jump height reached
-                if (groundBelow != null || y == maxJumpHeight)
-                {
-                    break;
                 }
             }
 
             // If this path is complete, join this jump-segment to the dictionary nodes
-            if (groundBelow != null)
+            if (groundBelow != null && nodes.Count > 1)
             {
                 // Connect the first jump node to the origin
                 origin.AdjacentNodes.Add(nodes[0]);
