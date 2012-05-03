@@ -65,6 +65,7 @@
     <Compile Include="Data\DwarvesDataAdapter.cs" />
     <Compile Include="DwarvesConfig.cs" />
     <Compile Include="Const.cs" />
+    <Compile Include="Game\Path\LinkedPathNode.cs" />
     <Compile Include="Game\Path\PathFinder.cs" />
     <Compile Include="Game\Path\PathBuilder.cs" />
     <Compile Include="Game\Path\PathNode.cs" />

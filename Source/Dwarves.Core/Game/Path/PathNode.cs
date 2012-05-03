@@ -5,7 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Game.Path
 {
-    using System.Collections.Generic;
     using Microsoft.Xna.Framework;
 
     /// <summary>
@@ -81,9 +80,9 @@ namespace Dwarves.Game.Path
                 ((PathNode)obj).X == this.X &&
                 ((PathNode)obj).Y == this.Y &&
                 ((PathNode)obj).Type == this.Type) ||
-                ((obj is Point &&
+                (obj is Point &&
                 ((Point)obj).X == this.X &&
-                ((Point)obj).Y == this.Y));
+                ((Point)obj).Y == this.Y);
         }
 
         /// <summary>
@@ -102,62 +101,6 @@ namespace Dwarves.Game.Path
         public override string ToString()
         {
             return string.Format("X:{0}, Y:{1}, Type:{2}", this.X, this.Y, this.Type);
-        }
-    }
-
-    /// <summary>
-    /// A path node linked to adjacent nodes.
-    /// </summary>
-    public class LinkedPathNode
-    {
-        /// <summary>
-        /// Initializes a new instance of the LinkedPathNode class.
-        /// </summary>
-        /// <param name="point">The position for this node.</param>
-        /// <param name="type">The type of this node.</param>
-        public LinkedPathNode(Point point, PathNodeType type)
-            : this(new PathNode(point, type))
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the LinkedPathNode class.
-        /// </summary>
-        /// <param name="x">The x position for this node.</param>
-        /// <param name="y">The y position for this node.</param>
-        /// <param name="type">The type of this node.</param>
-        public LinkedPathNode(int x, int y, PathNodeType type)
-            : this(new PathNode(x, y, type))
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the LinkedPathNode class.
-        /// </summary>
-        /// <param name="node">The path node.</param>
-        public LinkedPathNode(PathNode node)
-        {
-            this.Node = node;
-            this.AdjacentNodes = new List<LinkedPathNode>();
-        }
-
-        /// <summary>
-        /// Gets the path node.
-        /// </summary>
-        public PathNode Node { get; private set; }
-
-        /// <summary>
-        /// Gets the list of adjacent path nodes.
-        /// </summary>
-        public List<LinkedPathNode> AdjacentNodes { get; private set; }
-
-        /// <summary>
-        /// Gets the string representation of this instance.
-        /// </summary>
-        /// <returns>The string representation.</returns>
-        public override string ToString()
-        {
-            return this.Node.ToString();
         }
     }
 }

@@ -128,8 +128,8 @@ namespace Dwarves.Debug
             ClipQuadTree<TerrainType> terrainQuadTree = terrainFactory.CreateTerrainQuadTree(texture);
 
             // Build the path nodes from the terrain quad tree
-            var pathBuilder = new PathBuilder();
-            Dictionary<Point, LinkedPathNode> pathNodes = pathBuilder.BuildPathNodes(terrainQuadTree, 100);
+            var pathBuilder = new PathBuilder(terrainQuadTree, 100);
+            Dictionary<Point, LinkedPathNode> pathNodes = pathBuilder.BuildPathNodes();
 
             // Create the terrain component
             var cTerrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
@@ -151,8 +151,8 @@ namespace Dwarves.Debug
             var testEntity = world.EntityManager.CreateEntity();
 
             // Define start and end points
-            Point start = new Point(644, 354);
-            Point goal = new Point(814, 423);
+            Point start = new Point(53, 761);
+            Point goal = new Point(713, 393);
 
             // Create the path finder
             var pathFinder = new PathFinder(terrain);

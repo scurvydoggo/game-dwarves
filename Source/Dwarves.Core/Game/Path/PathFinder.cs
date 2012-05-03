@@ -35,12 +35,12 @@ namespace Dwarves.Game.Path
         /// <summary>
         /// The open list mapped by point coordinates.
         /// </summary>
-        private Dictionary<PathNode, AStarNode> openSet;
+        private Dictionary<LinkedPathNode, AStarNode> openSet;
 
         /// <summary>
         /// The closed list mapped by point coordinates.
         /// </summary>
-        private Dictionary<PathNode, AStarNode> closedSet;
+        private Dictionary<LinkedPathNode, AStarNode> closedSet;
 
         /// <summary>
         /// The goal node.
@@ -74,8 +74,8 @@ namespace Dwarves.Game.Path
         {
             // Reset open/closed lists
             this.openSetOrdered = new PriorityQueue<AStarNode>(Comparer<AStarNode>.Default);
-            this.openSet = new Dictionary<PathNode, AStarNode>();
-            this.closedSet = new Dictionary<PathNode, AStarNode>();
+            this.openSet = new Dictionary<LinkedPathNode, AStarNode>();
+            this.closedSet = new Dictionary<LinkedPathNode, AStarNode>();
 
             // Get the path node for the start and goal points. Also test that the start and goal points have valid
             // rectangles
@@ -136,8 +136,8 @@ namespace Dwarves.Game.Path
             {
                 // Take the node from the open list with the lowest cost and move to the closed list
                 AStarNode current = this.openSetOrdered.Pop();
-                this.openSet.Remove(current.PathNode.Node);
-                this.closedSet.Add(current.PathNode.Node, current);
+                this.openSet.Remove(current.PathNode);
+                this.closedSet.Add(current.PathNode, current);
 
                 // The goal node was just added to the closed list so the search is complete
                 if (current.PathNode.Node.Equals(this.goal.Node))
@@ -150,7 +150,7 @@ namespace Dwarves.Game.Path
                 foreach (LinkedPathNode adjacent in current.PathNode.AdjacentNodes)
                 {
                     // Add the left node (if it isn't already in the closed list or blocked)
-                    if (!this.closedSet.ContainsKey(adjacent.Node))
+                    if (!this.closedSet.ContainsKey(adjacent))
                     {
                         if (this.IsOpenSpace(
                             this.GetNodeRectangle(adjacent.Node.X, adjacent.Node.Y, nodeWidth, nodeHeight)))
@@ -180,7 +180,7 @@ namespace Dwarves.Game.Path
         {
             // Check if this node exists
             AStarNode existing;
-            if (this.openSet.TryGetValue(node.PathNode.Node, out existing))
+            if (this.openSet.TryGetValue(node.PathNode, out existing))
             {
                 // If this node has a better cost than the existing node, update the existing node's parent and G score
                 if (node.G < existing.G)
@@ -193,7 +193,7 @@ namespace Dwarves.Game.Path
             {
                 // If the node doesn't already exist, add it to the open list
                 this.openSetOrdered.Push(node);
-                this.openSet.Add(node.PathNode.Node, node);
+                this.openSet.Add(node.PathNode, node);
             }
         }
 

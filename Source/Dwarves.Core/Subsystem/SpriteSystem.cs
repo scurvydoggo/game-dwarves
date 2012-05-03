@@ -196,7 +196,7 @@ namespace Dwarves.Subsystem
                 // TODO: Delete this test code
                 // Draw path components in red
                 Texture2D debugTexture = new Texture2D(this.graphics, 1, 1);
-                debugTexture.SetData<Color>(new Color[] { Color.Red });
+                debugTexture.SetData<Color>(new Color[] { Color.White });
                 foreach (PathComponent path in this.EntityManager.GetComponents(typeof(PathComponent)))
                 {
                     for (int i = 0; i < path.Nodes.Length - 1; i++)
@@ -213,7 +213,7 @@ namespace Dwarves.Subsystem
                         spriteBatch.Draw(
                             debugTexture,
                             new Rectangle(p1.X, p1.Y, width, height),
-                            p2.Type == PathNodeType.Normal ? Color.Red : Color.Green);
+                            (p1.Type == PathNodeType.Normal && p2.Type == PathNodeType.Normal) ? Color.Red : Color.Yellow);
                     }
                 }
 

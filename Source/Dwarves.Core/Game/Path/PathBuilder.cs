@@ -17,32 +17,58 @@ namespace Dwarves.Game.Path
     public class PathBuilder
     {
         /// <summary>
-        /// Populate the path nodes dictionary from the given terrain quad tree.
+        /// Initializes a new instance of the PathBuilder class.
         /// </summary>
         /// <param name="quadTree">The terrain quad tree.</param>
         /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
-        /// <returns>The set of path nodes.</returns>
-        public Dictionary<Point, LinkedPathNode> BuildPathNodes(ClipQuadTree<TerrainType> quadTree, int maxJumpLength)
+        public PathBuilder(ClipQuadTree<TerrainType> quadTree, int maxJumpLength)
         {
-            var pathNodes = new Dictionary<Point, LinkedPathNode>();
-
-            // Populate all terrain nodes
-            this.PopulateTerrainNodes(pathNodes, quadTree);
-
-            // Populate all mid-air nodes
-            this.PopulateMidAirNodes(pathNodes, quadTree, maxJumpLength);
-
-            return pathNodes;
+            this.QuadTree = quadTree;
+            this.MaxSpanLength = maxJumpLength;
         }
 
         /// <summary>
-        /// Populate the terrain nodes. These are any horizontal segments of terrain.
+        /// Gets or sets the terrain quad tree.
         /// </summary>
-        /// <param name="pathNodes">The set of path nodes.</param>
-        /// <param name="quadTree">The terrain quad tree.</param>
-        private void PopulateTerrainNodes(Dictionary<Point, LinkedPathNode> pathNodes, ClipQuadTree<TerrainType> quadTree)
+        public ClipQuadTree<TerrainType> QuadTree { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum length (in adjacent nodes) of a span.
+        /// </summary>
+        public int MaxSpanLength { get; set; }
+
+        #region Public Methods
+
+        /// <summary>
+        /// Populate the path nodes dictionary from the given terrain quad tree.
+        /// </summary>
+        /// <returns>The set of path nodes along the ground.</returns>
+        public Dictionary<Point, LinkedPathNode> BuildPathNodes()
         {
-            foreach (QuadTreeData<TerrainType> data in quadTree)
+            // Build the set of ground nodes
+            var groundNodes = this.BuildGroundNodes();
+
+            // Attach the nodes which span between ground platforms
+            this.AttachSpanNodes(groundNodes);
+
+            return groundNodes;
+        }
+
+        #endregion
+
+        #region Build Flat-Terrain Nodes
+
+        /// <summary>
+        /// Build the set of ground nodes. These are any horizontal segments of terrain which can be walked on by a
+        /// character.
+        /// </summary>
+        /// <returns>The set of path nodes along the ground.</returns>
+        private Dictionary<Point, LinkedPathNode> BuildGroundNodes()
+        {
+            var groundNodes = new Dictionary<Point, LinkedPathNode>();
+
+            // Add all ground nodes
+            foreach (QuadTreeData<TerrainType> data in this.QuadTree)
             {
                 // Ignore non-walkable terrain
                 if (data.Data == TerrainType.None)
@@ -53,39 +79,20 @@ namespace Dwarves.Game.Path
                 // Test each point 1 pixel above the top of this quad
                 for (int x = data.Bounds.X; x < data.Bounds.Right; x++)
                 {
-                    // Get the next point above this one
                     var pointAbove = new Point(x, data.Bounds.Y - 1);
-
-                    bool isWalkable = false;
-                    TerrainType terrainAbove;
-                    if (quadTree.GetData(pointAbove, out terrainAbove))
+                    if (this.IsPassableTerrain(pointAbove))
                     {
-                        if (terrainAbove == TerrainType.None)
-                        {
-                            isWalkable = true;
-                        }
-                    }
-                    else
-                    {
-                        // GetData returns false if point is outside the quad tree, which we treat as a walkable point
-                        // since the character would be walking 'on top' of the terrain
-                        isWalkable = true;
-                    }
-
-                    // If this is a walkable point, add it to the set of path nodes
-                    if (isWalkable)
-                    {
-                        // Create and add the path node
-                        pathNodes.Add(pointAbove, new LinkedPathNode(pointAbove, PathNodeType.Normal));
+                        // The point above is a passable node so add it to the set
+                        groundNodes.Add(pointAbove, new LinkedPathNode(pointAbove, PathNodeType.Normal));
                     }
                 }
             }
 
             // Connect any adjacent nodes horizontally or diagonally
-            foreach (LinkedPathNode node in pathNodes.Values)
+            foreach (LinkedPathNode node in groundNodes.Values)
             {
                 LinkedPathNode rightUp;
-                if (pathNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y - 1), out rightUp))
+                if (groundNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y - 1), out rightUp))
                 {
                     if (!rightUp.AdjacentNodes.Contains(node))
                     {
@@ -99,7 +106,7 @@ namespace Dwarves.Game.Path
                 }
 
                 LinkedPathNode right;
-                if (pathNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y), out right))
+                if (groundNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y), out right))
                 {
                     if (!right.AdjacentNodes.Contains(node))
                     {
@@ -113,7 +120,7 @@ namespace Dwarves.Game.Path
                 }
 
                 LinkedPathNode rightDown;
-                if (pathNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y + 1), out rightDown))
+                if (groundNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y + 1), out rightDown))
                 {
                     if (!rightDown.AdjacentNodes.Contains(node))
                     {
@@ -126,189 +133,147 @@ namespace Dwarves.Game.Path
                     }
                 }
             }
+
+            return groundNodes;
         }
 
+        #endregion
+
+        #region Build Mid-Air Nodes
+
         /// <summary>
-        /// Populate the nodes that join terrain segments. These are 'mid-air' nodes that are traversed by the
+        /// Find the nodes which span between ground nodes. These are 'mid-air' nodes that are traversed by the
         /// character jumping, climbing and such.
         /// </summary>
-        /// <param name="pathNodes">The set of path nodes.</param>
-        /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
-        private void PopulateMidAirNodes(
-            Dictionary<Point, LinkedPathNode> pathNodes,
-            ClipQuadTree<TerrainType> quadTree,
-            int maxJumpLength)
+        /// <param name="groundNodes">The set of path nodes along the ground.</param>
+        private void AttachSpanNodes(Dictionary<Point, LinkedPathNode> groundNodes)
         {
-            // Sanity check. A jump less than 2 is considered a normal step
-            if (maxJumpLength < 2)
+            // Sanity check. A span less than 2 is considered a normal step between adjacent nodes
+            if (this.MaxSpanLength < 2)
             {
                 return;
             }
 
-            // For each node, check if it is an 'edge' node which means it has no adjacent nodes directly to the
-            // left/right
-            foreach (LinkedPathNode node in pathNodes.Values)
+            // Check if each node is an 'edge' node, in which case try to 'jump' over to another platform
+            foreach (LinkedPathNode node in groundNodes.Values)
             {
-                // Determine if this is an edge point
-                bool isLeftEdge = true;
-                bool isRightEdge = true;
-                Point leftUp = new Point(node.Node.X - 1, node.Node.Y - 1);
-                Point left = new Point(node.Node.X - 1, node.Node.Y);
-                Point leftDown = new Point(node.Node.X - 1, node.Node.Y + 1);
-                Point rightUp = new Point(node.Node.X + 1, node.Node.Y - 1);
-                Point right = new Point(node.Node.X + 1, node.Node.Y);
-                Point rightDown = new Point(node.Node.X + 1, node.Node.Y + 1);
-                foreach (LinkedPathNode adjacent in node.AdjacentNodes)
+                // Check if the points to the left of the node are passable
+                if (this.IsPassableTerrain(new Point(node.Node.X - 1, node.Node.Y - 1)) &&
+                    this.IsPassableTerrain(new Point(node.Node.X - 1, node.Node.Y)) &&
+                    this.IsPassableTerrain(new Point(node.Node.X - 1, node.Node.Y + 1)))
                 {
-                    if (adjacent.Node.Equals(leftUp) || adjacent.Node.Equals(left) || adjacent.Node.Equals(leftDown))
-                    {
-                        isLeftEdge = false;
-                    }
-
-                    if (adjacent.Node.Equals(rightUp) || adjacent.Node.Equals(right) || adjacent.Node.Equals(rightDown))
-                    {
-                        isRightEdge = false;
-                    }
-
-                    if (!isLeftEdge && !isRightEdge)
-                    {
-                        break;
-                    }
+                    this.AttachSpanNodes(node, true, groundNodes);
                 }
 
-                // Populate the left-edge jump nodes
-                if (isLeftEdge)
+                // Check if the points to the right of the node are passable
+                if (this.IsPassableTerrain(new Point(node.Node.X + 1, node.Node.Y - 1)) &&
+                    this.IsPassableTerrain(new Point(node.Node.X + 1, node.Node.Y)) &&
+                    this.IsPassableTerrain(new Point(node.Node.X + 1, node.Node.Y + 1)))
                 {
-                    this.PopulateDownwardMidAirNodes(node, true, pathNodes, quadTree, maxJumpLength);
-                }
-
-                // Populate the right-edge jump nodes
-                if (isRightEdge)
-                {
-                    this.PopulateDownwardMidAirNodes(node, false, pathNodes, quadTree, maxJumpLength);
+                    this.AttachSpanNodes(node, false, groundNodes);
                 }
             }
         }
 
         /// <summary>
-        /// Populate the nodes that join terrain segments that are accessible downwards from the given origin node.
-        /// These are 'mid-air' nodes that are traversed by the character jumping, climbing and such.
-        /// </summary>
-        /// <param name="origin">The point being jumped down from.</param>
+        /// Attach nodes which span from the given node to another ground node.</summary>
+        /// <param name="origin">The point being searched from.</param>
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
-        /// <param name="pathNodes">The set of path nodes.</param>
-        /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
-        private void PopulateDownwardMidAirNodes(
-            LinkedPathNode origin,
-            bool left,
-            Dictionary<Point, LinkedPathNode> pathNodes,
-            ClipQuadTree<TerrainType> quadTree,
-            int maxJumpLength)
+        /// <param name="groundNodes">The set of path nodes along the ground.</param>
+        private void AttachSpanNodes(LinkedPathNode origin, bool left, Dictionary<Point, LinkedPathNode> groundNodes)
         {
-            // Populate the nodes for a direct vertical 'pin drop' downwards
-            ////this.PopulatePinDropNodes(origin, left, pathNodes, maxJumpLength);
+            // Attach span for a direct vertical 'pin drop' downwards
+            this.AttachPinDropJump(origin, left, groundNodes);
 
-            // Populate the nodes for parabolic jumps
-            this.PopulateParabolicDropNodes(origin, left, pathNodes, quadTree, maxJumpLength);
+            // Attach spans for parabolic jumps
+            this.AttachParabolicJump(origin, left, groundNodes);
         }
 
         /// <summary>
-        /// Populate the nodes for a direct vertical 'pin drop' downwards from the given origin node.
+        /// Attach nodes which span from the given node as a vertical 'pin drop' downwards to another ground node.
         /// </summary>
         /// <param name="origin">The point being jumped down from.</param>
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
-        /// <param name="pathNodes">The set of path nodes.</param>
-        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
-        private void PopulatePinDropNodes(
-            LinkedPathNode origin,
-            bool left,
-            Dictionary<Point, LinkedPathNode> pathNodes,
-            int maxJumpLength)
+        /// <param name="groundNodes">The set of path nodes along the ground.</param>
+        private void AttachPinDropJump(LinkedPathNode origin, bool left, Dictionary<Point, LinkedPathNode> groundNodes)
         {
-            var nodes = new List<LinkedPathNode>();
+            var spanNodes = new List<LinkedPathNode>();
 
             // Set the x coordinate of the pin drop
             int x = left ? origin.Node.X - 1 : origin.Node.X + 1;
 
             // Add the first 2 points as they have already been tested
-            nodes.Add(new LinkedPathNode(x, origin.Node.Y, PathNodeType.Jump));
-            nodes.Add(new LinkedPathNode(x, origin.Node.Y + 1, PathNodeType.Jump));
-            nodes[0].AdjacentNodes.Add(nodes[1]);
-            nodes[1].AdjacentNodes.Add(nodes[0]);
+            spanNodes.Add(new LinkedPathNode(x, origin.Node.Y, PathNodeType.Jump));
+            spanNodes.Add(new LinkedPathNode(x, origin.Node.Y + 1, PathNodeType.Jump));
+            spanNodes[0].AdjacentNodes.Add(spanNodes[1]);
+            spanNodes[1].AdjacentNodes.Add(spanNodes[0]);
 
-            // Test the remaining points until ground is hit or max jump height is reached
+            // Test the remaining points until ground is hit or max span length is reached
             LinkedPathNode groundBelow = null;
-            LinkedPathNode prevNode = nodes[1];
-            for (int y = origin.Node.Y + 2; y <= origin.Node.Y + maxJumpLength; y++)
+            LinkedPathNode prevNode = spanNodes[1];
+            for (int y = origin.Node.Y + 2; y <= origin.Node.Y + this.MaxSpanLength; y++)
             {
-                Point point = new Point(x, y);
+                var point = new Point(x, y);
 
-                // Check if this point is a terrain block. In which case the path is complete, otherwise keep iterating
-                LinkedPathNode node;
-                if (pathNodes.TryGetValue(point, out node))
+                // Check that this point is passable
+                if (!this.IsPassableTerrain(point))
                 {
-                    // This point is a terrain platform
-                    groundBelow = node;
+                    // This is a non-passable point so the path fails
                     break;
                 }
-                else
+
+                // If the point below this one is non-passable terrain then the ground has been hit
+                if (!this.IsPassableTerrain(new Point(point.X, point.Y + 1)))
                 {
-                    // The point is mid-air, so create the node and connect it to the previous node
-                    node = new LinkedPathNode(point, PathNodeType.Jump);
-                    prevNode.AdjacentNodes.Add(node);
-                    node.AdjacentNodes.Add(prevNode);
-
-                    // Add the node to the list
-                    nodes.Add(node);
-
-                    // Set the previous node
-                    prevNode = node;
+                    // A ground node has been hit, so set this and break
+                    groundBelow = groundNodes[point];
+                    break;
                 }
+
+                // The point is mid-air, so create the node and connect it to the previous node
+                var node = new LinkedPathNode(point, PathNodeType.Jump);
+                prevNode.AdjacentNodes.Add(node);
+                node.AdjacentNodes.Add(prevNode);
+
+                // Add the node to the list
+                spanNodes.Add(node);
+
+                // Set the previous node
+                prevNode = node;
             }
 
-            // If this path is complete, join this jump-segment to the dictionary nodes
-            if (groundBelow != null)
+            // If the path is complete, join this span to the ground nodes
+            if (groundBelow != null && spanNodes.Count > 0)
             {
                 // Connect the first jump node to the origin
-                origin.AdjacentNodes.Add(nodes[0]);
-                nodes[0].AdjacentNodes.Add(origin);
+                origin.AdjacentNodes.Add(spanNodes[0]);
+                spanNodes[0].AdjacentNodes.Add(origin);
 
                 // Connect the last jump node to the ground
-                groundBelow.AdjacentNodes.Add(nodes[nodes.Count - 1]);
-                nodes[nodes.Count - 1].AdjacentNodes.Add(groundBelow);
+                groundBelow.AdjacentNodes.Add(spanNodes[spanNodes.Count - 1]);
+                spanNodes[spanNodes.Count - 1].AdjacentNodes.Add(groundBelow);
             }
         }
 
         /// <summary>
-        /// Populate the nodes for a direct vertical 'pin drop' downwards from the given origin node.
+        /// Attach nodes which span from the given node as a parabolic jump to another ground node.
         /// </summary>
         /// <param name="origin">The point being jumped down from.</param>
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
-        /// <param name="pathNodes">The set of path nodes.</param>
-        /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
-        private void PopulateParabolicDropNodes(
+        /// <param name="groundNodes">The set of path nodes along the ground.</param>
+        private void AttachParabolicJump(
             LinkedPathNode origin,
             bool left,
-            Dictionary<Point, LinkedPathNode> pathNodes,
-            ClipQuadTree<TerrainType> quadTree,
-            int maxJumpLength)
+            Dictionary<Point, LinkedPathNode> groundNodes)
         {
-            if (origin.Node.X == 775 && origin.Node.Y == 357)
-            {
-
-            }
-
-            var nodes = new List<LinkedPathNode>();
+            var spanNodes = new List<LinkedPathNode>();
 
             LinkedPathNode groundBelow = null;
             LinkedPathNode prevNode = null;
             int deltaX = 0;
             int jumpNodeCount = 0;
             bool terrainHit = false;
-            while (groundBelow == null && jumpNodeCount < maxJumpLength && !terrainHit)
+            while (groundBelow == null && jumpNodeCount < this.MaxSpanLength && !terrainHit)
             {
                 // Increment/decrement the x delta
                 deltaX = left ? deltaX - 1 : deltaX + 1;
@@ -325,70 +290,85 @@ namespace Dwarves.Game.Path
                 int deltaY = 0;
                 while (deltaY < interpolateLength)
                 {
-                    // Increment/decrement the y delta
+                    // Calculate the interpolated y value
                     deltaY = up ? deltaY - 1 : deltaY + 1;
-
-                    // Calculate the y point for this interpolated step
                     int innerY = prevPoint.Y + deltaY;
-                    Point point = new Point(x, innerY);
 
-                    // Check if this point is a terrain block. In which case the path is complete, otherwise keep
-                    // iterating
-                    LinkedPathNode node;
-                    if (pathNodes.TryGetValue(point, out node))
+                    var point = new Point(x, innerY);
+
+                    // Check that this point is passable
+                    if (!this.IsPassableTerrain(point))
                     {
-                        // This point is a terrain platform
-                        groundBelow = node;
+                        // This is a non-passable point so the path fails
+                        terrainHit = true;
                         break;
                     }
-                    else
+
+                    // If the point below this one is non-passable terrain then the ground has been hit
+                    if (!this.IsPassableTerrain(new Point(point.X, point.Y + 1)))
                     {
-                        // Test if the point is a terrain collision, in which case the path fails
-                        TerrainType terrain;
-                        if (quadTree.GetData(point, out terrain))
-                        {
-                            if (terrain != TerrainType.None)
-                            {
-                                // This point is a terrain block, so the path cannot continue
-                                terrainHit = true;
-                                break;
-                            }
-                        }
-
-                        // The point is mid-air, so create the node and connect it to the previous node
-                        node = new LinkedPathNode(point, PathNodeType.Jump);
-                        if (prevNode != null)
-                        {
-                            prevNode.AdjacentNodes.Add(node);
-                            node.AdjacentNodes.Add(prevNode);
-                        }
-
-                        // Add the node to the list
-                        nodes.Add(node);
-
-                        // Increment the jump nodes count and check whether the limit has been reached
-                        if (++jumpNodeCount >= maxJumpLength)
-                        {
-                            break;
-                        }
-
-                        // Set the previous node
-                        prevNode = node;
+                        // A ground node has been hit, so set this and break
+                        groundBelow = groundNodes[point];
+                        break;
                     }
+
+                    // The point is mid-air, so create the node and connect it to the previous node
+                    var node = new LinkedPathNode(point, PathNodeType.Jump);
+                    if (prevNode != null)
+                    {
+                        prevNode.AdjacentNodes.Add(node);
+                        node.AdjacentNodes.Add(prevNode);
+                    }
+
+                    // Add the node to the list
+                    spanNodes.Add(node);
+
+                    // Increment the jump nodes count and check whether the limit has been reached
+                    if (++jumpNodeCount >= this.MaxSpanLength)
+                    {
+                        break;
+                    }
+
+                    // Set the previous node
+                    prevNode = node;
                 }
             }
 
             // If this path is complete, join this jump-segment to the dictionary nodes
-            if (groundBelow != null && nodes.Count > 1)
+            if (groundBelow != null && spanNodes.Count > 0)
             {
                 // Connect the first jump node to the origin
-                origin.AdjacentNodes.Add(nodes[0]);
-                nodes[0].AdjacentNodes.Add(origin);
+                origin.AdjacentNodes.Add(spanNodes[0]);
+                spanNodes[0].AdjacentNodes.Add(origin);
 
                 // Connect the last jump node to the ground
-                groundBelow.AdjacentNodes.Add(nodes[nodes.Count - 1]);
-                nodes[nodes.Count - 1].AdjacentNodes.Add(groundBelow);
+                groundBelow.AdjacentNodes.Add(spanNodes[spanNodes.Count - 1]);
+                spanNodes[spanNodes.Count - 1].AdjacentNodes.Add(groundBelow);
             }
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Returns a value indicating whether the given point is passable terrain.
+        /// </summary>
+        /// <param name="point">The point to test.</param>
+        /// <returns>True if the point is passable terrain.</returns>
+        private bool IsPassableTerrain(Point point)
+        {
+            TerrainType terrain;
+            if (this.QuadTree.GetData(point, out terrain))
+            {
+                return terrain == TerrainType.None;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        #endregion
     }
 }
