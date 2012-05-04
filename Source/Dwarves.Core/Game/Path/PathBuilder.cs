@@ -186,7 +186,7 @@ namespace Dwarves.Game.Path
             this.AttachPinDropJump(origin, left, groundNodes);
 
             // Attach spans for parabolic jumps
-            this.AttachParabolicJump(origin, left, groundNodes);
+            this.AttachParabolicJump(origin, left, groundNodes, 0.5f, 5);
         }
 
         /// <summary>
@@ -261,10 +261,14 @@ namespace Dwarves.Game.Path
         /// <param name="origin">The point being jumped down from.</param>
         /// <param name="left">Indicates whether the path is to the left of origin; False indicates to right.</param>
         /// <param name="groundNodes">The set of path nodes along the ground.</param>
+        /// <param name="coefficient">The parabolic coefficient.</param>
+        /// <param name="peakOffset">The distance to peak upwards before spanning downwards.</param>
         private void AttachParabolicJump(
             LinkedPathNode origin,
             bool left,
-            Dictionary<Point, LinkedPathNode> groundNodes)
+            Dictionary<Point, LinkedPathNode> groundNodes,
+            float coefficient,
+            uint peakOffset)
         {
             var spanNodes = new List<LinkedPathNode>();
 
@@ -280,15 +284,16 @@ namespace Dwarves.Game.Path
 
                 // Calculate the x and y point for this step
                 int x = origin.Node.X + deltaX;
-                int y = origin.Node.Y + (deltaX * deltaX);
+                double square = (coefficient * (left ? -1 : 1) * deltaX - Math.Sqrt(peakOffset));
+                double y = origin.Node.Y - (-(square * square) + peakOffset);
 
                 // Calculate how many points of interpolation are required and the direction
                 PathNode prevPoint = prevNode == null ? origin.Node : prevNode.Node;
-                int interpolateLength = Math.Abs(prevPoint.Y - y);
+                int interpolateLength = (int)Math.Abs(prevPoint.Y - y);
                 bool up = prevPoint.Y > y;
 
                 int deltaY = 0;
-                while (deltaY < interpolateLength)
+                while (Math.Abs(deltaY) <= (interpolateLength))
                 {
                     // Calculate the interpolated y value
                     deltaY = up ? deltaY - 1 : deltaY + 1;
