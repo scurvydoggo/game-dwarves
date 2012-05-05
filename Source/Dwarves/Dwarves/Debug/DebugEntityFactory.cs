@@ -134,8 +134,12 @@ namespace Dwarves.Debug
             // Create the terrain component
             var cTerrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
 
-            // TODO: Remove this test code
-            this.TestAStarAlgorithm(world, cTerrain);
+            // TODO: Remove this test code. Drawing test paths
+            // Bottom-left map edge to underground peak
+            this.CreateTestPath(world, cTerrain, new Point(53, 761), new Point(713, 393));
+
+            // Bottom-right map edge to overhange
+            this.CreateTestPath(world, cTerrain, new Point(1951, 765), new Point(714, 328));
 
             // Add terrain component
             world.EntityManager.AddComponent(entity, cTerrain);
@@ -146,13 +150,9 @@ namespace Dwarves.Debug
             return entity;
         }
 
-        private void TestAStarAlgorithm(WorldContext world, TerrainComponent terrain)
+        private void CreateTestPath(WorldContext world, TerrainComponent terrain, Point start, Point goal)
         {
             var testEntity = world.EntityManager.CreateEntity();
-
-            // Define start and end points
-            Point start = new Point(53, 761);
-            Point goal = new Point(713, 393);
 
             // Create the path finder
             var pathFinder = new PathFinder(terrain);
