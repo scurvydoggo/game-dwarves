@@ -176,10 +176,10 @@ namespace Dwarves.Common
         /// bounds of this node.
         /// </param>
         /// <returns>True if the data was retrieved; False if the point lies outside the bounds of this node.</returns>
-        public bool GetData(Point point, out T data)
+        public bool GetDataAt(Point point, out T data)
         {
             ClipQuadTree<T> node;
-            if (this.GetNode(point, out node))
+            if (this.GetNodeAt(point, out node))
             {
                 data = node.data;
                 return true;
@@ -199,11 +199,18 @@ namespace Dwarves.Common
         /// <param name="dataArray">The data within the rectangle.</param>
         /// <returns>True if the data was retrieved; False if the rectangle lies outside the bounds of this node.
         /// </returns>
-        public bool GetData(Rectangle rect, out QuadTreeData<T>[] dataArray)
+        public bool GetDataIntersecting(Rectangle rect, out QuadTreeData<T>[] dataArray)
         {
-            ClipQuadTree<T> node;
-            if (this.GetNode(rect, out node))
+            if (this.Bounds.Intersects(rect))
             {
+                // Get the smallest node containing the whole rectangle
+                ClipQuadTree<T> node;
+                if (!this.GetNodeContaining(rect, out node))
+                {
+                    node = this;
+                }
+
+                // Iterate all data items in the node
                 var dataList = new List<QuadTreeData<T>>();
                 foreach (QuadTreeData<T> data in node)
                 {
@@ -231,7 +238,7 @@ namespace Dwarves.Common
         /// <param name="point">The point.</param>
         /// <param name="node">The node at the point. Null if no node was not found.</param>
         /// <returns>True if the node was retrieved; False if the point lies outside the bounds of this node.</returns>
-        public bool GetNode(Point point, out ClipQuadTree<T> node)
+        public bool GetNodeAt(Point point, out ClipQuadTree<T> node)
         {
             if (this.Bounds.Contains(point))
             {
@@ -245,10 +252,10 @@ namespace Dwarves.Common
                 {
                     // Try and see if the point lies in one of the sub-quadrants
                     return
-                        this.TopLeft.GetNode(point, out node) ||
-                        this.TopRight.GetNode(point, out node) ||
-                        this.BottomLeft.GetNode(point, out node) ||
-                        this.BottomRight.GetNode(point, out node);
+                        this.TopLeft.GetNodeAt(point, out node) ||
+                        this.TopRight.GetNodeAt(point, out node) ||
+                        this.BottomLeft.GetNodeAt(point, out node) ||
+                        this.BottomRight.GetNodeAt(point, out node);
                 }
             }
             else
@@ -266,7 +273,7 @@ namespace Dwarves.Common
         /// <param name="node">The node at the point. Null if no node was not found.</param>
         /// <returns>True if the node was retrieved; False if the rectangle lies outside the bounds of this node.
         /// </returns>
-        public bool GetNode(Rectangle rect, out ClipQuadTree<T> node)
+        public bool GetNodeContaining(Rectangle rect, out ClipQuadTree<T> node)
         {
             if (this.Bounds.Contains(rect))
             {
@@ -280,10 +287,10 @@ namespace Dwarves.Common
                 {
                     // Try and see if the rectangle fits in one of the sub-quadrants
                     bool existsInChild =
-                        this.TopLeft.GetNode(rect, out node) ||
-                        this.TopRight.GetNode(rect, out node) ||
-                        this.BottomLeft.GetNode(rect, out node) ||
-                        this.BottomRight.GetNode(rect, out node);
+                        this.TopLeft.GetNodeContaining(rect, out node) ||
+                        this.TopRight.GetNodeContaining(rect, out node) ||
+                        this.BottomLeft.GetNodeContaining(rect, out node) ||
+                        this.BottomRight.GetNodeContaining(rect, out node);
 
                     // If the rectangle doesn't fit in a sub-quadrant, this node is the smallest fit
                     if (!existsInChild)

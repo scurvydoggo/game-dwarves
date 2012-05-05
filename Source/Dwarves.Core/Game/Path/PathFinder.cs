@@ -244,7 +244,7 @@ namespace Dwarves.Game.Path
         private bool IsOpenSpace(Rectangle rect)
         {
             QuadTreeData<TerrainType>[] data;
-            if (this.Terrain.QuadTree.GetData(rect, out data))
+            if (this.Terrain.QuadTree.GetDataIntersecting(rect, out data))
             {
                 foreach (QuadTreeData<TerrainType> terrainType in data)
                 {

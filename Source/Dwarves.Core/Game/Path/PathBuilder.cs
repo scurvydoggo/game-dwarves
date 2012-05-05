@@ -376,7 +376,7 @@ namespace Dwarves.Game.Path
         private bool IsPassableTerrain(Point point)
         {
             TerrainType terrain;
-            if (this.QuadTree.GetData(point, out terrain))
+            if (this.QuadTree.GetDataAt(point, out terrain))
             {
                 return terrain == TerrainType.None;
             }

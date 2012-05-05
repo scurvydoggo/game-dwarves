@@ -162,35 +162,48 @@ namespace Dwarves.Subsystem
                 var cScaleRender =
                     (ScaleRenderComponent)this.EntityManager.GetComponent(entity, typeof(ScaleRenderComponent));
 
-                // Create the transform matrix
-                Matrix transform =
-                    Matrix.Identity *
-                    Matrix.CreateTranslation(cameraTranslateX / cScaleRender.Scale, cameraTranslateY / cScaleRender.Scale, 0) *
-                    Matrix.CreateTranslation(cPosition.Position.X, cPosition.Position.Y, 0) *
-                    Matrix.CreateScale(cameraScaleX, cameraScaleY, 0) *
-                    Matrix.CreateScale(cScaleRender.Scale, cScaleRender.Scale, 0);
+                // Create the camera transform matrix
+                var camTranslation = new Vector3(
+                    (cameraTranslateX / cScaleRender.Scale) + cPosition.Position.X,
+                    (cameraTranslateY / cScaleRender.Scale) + cPosition.Position.Y,
+                    0);
+                var camScale = new Vector3(cameraScaleX * cScaleRender.Scale, cameraScaleY * cScaleRender.Scale, 0);
+                Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
 
+                // Begin the sprite batch with the camera transform
                 spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
 
-                // Step through each terrain block
-                foreach (QuadTreeData<TerrainType> data in cTerrain.QuadTree)
+                // Get the terrain data for the visible portion of the screen
+                int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
+                int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
+                Rectangle screenRect = new Rectangle(
+                    terrainStartX,
+                    terrainStartY,
+                    (int)(this.graphics.Viewport.Width / camScale.X),
+                    (int)(this.graphics.Viewport.Height / camScale.Y));
+                QuadTreeData<TerrainType>[] terrainBlocks;
+                if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
                 {
-                    // Don't draw anything if no terrain exists here
-                    TerrainType terrainType = data.Data;
-                    if (terrainType == TerrainType.None)
+                    // Step through each terrain block
+                    foreach (QuadTreeData<TerrainType> terrainBlock in terrainBlocks)
                     {
-                        continue;
+                        // Don't draw anything if no terrain exists here
+                        TerrainType terrainType = terrainBlock.Data;
+                        if (terrainType == TerrainType.None)
+                        {
+                            continue;
+                        }
+
+                        // Calculate the bounds of this terrain block in on-screen coordinates
+                        var bounds = new Rectangle(
+                            (int)Math.Round(terrainBlock.Bounds.X * cScaleSpace.Scale),
+                            (int)Math.Round(terrainBlock.Bounds.Y * cScaleSpace.Scale),
+                            (int)Math.Round(terrainBlock.Bounds.Length * cScaleSpace.Scale),
+                            (int)Math.Round(terrainBlock.Bounds.Length * cScaleSpace.Scale));
+
+                        // Tile the terrain within the bounds
+                        this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
                     }
-
-                    // Calculate the bounds of this terrain block in on-screen coordinates
-                    var bounds = new Rectangle(
-                        (int)Math.Round(data.Bounds.X * cScaleSpace.Scale),
-                        (int)Math.Round(data.Bounds.Y * cScaleSpace.Scale),
-                        (int)Math.Round(data.Bounds.Length * cScaleSpace.Scale),
-                        (int)Math.Round(data.Bounds.Length * cScaleSpace.Scale));
-
-                    // Tile the terrain within the bounds
-                    this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
                 }
 
                 // TODO: Delete this test code
