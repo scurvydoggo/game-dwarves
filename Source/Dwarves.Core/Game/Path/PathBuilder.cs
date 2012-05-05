@@ -16,6 +16,27 @@ namespace Dwarves.Game.Path
     /// </summary>
     public class PathBuilder
     {
+        #region Constants
+
+        /// <summary>
+        /// The link cost for left/right/up/down movement.
+        /// </summary>
+        public const int LinkCostFourDirection = 10;
+
+        /// <summary>
+        /// The link cost for diagonal movement.
+        /// </summary>
+        public const int LinkCostDiagonal = 14;
+
+        /// <summary>
+        /// The scaling factor from terrain units.
+        /// </summary>
+        public const int LinkCostScale = 10;
+
+        #endregion
+
+        #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the PathBuilder class.
         /// </summary>
@@ -27,6 +48,10 @@ namespace Dwarves.Game.Path
             this.MaxSpanLength = maxJumpLength;
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>
         /// Gets or sets the terrain quad tree.
         /// </summary>
@@ -36,6 +61,8 @@ namespace Dwarves.Game.Path
         /// Gets or sets the maximum length (in adjacent nodes) of a span.
         /// </summary>
         public int MaxSpanLength { get; set; }
+
+        #endregion
 
         #region Public Methods
 
@@ -94,42 +121,42 @@ namespace Dwarves.Game.Path
                 LinkedPathNode rightUp;
                 if (groundNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y - 1), out rightUp))
                 {
-                    if (!rightUp.AdjacentNodes.Contains(node))
+                    if (!rightUp.HasLinkedNode(node))
                     {
-                        rightUp.AdjacentNodes.Add(node);
+                        rightUp.AddLink(node, LinkCostDiagonal);
                     }
 
-                    if (!node.AdjacentNodes.Contains(rightUp))
+                    if (!node.HasLinkedNode(rightUp))
                     {
-                        node.AdjacentNodes.Add(rightUp);
+                        node.AddLink(rightUp, LinkCostDiagonal);
                     }
                 }
 
                 LinkedPathNode right;
                 if (groundNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y), out right))
                 {
-                    if (!right.AdjacentNodes.Contains(node))
+                    if (!right.HasLinkedNode(node))
                     {
-                        right.AdjacentNodes.Add(node);
+                        right.AddLink(node, LinkCostFourDirection);
                     }
 
-                    if (!node.AdjacentNodes.Contains(right))
+                    if (!node.HasLinkedNode(right))
                     {
-                        node.AdjacentNodes.Add(right);
+                        node.AddLink(right, LinkCostFourDirection);
                     }
                 }
 
                 LinkedPathNode rightDown;
                 if (groundNodes.TryGetValue(new Point(node.Node.X + 1, node.Node.Y + 1), out rightDown))
                 {
-                    if (!rightDown.AdjacentNodes.Contains(node))
+                    if (!rightDown.HasLinkedNode(node))
                     {
-                        rightDown.AdjacentNodes.Add(node);
+                        rightDown.AddLink(node, LinkCostDiagonal);
                     }
 
-                    if (!node.AdjacentNodes.Contains(rightDown))
+                    if (!node.HasLinkedNode(rightDown))
                     {
-                        node.AdjacentNodes.Add(rightDown);
+                        node.AddLink(rightDown, LinkCostDiagonal);
                     }
                 }
             }
@@ -207,8 +234,8 @@ namespace Dwarves.Game.Path
             // Add the first 2 points as they have already been tested
             spanNodes.Add(new LinkedPathNode(x, origin.Node.Y, PathNodeType.Jump));
             spanNodes.Add(new LinkedPathNode(x, origin.Node.Y + 1, PathNodeType.Jump));
-            spanNodes[0].AdjacentNodes.Add(spanNodes[1]);
-            spanNodes[1].AdjacentNodes.Add(spanNodes[0]);
+            spanNodes[0].AddLink(spanNodes[1], LinkCostFourDirection);
+            spanNodes[1].AddLink(spanNodes[0], LinkCostFourDirection);
 
             // Test the remaining points until ground is hit or max span length is reached
             LinkedPathNode groundBelow = null;
@@ -234,8 +261,8 @@ namespace Dwarves.Game.Path
 
                 // The point is mid-air, so create the node and connect it to the previous node
                 var node = new LinkedPathNode(point, PathNodeType.Jump);
-                prevNode.AdjacentNodes.Add(node);
-                node.AdjacentNodes.Add(prevNode);
+                prevNode.AddLink(node, LinkCostFourDirection);
+                node.AddLink(prevNode, LinkCostFourDirection);
 
                 // Add the node to the list
                 spanNodes.Add(node);
@@ -248,12 +275,12 @@ namespace Dwarves.Game.Path
             if (groundBelow != null && spanNodes.Count > 0)
             {
                 // Connect the first jump node to the origin
-                origin.AdjacentNodes.Add(spanNodes[0]);
-                spanNodes[0].AdjacentNodes.Add(origin);
+                origin.AddLink(spanNodes[0], LinkCostFourDirection);
+                spanNodes[0].AddLink(origin, LinkCostFourDirection);
 
                 // Connect the last jump node to the ground
-                groundBelow.AdjacentNodes.Add(spanNodes[spanNodes.Count - 1]);
-                spanNodes[spanNodes.Count - 1].AdjacentNodes.Add(groundBelow);
+                groundBelow.AddLink(spanNodes[spanNodes.Count - 1], LinkCostFourDirection);
+                spanNodes[spanNodes.Count - 1].AddLink(groundBelow, LinkCostFourDirection);
             }
         }
 
@@ -327,8 +354,9 @@ namespace Dwarves.Game.Path
                     var node = new LinkedPathNode(point, PathNodeType.Jump);
                     if (prevNode != null)
                     {
-                        prevNode.AdjacentNodes.Add(node);
-                        node.AdjacentNodes.Add(prevNode);
+                        int cost = this.CalculatePathCost(node.Node.Y - prevNode.Node.Y, node.Node.X - prevNode.Node.X);
+                        prevNode.AddLink(node, cost);
+                        node.AddLink(prevNode, cost);
                     }
 
                     // Add the node to the list
@@ -354,13 +382,18 @@ namespace Dwarves.Game.Path
             // If this path is complete, join this jump-segment to the dictionary nodes
             if (groundBelow != null && spanNodes.Count > 4)
             {
+                LinkedPathNode first = spanNodes[0];
+                LinkedPathNode last = spanNodes[spanNodes.Count - 1];
+
                 // Connect the first jump node to the origin
-                origin.AdjacentNodes.Add(spanNodes[0]);
-                spanNodes[0].AdjacentNodes.Add(origin);
+                int cost = this.CalculatePathCost(origin.Node.Y - first.Node.Y, origin.Node.X - first.Node.X);
+                origin.AddLink(first, cost);
+                first.AddLink(origin, cost);
 
                 // Connect the last jump node to the ground
-                groundBelow.AdjacentNodes.Add(spanNodes[spanNodes.Count - 1]);
-                spanNodes[spanNodes.Count - 1].AdjacentNodes.Add(groundBelow);
+                cost = this.CalculatePathCost(groundBelow.Node.Y - last.Node.Y, groundBelow.Node.X - last.Node.X);
+                groundBelow.AddLink(last, cost);
+                last.AddLink(groundBelow, cost);
             }
         }
 
@@ -384,6 +417,19 @@ namespace Dwarves.Game.Path
             {
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Calculate the path cost for a single step with the given X and Y offsets.
+        /// </summary>
+        /// <param name="offsetX">The distance that the node is offset from the adjacent node by X.</param>
+        /// <param name="offsetY">The distance that the node is offset from the adjacent node by Y.</param>
+        /// <returns>The path cost for the given X and Y offsets.</returns>
+        private int CalculatePathCost(int offsetX, int offsetY)
+        {
+            offsetX *= LinkCostScale;
+            offsetY *= LinkCostScale;
+            return (int)Math.Sqrt((offsetX * offsetX) + (offsetY * offsetY));
         }
 
         #endregion

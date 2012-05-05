@@ -17,15 +17,7 @@ namespace Dwarves.Game.Path
     /// </summary>
     public class PathFinder
     {
-        /// <summary>
-        /// The cost for a normal up/down/left/right step.
-        /// </summary>
-        private const int SquareStepCost = 10;
-
-        /// <summary>
-        /// The cost for a normal diagonal step.
-        /// </summary>
-        private const int DiagonalStepCost = 14;
+        #region Private Variables
 
         /// <summary>
         /// The ordered open list.
@@ -47,6 +39,10 @@ namespace Dwarves.Game.Path
         /// </summary>
         private LinkedPathNode goal;
 
+        #endregion
+
+        #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the PathFinder class.
         /// </summary>
@@ -56,10 +52,18 @@ namespace Dwarves.Game.Path
             this.Terrain = terrain;
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>
         /// Gets or sets the terrain to be traversed.
         /// </summary>
         public TerrainComponent Terrain { get; set; }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// Find the path between the two given points.
@@ -121,6 +125,10 @@ namespace Dwarves.Game.Path
             }
         }
 
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
         /// Find the goal node from the existing open set.
         /// </summary>
@@ -146,23 +154,21 @@ namespace Dwarves.Game.Path
                     break;
                 }
 
-                // Add the adjacent nodes to the open list
-                foreach (LinkedPathNode adjacent in current.PathNode.AdjacentNodes)
+                // Add the linked nodes to the open list
+                foreach (PathLink link in current.PathNode.GetLinks())
                 {
                     // Add the left node (if it isn't already in the closed list or blocked)
-                    if (!this.closedSet.ContainsKey(adjacent))
+                    if (!this.closedSet.ContainsKey(link.Node))
                     {
                         if (this.IsOpenSpace(
-                            this.GetNodeRectangle(adjacent.Node.X, adjacent.Node.Y, nodeWidth, nodeHeight)))
+                            this.GetNodeRectangle(link.Node.Node.X, link.Node.Node.Y, nodeWidth, nodeHeight)))
                         {
-                            // Calculate the H and G value for the adjacent node
-                            int g = current.G + this.CalculateGIncrement(
-                                adjacent.Node.X - current.PathNode.Node.X,
-                                adjacent.Node.Y - current.PathNode.Node.Y);
-                            int h = this.CalculateH(adjacent.Node);
+                            // Calculate the G and H path cost for the adjacent node
+                            int g = current.G + link.Cost;
+                            int h = this.CalculateH(link.Node.Node);
 
                             // Add the adjacent node to the open list
-                            this.AddOpenNode(new AStarNode(adjacent, h, g, current));
+                            this.AddOpenNode(new AStarNode(link.Node, h, g, current));
                         }
                     }
                 }
@@ -209,20 +215,6 @@ namespace Dwarves.Game.Path
         }
 
         /// <summary>
-        /// Calculate the amount to increment G for a single step with the given X and Y offsets.
-        /// </summary>
-        /// <param name="offsetX">The distance that the node is offset from the adjacent node by X.</param>
-        /// <param name="offsetY">The distance that the node is offset from the adjacent node by Y.</param>
-        /// <returns>The amount to increment G.</returns>
-        private int CalculateGIncrement(int offsetX, int offsetY)
-        {
-            // Multiply by 10 such that the first sqrt decimal isn't rounded off
-            offsetX *= 10;
-            offsetY *= 10;
-            return (int)Math.Sqrt((offsetX * offsetX) + (offsetY * offsetY));
-        }
-
-        /// <summary>
         /// Gets a rectangle for the given node with the node point at the middle of the bottom edge.
         /// </summary>
         /// <param name="x">The center x position of the node.</param>
@@ -260,10 +252,14 @@ namespace Dwarves.Game.Path
             return false;
         }
 
+        #endregion
+
+        #region Inner Classes
+
         /// <summary>
         /// Represents a node in the A-star algorithm.
         /// </summary>
-        public class AStarNode : IIndexedObject, IComparable<AStarNode>
+        private class AStarNode : IIndexedObject, IComparable<AStarNode>
         {
             /// <summary>
             /// Initializes a new instance of the AStarNode class.
@@ -348,5 +344,7 @@ namespace Dwarves.Game.Path
                 }
             }
         }
+
+        #endregion
     }
 }
