@@ -187,6 +187,8 @@ namespace Dwarves.Game.Path
 
             // Attach spans for parabolic jumps
             this.AttachParabolicJump(origin, left, groundNodes, 0.5f, 5);
+            this.AttachParabolicJump(origin, left, groundNodes, 1, 2);
+            this.AttachParabolicJump(origin, left, groundNodes, 1.5f, 1);
         }
 
         /// <summary>

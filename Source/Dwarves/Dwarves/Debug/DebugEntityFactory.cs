@@ -128,7 +128,7 @@ namespace Dwarves.Debug
             ClipQuadTree<TerrainType> terrainQuadTree = terrainFactory.CreateTerrainQuadTree(texture);
 
             // Build the path nodes from the terrain quad tree
-            var pathBuilder = new PathBuilder(terrainQuadTree, 100);
+            var pathBuilder = new PathBuilder(terrainQuadTree, 30);
             Dictionary<Point, LinkedPathNode> pathNodes = pathBuilder.BuildPathNodes();
 
             // Create the terrain component
