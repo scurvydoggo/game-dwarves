@@ -177,10 +177,10 @@ namespace Dwarves.Subsystem
                 int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
                 int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
                 Rectangle screenRect = new Rectangle(
-                    terrainStartX,
-                    terrainStartY,
-                    (int)(this.graphics.Viewport.Width / camScale.X),
-                    (int)(this.graphics.Viewport.Height / camScale.Y));
+                    terrainStartX - Const.TileSize,
+                    terrainStartY - Const.TileSize,
+                    (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + Const.TileSize + 1,
+                    (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + Const.TileSize + 1);
                 QuadTreeData<TerrainData>[] terrainBlocks;
                 if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
                 {
