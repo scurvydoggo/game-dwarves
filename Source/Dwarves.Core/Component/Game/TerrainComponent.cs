@@ -24,7 +24,7 @@ namespace Dwarves.Component.Game
         /// <param name="isCollidable">Indicates whether the terrain can be collided with.</param>
         /// <param name="pathNodes">The pathfinding nodes of the terrain.</param>
         public TerrainComponent(
-            ClipQuadTree<TerrainType> terrain,
+            ClipQuadTree<TerrainData> terrain,
             bool isCollidable,
             Dictionary<Point, LinkedPathNode> pathNodes)
         {
@@ -36,7 +36,7 @@ namespace Dwarves.Component.Game
         /// <summary>
         /// Gets the terrain quad tree.
         /// </summary>
-        public ClipQuadTree<TerrainType> QuadTree { get; private set; }
+        public ClipQuadTree<TerrainData> QuadTree { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this terrain can be collided with.

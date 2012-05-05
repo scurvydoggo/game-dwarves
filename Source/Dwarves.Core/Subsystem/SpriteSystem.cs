@@ -181,14 +181,14 @@ namespace Dwarves.Subsystem
                     terrainStartY,
                     (int)(this.graphics.Viewport.Width / camScale.X),
                     (int)(this.graphics.Viewport.Height / camScale.Y));
-                QuadTreeData<TerrainType>[] terrainBlocks;
+                QuadTreeData<TerrainData>[] terrainBlocks;
                 if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
                 {
                     // Step through each terrain block
-                    foreach (QuadTreeData<TerrainType> terrainBlock in terrainBlocks)
+                    foreach (QuadTreeData<TerrainData> terrainBlock in terrainBlocks)
                     {
                         // Don't draw anything if no terrain exists here
-                        TerrainType terrainType = terrainBlock.Data;
+                        TerrainType terrainType = terrainBlock.Data.Type;
                         if (terrainType == TerrainType.None)
                         {
                             continue;

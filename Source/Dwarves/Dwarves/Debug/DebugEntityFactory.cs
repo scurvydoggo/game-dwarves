@@ -6,6 +6,7 @@
 #if DEBUG
 namespace Dwarves.Debug
 {
+    using System;
     using System.Collections.Generic;
     using Dwarves.Assembler.Body;
     using Dwarves.Common;
@@ -109,6 +110,7 @@ namespace Dwarves.Debug
         /// <param name="scale">The scale ratio for the terrain.</param>
         /// <param name="isCollidable">Indicates whether the terrain can be collided with.</param>
         /// <param name="terrainBitmapName">The name of the terrain bitmap.</param>
+        /// <param name="currentTime">The current time used as the terrain creation time.</param>
         /// <returns>The entity.</returns>
         public Entity CreateTerrain(
             WorldContext world,
@@ -116,7 +118,8 @@ namespace Dwarves.Debug
             float y,
             float scale,
             bool isCollidable,
-            string terrainBitmapName)
+            string terrainBitmapName,
+            TimeSpan currentTime)
         {
             Entity entity = world.EntityManager.CreateEntity();
 
@@ -125,7 +128,7 @@ namespace Dwarves.Debug
 
             // Create the terrain quad tree
             var terrainFactory = new TerrainFactory();
-            ClipQuadTree<TerrainType> terrainQuadTree = terrainFactory.CreateTerrainQuadTree(texture);
+            ClipQuadTree<TerrainData> terrainQuadTree = terrainFactory.CreateTerrainQuadTree(texture, currentTime);
 
             // Build the path nodes from the terrain quad tree
             var pathBuilder = new PathBuilder(terrainQuadTree, 30, 5);

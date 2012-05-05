@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Game.Terrain
 {
+    using System;
     using Dwarves.Common;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
@@ -20,11 +21,12 @@ namespace Dwarves.Game.Terrain
         /// Create a terrain object from the given terrain bitmap.
         /// </summary>
         /// <param name="bitmap">The bitmap defining the terrain.</param>
+        /// <param name="currentTime">The current time used as the terrain creation time.</param>
         /// <returns>The terrain object.</returns>
-        public ClipQuadTree<TerrainType> CreateTerrainQuadTree(Texture2D bitmap)
+        public ClipQuadTree<TerrainData> CreateTerrainQuadTree(Texture2D bitmap, TimeSpan currentTime)
         {
             // Create the quad tree
-            var quadTree = new ClipQuadTree<TerrainType>(
+            var quadTree = new ClipQuadTree<TerrainData>(
                 new Square(0, 0, this.GetUpperPowerOf2(bitmap.Height > bitmap.Width ? bitmap.Height : bitmap.Width)));
 
             // Read the bitmap data
@@ -32,7 +34,7 @@ namespace Dwarves.Game.Terrain
             bitmap.GetData<Color>(bitmapData);
 
             // Populate the terrain's quad tree from the bitmap data
-            this.PopulateQuadTree(quadTree, bitmapData, bitmap.Width);
+            this.PopulateQuadTree(quadTree, bitmapData, bitmap.Width, currentTime);
 
             return quadTree;
         }
@@ -47,14 +49,22 @@ namespace Dwarves.Game.Terrain
         /// <param name="quadTree">The quad tree to populate.</param>
         /// <param name="bitmapData">The bit map color data.</param>
         /// <param name="bitmapWidth">The width in pixels of the bitmap image.</param>
-        private void PopulateQuadTree(ClipQuadTree<TerrainType> quadTree, Color[] bitmapData, int bitmapWidth)
+        /// <param name="currentTime">The current time used as the terrain creation time.</param>
+        private void PopulateQuadTree(
+            ClipQuadTree<TerrainData> quadTree,
+            Color[] bitmapData,
+            int bitmapWidth,
+            TimeSpan currentTime)
         {
             // Create the quadrants
-            TerrainType? terrainType = this.PopulateQuadrants(quadTree, quadTree.Bounds, bitmapData, bitmapWidth);
+            TerrainType? terrainType =
+                this.PopulateQuadrants(quadTree, quadTree.Bounds, bitmapData, bitmapWidth, currentTime);
             if (terrainType.HasValue)
             {
+                TerrainData data = new TerrainData(terrainType.Value, currentTime);
+
                 // The entire terrain quad tree is of a single terrain type, so set the root value with no leaves
-                quadTree.SetData(terrainType.Value, quadTree.Bounds, null);
+                quadTree.SetData(data, quadTree.Bounds, null);
             }
         }
 
@@ -77,13 +87,15 @@ namespace Dwarves.Game.Terrain
         /// <param name="bounds">The bounds of the quadrant whose sub-quandrants are being populated.</param>
         /// <param name="bitmapData">The bit map color data.</param>
         /// <param name="bitmapWidth">The width in pixels of the bitmap image.</param>
+        /// <param name="currentTime">The current time used as the terrain creation time.</param>
         /// <returns>The terrain type value if all sub-quadrants in this bound are filled with the same terrain type;
         /// Null if the sub-quadrants have various terrain types.</returns>
         private TerrainType? PopulateQuadrants(
-            ClipQuadTree<TerrainType> quadTree,
+            ClipQuadTree<TerrainData> quadTree,
             Square bounds,
             Color[] bitmapData,
-            int bitmapWidth)
+            int bitmapWidth,
+            TimeSpan currentTime)
         {
             if (bounds.Length > 1)
             {
@@ -95,13 +107,13 @@ namespace Dwarves.Game.Terrain
 
                 // Populate the sub quadrants or if they are uniform get the single terrain type they contain
                 TerrainType? topLeftTerrain =
-                    this.PopulateQuadrants(quadTree, topLeftBounds, bitmapData, bitmapWidth);
+                    this.PopulateQuadrants(quadTree, topLeftBounds, bitmapData, bitmapWidth, currentTime);
                 TerrainType? topRightTerrain =
-                    this.PopulateQuadrants(quadTree, topRightBounds, bitmapData, bitmapWidth);
+                    this.PopulateQuadrants(quadTree, topRightBounds, bitmapData, bitmapWidth, currentTime);
                 TerrainType? bottomLeftTerrain =
-                    this.PopulateQuadrants(quadTree, bottomLeftBounds, bitmapData, bitmapWidth);
+                    this.PopulateQuadrants(quadTree, bottomLeftBounds, bitmapData, bitmapWidth, currentTime);
                 TerrainType? bottomRightTerrain =
-                    this.PopulateQuadrants(quadTree, bottomRightBounds, bitmapData, bitmapWidth);
+                    this.PopulateQuadrants(quadTree, bottomRightBounds, bitmapData, bitmapWidth, currentTime);
 
                 // Check if all of the quadrants are uniform and all have the same terrain type
                 if (topLeftTerrain.HasValue &&
@@ -119,25 +131,29 @@ namespace Dwarves.Game.Terrain
                     if (topLeftTerrain.HasValue)
                     {
                         // Quadrant has a uniform color
-                        quadTree.SetData(topLeftTerrain.Value, topLeftBounds, null);
+                        quadTree.SetData(
+                            new TerrainData(topLeftTerrain.Value, currentTime), topLeftBounds, null);
                     }
 
                     if (topRightTerrain.HasValue)
                     {
                         // Quadrant has a uniform color
-                        quadTree.SetData(topRightTerrain.Value, topRightBounds, null);
+                        quadTree.SetData(
+                            new TerrainData(topRightTerrain.Value, currentTime), topRightBounds, null);
                     }
 
                     if (bottomLeftTerrain.HasValue)
                     {
                         // Quadrant has a uniform color
-                        quadTree.SetData(bottomLeftTerrain.Value, bottomLeftBounds, null);
+                        quadTree.SetData(
+                            new TerrainData(bottomLeftTerrain.Value, currentTime), bottomLeftBounds, null);
                     }
 
                     if (bottomRightTerrain.HasValue)
                     {
                         // Quadrant has a uniform color
-                        quadTree.SetData(bottomRightTerrain.Value, bottomRightBounds, null);
+                        quadTree.SetData(
+                            new TerrainData(bottomRightTerrain.Value, currentTime), bottomRightBounds, null);
                     }
 
                     // Return null since there isnt a single color shared between all the quadrants

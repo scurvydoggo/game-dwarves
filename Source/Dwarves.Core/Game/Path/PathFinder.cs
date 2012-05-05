@@ -235,12 +235,12 @@ namespace Dwarves.Game.Path
         /// terrain or the rectangle is outside the bounds of the terrain quad tree.</returns>
         private bool IsOpenSpace(Rectangle rect)
         {
-            QuadTreeData<TerrainType>[] data;
-            if (this.Terrain.QuadTree.GetDataIntersecting(rect, out data))
+            QuadTreeData<TerrainData>[] terrainDataArray;
+            if (this.Terrain.QuadTree.GetDataIntersecting(rect, out terrainDataArray))
             {
-                foreach (QuadTreeData<TerrainType> terrainType in data)
+                foreach (QuadTreeData<TerrainData> terrainData in terrainDataArray)
                 {
-                    if (terrainType.Data != TerrainType.None)
+                    if (terrainData.Data.Type != TerrainType.None)
                     {
                         return false;
                     }

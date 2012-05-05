@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves
 {
+    using System;
     using Dwarves.Data;
     using Dwarves.Subsystem;
     using EntitySystem;
@@ -52,7 +53,8 @@ namespace Dwarves
             var resourceManager = new ResourceManager(content);
 
             // Create the world context
-            this.World = new WorldContext(this.entitySystemWorld.EntityManager, physicsWorld, resourceManager);
+            this.World =
+                new WorldContext(this.entitySystemWorld.EntityManager, physicsWorld, resourceManager, new TimeSpan());
 
             var updateSystems = this.entitySystemWorld.UpdateSystemManager;
             var drawSystems = this.entitySystemWorld.DrawSystemManager;
@@ -102,6 +104,9 @@ namespace Dwarves
         /// <param name="delta">The number of milliseconds since the last step.</param>
         public void Step(int delta)
         {
+            // Update the current game time
+            this.World.CurrentTime = this.World.CurrentTime.Add(TimeSpan.FromMilliseconds(delta));
+
             // Process the update-related systems
             this.entitySystemWorld.Step(delta);
         }

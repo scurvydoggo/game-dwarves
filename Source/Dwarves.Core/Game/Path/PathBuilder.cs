@@ -42,9 +42,9 @@ namespace Dwarves.Game.Path
         /// </summary>
         /// <param name="quadTree">The terrain quad tree.</param>
         /// <param name="maxSpanLength">The maximum length (in nodes) of a span.</param>
-        /// <param name="maxSpanLength">The minimum height (in nodes) that is required for a span to be considered a
+        /// <param name="minJumpHeight">The minimum height (in nodes) that is required for a span to be considered a
         /// jump.</param>
-        public PathBuilder(ClipQuadTree<TerrainType> quadTree, int maxSpanLength, int minJumpHeight)
+        public PathBuilder(ClipQuadTree<TerrainData> quadTree, int maxSpanLength, int minJumpHeight)
         {
             this.QuadTree = quadTree;
             this.MaxSpanLength = maxSpanLength;
@@ -58,7 +58,7 @@ namespace Dwarves.Game.Path
         /// <summary>
         /// Gets or sets the terrain quad tree.
         /// </summary>
-        public ClipQuadTree<TerrainType> QuadTree { get; set; }
+        public ClipQuadTree<TerrainData> QuadTree { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum length (in nodes) of a span.
@@ -103,18 +103,18 @@ namespace Dwarves.Game.Path
             var groundNodes = new Dictionary<Point, LinkedPathNode>();
 
             // Add all ground nodes
-            foreach (QuadTreeData<TerrainType> data in this.QuadTree)
+            foreach (QuadTreeData<TerrainData> terrainData in this.QuadTree)
             {
                 // Ignore non-walkable terrain
-                if (data.Data == TerrainType.None)
+                if (terrainData.Data.Type == TerrainType.None)
                 {
                     continue;
                 }
 
                 // Test each point 1 pixel above the top of this quad
-                for (int x = data.Bounds.X; x < data.Bounds.Right; x++)
+                for (int x = terrainData.Bounds.X; x < terrainData.Bounds.Right; x++)
                 {
-                    var pointAbove = new Point(x, data.Bounds.Y - 1);
+                    var pointAbove = new Point(x, terrainData.Bounds.Y - 1);
                     if (this.IsPassableTerrain(pointAbove))
                     {
                         // The point above is a passable node so add it to the set
@@ -425,10 +425,10 @@ namespace Dwarves.Game.Path
         /// <returns>True if the point is passable terrain.</returns>
         private bool IsPassableTerrain(Point point)
         {
-            TerrainType terrain;
-            if (this.QuadTree.GetDataAt(point, out terrain))
+            TerrainData terrainData;
+            if (this.QuadTree.GetDataAt(point, out terrainData))
             {
-                return terrain == TerrainType.None;
+                return terrainData.Type == TerrainType.None;
             }
             else
             {

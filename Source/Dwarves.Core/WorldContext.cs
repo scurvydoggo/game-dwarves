@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves
 {
+    using System;
     using EntitySystem;
     using FarseerPhysics.Dynamics;
 
@@ -19,11 +20,13 @@ namespace Dwarves
         /// <param name="entityManager">The entity manager.</param>
         /// <param name="physics">The physics world.</param>
         /// <param name="resources">The game resources.</param>
-        public WorldContext(EntityManager entityManager, World physics, ResourceManager resources)
+        /// <param name="currentTime">The current game time.</param>
+        public WorldContext(EntityManager entityManager, World physics, ResourceManager resources, TimeSpan currentTime)
         {
             this.EntityManager = entityManager;
             this.Physics = physics;
             this.Resources = resources;
+            this.CurrentTime = currentTime;
         }
 
         /// <summary>
@@ -40,5 +43,10 @@ namespace Dwarves
         /// Gets the game resources.
         /// </summary>
         public ResourceManager Resources { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the current game time.
+        /// </summary>
+        public TimeSpan CurrentTime { get; set; }
     }
 }
