@@ -63,9 +63,9 @@ namespace Dwarves.Game.Path
         public int Y { get; private set; }
 
         /// <summary>
-        /// Gets the type of this node.
+        /// Gets or sets the type of this node.
         /// </summary>
-        public PathNodeType Type { get; private set; }
+        public PathNodeType Type { get; set; }
 
         /// <summary>
         /// Determine if the given object is equal to this object.

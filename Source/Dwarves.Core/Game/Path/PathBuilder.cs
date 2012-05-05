@@ -41,11 +41,14 @@ namespace Dwarves.Game.Path
         /// Initializes a new instance of the PathBuilder class.
         /// </summary>
         /// <param name="quadTree">The terrain quad tree.</param>
-        /// <param name="maxJumpLength">The maximum length (in adjacent nodes) of a jump.</param>
-        public PathBuilder(ClipQuadTree<TerrainType> quadTree, int maxJumpLength)
+        /// <param name="maxSpanLength">The maximum length (in nodes) of a span.</param>
+        /// <param name="maxSpanLength">The minimum height (in nodes) that is required for a span to be considered a
+        /// jump.</param>
+        public PathBuilder(ClipQuadTree<TerrainType> quadTree, int maxSpanLength, int minJumpHeight)
         {
             this.QuadTree = quadTree;
-            this.MaxSpanLength = maxJumpLength;
+            this.MaxSpanLength = maxSpanLength;
+            this.MinJumpHeight = minJumpHeight;
         }
 
         #endregion
@@ -58,9 +61,14 @@ namespace Dwarves.Game.Path
         public ClipQuadTree<TerrainType> QuadTree { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum length (in adjacent nodes) of a span.
+        /// Gets or sets the maximum length (in nodes) of a span.
         /// </summary>
         public int MaxSpanLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum height (in nodes) that is required for a span to be considered a jump.
+        /// </summary>
+        public int MinJumpHeight { get; set; }
 
         #endregion
 
@@ -274,6 +282,15 @@ namespace Dwarves.Game.Path
             // If the path is complete, join this span to the ground nodes
             if (groundBelow != null && spanNodes.Count > 0)
             {
+                // If it is a small drop, don't treat this as a jump
+                if (spanNodes.Count < this.MinJumpHeight)
+                {
+                    foreach (LinkedPathNode node in spanNodes)
+                    {
+                        node.Node = new PathNode(node.Node.X, node.Node.Y, PathNodeType.Normal);
+                    }
+                }
+
                 // Connect the first jump node to the origin
                 origin.AddLink(spanNodes[0], LinkCostFourDirection);
                 spanNodes[0].AddLink(origin, LinkCostFourDirection);
@@ -380,7 +397,7 @@ namespace Dwarves.Game.Path
             }
 
             // If this path is complete, join this jump-segment to the dictionary nodes
-            if (groundBelow != null && spanNodes.Count > 4)
+            if (groundBelow != null && spanNodes.Count >= this.MinJumpHeight)
             {
                 LinkedPathNode first = spanNodes[0];
                 LinkedPathNode last = spanNodes[spanNodes.Count - 1];

@@ -52,7 +52,7 @@ namespace Dwarves.Game.Path
         /// <summary>
         /// Gets the path node.
         /// </summary>
-        public PathNode Node { get; private set; }
+        public PathNode Node { get; internal set; }
 
         /// <summary>
         /// Add a linked path node.
