@@ -13,6 +13,7 @@ namespace Dwarves.Subsystem
     using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
+    using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
     using EntitySystem;
     using EntitySystem.Subsystem;
@@ -183,7 +184,7 @@ namespace Dwarves.Subsystem
                 QuadTreeData<TerrainData>[] terrainBlocks;
                 if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
                 {
-                    // Step through each terrain block
+                    // Tile sprites for each terrain block
                     foreach (QuadTreeData<TerrainData> terrainBlock in terrainBlocks)
                     {
                         // Don't draw anything if no terrain exists here
@@ -194,14 +195,29 @@ namespace Dwarves.Subsystem
                         }
 
                         // Calculate the bounds of this terrain block in on-screen coordinates
-                        var bounds = new Rectangle(
+                        var screenBounds = new Rectangle(
                             (int)Math.Round(terrainBlock.Bounds.X * cScaleSpace.Scale),
                             (int)Math.Round(terrainBlock.Bounds.Y * cScaleSpace.Scale),
                             (int)Math.Round(terrainBlock.Bounds.Length * cScaleSpace.Scale),
                             (int)Math.Round(terrainBlock.Bounds.Length * cScaleSpace.Scale));
 
                         // Tile the terrain within the bounds
-                        this.DrawTiledTerrain(spriteBatch, terrainType, bounds);
+                        this.DrawTiledTerrain(spriteBatch, terrainType, screenBounds);
+                    }
+
+                    // Draw fringe sprites for each terrain block
+                    foreach (QuadTreeData<TerrainData> terrainBlock in terrainBlocks)
+                    {
+                        // Don't draw anything if no terrain exists here
+                        TerrainType terrainType = terrainBlock.Data.Type;
+                        if (terrainType == TerrainType.None)
+                        {
+                            continue;
+                        }
+
+                        // Draw the fringe tiles
+                        this.DrawTerrainFringe(
+                            spriteBatch, terrainType, terrainBlock.Bounds, cScaleSpace.Scale, cTerrain.PathNodes);
                     }
                 }
 
@@ -239,8 +255,8 @@ namespace Dwarves.Subsystem
         /// </summary>
         /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
         /// <param name="terrain">The terrain type.</param>
-        /// <param name="bounds">The bounds within which terrain is tiled.</param>
-        private void DrawTiledTerrain(SpriteBatch spriteBatch, TerrainType terrain, Rectangle bounds)
+        /// <param name="scaledBounds">The bounds of the terrain block scaled by the terrain scale factor.</param>
+        private void DrawTiledTerrain(SpriteBatch spriteBatch, TerrainType terrain, Rectangle scaledBounds)
         {
             // Get the variations of this terrain type
             // TODO: Use the TerrainType value, rather than just using mud here
@@ -251,12 +267,12 @@ namespace Dwarves.Subsystem
                 spriteRects.Add(variation, this.resources.GetSpriteRectangle(name));
             }
 
-            // Calculate the scaled tile size and determine the offset of the top-right corner of the tile
-            int offsetX = bounds.X % Const.TileSize;
-            int offsetY = bounds.Y % Const.TileSize;
-            for (int x = bounds.Left; x < bounds.Right; x += Const.TileSize)
+            // Calculate the scaled tile size and determine the offset of the top-left corner of the tile
+            int offsetX = scaledBounds.X % Const.TileSize;
+            int offsetY = scaledBounds.Y % Const.TileSize;
+            for (int x = scaledBounds.Left; x < scaledBounds.Right; x += Const.TileSize)
             {
-                for (int y = bounds.Top; y < bounds.Bottom; y += Const.TileSize)
+                for (int y = scaledBounds.Top; y < scaledBounds.Bottom; y += Const.TileSize)
                 {
                     // Calculate the top-left position of the tile
                     int tileX = x - offsetX;
@@ -267,33 +283,33 @@ namespace Dwarves.Subsystem
                     Rectangle srcRect = spriteRects.ElementAt(rectIndex).Value;
 
                     // Clip the left bounds
-                    if (tileX < bounds.Left)
+                    if (tileX < scaledBounds.Left)
                     {
-                        int diff = bounds.Left - tileX;
+                        int diff = scaledBounds.Left - tileX;
+                        tileX += diff;
                         srcRect.X += diff;
                         srcRect.Width -= diff;
-                        tileX += diff;
                     }
 
                     // Clip the top bounds
-                    if (tileY < bounds.Top)
+                    if (tileY < scaledBounds.Top)
                     {
-                        int diff = bounds.Top - tileY;
+                        int diff = scaledBounds.Top - tileY;
+                        tileY += diff;
                         srcRect.Y += diff;
                         srcRect.Height -= diff;
-                        tileY += diff;
                     }
 
                     // Clip the right bounds
-                    if (x + srcRect.Width > bounds.Right)
+                    if (x + srcRect.Width > scaledBounds.Right)
                     {
-                        srcRect.Width = bounds.Right - x;
+                        srcRect.Width = scaledBounds.Right - x;
                     }
 
                     // Clip the bottom bounds
-                    if (y + srcRect.Height > bounds.Bottom)
+                    if (y + srcRect.Height > scaledBounds.Bottom)
                     {
-                        srcRect.Height = bounds.Bottom - y;
+                        srcRect.Height = scaledBounds.Bottom - y;
                     }
 
                     // Create the dest rectangle
@@ -301,6 +317,147 @@ namespace Dwarves.Subsystem
 
                     // Draw the sprite
                     spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Draw the fringe tiles such as grass and rocks.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
+        /// <param name="terrainType">The terrain type.</param>
+        /// <param name="terrainBounds">The bounds of the terrain block in terrain units.</param>
+        /// <param name="terrainScale">The terrain scale factor.</param>
+        /// <param name="groundNodes">The ground nodes which represents the walkable ground in the terrain on which the
+        /// fringe sprites will be rendered.</param>
+        private void DrawTerrainFringe(
+            SpriteBatch spriteBatch,
+            TerrainType terrainType,
+            Square terrainBounds,
+            float terrainScale,
+            Dictionary<Point, LinkedPathNode> groundNodes)
+        {
+            // Determine which segments (if any) of this terrain block are ground nodes
+            var groundPoints = new List<Tuple<int, int>>();
+            int groundY = terrainBounds.Y - 1;
+            int currentStart = -1;
+            int currentLength = 0;
+            for (int x = terrainBounds.X; x < terrainBounds.Right; x++)
+            {
+                // Check if this point is a ground node
+                if (groundNodes.ContainsKey(new Point(x, groundY)))
+                {
+                    // This is a ground node, so add it to the current point set
+                    if (currentStart != -1)
+                    {
+                        currentLength++;
+                    }
+                    else
+                    {
+                        currentStart = x;
+                        currentLength = 1;
+                    }
+                }
+                else
+                {
+                    // This is not a ground node. If a range was being build, add it to the collection
+                    if (currentStart != -1)
+                    {
+                        groundPoints.Add(Tuple.Create(currentStart, currentLength));
+                        currentStart = -1;
+                    }
+                }
+            }
+
+            // Add the last x range
+            if (currentStart != -1)
+            {
+                groundPoints.Add(Tuple.Create(currentStart, currentLength));
+                currentStart = -1;
+            }
+
+            // If there are no ground points for this terrain block, there is nothing to render
+            if (groundPoints.Count == 0)
+            {
+                return;
+            }
+
+            // Get the variations of the lower fringe sprites
+            // TODO: Use the TerrainType value, rather than just using mud here
+            var lowerFringeRects = new Dictionary<int, Rectangle>();
+            foreach (int variation in this.resources.GetSpriteVariations("terrain", "lowerfringe", "mud"))
+            {
+                string name = this.resources.GetSpriteName("terrain", "lowerfringe", "mud", variation);
+                lowerFringeRects.Add(variation, this.resources.GetSpriteRectangle(name));
+            }
+
+            // Get the variations of the upper fringe sprites
+            // TODO: Use the TerrainType value, rather than just using mud here
+            var upperFringeRects = new Dictionary<int, Rectangle>();
+            foreach (int variation in this.resources.GetSpriteVariations("terrain", "upperfringe", "mud"))
+            {
+                string name = this.resources.GetSpriteName("terrain", "upperfringe", "mud", variation);
+                upperFringeRects.Add(variation, this.resources.GetSpriteRectangle(name));
+            }
+
+            // Do nothing if no sprites exist for this terrain type
+            if (lowerFringeRects.Count == 0 && upperFringeRects.Count == 0)
+            {
+                return;
+            }
+
+            // Determine the offset of the left side of the tile
+            int offsetX = (int)Math.Round(terrainBounds.X * terrainScale) % Const.TileSize;
+
+            // Draw the sprites
+            foreach (Tuple<int, int> xRange in groundPoints)
+            {
+                // Scale the range
+                int scaledX = (int)Math.Round(xRange.Item1 * terrainScale);
+                int scaledWidth = (int)Math.Round(xRange.Item2 * terrainScale);
+
+                for (int x = scaledX; x < scaledX + scaledWidth; x += Const.TileSize)
+                {
+                    // Calculate the x position of the tile
+                    int tileX = x - offsetX;
+
+                    // Get a random sprite seeded by the x/y tile coordinate
+                    int lowerFringeIndex = new Random(tileX ^ terrainBounds.Y).Next(0, lowerFringeRects.Count);
+                    Rectangle lowerFringeRect = lowerFringeRects.ElementAt(lowerFringeIndex).Value;
+                    int upperFringeIndex = new Random(tileX ^ terrainBounds.Y).Next(0, upperFringeRects.Count);
+                    Rectangle upperFringeRect = upperFringeRects.ElementAt(upperFringeIndex).Value;
+
+                    // Clip the left bounds
+                    if (tileX < scaledX)
+                    {
+                        int diff = scaledX - tileX;
+                        tileX += diff;
+                        lowerFringeRect.X += diff;
+                        lowerFringeRect.Width -= diff;
+                        upperFringeRect.X += diff;
+                        upperFringeRect.Width -= diff;
+                    }
+
+                    // Clip the right bounds
+                    if (x + lowerFringeRect.Width > scaledX + scaledWidth)
+                    {
+                        int newWidth = scaledX + scaledWidth - x;
+                        lowerFringeRect.Width = newWidth;
+                        upperFringeRect.Width = newWidth;
+                    }
+
+                    // Create the dest rectangles
+                    var lowerFringeDestRect =
+                        new Rectangle(tileX, terrainBounds.Y, lowerFringeRect.Width, lowerFringeRect.Height);
+                    var upperFringeDestRect = new Rectangle(
+                        tileX,
+                        terrainBounds.Y - upperFringeRect.Height, // Upper fringe is above ground, so offset by its height
+                        upperFringeRect.Width,
+                        upperFringeRect.Height);
+
+                    // Draw the sprites
+                    spriteBatch.Draw(this.resources.SpriteSheet, lowerFringeDestRect, lowerFringeRect, Color.White);
+                    spriteBatch.Draw(this.resources.SpriteSheet, upperFringeDestRect, upperFringeRect, Color.White);
                 }
             }
         }
