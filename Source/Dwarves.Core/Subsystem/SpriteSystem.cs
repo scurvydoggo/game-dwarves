@@ -226,7 +226,7 @@ namespace Dwarves.Subsystem
                         spriteBatch.Draw(
                             debugTexture,
                             new Rectangle(p1.X, p1.Y, width, height),
-                            (p1.Type == PathNodeType.Normal && p2.Type == PathNodeType.Normal) ? Color.Red : Color.Yellow);
+                            (p1.Type == PathNodeType.Normal) ? Color.Red : Color.Yellow);
                     }
                 }
 
