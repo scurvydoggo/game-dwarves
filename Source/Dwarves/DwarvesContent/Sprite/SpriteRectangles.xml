@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <XnaContent>
-<Asset Type="System.Collections.Generic.Dictionary[System.String, Microsoft.Xna.Framework.Rectangle]">
-<Item><Key>terrain-earth-mud-1</Key><Value>1 1 32 32</Value></Item>
-<Item><Key>body-torso-dwarf-1</Key><Value>0 35 11 10</Value></Item>
-<Item><Key>body-head-dwarf-1</Key><Value>12 35 6 10</Value></Item>
-<Item><Key>body-arm-dwarf-1</Key><Value>19 35 4 5</Value></Item>
-<Item><Key>body-leg-dwarf-1</Key><Value>24 35 4 4</Value></Item>
-<Item><Key>body-beard-dwarf-1</Key><Value>29 35 8 13</Value></Item>
-</Asset>
+  <Asset Type="System.Collections.Generic.Dictionary[System.String, Microsoft.Xna.Framework.Rectangle]">
+    <Item><Key>terrain-earth-mud-1</Key><Value>1 1 32 32</Value></Item>
+    <Item><Key>terrain-lowerfringe-mud-1</Key><Value>35 0 32 9</Value></Item>
+    <Item><Key>terrain-upperfringe-mud-1</Key><Value>35 10 32 3</Value></Item>
+    <Item><Key>body-torso-dwarf-1</Key><Value>0 35 11 10</Value></Item>
+    <Item><Key>body-head-dwarf-1</Key><Value>12 35 6 10</Value></Item>
+    <Item><Key>body-arm-dwarf-1</Key><Value>19 35 4 5</Value></Item>
+    <Item><Key>body-leg-dwarf-1</Key><Value>24 35 4 4</Value></Item>
+    <Item><Key>body-beard-dwarf-1</Key><Value>29 35 8 13</Value></Item>
+  </Asset>
 </XnaContent>
