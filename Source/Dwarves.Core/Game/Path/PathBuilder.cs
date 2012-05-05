@@ -274,6 +274,7 @@ namespace Dwarves.Game.Path
         {
             var spanNodes = new List<LinkedPathNode>();
 
+            // Iterate along x values calculating the y coordinate for each step
             LinkedPathNode groundBelow = null;
             LinkedPathNode prevNode = null;
             int deltaX = 0;
@@ -286,22 +287,25 @@ namespace Dwarves.Game.Path
 
                 // Calculate the x and y point for this step
                 int x = origin.Node.X + deltaX;
-                double square = (coefficient * (left ? -1 : 1) * deltaX - Math.Sqrt(peakOffset));
-                double y = origin.Node.Y - (-(square * square) + peakOffset);
+                double square = (coefficient * (left ? -1 : 1) * deltaX) - Math.Sqrt(peakOffset);
+                int y = (int)Math.Round(origin.Node.Y - (-(square * square) + peakOffset));
 
                 // Calculate how many points of interpolation are required and the direction
                 PathNode prevPoint = prevNode == null ? origin.Node : prevNode.Node;
                 int interpolateLength = (int)Math.Abs(prevPoint.Y - y);
                 bool up = prevPoint.Y > y;
 
+                // Add the points (or just the one point if no interpolation is required)
                 int deltaY = 0;
-                while (Math.Abs(deltaY) <= (interpolateLength))
+                while (interpolateLength == 0 || Math.Abs(deltaY) < interpolateLength)
                 {
-                    // Calculate the interpolated y value
-                    deltaY = up ? deltaY - 1 : deltaY + 1;
-                    int innerY = prevPoint.Y + deltaY;
+                    // If interpolation is required, increment/decrement the delta y value
+                    if (interpolateLength > 0)
+                    {
+                        deltaY = up ? deltaY - 1 : deltaY + 1;
+                    }
 
-                    var point = new Point(x, innerY);
+                    var point = new Point(x, prevPoint.Y + deltaY);
 
                     // Check that this point is passable
                     if (!this.IsPassableTerrain(point))
@@ -338,6 +342,12 @@ namespace Dwarves.Game.Path
 
                     // Set the previous node
                     prevNode = node;
+
+                    // If no interpolation is required do not perform any further iteration
+                    if (interpolateLength == 0)
+                    {
+                        break;
+                    }
                 }
             }
 
