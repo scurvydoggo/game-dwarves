@@ -342,7 +342,7 @@ namespace Dwarves.Game.Path
             }
 
             // If this path is complete, join this jump-segment to the dictionary nodes
-            if (groundBelow != null && spanNodes.Count > 0)
+            if (groundBelow != null && spanNodes.Count > 4)
             {
                 // Connect the first jump node to the origin
                 origin.AdjacentNodes.Add(spanNodes[0]);
