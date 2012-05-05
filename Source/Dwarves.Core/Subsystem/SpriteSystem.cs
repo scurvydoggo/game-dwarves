@@ -177,10 +177,10 @@ namespace Dwarves.Subsystem
                 int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
                 int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
                 Rectangle screenRect = new Rectangle(
-                    terrainStartX,
-                    terrainStartY,
-                    (int)(this.graphics.Viewport.Width / camScale.X),
-                    (int)(this.graphics.Viewport.Height / camScale.Y));
+                    terrainStartX - Const.TileSize,
+                    terrainStartY - Const.TileSize,
+                    (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + Const.TileSize + 1,
+                    (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + Const.TileSize + 1);
                 QuadTreeData<TerrainData>[] terrainBlocks;
                 if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
                 {
@@ -410,11 +410,11 @@ namespace Dwarves.Subsystem
             int offsetX = (int)Math.Round(terrainBounds.X * terrainScale) % Const.TileSize;
 
             // Draw the sprites
-            foreach (Tuple<int, int> xRange in groundPoints)
+            foreach (Tuple<int, int> range in groundPoints)
             {
                 // Scale the range
-                int scaledX = (int)Math.Round(xRange.Item1 * terrainScale);
-                int scaledWidth = (int)Math.Round(xRange.Item2 * terrainScale);
+                int scaledX = (int)Math.Round(range.Item1 * terrainScale);
+                int scaledWidth = (int)Math.Round(range.Item2 * terrainScale);
 
                 for (int x = scaledX; x < scaledX + scaledWidth; x += Const.TileSize)
                 {
