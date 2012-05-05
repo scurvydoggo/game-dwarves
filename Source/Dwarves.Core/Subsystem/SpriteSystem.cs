@@ -13,7 +13,6 @@ namespace Dwarves.Subsystem
     using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
-    using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
     using EntitySystem;
     using EntitySystem.Subsystem;
@@ -206,8 +205,8 @@ namespace Dwarves.Subsystem
                     }
                 }
 
-                // TODO: Delete this test code
-                // Draw path components in red
+                /*
+                // DEBUG: Draw path components
                 Texture2D debugTexture = new Texture2D(this.graphics, 1, 1);
                 debugTexture.SetData<Color>(new Color[] { Color.White });
                 foreach (PathComponent path in this.EntityManager.GetComponents(typeof(PathComponent)))
@@ -229,6 +228,7 @@ namespace Dwarves.Subsystem
                             (p1.Type == PathNodeType.Normal) ? Color.Red : Color.Yellow);
                     }
                 }
+                */
 
                 spriteBatch.End();
             }
