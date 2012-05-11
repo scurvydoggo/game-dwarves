@@ -176,11 +176,13 @@ namespace Dwarves.Subsystem
                 // Get the terrain data for the visible portion of the screen
                 int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
                 int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
+                int tileSize = (int)Math.Ceiling(Const.TileSize * cScaleSpace.Scale);
+                int tileAndHalfSize = tileSize + tileSize / 2; // Use tile-and-half size with with fringes (grass)
                 Rectangle screenRect = new Rectangle(
-                    terrainStartX - Const.TileSize,
-                    terrainStartY - Const.TileSize,
-                    (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + Const.TileSize + 1,
-                    (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + Const.TileSize + 1);
+                    terrainStartX - tileSize,
+                    terrainStartY - tileSize,
+                    (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
+                    (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
                 QuadTreeData<TerrainData>[] terrainBlocks;
                 if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
                 {

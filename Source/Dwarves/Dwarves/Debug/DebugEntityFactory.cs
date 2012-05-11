@@ -148,7 +148,7 @@ namespace Dwarves.Debug
             world.EntityManager.AddComponent(entity, cTerrain);
             world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
             world.EntityManager.AddComponent(entity, new ScaleSpatialComponent(scale));
-            world.EntityManager.AddComponent(entity, new ScaleRenderComponent(Const.PixelsToMeters));
+            world.EntityManager.AddComponent(entity, new ScaleRenderComponent(1 / Const.PixelsToMeters));
 
             return entity;
         }
