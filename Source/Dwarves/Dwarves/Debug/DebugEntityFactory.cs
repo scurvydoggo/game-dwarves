@@ -134,17 +134,17 @@ namespace Dwarves.Debug
             Dictionary<Point, LinkedPathNode> pathNodes = pathBuilder.BuildPathNodes();
 
             // Create the terrain component
-            var cTerrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
+            var terrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
 
             // TODO: Remove this test code. Drawing test paths
             // Bottom-left map edge to underground peak
-            this.CreateTestPath(world, cTerrain, new Point(53, 761), new Point(713, 393));
+            this.CreateTestPath(world, terrain, new Point(53, 761), new Point(713, 393));
 
             // Bottom-right map edge to overhange
-            this.CreateTestPath(world, cTerrain, new Point(1951, 765), new Point(714, 328));
+            this.CreateTestPath(world, terrain, new Point(1951, 765), new Point(714, 328));
 
             // Add terrain component
-            world.EntityManager.AddComponent(entity, cTerrain);
+            world.EntityManager.AddComponent(entity, terrain);
             world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
             world.EntityManager.AddComponent(entity, new ScaleComponent(scale));
 

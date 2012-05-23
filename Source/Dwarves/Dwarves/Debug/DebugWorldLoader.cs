@@ -40,7 +40,7 @@ namespace Dwarves.Debug
                 world,
                 -700,
                 -360,
-                Const.PixelsToMeters * 4, // Each terrain pixel shall be 4 times the size of standard sprite pixels
+                Const.PixelsToMeters,
                 true,
                 "Terrain\\Test1_Terrain",
                 world.CurrentTime);

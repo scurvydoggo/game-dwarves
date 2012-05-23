@@ -177,7 +177,7 @@ namespace Dwarves.Subsystem
                 int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
                 int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
                 int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
-                int tileAndHalfSize = tileSize + tileSize / 2; // Use tile-and-half size with with fringes (grass)
+                int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
                 Rectangle screenRect = new Rectangle(
                     terrainStartX - tileSize,
                     terrainStartY - tileSize,
