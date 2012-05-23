@@ -25,6 +25,8 @@ namespace Dwarves.Subsystem
     /// </summary>
     public class SpriteSystem : BaseSystem
     {
+        #region Private Variables
+
         /// <summary>
         /// The game resources.
         /// </summary>
@@ -34,6 +36,10 @@ namespace Dwarves.Subsystem
         /// The graphics device.
         /// </summary>
         private GraphicsDevice graphics;
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// Initializes a new instance of the SpriteSystem class.
@@ -47,6 +53,8 @@ namespace Dwarves.Subsystem
             this.resources = resources;
             this.graphics = graphics;
         }
+
+        #endregion
 
         #region Public Methods
 
