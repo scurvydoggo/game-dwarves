@@ -57,11 +57,10 @@
     <Compile Include="Component\Input\InputRegionComponent.cs" />
     <Compile Include="Component\Physics\PhysicsComponent.cs" />
     <Compile Include="Component\Game\TerrainComponent.cs" />
-    <Compile Include="Component\Render\ScaleRenderComponent.cs" />
     <Compile Include="Component\Render\SpriteComponent.cs" />
     <Compile Include="Component\Screen\CameraComponent.cs" />
     <Compile Include="Component\Spatial\PositionComponent.cs" />
-    <Compile Include="Component\Spatial\ScaleSpatialComponent.cs" />
+    <Compile Include="Component\Spatial\ScaleComponent.cs" />
     <Compile Include="Data\DwarvesDataAdapter.cs" />
     <Compile Include="DwarvesConfig.cs" />
     <Compile Include="Const.cs" />

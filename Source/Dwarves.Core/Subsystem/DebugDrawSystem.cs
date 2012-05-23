@@ -71,7 +71,7 @@ namespace Dwarves.Subsystem
                 var cCameraPosition =
                     (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
                 var cCameraScale =
-                    (ScaleSpatialComponent)this.EntityManager.GetComponent(entity, typeof(ScaleSpatialComponent));
+                    (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
 
                 // Calculate the projection matrix
                 Matrix projection = this.CalculateProjection(cCamera.ProjectionWidth, cCamera.ProjectionHeight);

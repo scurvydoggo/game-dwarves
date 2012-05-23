@@ -78,7 +78,7 @@ namespace Dwarves.Subsystem
             var cCameraPosition =
                 (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
             var cCameraScale =
-                (ScaleSpatialComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleSpatialComponent));
+                (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
 
             int? entityOnTouchPoint = null;
             if (isSingleTouch)

@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="ScaleSpatialComponent.cs" company="Acidwashed Games">
+// <copyright file="ScaleComponent.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -10,13 +10,13 @@ namespace Dwarves.Component.Spatial
     /// <summary>
     /// The scaling ratio for entity spatial attributes.
     /// </summary>
-    public class ScaleSpatialComponent : IComponent
+    public class ScaleComponent : IComponent
     {
         /// <summary>
-        /// Initializes a new instance of the ScaleSpatialComponent class.
+        /// Initializes a new instance of the ScaleComponent class.
         /// </summary>
         /// <param name="scale">The scaling ratio.</param>
-        public ScaleSpatialComponent(float scale)
+        public ScaleComponent(float scale)
         {
             this.Scale = scale;
         }

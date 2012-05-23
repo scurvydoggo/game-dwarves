@@ -61,7 +61,7 @@ namespace Dwarves.Subsystem
             var cCamera =
                 (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
             var cCameraScale =
-                (ScaleSpatialComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleSpatialComponent));
+                (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
             var cCameraPosition =
                 (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
 
@@ -113,12 +113,9 @@ namespace Dwarves.Subsystem
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(SpriteComponent)))
             {
                 // Get the sprite components
-                var cSprite =
-                    (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
-                var cPosition =
-                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                var cScale =
-                    (ScaleRenderComponent)this.EntityManager.GetComponent(entity, typeof(ScaleRenderComponent));
+                var cSprite = (SpriteComponent)this.EntityManager.GetComponent(entity, typeof(SpriteComponent));
+                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
 
                 // Draw the sprite
                 spriteBatch.Draw(
@@ -153,21 +150,16 @@ namespace Dwarves.Subsystem
         {
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
             {
-                var cTerrain =
-                    (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
-                var cPosition =
-                    (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                var cScaleSpace =
-                    (ScaleSpatialComponent)this.EntityManager.GetComponent(entity, typeof(ScaleSpatialComponent));
-                var cScaleRender =
-                    (ScaleRenderComponent)this.EntityManager.GetComponent(entity, typeof(ScaleRenderComponent));
+                var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
+                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
+                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
 
                 // Create the camera transform matrix
                 var camTranslation = new Vector3(
-                    (cameraTranslateX / cScaleRender.Scale) + cPosition.Position.X,
-                    (cameraTranslateY / cScaleRender.Scale) + cPosition.Position.Y,
+                    (cameraTranslateX / cScale.Scale) + cPosition.Position.X,
+                    (cameraTranslateY / cScale.Scale) + cPosition.Position.Y,
                     0);
-                var camScale = new Vector3(cameraScaleX * cScaleRender.Scale, cameraScaleY * cScaleRender.Scale, 0);
+                var camScale = new Vector3(cameraScaleX * cScale.Scale, cameraScaleY * cScale.Scale, 0);
                 Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
 
                 // Begin the sprite batch with the camera transform
@@ -176,7 +168,7 @@ namespace Dwarves.Subsystem
                 // Get the terrain data for the visible portion of the screen
                 int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
                 int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
-                int tileSize = (int)Math.Ceiling(Const.TileSize * cScaleSpace.Scale);
+                int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
                 int tileAndHalfSize = tileSize + tileSize / 2; // Use tile-and-half size with with fringes (grass)
                 Rectangle screenRect = new Rectangle(
                     terrainStartX - tileSize,
@@ -198,10 +190,10 @@ namespace Dwarves.Subsystem
 
                         // Calculate the bounds of this terrain block in on-screen coordinates
                         var screenBounds = new Rectangle(
-                            (int)Math.Round(terrainBlock.Bounds.X * cScaleSpace.Scale),
-                            (int)Math.Round(terrainBlock.Bounds.Y * cScaleSpace.Scale),
-                            (int)Math.Round(terrainBlock.Bounds.Length * cScaleSpace.Scale),
-                            (int)Math.Round(terrainBlock.Bounds.Length * cScaleSpace.Scale));
+                            terrainBlock.Bounds.X,
+                            terrainBlock.Bounds.Y,
+                            terrainBlock.Bounds.Length,
+                            terrainBlock.Bounds.Length);
 
                         // Tile the terrain within the bounds
                         this.DrawTiledTerrain(spriteBatch, terrainType, screenBounds);
@@ -218,8 +210,7 @@ namespace Dwarves.Subsystem
                         }
 
                         // Draw the fringe tiles
-                        this.DrawTerrainFringe(
-                            spriteBatch, terrainType, terrainBlock.Bounds, cScaleSpace.Scale, cTerrain.PathNodes);
+                        this.DrawTerrainFringe(spriteBatch, terrainType, terrainBlock.Bounds, cTerrain.PathNodes);
                     }
                 }
 
@@ -329,14 +320,12 @@ namespace Dwarves.Subsystem
         /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
         /// <param name="terrainType">The terrain type.</param>
         /// <param name="terrainBounds">The bounds of the terrain block in terrain units.</param>
-        /// <param name="terrainScale">The terrain scale factor.</param>
         /// <param name="groundNodes">The ground nodes which represents the walkable ground in the terrain on which the
         /// fringe sprites will be rendered.</param>
         private void DrawTerrainFringe(
             SpriteBatch spriteBatch,
             TerrainType terrainType,
             Square terrainBounds,
-            float terrainScale,
             Dictionary<Point, LinkedPathNode> groundNodes)
         {
             // Determine which segments (if any) of this terrain block are ground nodes
@@ -409,16 +398,15 @@ namespace Dwarves.Subsystem
             }
 
             // Determine the offset of the left side of the tile
-            int offsetX = (int)Math.Round(terrainBounds.X * terrainScale) % Const.TileSize;
+            int offsetX = terrainBounds.X % Const.TileSize;
 
             // Draw the sprites
             foreach (Tuple<int, int> range in groundPoints)
             {
-                // Scale the range
-                int scaledX = (int)Math.Round(range.Item1 * terrainScale);
-                int scaledWidth = (int)Math.Round(range.Item2 * terrainScale);
+                int startX = range.Item1;
+                int width = range.Item2;
 
-                for (int x = scaledX; x < scaledX + scaledWidth; x += Const.TileSize)
+                for (int x = startX; x < startX + width; x += Const.TileSize)
                 {
                     // Calculate the x position of the tile
                     int tileX = x - offsetX;
@@ -430,9 +418,9 @@ namespace Dwarves.Subsystem
                     Rectangle upperFringeRect = upperFringeRects.ElementAt(upperFringeIndex).Value;
 
                     // Clip the left bounds
-                    if (tileX < scaledX)
+                    if (tileX < startX)
                     {
-                        int diff = scaledX - tileX;
+                        int diff = startX - tileX;
                         tileX += diff;
                         lowerFringeRect.X += diff;
                         lowerFringeRect.Width -= diff;
@@ -441,9 +429,9 @@ namespace Dwarves.Subsystem
                     }
 
                     // Clip the right bounds
-                    if (x + lowerFringeRect.Width > scaledX + scaledWidth)
+                    if (x + lowerFringeRect.Width > startX + width)
                     {
-                        int newWidth = scaledX + scaledWidth - x;
+                        int newWidth = startX + width - x;
                         lowerFringeRect.Width = newWidth;
                         upperFringeRect.Width = newWidth;
                     }
