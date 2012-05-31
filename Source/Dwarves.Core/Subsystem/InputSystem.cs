@@ -72,7 +72,7 @@ namespace Dwarves.Subsystem
                 this.prevMouseState.Value.ScrollWheelValue != mouseState.ScrollWheelValue);
 
             // Get the camera components, since this needs to be taken into account with determining location
-            Entity cameraEntity = this.GetCameraEntity();
+            Entity cameraEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(CameraComponent));
             var cCamera =
                 (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
             var cCameraPosition =
@@ -227,26 +227,6 @@ namespace Dwarves.Subsystem
             }
 
             return entities;
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        /// <summary>
-        /// Get the camera entity.
-        /// </summary>
-        /// <returns>The camera entity.</returns>
-        private Entity GetCameraEntity()
-        {
-            // Get the entity and take the first item
-            var enumerator = this.EntityManager.GetEntitiesWithComponent(typeof(CameraComponent)).GetEnumerator();
-            if (!enumerator.MoveNext())
-            {
-                throw new ApplicationException("Camera entity does not exist.");
-            }
-
-            return enumerator.Current;
         }
 
         #endregion
