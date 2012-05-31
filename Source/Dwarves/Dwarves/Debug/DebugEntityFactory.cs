@@ -11,11 +11,13 @@ namespace Dwarves.Debug
     using Dwarves.Assembler.Body;
     using Dwarves.Common;
     using Dwarves.Component.Game;
+    using Dwarves.Component.Physics;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
     using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
     using EntitySystem;
+    using FarseerPhysics.Dynamics;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -134,18 +136,16 @@ namespace Dwarves.Debug
             Dictionary<Point, LinkedPathNode> pathNodes = pathBuilder.BuildPathNodes();
 
             // Create the terrain component
-            var terrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
+            var cTerrain = new TerrainComponent(terrainQuadTree, isCollidable, pathNodes);
 
-            // TODO: Remove this test code. Drawing test paths
-            // Bottom-left map edge to underground peak
-            this.CreateTestPath(world, terrain, new Point(53, 761), new Point(713, 393));
+            // Create the physics body. Initially this has no fixtures, as those are populated dynamically
+            var body = new Body(world.Physics);
+            var cPhysics = new PhysicsComponent(body);
 
-            // Bottom-right map edge to overhange
-            this.CreateTestPath(world, terrain, new Point(1951, 765), new Point(714, 328));
-
-            // Add terrain component
-            world.EntityManager.AddComponent(entity, terrain);
-            world.EntityManager.AddComponent(entity, new PositionComponent(new Vector2(x, y)));
+            // Add components to entity
+            world.EntityManager.AddComponent(entity, cTerrain);
+            world.EntityManager.AddComponent(entity, cPhysics);
+            world.EntityManager.AddComponent(entity, new PositionComponent(body, new Vector2(x, y)));
             world.EntityManager.AddComponent(entity, new ScaleComponent(scale));
 
             return entity;
