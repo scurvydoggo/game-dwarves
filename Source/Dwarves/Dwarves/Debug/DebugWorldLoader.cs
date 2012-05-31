@@ -46,7 +46,7 @@ namespace Dwarves.Debug
                 world.CurrentTime);
 
             // Add a dwarf
-            this.entityFactory.CreateDwarf(world, 0, 0);
+            this.entityFactory.CreateDwarf(world, 0, 50);
         }
     }
 }
