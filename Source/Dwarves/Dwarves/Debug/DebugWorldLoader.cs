@@ -39,7 +39,7 @@ namespace Dwarves.Debug
             this.entityFactory.CreateTerrain(
                 world,
                 -700,
-                -360,
+                360,
                 Const.PixelsToMeters,
                 true,
                 "Terrain\\Test1_Terrain",

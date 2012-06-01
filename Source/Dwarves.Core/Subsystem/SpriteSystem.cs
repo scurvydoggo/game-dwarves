@@ -165,7 +165,7 @@ namespace Dwarves.Subsystem
                 // Create the camera transform matrix
                 var camTranslation = new Vector3(
                     (cameraTranslateX / cScale.Scale) + cPosition.Position.X,
-                    (cameraTranslateY / cScale.Scale) + cPosition.Position.Y,
+                    (cameraTranslateY / cScale.Scale) - cPosition.Position.Y,
                     0);
                 var camScale = new Vector3(cameraScaleX * cScale.Scale, cameraScaleY * cScale.Scale, 0);
                 Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);

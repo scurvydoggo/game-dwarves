@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Subsystem
 {
+    using System;
     using System.Collections.Generic;
     using Dwarves.Common;
     using Dwarves.Component.Game;
@@ -67,9 +68,10 @@ namespace Dwarves.Subsystem
                     (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
                 var cTerrainPhysics =
                     (PhysicsComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PhysicsComponent));
+                var cTerrainPosition =
+                    (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
                 var cTerrainScale =
                     (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
-                var terrainPosition = new Vector2(cTerrain.QuadTree.Bounds.X, cTerrain.QuadTree.Bounds.Y);
 
                 // Build the list of terrain blocks that are in range of a physics entity
                 var blocksInRange = new HashSet<Square>();
@@ -106,24 +108,25 @@ namespace Dwarves.Subsystem
                     bodyAABB.LowerBound += cPhysics.Body.Position;
                     bodyAABB.UpperBound += cPhysics.Body.Position;
 
-                    // Invert Y-coordinate as physics uses a different scale
-                    bodyAABB.LowerBound *= new Vector2(1, -1);
-                    bodyAABB.UpperBound *= new Vector2(1, -1);
-
                     // Transform the bounds of the body into game-world coordinates
-                    Vector2 bodyPosition =
-                        terrainPosition + ((bodyAABB.LowerBound - terrainPosition) / cTerrainScale.Scale);
-                    Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / cTerrainScale.Scale;
+                    Vector2 scaledLowerBound = (bodyAABB.LowerBound / scalePlaceholder);
+                    Vector2 bodyPosition = new Vector2(
+                        scaledLowerBound.X - cTerrainPosition.Position.X,
+                        cTerrainPosition.Position.Y - scaledLowerBound.Y);
+                    Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / scalePlaceholder;
                     var bodyBounds = new Rectangle(
-                        (int)bodyPosition.X, (int)bodyPosition.Y, (int)(bodySize.X + 0.5), (int)(bodySize.Y + 0.5));
+                        (int)bodyPosition.X,
+                        (int)bodyPosition.Y,
+                        (int)(Math.Abs(bodySize.X) + 0.5),
+                        (int)(Math.Abs(bodySize.Y) + 0.5));
 
                     // Get the terrain blocks which intersect the body
                     foreach (ClipQuadTree<TerrainData> block in cTerrain.QuadTree.GetNodesIntersecting(bodyBounds))
                     {
-                        //if (block.Data.Type != TerrainType.None)
-                        //{
-                        blocksInRange.Add(block.Bounds);
-                        //}
+                        if (block.Data.Type != TerrainType.None)
+                        {
+                            blocksInRange.Add(block.Bounds);
+                        }
                     }
                 }
 
@@ -149,16 +152,16 @@ namespace Dwarves.Subsystem
                 {
                     if (!cTerrain.Fixtures.ContainsKey(block))
                     {
-                        Vector2 blockPosition =
-                            terrainPosition + ((new Vector2(block.X, block.Y) - terrainPosition) * cTerrainScale.Scale);
-                        float blockSize = block.Length * cTerrainScale.Scale;
+                        Vector2 blockPosition = new Vector2(block.X, -block.Y);
+                        float blockSize = block.Length;
+                        float halfSize = blockSize / 2;
 
                         // Create the fixture for this block
                         var fixture = FixtureFactory.AttachRectangle(
                             blockSize,
                             blockSize,
                             1,
-                            new Vector2(blockPosition.X, blockPosition.Y - blockSize),
+                            new Vector2(blockPosition.X + halfSize, blockPosition.Y - halfSize),
                             cTerrainPhysics.Body);
 
                         // Add the fixture to the terrain's collection
