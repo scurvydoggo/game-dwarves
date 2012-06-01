@@ -118,17 +118,12 @@ namespace Dwarves.Subsystem
                         (int)bodyPosition.X, (int)bodyPosition.Y, (int)(bodySize.X + 0.5), (int)(bodySize.Y + 0.5));
 
                     // Get the terrain blocks which intersect the body
-                    QuadTreeData<TerrainData>[] blocks;
-                    if (cTerrain.QuadTree.GetDataIntersecting(bodyBounds, out blocks))
+                    foreach (ClipQuadTree<TerrainData> block in cTerrain.QuadTree.GetNodesIntersecting(bodyBounds))
                     {
-                        // Add each terrain block to the set
-                        foreach (QuadTreeData<TerrainData> block in blocks)
-                        {
-                            //if (block.Data.Type != TerrainType.None)
-                            //{
-                            blocksInRange.Add(block.Bounds);
-                            //}
-                        }
+                        //if (block.Data.Type != TerrainType.None)
+                        //{
+                        blocksInRange.Add(block.Bounds);
+                        //}
                     }
                 }
 

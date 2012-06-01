@@ -103,18 +103,18 @@ namespace Dwarves.Game.Path
             var groundNodes = new Dictionary<Point, LinkedPathNode>();
 
             // Add all ground nodes
-            foreach (QuadTreeData<TerrainData> terrainData in this.QuadTree)
+            foreach (ClipQuadTree<TerrainData> terrainNode in this.QuadTree)
             {
                 // Ignore non-walkable terrain
-                if (terrainData.Data.Type == TerrainType.None)
+                if (terrainNode.Data.Type == TerrainType.None)
                 {
                     continue;
                 }
 
                 // Test each point 1 pixel above the top of this quad
-                for (int x = terrainData.Bounds.X; x < terrainData.Bounds.Right; x++)
+                for (int x = terrainNode.Bounds.X; x < terrainNode.Bounds.Right; x++)
                 {
-                    var pointAbove = new Point(x, terrainData.Bounds.Y - 1);
+                    var pointAbove = new Point(x, terrainNode.Bounds.Y - 1);
                     if (this.IsPassableTerrain(pointAbove))
                     {
                         // The point above is a passable node so add it to the set

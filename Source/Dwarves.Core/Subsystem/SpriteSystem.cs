@@ -173,7 +173,7 @@ namespace Dwarves.Subsystem
                 // Begin the sprite batch with the camera transform
                 spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
 
-                // Get the terrain data for the visible portion of the screen
+                // Get the terrain nodes for the visible portion of the screen
                 int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
                 int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
                 int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
@@ -183,43 +183,42 @@ namespace Dwarves.Subsystem
                     terrainStartY - tileSize,
                     (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
                     (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
-                QuadTreeData<TerrainData>[] terrainBlocks;
-                if (cTerrain.QuadTree.GetDataIntersecting(screenRect, out terrainBlocks))
+
+                // Tile sprites for each terrain block
+                ClipQuadTree<TerrainData>[] terrainBlocks =
+                    cTerrain.QuadTree.GetNodesIntersecting(screenRect).ToArray();
+                foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
                 {
-                    // Tile sprites for each terrain block
-                    foreach (QuadTreeData<TerrainData> terrainBlock in terrainBlocks)
+                    // Don't draw anything if no terrain exists here
+                    TerrainType terrainType = terrainBlock.Data.Type;
+                    if (terrainType == TerrainType.None)
                     {
-                        // Don't draw anything if no terrain exists here
-                        TerrainType terrainType = terrainBlock.Data.Type;
-                        if (terrainType == TerrainType.None)
-                        {
-                            continue;
-                        }
-
-                        // Calculate the bounds of this terrain block in on-screen coordinates
-                        var screenBounds = new Rectangle(
-                            terrainBlock.Bounds.X,
-                            terrainBlock.Bounds.Y,
-                            terrainBlock.Bounds.Length,
-                            terrainBlock.Bounds.Length);
-
-                        // Tile the terrain within the bounds
-                        this.DrawTiledTerrain(spriteBatch, terrainType, screenBounds);
+                        continue;
                     }
 
-                    // Draw fringe sprites for each terrain block
-                    foreach (QuadTreeData<TerrainData> terrainBlock in terrainBlocks)
-                    {
-                        // Don't draw anything if no terrain exists here
-                        TerrainType terrainType = terrainBlock.Data.Type;
-                        if (terrainType == TerrainType.None)
-                        {
-                            continue;
-                        }
+                    // Calculate the bounds of this terrain block in on-screen coordinates
+                    var screenBounds = new Rectangle(
+                        terrainBlock.Bounds.X,
+                        terrainBlock.Bounds.Y,
+                        terrainBlock.Bounds.Length,
+                        terrainBlock.Bounds.Length);
 
-                        // Draw the fringe tiles
-                        this.DrawTerrainFringe(spriteBatch, terrainType, terrainBlock.Bounds, cTerrain.PathNodes);
+                    // Tile the terrain within the bounds
+                    this.DrawTiledTerrain(spriteBatch, terrainType, screenBounds);
+                }
+
+                // Draw fringe sprites for each terrain block
+                foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
+                {
+                    // Don't draw anything if no terrain exists here
+                    TerrainType terrainType = terrainBlock.Data.Type;
+                    if (terrainType == TerrainType.None)
+                    {
+                        continue;
                     }
+
+                    // Draw the fringe tiles
+                    this.DrawTerrainFringe(spriteBatch, terrainType, terrainBlock.Bounds, cTerrain.PathNodes);
                 }
 
                 /*

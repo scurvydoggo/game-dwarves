@@ -46,7 +46,6 @@
     <Compile Include="Assembler\Body\HumanoidAssembler.cs" />
     <Compile Include="Common\IIndexedObject.cs" />
     <Compile Include="Common\PriorityQueue.cs" />
-    <Compile Include="Common\QuadTreeData.cs" />
     <Compile Include="Common\QuadTreeDataSplitter.cs" />
     <Compile Include="Common\Square.cs" />
     <Compile Include="Component\Game\BodyPartComponent.cs" />

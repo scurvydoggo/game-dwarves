@@ -232,24 +232,18 @@ namespace Dwarves.Game.Path
         /// </summary>
         /// <param name="rect">The rectangle to test.</param>
         /// <returns>True if the rectangle doesn't contain any terrain; False if the rectangle contains obstructing
-        /// terrain or the rectangle is outside the bounds of the terrain quad tree.</returns>
+        /// terrain.</returns>
         private bool IsOpenSpace(Rectangle rect)
         {
-            QuadTreeData<TerrainData>[] terrainDataArray;
-            if (this.Terrain.QuadTree.GetDataIntersecting(rect, out terrainDataArray))
+            foreach (ClipQuadTree<TerrainData> terrainBlock in this.Terrain.QuadTree.GetNodesIntersecting(rect))
             {
-                foreach (QuadTreeData<TerrainData> terrainData in terrainDataArray)
+                if (terrainBlock.Data.Type != TerrainType.None)
                 {
-                    if (terrainData.Data.Type != TerrainType.None)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-
-                return true;
             }
 
-            return false;
+            return true;
         }
 
         #endregion
