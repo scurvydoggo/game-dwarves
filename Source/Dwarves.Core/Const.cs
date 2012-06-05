@@ -24,5 +24,10 @@ namespace Dwarves
         /// Collision group.
         /// </summary>
         public const short CollisionGroupDwarf = -2;
+
+        /// <summary>
+        /// The number of meters to expand each side of a body's bounding box when testing for collisions.
+        /// </summary>
+        public const float BodyCollisionPadding = 0.5f;
     }
 }

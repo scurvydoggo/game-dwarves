@@ -108,6 +108,10 @@ namespace Dwarves.Subsystem
                     bodyAABB.LowerBound += cPhysics.Body.Position;
                     bodyAABB.UpperBound += cPhysics.Body.Position;
 
+                    // Add the body padding
+                    bodyAABB.LowerBound -= new Vector2(Const.BodyCollisionPadding);
+                    bodyAABB.UpperBound += new Vector2(Const.BodyCollisionPadding);
+
                     // Transform the bounds of the body into game-world coordinates
                     Vector2 scaledLowerBound = (bodyAABB.LowerBound / scalePlaceholder);
                     Vector2 bodyPosition = new Vector2(
