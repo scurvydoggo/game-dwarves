@@ -112,15 +112,23 @@ namespace Dwarves.Subsystem
                     bodyAABB.LowerBound -= new Vector2(Const.BodyCollisionPadding);
                     bodyAABB.UpperBound += new Vector2(Const.BodyCollisionPadding);
 
-                    // Transform the bounds of the body into game-world coordinates
-                    Vector2 scaledLowerBound = (bodyAABB.LowerBound / scalePlaceholder);
-                    Vector2 bodyPosition = new Vector2(
-                        scaledLowerBound.X - cTerrainPosition.Position.X,
-                        cTerrainPosition.Position.Y - scaledLowerBound.Y);
+                    // Get the distance of the top-left point of the body relative to the terrain's top-left position
+                    // Remember that the terrain quad tree goes top-left to bottom-right, so Y increases as the body is
+                    // further down
+                    var terrainRelativeDistance = new Vector2(
+                        bodyAABB.LowerBound.X - cTerrainPosition.Position.X,
+                        cTerrainPosition.Position.Y - bodyAABB.UpperBound.Y);
+
+                    // Scale the distance by the terrain scale factor (ie. if the terrain is x2 sized, the body's
+                    // relative distance should be halved)
+                    terrainRelativeDistance /= scalePlaceholder;
+
+                    // Scale the length/width of the body by the terrain scale factor to get the size
                     Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / scalePlaceholder;
+
                     var bodyBounds = new Rectangle(
-                        (int)bodyPosition.X,
-                        (int)bodyPosition.Y,
+                        (int)terrainRelativeDistance.X,
+                        (int)terrainRelativeDistance.Y,
                         (int)(Math.Abs(bodySize.X) + 0.5),
                         (int)(Math.Abs(bodySize.Y) + 0.5));
 
@@ -140,7 +148,7 @@ namespace Dwarves.Subsystem
                 {
                     if (!blocksInRange.Contains(kvp.Key))
                     {
-                        toRemove.Add(kvp);
+                        //toRemove.Add(kvp);
                     }
                 }
 
@@ -167,6 +175,8 @@ namespace Dwarves.Subsystem
                             1,
                             new Vector2(blockPosition.X + halfSize, blockPosition.Y - halfSize),
                             cTerrainPhysics.Body);
+
+                        fixture.IsSensor = true;
 
                         // Add the fixture to the terrain's collection
                         cTerrain.Fixtures.Add(block, fixture);
