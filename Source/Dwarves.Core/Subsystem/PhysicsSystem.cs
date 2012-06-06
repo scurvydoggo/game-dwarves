@@ -59,8 +59,6 @@ namespace Dwarves.Subsystem
         /// </summary>
         private void CreateAndDestroyTerrainFixtures()
         {
-            float scalePlaceholder = 1;
-
             foreach (Entity terrainEntity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
             {
                 // Get the terrain components
@@ -121,10 +119,10 @@ namespace Dwarves.Subsystem
 
                     // Scale the distance by the terrain scale factor (ie. if the terrain is x2 sized, the body's
                     // relative distance should be halved)
-                    terrainRelativeDistance /= scalePlaceholder;
+                    terrainRelativeDistance /= cTerrainScale.Scale;
 
                     // Scale the length/width of the body by the terrain scale factor to get the size
-                    Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / scalePlaceholder;
+                    Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / cTerrainScale.Scale;
 
                     var bodyBounds = new Rectangle(
                         (int)terrainRelativeDistance.X,
@@ -148,7 +146,7 @@ namespace Dwarves.Subsystem
                 {
                     if (!blocksInRange.Contains(kvp.Key))
                     {
-                        //toRemove.Add(kvp);
+                        toRemove.Add(kvp);
                     }
                 }
 
@@ -164,8 +162,8 @@ namespace Dwarves.Subsystem
                 {
                     if (!cTerrain.Fixtures.ContainsKey(block))
                     {
-                        Vector2 blockPosition = new Vector2(block.X, -block.Y);
-                        float blockSize = block.Length;
+                        Vector2 blockPosition = new Vector2(block.X, -block.Y) * cTerrainScale.Scale;
+                        float blockSize = block.Length * cTerrainScale.Scale;
                         float halfSize = blockSize / 2;
 
                         // Create the fixture for this block
@@ -175,8 +173,6 @@ namespace Dwarves.Subsystem
                             1,
                             new Vector2(blockPosition.X + halfSize, blockPosition.Y - halfSize),
                             cTerrainPhysics.Body);
-
-                        fixture.IsSensor = true;
 
                         // Add the fixture to the terrain's collection
                         cTerrain.Fixtures.Add(block, fixture);

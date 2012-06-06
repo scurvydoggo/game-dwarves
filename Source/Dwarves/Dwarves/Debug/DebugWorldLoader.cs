@@ -38,8 +38,8 @@ namespace Dwarves.Debug
             // Add terrain
             this.entityFactory.CreateTerrain(
                 world,
-                -700,
-                360,
+                -140,
+                72,
                 Const.PixelsToMeters,
                 true,
                 "Terrain\\Test1_Terrain",
