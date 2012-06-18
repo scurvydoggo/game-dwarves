@@ -59,124 +59,123 @@ namespace Dwarves.Subsystem
         /// </summary>
         private void CreateAndDestroyTerrainFixtures()
         {
-            foreach (Entity terrainEntity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
+            Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
+
+            // Get the terrain components
+            var cTerrain =
+                (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
+            var cTerrainPhysics =
+                (PhysicsComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PhysicsComponent));
+            var cTerrainPosition =
+                (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
+            var cTerrainScale =
+                (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
+
+            // Build the list of terrain blocks that are in range of a physics entity
+            var blocksInRange = new HashSet<Square>();
+            foreach (Entity physicsEntity in this.EntityManager.GetEntitiesWithComponent(typeof(PhysicsComponent)))
             {
-                // Get the terrain components
-                var cTerrain =
-                    (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
-                var cTerrainPhysics =
-                    (PhysicsComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PhysicsComponent));
-                var cTerrainPosition =
-                    (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
-                var cTerrainScale =
-                    (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
+                var cPhysics =
+                    (PhysicsComponent)this.EntityManager.GetComponent(physicsEntity, typeof(PhysicsComponent));
 
-                // Build the list of terrain blocks that are in range of a physics entity
-                var blocksInRange = new HashSet<Square>();
-                foreach (Entity physicsEntity in this.EntityManager.GetEntitiesWithComponent(typeof(PhysicsComponent)))
+                // Skip the body if it is static or has no fixtures
+                if (cPhysics.Body.IsStatic || cPhysics.Body.FixtureList.Count == 0)
                 {
-                    var cPhysics =
-                        (PhysicsComponent)this.EntityManager.GetComponent(physicsEntity, typeof(PhysicsComponent));
+                    continue;
+                }
 
-                    // Skip the body if it is static or has no fixtures
-                    if (cPhysics.Body.IsStatic || cPhysics.Body.FixtureList.Count == 0)
+                // Get the bounds of body in physics-world coordinates
+                AABB bodyAABB = new AABB();
+                bool firstStep = true;
+                foreach (Fixture fixture in cPhysics.Body.FixtureList)
+                {
+                    AABB fixtureBounds;
+                    fixture.GetAABB(out fixtureBounds, 0);
+                    if (firstStep)
                     {
-                        continue;
+                        bodyAABB = fixtureBounds;
+                        firstStep = false;
                     }
-
-                    // Get the bounds of body in physics-world coordinates
-                    AABB bodyAABB = new AABB();
-                    bool firstStep = true;
-                    foreach (Fixture fixture in cPhysics.Body.FixtureList)
+                    else
                     {
-                        AABB fixtureBounds;
-                        fixture.GetAABB(out fixtureBounds, 0);
-                        if (firstStep)
-                        {
-                            bodyAABB = fixtureBounds;
-                            firstStep = false;
-                        }
-                        else
-                        {
-                            bodyAABB.Combine(ref fixtureBounds);
-                        }
-                    }
-
-                    // Translate the body AABB with the body position
-                    bodyAABB.LowerBound += cPhysics.Body.Position;
-                    bodyAABB.UpperBound += cPhysics.Body.Position;
-
-                    // Add the body padding
-                    bodyAABB.LowerBound -= new Vector2(Const.BodyCollisionPadding);
-                    bodyAABB.UpperBound += new Vector2(Const.BodyCollisionPadding);
-
-                    // Get the distance of the top-left point of the body relative to the terrain's top-left position
-                    // Remember that the terrain quad tree goes top-left to bottom-right, so Y increases as the body is
-                    // further down
-                    var terrainRelativeDistance = new Vector2(
-                        bodyAABB.LowerBound.X - cTerrainPosition.Position.X,
-                        cTerrainPosition.Position.Y - bodyAABB.UpperBound.Y);
-
-                    // Scale the distance by the terrain scale factor (ie. if the terrain is x2 sized, the body's
-                    // relative distance should be halved)
-                    terrainRelativeDistance /= cTerrainScale.Scale;
-
-                    // Scale the length/width of the body by the terrain scale factor to get the size
-                    Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / cTerrainScale.Scale;
-
-                    var bodyBounds = new Rectangle(
-                        (int)terrainRelativeDistance.X,
-                        (int)terrainRelativeDistance.Y,
-                        (int)(Math.Abs(bodySize.X) + 0.5),
-                        (int)(Math.Abs(bodySize.Y) + 0.5));
-
-                    // Get the terrain blocks which intersect the body
-                    foreach (ClipQuadTree<TerrainData> block in cTerrain.Terrain.GetNodesIntersecting(bodyBounds))
-                    {
-                        if (block.Data.State == TerrainState.Terrain)
-                        {
-                            blocksInRange.Add(block.Bounds);
-                        }
+                        bodyAABB.Combine(ref fixtureBounds);
                     }
                 }
 
-                // Determine which terrain fixtures which are no longer in range of any bodies
-                var toRemove = new List<KeyValuePair<Square, Fixture>>();
-                foreach (KeyValuePair<Square, Fixture> kvp in cTerrain.Fixtures)
+                // Translate the body AABB with the body position
+                bodyAABB.LowerBound += cPhysics.Body.Position;
+                bodyAABB.UpperBound += cPhysics.Body.Position;
+
+                // Add the body padding
+                bodyAABB.LowerBound -= new Vector2(Const.BodyCollisionPadding);
+                bodyAABB.UpperBound += new Vector2(Const.BodyCollisionPadding);
+
+                // Get the distance of the top-left point of the body relative to the terrain's top-left position
+                // Remember that the terrain quad tree goes top-left to bottom-right, so Y increases as the body is
+                // further down
+                var terrainRelativeDistance = new Vector2(
+                    bodyAABB.LowerBound.X - cTerrainPosition.Position.X,
+                    cTerrainPosition.Position.Y - bodyAABB.UpperBound.Y);
+
+                // Scale the distance by the terrain scale factor (ie. if the terrain is x2 sized, the body's
+                // relative distance should be halved)
+                terrainRelativeDistance /= cTerrainScale.Scale;
+
+                // Scale the length/width of the body by the terrain scale factor to get the size
+                Vector2 bodySize = (bodyAABB.UpperBound - bodyAABB.LowerBound) / cTerrainScale.Scale;
+
+                var bodyBounds = new Rectangle(
+                    (int)terrainRelativeDistance.X,
+                    (int)terrainRelativeDistance.Y,
+                    (int)(Math.Abs(bodySize.X) + 0.5),
+                    (int)(Math.Abs(bodySize.Y) + 0.5));
+
+                // Get the terrain blocks which intersect the body
+                foreach (ClipQuadTree<TerrainData> block in cTerrain.Terrain.GetNodesIntersecting(bodyBounds))
                 {
-                    if (!blocksInRange.Contains(kvp.Key))
+                    if (block.Data.State == TerrainState.Terrain)
                     {
-                        toRemove.Add(kvp);
+                        blocksInRange.Add(block.Bounds);
                     }
                 }
+            }
 
-                // Remove terrain fixtures which are no longer in range of any bodies
-                foreach (KeyValuePair<Square, Fixture> kvp in toRemove)
+            // Determine which terrain fixtures which are no longer in range of any bodies
+            var toRemove = new List<KeyValuePair<Square, Fixture>>();
+            foreach (KeyValuePair<Square, Fixture> kvp in cTerrain.Fixtures)
+            {
+                if (!blocksInRange.Contains(kvp.Key))
                 {
-                    cTerrainPhysics.Body.DestroyFixture(kvp.Value);
-                    cTerrain.Fixtures.Remove(kvp.Key);
+                    toRemove.Add(kvp);
                 }
+            }
 
-                // Add new terrain fixtures
-                foreach (Square block in blocksInRange)
+            // Remove terrain fixtures which are no longer in range of any bodies
+            foreach (KeyValuePair<Square, Fixture> kvp in toRemove)
+            {
+                cTerrainPhysics.Body.DestroyFixture(kvp.Value);
+                cTerrain.Fixtures.Remove(kvp.Key);
+            }
+
+            // Add new terrain fixtures
+            foreach (Square block in blocksInRange)
+            {
+                if (!cTerrain.Fixtures.ContainsKey(block))
                 {
-                    if (!cTerrain.Fixtures.ContainsKey(block))
-                    {
-                        Vector2 blockPosition = new Vector2(block.X, -block.Y) * cTerrainScale.Scale;
-                        float blockSize = block.Length * cTerrainScale.Scale;
-                        float halfSize = blockSize / 2;
+                    Vector2 blockPosition = new Vector2(block.X, -block.Y) * cTerrainScale.Scale;
+                    float blockSize = block.Length * cTerrainScale.Scale;
+                    float halfSize = blockSize / 2;
 
-                        // Create the fixture for this block
-                        var fixture = FixtureFactory.AttachRectangle(
-                            blockSize,
-                            blockSize,
-                            1,
-                            new Vector2(blockPosition.X + halfSize, blockPosition.Y - halfSize),
-                            cTerrainPhysics.Body);
+                    // Create the fixture for this block
+                    var fixture = FixtureFactory.AttachRectangle(
+                        blockSize,
+                        blockSize,
+                        1,
+                        new Vector2(blockPosition.X + halfSize, blockPosition.Y - halfSize),
+                        cTerrainPhysics.Body);
 
-                        // Add the fixture to the terrain's collection
-                        cTerrain.Fixtures.Add(block, fixture);
-                    }
+                    // Add the fixture to the terrain's collection
+                    cTerrain.Fixtures.Add(block, fixture);
                 }
             }
         }
