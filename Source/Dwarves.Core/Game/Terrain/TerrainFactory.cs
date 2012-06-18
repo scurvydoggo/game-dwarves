@@ -57,13 +57,13 @@ namespace Dwarves.Game.Terrain
             TimeSpan currentTime)
         {
             // Create the quadrants
-            TerrainType? terrainType =
+            TerrainMaterial? material =
                 this.PopulateQuadrants(quadTree, quadTree.Bounds, bitmapData, bitmapWidth, currentTime);
-            if (terrainType.HasValue)
+            if (material.HasValue)
             {
-                TerrainData data = new TerrainData(terrainType.Value, currentTime);
+                TerrainData data = new TerrainData(material.Value, currentTime);
 
-                // The entire terrain quad tree is of a single terrain type, so set the root value with no leaves
+                // The entire terrain quad tree is of a single material, so set the root value with no leaves
                 quadTree.SetData(data, quadTree.Bounds, null);
             }
         }
@@ -72,25 +72,25 @@ namespace Dwarves.Game.Terrain
         /// Populate the quad tree quadrants in the given bounds from the bit map data.
         /// <para />
         /// This function will be recursively called the on the four sub-quadrants of this quadrant. If all of the sub-
-        /// quandrants share the same terrain type, then no data is added to the quad tree and the type is returned. The
-        /// data will be set at a higher level in the quad tree hierarchy. The reason for this is because if the parent
-        /// quadrant is also fully uniform, then any quadrants below it (this one) would have be removed, wasting
-        /// processor time.
+        /// quandrants share the same material, then no data is added to the quad tree and the material is returned.
+        /// The data will be set at a higher level in the quad tree hierarchy. The reason for this is because if the
+        /// parent quadrant is also fully uniform, then any quadrants below it (this one) would have be removed,
+        /// wasting processor time.
         /// <para />
-        /// If any of the sub-quadrants are of a fully uniform type (yet not *all* sub-quadrants like in the above case)
-        /// then the data for those sub-quadrants is set in the quad tree here, making those sub-quadrants leaf nodes
-        /// (an example of this could be Q1 and Q2 returning TerrainType.None, Q3 returning TerrainType.Mud, and Q4
-        /// returning null since it is a 'mixed' quadrant and the data is set at a lower level. In this situation Q1, Q2
-        /// and Q3 would have their data set at this level).
+        /// If any of the sub-quadrants are of a fully uniform material (yet not *all* sub-quadrants like in the above
+        /// case) then the data for those sub-quadrants is set in the quad tree here, making those sub-quadrants leaf
+        /// nodes (an example of this could be Q1 and Q2 returning TerrainMaterial.None, Q3 returning
+        /// TerrainMaterial.Mud, and Q4 returning null since it is a 'mixed' quadrant and the data is set at a lower
+        /// level. In this situation Q1, Q2 and Q3 would have their data set at this level).
         /// </summary>
         /// <param name="quadTree">The quad tree to populate.</param>
         /// <param name="bounds">The bounds of the quadrant whose sub-quandrants are being populated.</param>
         /// <param name="bitmapData">The bit map color data.</param>
         /// <param name="bitmapWidth">The width in pixels of the bitmap image.</param>
         /// <param name="currentTime">The current time used as the terrain creation time.</param>
-        /// <returns>The terrain type value if all sub-quadrants in this bound are filled with the same terrain type;
-        /// Null if the sub-quadrants have various terrain types.</returns>
-        private TerrainType? PopulateQuadrants(
+        /// <returns>The material value if all sub-quadrants in this bound are filled with the same material; Null if
+        /// the sub-quadrants have various materials.</returns>
+        private TerrainMaterial? PopulateQuadrants(
             ClipQuadTree<TerrainData> quadTree,
             Square bounds,
             Color[] bitmapData,
@@ -105,29 +105,29 @@ namespace Dwarves.Game.Terrain
                 Square bottomLeftBounds = bounds.GetBottomLeftQuadrant();
                 Square bottomRightBounds = bounds.GetBottomRightQuadrant();
 
-                // Populate the sub quadrants or if they are uniform get the single terrain type they contain
-                TerrainType? topLeftTerrain =
+                // Populate the sub quadrants or if they are uniform get the single material they contain
+                TerrainMaterial? topLeftTerrain =
                     this.PopulateQuadrants(quadTree, topLeftBounds, bitmapData, bitmapWidth, currentTime);
-                TerrainType? topRightTerrain =
+                TerrainMaterial? topRightTerrain =
                     this.PopulateQuadrants(quadTree, topRightBounds, bitmapData, bitmapWidth, currentTime);
-                TerrainType? bottomLeftTerrain =
+                TerrainMaterial? bottomLeftTerrain =
                     this.PopulateQuadrants(quadTree, bottomLeftBounds, bitmapData, bitmapWidth, currentTime);
-                TerrainType? bottomRightTerrain =
+                TerrainMaterial? bottomRightTerrain =
                     this.PopulateQuadrants(quadTree, bottomRightBounds, bitmapData, bitmapWidth, currentTime);
 
-                // Check if all of the quadrants are uniform and all have the same terrain type
+                // Check if all of the quadrants are uniform and all have the same material
                 if (topLeftTerrain.HasValue &&
                     topLeftTerrain == topRightTerrain &&
                     topRightTerrain == bottomLeftTerrain &&
                     bottomLeftTerrain == bottomRightTerrain)
                 {
-                    // All quadrants have the same terrain type. Return this to create the quadrant at a higher level
+                    // All quadrants have the same material. Return this to create the quadrant at a higher level
                     return topLeftTerrain;
                 }
                 else
                 {
-                    // The quadrants do not all share the same terrain type. However, they may themselves be uniform
-                    // in which case their quadrant values need to be set in the quad tree
+                    // The quadrants do not all share the same material. However, they may themselves be uniform in
+                    // which case their quadrant values need to be set in the quad tree
                     if (topLeftTerrain.HasValue)
                     {
                         // Quadrant has a uniform color
@@ -162,26 +162,26 @@ namespace Dwarves.Game.Terrain
             }
             else
             {
-                // Get the terrain type at this pixel
+                // Get the terrain material at this pixel
                 if (bounds.X < bitmapWidth)
                 {
                     int dataIndex = bounds.X + (bounds.Y * bitmapWidth);
                     if (dataIndex < bitmapData.Length)
                     {
-                        return TerrainTypeConverter.GetValue(bitmapData[dataIndex]);
+                        return TerrainMaterialConverter.GetValue(bitmapData[dataIndex]);
                     }
                     else
                     {
                         // The index is out of bounds for this quadrant. This will happen if the bitmap image is not a
-                        // square with a power-of-2 length. Just return TerrainType.None
-                        return TerrainType.None;
+                        // square with a power-of-2 length. Just return TerrainMaterial.None
+                        return TerrainMaterial.None;
                     }
                 }
                 else
                 {
                     // The index is out of bounds for this quadrant. This will happen if the bitmap image is not a
-                    // square with a power-of-2 length. Just return TerrainType.None
-                    return TerrainType.None;
+                    // square with a power-of-2 length. Just return TerrainMaterial.None
+                    return TerrainMaterial.None;
                 }
             }
         }
@@ -202,6 +202,7 @@ namespace Dwarves.Game.Terrain
                 return 0;
             }
 
+            // Magic!
             x--;
             x |= x >> 1;
             x |= x >> 2;

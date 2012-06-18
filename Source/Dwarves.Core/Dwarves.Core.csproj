@@ -70,7 +70,8 @@
     <Compile Include="Game\Path\PathNode.cs" />
     <Compile Include="Game\Terrain\TerrainData.cs" />
     <Compile Include="Game\Terrain\TerrainFactory.cs" />
-    <Compile Include="Game\Terrain\TerrainTypeConverter.cs" />
+    <Compile Include="Game\Terrain\TerrainMaterialConverter.cs" />
+    <Compile Include="Game\Terrain\TerrainState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceManager.cs" />
     <Compile Include="Subsystem\DebugDrawSystem.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="Subsystem\SpriteSystem.cs" />
     <Compile Include="Common\ClipQuadTree.cs" />
     <Compile Include="WorldContext.cs" />
-    <Compile Include="Game\Terrain\TerrainType.cs" />
+    <Compile Include="Game\Terrain\TerrainMaterial.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\EntitySystem\EntitySystem.Data\EntitySystem.Data.csproj">

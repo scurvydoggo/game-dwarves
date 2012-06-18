@@ -177,8 +177,8 @@ namespace Dwarves.Subsystem
                 spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
 
                 // Get the terrain nodes for the visible portion of the screen
-                int terrainStartX = cTerrain.QuadTree.Bounds.X - (int)camTranslation.X;
-                int terrainStartY = cTerrain.QuadTree.Bounds.Y - (int)camTranslation.Y;
+                int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
+                int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
                 int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
                 int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
                 Rectangle screenRect = new Rectangle(
@@ -189,12 +189,12 @@ namespace Dwarves.Subsystem
 
                 // Tile sprites for each terrain block
                 ClipQuadTree<TerrainData>[] terrainBlocks =
-                    cTerrain.QuadTree.GetNodesIntersecting(screenRect).ToArray();
+                    cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
                 foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
                 {
                     // Don't draw anything if no terrain exists here
-                    TerrainType terrainType = terrainBlock.Data.Type;
-                    if (terrainType == TerrainType.None)
+                    TerrainMaterial material = terrainBlock.Data.Material;
+                    if (material == TerrainMaterial.None)
                     {
                         continue;
                     }
@@ -207,21 +207,21 @@ namespace Dwarves.Subsystem
                         terrainBlock.Bounds.Length);
 
                     // Tile the terrain within the bounds
-                    this.DrawTiledTerrain(spriteBatch, terrainType, screenBounds);
+                    this.DrawTiledTerrain(spriteBatch, material, screenBounds);
                 }
 
                 // Draw fringe sprites for each terrain block
                 foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
                 {
                     // Don't draw anything if no terrain exists here
-                    TerrainType terrainType = terrainBlock.Data.Type;
-                    if (terrainType == TerrainType.None)
+                    TerrainMaterial material = terrainBlock.Data.Material;
+                    if (material == TerrainMaterial.None)
                     {
                         continue;
                     }
 
                     // Draw the fringe tiles
-                    this.DrawTerrainFringe(spriteBatch, terrainType, terrainBlock.Bounds, cTerrain.PathNodes);
+                    this.DrawTerrainFringe(spriteBatch, material, terrainBlock.Bounds, cTerrain.PathNodes);
                 }
 
                 /*
@@ -257,12 +257,12 @@ namespace Dwarves.Subsystem
         /// Draw a tiled terrain within the given bounds.
         /// </summary>
         /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
-        /// <param name="terrain">The terrain type.</param>
+        /// <param name="material">The terrain material.</param>
         /// <param name="scaledBounds">The bounds of the terrain block scaled by the terrain scale factor.</param>
-        private void DrawTiledTerrain(SpriteBatch spriteBatch, TerrainType terrain, Rectangle scaledBounds)
+        private void DrawTiledTerrain(SpriteBatch spriteBatch, TerrainMaterial material, Rectangle scaledBounds)
         {
-            // Get the variations of this terrain type
-            // TODO: Use the TerrainType value, rather than just using mud here
+            // Get the variations of this terrain material
+            // TODO: Use the TerrainMaterial value, rather than just using mud here
             var spriteRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "earth", "mud"))
             {
@@ -328,13 +328,13 @@ namespace Dwarves.Subsystem
         /// Draw the fringe tiles such as grass and rocks.
         /// </summary>
         /// <param name="spriteBatch">The sprite batch that is being drawn.</param>
-        /// <param name="terrainType">The terrain type.</param>
+        /// <param name="material">The terrain material.</param>
         /// <param name="terrainBounds">The bounds of the terrain block in terrain units.</param>
         /// <param name="groundNodes">The ground nodes which represents the walkable ground in the terrain on which the
         /// fringe sprites will be rendered.</param>
         private void DrawTerrainFringe(
             SpriteBatch spriteBatch,
-            TerrainType terrainType,
+            TerrainMaterial material,
             Square terrainBounds,
             Dictionary<Point, LinkedPathNode> groundNodes)
         {
@@ -384,7 +384,7 @@ namespace Dwarves.Subsystem
             }
 
             // Get the variations of the lower fringe sprites
-            // TODO: Use the TerrainType value, rather than just using mud here
+            // TODO: Use the TerrainMaterial value, rather than just using mud here
             var lowerFringeRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "lowerfringe", "mud"))
             {
@@ -393,7 +393,7 @@ namespace Dwarves.Subsystem
             }
 
             // Get the variations of the upper fringe sprites
-            // TODO: Use the TerrainType value, rather than just using mud here
+            // TODO: Use the TerrainMaterial value, rather than just using mud here
             var upperFringeRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "upperfringe", "mud"))
             {
@@ -401,7 +401,7 @@ namespace Dwarves.Subsystem
                 upperFringeRects.Add(variation, this.resources.GetSpriteRectangle(name));
             }
 
-            // Do nothing if no sprites exist for this terrain type
+            // Do nothing if no sprites exist for this terrain material
             if (lowerFringeRects.Count == 0 && upperFringeRects.Count == 0)
             {
                 return;

@@ -106,7 +106,7 @@ namespace Dwarves.Game.Path
             foreach (ClipQuadTree<TerrainData> terrainNode in this.QuadTree)
             {
                 // Ignore non-walkable terrain
-                if (terrainNode.Data.Type == TerrainType.None)
+                if (terrainNode.Data.State != TerrainState.Terrain)
                 {
                     continue;
                 }
@@ -428,7 +428,7 @@ namespace Dwarves.Game.Path
             TerrainData terrainData;
             if (this.QuadTree.GetDataAt(point, out terrainData))
             {
-                return terrainData.Type == TerrainType.None;
+                return terrainData.State != TerrainState.Terrain;
             }
             else
             {

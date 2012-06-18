@@ -29,7 +29,7 @@ namespace Dwarves.Component.Game
             bool isCollidable,
             Dictionary<Point, LinkedPathNode> pathNodes)
         {
-            this.QuadTree = terrain;
+            this.Terrain = terrain;
             this.IsCollidable = isCollidable;
             this.PathNodes = pathNodes;
             this.Fixtures = new Dictionary<Square, Fixture>();
@@ -38,7 +38,7 @@ namespace Dwarves.Component.Game
         /// <summary>
         /// Gets the terrain quad tree.
         /// </summary>
-        public ClipQuadTree<TerrainData> QuadTree { get; private set; }
+        public ClipQuadTree<TerrainData> Terrain { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this terrain can be collided with.

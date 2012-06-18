@@ -1,22 +1,22 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="TerrainType.cs" company="Acidwashed Games">
+// <copyright file="TerrainMaterial.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
 namespace Dwarves.Game.Terrain
 {
     /// <summary>
-    /// Defines the terrain types that can exist.
+    /// Defines the terrain materials that can exist.
     /// </summary>
-    public enum TerrainType : byte
+    public enum TerrainMaterial : byte
     {
         /// <summary>
-        /// No terrain (ie. air).
+        /// Nothing (ie. air).
         /// </summary>
         None,
 
         /// <summary>
-        /// Mud terrain.
+        /// Mud.
         /// </summary>
         Mud
     }

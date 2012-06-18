@@ -15,19 +15,28 @@ namespace Dwarves.Game.Terrain
         /// <summary>
         /// Initializes a new instance of the TerrainData struct.
         /// </summary>
-        /// <param name="type">The terrain type.</param>
+        /// <param name="material">The terrain material.</param>
         /// <param name="createTime">The creation time of the terrain.</param>
-        public TerrainData(TerrainType type, TimeSpan createTime)
+        public TerrainData(TerrainMaterial material, TimeSpan createTime)
             : this()
         {
-            this.Type = type;
+            this.Material = material;
             this.CreateTime = createTime;
+
+            // Initialize the state as either Terrain or NoTerrain
+            this.State =
+                material == TerrainMaterial.None ? TerrainState.Empty : TerrainState.Terrain;
         }
 
         /// <summary>
-        /// Gets or sets the terrain type.
+        /// Gets or sets the terrain material.
         /// </summary>
-        public TerrainType Type { get; set; }
+        public TerrainMaterial Material { get; set; }
+
+        /// <summary>
+        /// Gets or sets the terrain state.
+        /// </summary>
+        public TerrainState State { get; set; }
 
         /// <summary>
         /// Gets or sets the creation time of the terrain.

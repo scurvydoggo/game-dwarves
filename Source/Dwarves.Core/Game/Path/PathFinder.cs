@@ -235,9 +235,9 @@ namespace Dwarves.Game.Path
         /// terrain.</returns>
         private bool IsOpenSpace(Rectangle rect)
         {
-            foreach (ClipQuadTree<TerrainData> terrainBlock in this.Terrain.QuadTree.GetNodesIntersecting(rect))
+            foreach (ClipQuadTree<TerrainData> terrainBlock in this.Terrain.Terrain.GetNodesIntersecting(rect))
             {
-                if (terrainBlock.Data.Type != TerrainType.None)
+                if (terrainBlock.Data.State == TerrainState.Terrain)
                 {
                     return false;
                 }
