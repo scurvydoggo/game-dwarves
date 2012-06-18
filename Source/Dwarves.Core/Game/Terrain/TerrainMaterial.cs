@@ -16,7 +16,7 @@ namespace Dwarves.Game.Terrain
         None,
 
         /// <summary>
-        /// Mud.
+        /// Mud terrain.
         /// </summary>
         Mud
     }

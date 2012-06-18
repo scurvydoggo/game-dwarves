@@ -141,17 +141,17 @@ namespace Dwarves.Subsystem
             }
 
             // Determine which terrain fixtures which are no longer in range of any bodies
-            var toRemove = new List<KeyValuePair<Square, Fixture>>();
+            var blocksToRemove = new List<KeyValuePair<Square, Fixture>>();
             foreach (KeyValuePair<Square, Fixture> kvp in cTerrain.Fixtures)
             {
                 if (!blocksInRange.Contains(kvp.Key))
                 {
-                    toRemove.Add(kvp);
+                    blocksToRemove.Add(kvp);
                 }
             }
 
             // Remove terrain fixtures which are no longer in range of any bodies
-            foreach (KeyValuePair<Square, Fixture> kvp in toRemove)
+            foreach (KeyValuePair<Square, Fixture> kvp in blocksToRemove)
             {
                 cTerrainPhysics.Body.DestroyFixture(kvp.Value);
                 cTerrain.Fixtures.Remove(kvp.Key);
