@@ -104,8 +104,6 @@ namespace Dwarves
         {
             try
             {
-                this.GraphicsDevice.Clear(Color.FromNonPremultiplied(150, 200, 255, 255));
-
                 int delta = (int)gameTime.ElapsedGameTime.TotalMilliseconds;
 
                 // Draw the world

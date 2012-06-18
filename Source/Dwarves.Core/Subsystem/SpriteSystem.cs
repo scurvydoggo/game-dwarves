@@ -37,6 +37,13 @@ namespace Dwarves.Subsystem
         /// </summary>
         private GraphicsDevice graphics;
 
+        /// <summary>
+        /// The lighting shader.
+        /// </summary>
+        private Effect lightShader;
+
+        private Texture2D TempTestingWhiteTexture;
+
         #endregion
 
         #region Constructor
@@ -52,6 +59,13 @@ namespace Dwarves.Subsystem
         {
             this.resources = resources;
             this.graphics = graphics;
+
+            // Load the lighting shader
+            this.lightShader = (Effect)this.resources.Load<Effect>("Shader\\LightShader");
+
+            // TODO: Remove this test code!
+            TempTestingWhiteTexture = new Texture2D(this.graphics, 1, 1);
+            TempTestingWhiteTexture.SetData<Color>(new Color[] { Color.White });
         }
 
         #endregion
@@ -81,32 +95,57 @@ namespace Dwarves.Subsystem
             float translateY =
                 (float)(((float)this.graphics.Viewport.Height * 0.5) / scaleY) + cCameraPosition.Position.Y;
 
-            // Draw the sprites
-            this.DrawSprites(translateX, translateY, scaleX, scaleY);
+            using (SpriteBatch spriteBatch = new SpriteBatch(this.graphics))
+            {
+                using (RenderTarget2D mainTarget = this.CreateRenderTarget())
+                {
+                    using (RenderTarget2D lightTarget = this.CreateRenderTarget())
+                    {
+                        // Render the game
+                        this.graphics.SetRenderTarget(mainTarget);
+                        this.graphics.Clear(Color.FromNonPremultiplied(150, 200, 255, 255));
+                        this.DrawGame(spriteBatch, translateX, translateY, scaleX, scaleY);
+
+                        // Render the lighting
+                        this.graphics.SetRenderTarget(lightTarget);
+                        this.graphics.Clear(Color.Gray);
+                        this.DrawLighting(spriteBatch, translateX, translateY, scaleX, scaleY);
+
+                        // Blended the game and lighting textures
+                        this.graphics.SetRenderTarget(null);
+                        this.DrawBlendedLighting(spriteBatch, mainTarget, lightTarget);
+                    }
+                }
+            }
         }
 
         #endregion
 
+        #region Render Game
+
         /// <summary>
-        /// Draw the sprites.
+        /// Draw the game.
         /// </summary>
+        /// <param name="spriteBatch">The sprite batch.</param>
         /// <param name="cameraTranslateX">The camera x translation value.</param>
         /// <param name="cameraTranslateY">The camera y translation value.</param>
         /// <param name="cameraScaleX">The camera x scale value.</param>
         /// <param name="cameraScaleY">The camera y scale value.</param>
-        private void DrawSprites(float cameraTranslateX, float cameraTranslateY, float cameraScaleX, float cameraScaleY)
+        private void DrawGame(
+            SpriteBatch spriteBatch,
+            float cameraTranslateX,
+            float cameraTranslateY,
+            float cameraScaleX,
+            float cameraScaleY)
         {
-            using (SpriteBatch spriteBatch = new SpriteBatch(this.graphics))
-            {
-                // Draw the terrain components
-                this.DrawTerrainComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
+            // Draw the terrain
+            this.DrawTerrainComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
 
-                // Draw the sprite components
-                this.DrawSpriteComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
-            }
+            // Draw the sprites
+            this.DrawSpriteComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
         }
 
-        #region Draw Methods
+        #region Draw Sprites
 
         /// <summary>
         /// Draw the SpriteComponent sprites.
@@ -154,6 +193,10 @@ namespace Dwarves.Subsystem
             spriteBatch.End();
         }
 
+        #endregion
+
+        #region Draw Terrain
+
         /// <summary>
         /// Draw the TerrainComponent sprites.
         /// </summary>
@@ -169,101 +212,100 @@ namespace Dwarves.Subsystem
             float cameraScaleX,
             float cameraScaleY)
         {
-            foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(TerrainComponent)))
+            Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
+
+            var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
+            var cPosition = (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
+            var cScale = (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
+
+            // Create the camera transform matrix
+            var camTranslation = new Vector3(
+                (cameraTranslateX + cPosition.Position.X) / cScale.Scale,
+                (cameraTranslateY - cPosition.Position.Y) / cScale.Scale,
+                0);
+            var camScale = new Vector3(
+                cameraScaleX * cScale.Scale,
+                cameraScaleY * cScale.Scale,
+                0);
+            Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
+
+            // Begin the sprite batch with the camera transform
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
+
+            // Get the terrain nodes for the visible portion of the screen
+            int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
+            int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
+            int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
+            int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
+            Rectangle screenRect = new Rectangle(
+                terrainStartX - tileSize,
+                terrainStartY - tileSize,
+                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
+                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
+
+            // Tile sprites for each terrain block
+            ClipQuadTree<TerrainData>[] terrainBlocks =
+                cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
+            foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
-                var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(entity, typeof(TerrainComponent));
-                var cPosition = (PositionComponent)this.EntityManager.GetComponent(entity, typeof(PositionComponent));
-                var cScale = (ScaleComponent)this.EntityManager.GetComponent(entity, typeof(ScaleComponent));
-
-                // Create the camera transform matrix
-                var camTranslation = new Vector3(
-                    (cameraTranslateX + cPosition.Position.X) / cScale.Scale,
-                    (cameraTranslateY - cPosition.Position.Y) / cScale.Scale,
-                    0);
-                var camScale = new Vector3(
-                    cameraScaleX * cScale.Scale,
-                    cameraScaleY * cScale.Scale,
-                    0);
-                Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
-
-                // Begin the sprite batch with the camera transform
-                spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
-
-                // Get the terrain nodes for the visible portion of the screen
-                int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
-                int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
-                int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
-                int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
-                Rectangle screenRect = new Rectangle(
-                    terrainStartX - tileSize,
-                    terrainStartY - tileSize,
-                    (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
-                    (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
-
-                // Tile sprites for each terrain block
-                ClipQuadTree<TerrainData>[] terrainBlocks =
-                    cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
-                foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
+                // Don't draw anything if no terrain exists here
+                TerrainMaterial material = terrainBlock.Data.Material;
+                if (material == TerrainMaterial.None)
                 {
-                    // Don't draw anything if no terrain exists here
-                    TerrainMaterial material = terrainBlock.Data.Material;
-                    if (material == TerrainMaterial.None)
-                    {
-                        continue;
-                    }
-
-                    // Calculate the bounds of this terrain block in on-screen coordinates
-                    var screenBounds = new Rectangle(
-                        terrainBlock.Bounds.X,
-                        terrainBlock.Bounds.Y,
-                        terrainBlock.Bounds.Length,
-                        terrainBlock.Bounds.Length);
-
-                    // Tile the terrain within the bounds
-                    this.DrawTiledTerrain(spriteBatch, material, screenBounds);
+                    continue;
                 }
 
-                // Draw fringe sprites for each terrain block
-                foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
-                {
-                    // Don't draw anything if no terrain exists here
-                    TerrainMaterial material = terrainBlock.Data.Material;
-                    if (material == TerrainMaterial.None)
-                    {
-                        continue;
-                    }
+                // Calculate the bounds of this terrain block in on-screen coordinates
+                var screenBounds = new Rectangle(
+                    terrainBlock.Bounds.X,
+                    terrainBlock.Bounds.Y,
+                    terrainBlock.Bounds.Length,
+                    terrainBlock.Bounds.Length);
 
-                    // Draw the fringe tiles
-                    this.DrawTerrainFringe(spriteBatch, material, terrainBlock.Bounds, cTerrain.PathNodes);
-                }
-
-                /*
-                // DEBUG: Draw path components
-                Texture2D debugTexture = new Texture2D(this.graphics, 1, 1);
-                debugTexture.SetData<Color>(new Color[] { Color.White });
-                foreach (PathComponent path in this.EntityManager.GetComponents(typeof(PathComponent)))
-                {
-                    for (int i = 0; i < path.Nodes.Length - 1; i++)
-                    {
-                        PathNode p1 = path.Nodes[i];
-                        PathNode p2 = path.Nodes[i + 1];
-
-                        int width = Math.Abs(p2.X - p1.X);
-                        if (width == 0) width = 1;
-
-                        int height = Math.Abs(p2.Y - p1.Y);
-                        if (height == 0) height = 1;
-
-                        spriteBatch.Draw(
-                            debugTexture,
-                            new Rectangle(p1.X, p1.Y, width, height),
-                            (p1.Type == PathNodeType.Normal) ? Color.Red : Color.Yellow);
-                    }
-                }
-                */
-
-                spriteBatch.End();
+                // Tile the terrain within the bounds
+                this.DrawTiledTerrain(spriteBatch, material, screenBounds);
             }
+
+            // Draw fringe sprites for each terrain block
+            foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
+            {
+                // Don't draw anything if no terrain exists here
+                TerrainMaterial material = terrainBlock.Data.Material;
+                if (material == TerrainMaterial.None)
+                {
+                    continue;
+                }
+
+                // Draw the fringe tiles
+                this.DrawTerrainFringe(spriteBatch, material, terrainBlock.Bounds, cTerrain.PathNodes);
+            }
+
+            /*
+            // DEBUG: Draw path components
+            Texture2D debugTexture = new Texture2D(this.graphics, 1, 1);
+            debugTexture.SetData<Color>(new Color[] { Color.White });
+            foreach (PathComponent path in this.EntityManager.GetComponents(typeof(PathComponent)))
+            {
+                for (int i = 0; i < path.Nodes.Length - 1; i++)
+                {
+                    PathNode p1 = path.Nodes[i];
+                    PathNode p2 = path.Nodes[i + 1];
+
+                    int width = Math.Abs(p2.X - p1.X);
+                    if (width == 0) width = 1;
+
+                    int height = Math.Abs(p2.Y - p1.Y);
+                    if (height == 0) height = 1;
+
+                    spriteBatch.Draw(
+                        debugTexture,
+                        new Rectangle(p1.X, p1.Y, width, height),
+                        (p1.Type == PathNodeType.Normal) ? Color.Red : Color.Yellow);
+                }
+            }
+            */
+
+            spriteBatch.End();
         }
 
         /// <summary>
@@ -473,6 +515,124 @@ namespace Dwarves.Subsystem
                     spriteBatch.Draw(this.resources.SpriteSheet, upperFringeDestRect, upperFringeRect, Color.White);
                 }
             }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Post-processing
+
+        /// <summary>
+        /// Draw the lighting.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch.</param>
+        /// <param name="cameraTranslateX">The camera x translation value.</param>
+        /// <param name="cameraTranslateY">The camera y translation value.</param>
+        /// <param name="cameraScaleX">The camera x scale value.</param>
+        /// <param name="cameraScaleY">The camera y scale value.</param>
+        private void DrawLighting(
+            SpriteBatch spriteBatch,
+            float cameraTranslateX,
+            float cameraTranslateY,
+            float cameraScaleX,
+            float cameraScaleY)
+        {
+            Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
+
+            var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
+            var cPosition = (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
+            var cScale = (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
+
+            // Create the camera transform matrix
+            var camTranslation = new Vector3(
+                (cameraTranslateX + cPosition.Position.X) / cScale.Scale,
+                (cameraTranslateY - cPosition.Position.Y) / cScale.Scale,
+                0);
+            var camScale = new Vector3(
+                cameraScaleX * cScale.Scale,
+                cameraScaleY * cScale.Scale,
+                0);
+            Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
+
+            // Begin the sprite batch with the camera transform
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
+
+            // Get the terrain nodes for the visible portion of the screen
+            int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
+            int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
+            int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
+            int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
+            Rectangle screenRect = new Rectangle(
+                terrainStartX - tileSize,
+                terrainStartY - tileSize,
+                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
+                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
+
+            // Tile sprites for each terrain block
+            ClipQuadTree<TerrainData>[] terrainBlocks =
+                cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
+            foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
+            {
+                // Only lighten the empty areas of terrain
+                TerrainState state = terrainBlock.Data.State;
+                if (state != TerrainState.Empty)
+                {
+                    continue;
+                }
+
+                // Calculate the bounds of this terrain block in on-screen coordinates
+                var screenBounds = new Rectangle(
+                    terrainBlock.Bounds.X,
+                    terrainBlock.Bounds.Y,
+                    terrainBlock.Bounds.Length,
+                    terrainBlock.Bounds.Length);
+
+                spriteBatch.Draw(this.TempTestingWhiteTexture, screenBounds, Color.White);
+            }
+
+            spriteBatch.End();
+        }
+
+        /// <summary>
+        /// Blend the main texture with the light texture.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch.</param>
+        /// <param name="mainTexture">The main texture.</param>
+        /// <param name="lightTexture">The light texture.</param>
+        private void DrawBlendedLighting(SpriteBatch spriteBatch, Texture2D mainTexture, Texture2D lightTexture)
+        {
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+
+            // Apply the lighting shader
+            this.lightShader.Parameters["LightsTexture"].SetValue(lightTexture);
+            this.lightShader.CurrentTechnique.Passes[0].Apply();
+
+            // Get the rectangle for the screen buffer
+            var rectangle = new Rectangle(
+                0,
+                0,
+                this.graphics.PresentationParameters.BackBufferWidth,
+                this.graphics.PresentationParameters.BackBufferHeight);
+
+            spriteBatch.Draw(mainTexture, rectangle, Color.White);
+            spriteBatch.End();
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Create a 2D render target.
+        /// </summary>
+        /// <returns>The render target.</returns>
+        private RenderTarget2D CreateRenderTarget()
+        {
+            return new RenderTarget2D(
+                this.graphics,
+                this.graphics.PresentationParameters.BackBufferWidth,
+                this.graphics.PresentationParameters.BackBufferHeight);
         }
 
         #endregion
