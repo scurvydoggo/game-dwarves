@@ -81,17 +81,30 @@ namespace Dwarves.Subsystem
             float translateY =
                 (float)(((float)this.graphics.Viewport.Height * 0.5) / scaleY) + cCameraPosition.Position.Y;
 
-            using (SpriteBatch spriteBatch = new SpriteBatch(this.graphics))
-            {
-                // Draw the terrain components
-                this.DrawTerrainComponents(spriteBatch, translateX, translateY, scaleX, scaleY);
-
-                // Draw the sprite components
-                this.DrawSpriteComponents(spriteBatch, translateX, translateY, scaleX, scaleY);
-            }
+            // Draw the sprites
+            this.DrawSprites(translateX, translateY, scaleX, scaleY);
         }
 
         #endregion
+
+        /// <summary>
+        /// Draw the sprites.
+        /// </summary>
+        /// <param name="cameraTranslateX">The camera x translation value.</param>
+        /// <param name="cameraTranslateY">The camera y translation value.</param>
+        /// <param name="cameraScaleX">The camera x scale value.</param>
+        /// <param name="cameraScaleY">The camera y scale value.</param>
+        private void DrawSprites(float cameraTranslateX, float cameraTranslateY, float cameraScaleX, float cameraScaleY)
+        {
+            using (SpriteBatch spriteBatch = new SpriteBatch(this.graphics))
+            {
+                // Draw the terrain components
+                this.DrawTerrainComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
+
+                // Draw the sprite components
+                this.DrawSpriteComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
+            }
+        }
 
         #region Draw Methods
 
