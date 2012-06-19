@@ -10,15 +10,14 @@ namespace Dwarves.Game.Terrain
     /// <summary>
     /// Data for a terrain block.
     /// </summary>
-    public struct TerrainData
+    public class TerrainData
     {
         /// <summary>
-        /// Initializes a new instance of the TerrainData struct.
+        /// Initializes a new instance of the TerrainData class.
         /// </summary>
         /// <param name="material">The terrain material.</param>
         /// <param name="createTime">The creation time of the terrain.</param>
         public TerrainData(TerrainMaterial material, TimeSpan createTime)
-            : this()
         {
             this.Material = material;
             this.CreateTime = createTime;
