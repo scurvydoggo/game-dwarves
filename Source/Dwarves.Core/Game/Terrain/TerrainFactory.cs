@@ -7,6 +7,7 @@ namespace Dwarves.Game.Terrain
 {
     using System;
     using Dwarves.Common;
+    using Dwarves.Game.Light;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
 
@@ -35,6 +36,10 @@ namespace Dwarves.Game.Terrain
 
             // Populate the terrain's quad tree from the bitmap data
             this.PopulateQuadTree(quadTree, bitmapData, bitmap.Width, currentTime);
+
+            // Decorate the light fronts on the quad tree
+            var lightFrontDecorator = new LightFrontDecorator(quadTree);
+            lightFrontDecorator.Decorate();
 
             return quadTree;
         }

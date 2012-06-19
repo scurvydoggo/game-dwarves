@@ -16,20 +16,45 @@ namespace Dwarves.Game.Light
     public class LightFront
     {
         /// <summary>
+        /// Initializes a new instance of the LightFront class.
+        /// </summary>
+        /// <param name="x">The x coordinate of the point from which light emants.</param>
+        /// <param name="y">The y coordinate of the point from which light emants.</param>
+        /// <param name="direction">The direction into which the light fades.</param>
+        public LightFront(int x, int y, LightDirection direction)
+            : this(x, y, direction, 0)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the LightFront class.
+        /// </summary>
+        /// <param name="x">The x coordinate of the point from which light emants.</param>
+        /// <param name="y">The y coordinate of the point from which light emants.</param>
+        /// <param name="direction">The direction into which the light fades.</param>
+        /// <param name="baseLength">The length of the base for non-diagonally directed light.</param>
+        public LightFront(int x, int y, LightDirection direction, int baseLength)
+        {
+            this.Point = new Point(x, y);
+            this.Direction = direction;
+            this.BaseLength = baseLength;
+        }
+
+        /// <summary>
         /// Gets or sets the point from which the light emants. If the light is in an up/down/left/right direction, this
         /// point is the top/left point of the 'base' from which light emants.
         /// </summary>
         public Point Point { get; set; }
 
         /// <summary>
-        /// Gets or sets the length of the base. For diagonal direction light this is unused.
-        /// </summary>
-        public uint BaseLength { get; set; }
-
-        /// <summary>
         /// Gets or sets the direction into which the light fades.
         /// </summary>
         public LightDirection Direction { get; set; }
+
+        /// <summary>
+        /// Gets or sets the length of the base. For diagonal direction light this is unused.
+        /// </summary>
+        public int BaseLength { get; set; }
     }
 
     /// <summary>
