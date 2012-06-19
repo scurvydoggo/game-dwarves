@@ -11,7 +11,7 @@ namespace Dwarves.Game.Light
     /// This represents a linear segment of light that fades from 100% to 0% luminosity. The length of the light itself
     /// (ie. the length from 100% to 0% luminosity) is not specified in this class; that value is world-defined (the
     /// reason for this is because light can span multiple squares in a quad-tree, which is difficult to update if the 
-    /// light length changes).
+    /// light length changes; instead, light length will be a variable in the scope of the entire quad-tree).
     /// </summary>
     public class LightFront
     {
