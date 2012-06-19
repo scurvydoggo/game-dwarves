@@ -6,6 +6,7 @@
 namespace Dwarves.Game.Terrain
 {
     using System;
+    using Dwarves.Game.Light;
 
     /// <summary>
     /// Data for a terrain block.
@@ -20,11 +21,9 @@ namespace Dwarves.Game.Terrain
         public TerrainData(TerrainMaterial material, TimeSpan createTime)
         {
             this.Material = material;
+            this.State = material == TerrainMaterial.None ? TerrainState.Empty : TerrainState.Terrain;
             this.CreateTime = createTime;
-
-            // Initialize the state as either Terrain or NoTerrain
-            this.State =
-                material == TerrainMaterial.None ? TerrainState.Empty : TerrainState.Terrain;
+            this.StaticLightFronts = new LightFront[0];
         }
 
         /// <summary>
@@ -41,5 +40,10 @@ namespace Dwarves.Game.Terrain
         /// Gets or sets the creation time of the terrain.
         /// </summary>
         public TimeSpan CreateTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the static (terrain-based) light fronts at this terrain block.
+        /// </summary>
+        public LightFront[] StaticLightFronts { get; set; }
     }
 }
