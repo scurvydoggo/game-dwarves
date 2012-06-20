@@ -13,6 +13,7 @@ namespace Dwarves.Subsystem
     using Dwarves.Component.Render;
     using Dwarves.Component.Screen;
     using Dwarves.Component.Spatial;
+    using Dwarves.Game.Light;
     using Dwarves.Game.Path;
     using Dwarves.Game.Terrain;
     using EntitySystem;
@@ -42,7 +43,10 @@ namespace Dwarves.Subsystem
         /// </summary>
         private Effect lightShader;
 
-        private Texture2D TempTestingWhiteTexture;
+        /// <summary>
+        /// A 1x1 white texture.
+        /// </summary>
+        private Texture2D whiteTexture;
 
         #endregion
 
@@ -63,9 +67,9 @@ namespace Dwarves.Subsystem
             // Load the lighting shader
             this.lightShader = (Effect)this.resources.Load<Effect>("Shader\\LightShader");
 
-            // TODO: Remove this test code!
-            TempTestingWhiteTexture = new Texture2D(this.graphics, 1, 1);
-            TempTestingWhiteTexture.SetData<Color>(new Color[] { Color.White });
+            // Create a 1x1 white texture
+            this.whiteTexture = new Texture2D(this.graphics, 1, 1);
+            this.whiteTexture.SetData<Color>(new Color[] { Color.White });
         }
 
         #endregion
@@ -111,7 +115,7 @@ namespace Dwarves.Subsystem
                         this.graphics.Clear(Color.Gray);
                         this.DrawLighting(spriteBatch, translateX, translateY, scaleX, scaleY);
 
-                        // Blended the game and lighting textures
+                        // Blend the game and lighting textures
                         this.graphics.SetRenderTarget(null);
                         this.DrawBlendedLighting(spriteBatch, mainTarget, lightTarget);
                     }
@@ -574,21 +578,60 @@ namespace Dwarves.Subsystem
                 cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
             foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
-                // Only lighten the empty areas of terrain
                 TerrainState state = terrainBlock.Data.State;
-                if (state != TerrainState.Empty)
+
+                // If this block is empty (ie. is just air), then it is fully lit 
+                if (state == TerrainState.Empty)
                 {
-                    continue;
+                    var blockBounds = new Rectangle(
+                        terrainBlock.Bounds.X,
+                        terrainBlock.Bounds.Y,
+                        terrainBlock.Bounds.Length,
+                        terrainBlock.Bounds.Length);
+                    spriteBatch.Draw(this.whiteTexture, blockBounds, Color.White);
                 }
 
-                // Calculate the bounds of this terrain block in on-screen coordinates
-                var screenBounds = new Rectangle(
-                    terrainBlock.Bounds.X,
-                    terrainBlock.Bounds.Y,
-                    terrainBlock.Bounds.Length,
-                    terrainBlock.Bounds.Length);
+                // Draw any light-front sprites
+                foreach (LightFront light in terrainBlock.Data.StaticLightFronts)
+                {
+                    // TODO: Get the source rectangle of the light sprite and use the spritesheet
+                    // For now, just use the white texture
 
-                spriteBatch.Draw(this.TempTestingWhiteTexture, screenBounds, Color.White);
+                    // TODO: Make this a configurable variable
+                    const int lightLength = 25;
+
+                    // Calculate the bounds of the light sprite
+                    Rectangle spriteBounds;
+                    switch (light.Direction)
+                    {
+                        case LightDirection.Up:
+                            spriteBounds =
+                                new Rectangle(light.Point.X, light.Point.Y, light.BaseLength, lightLength);
+                            break;
+
+                        case LightDirection.Down:
+                            spriteBounds =
+                                new Rectangle(light.Point.X, light.Point.Y, light.BaseLength, -lightLength);
+                            break;
+
+                        case LightDirection.Right:
+                            spriteBounds =
+                                new Rectangle(light.Point.X, light.Point.Y, lightLength, -light.BaseLength);
+                            break;
+
+                        case LightDirection.Left:
+                            spriteBounds =
+                                new Rectangle(light.Point.X, light.Point.Y, -lightLength, -light.BaseLength);
+                            break;
+
+                        default:
+                            throw new ApplicationException(
+                                string.Format("Light direction {0} is not supported.", light.Direction));
+                    }
+
+                    // Draw the light
+                    spriteBatch.Draw(this.whiteTexture, spriteBounds, Color.White);
+                }
             }
 
             spriteBatch.End();
