@@ -76,18 +76,12 @@ namespace Dwarves.Game.Light
         {
             var lightFronts = new List<LightFront>();
 
-            // For convenience, get the corrdinates of the outside points for this node
-            int above = terrainNode.Bounds.Y - 1;
-            int below = terrainNode.Bounds.Bottom;
-            int left = terrainNode.Bounds.X - 1;
-            int right = terrainNode.Bounds.Right;
-
             // Test each point 1 pixel outside of this quad on the top/bottom sides
             int startAboveX = -1;
             int startBelowX = -1;
             for (int x = terrainNode.Bounds.X; x < terrainNode.Bounds.Right; x++)
             {
-                if (this.IsEmptyTerrain(x, above))
+                if (this.IsEmptyTerrain(x, terrainNode.Bounds.Y - 1))
                 {
                     if (startAboveX == -1)
                     {
@@ -100,15 +94,15 @@ namespace Dwarves.Game.Light
                     {
                         var lightFront = new LightFront(
                             startAboveX,
-                            above,
+                            terrainNode.Bounds.Y,
                             LightDirection.Down,
-                            x - startAboveX - 1);
+                            x - startAboveX);
                         lightFronts.Add(lightFront);
                         startAboveX = -1;
                     }
                 }
 
-                if (this.IsEmptyTerrain(x, below))
+                if (this.IsEmptyTerrain(x, terrainNode.Bounds.Bottom))
                 {
                     if (startBelowX == -1)
                     {
@@ -121,9 +115,9 @@ namespace Dwarves.Game.Light
                     {
                         var lightFront = new LightFront(
                             startBelowX,
-                            below,
+                            terrainNode.Bounds.Bottom - 1,
                             LightDirection.Up,
-                            x - startBelowX - 1);
+                            x - startBelowX);
                         lightFronts.Add(lightFront);
                         startBelowX = -1;
                     }
@@ -135,9 +129,9 @@ namespace Dwarves.Game.Light
             {
                 var lightFront = new LightFront(
                     startAboveX,
-                    above,
+                    terrainNode.Bounds.Y,
                     LightDirection.Down,
-                    terrainNode.Bounds.Right - startAboveX - 1);
+                    terrainNode.Bounds.Right - startAboveX);
                 lightFronts.Add(lightFront);
             }
 
@@ -146,9 +140,9 @@ namespace Dwarves.Game.Light
             {
                 var lightFront = new LightFront(
                     startBelowX,
-                    below,
+                    terrainNode.Bounds.Bottom - 1,
                     LightDirection.Up,
-                    terrainNode.Bounds.Right - startBelowX - 1);
+                    terrainNode.Bounds.Right - startBelowX);
                 lightFronts.Add(lightFront);
             }
 
@@ -157,7 +151,7 @@ namespace Dwarves.Game.Light
             int startRightY = -1;
             for (int y = terrainNode.Bounds.Y; y < terrainNode.Bounds.Bottom; y++)
             {
-                if (this.IsEmptyTerrain(left, y))
+                if (this.IsEmptyTerrain(terrainNode.Bounds.X - 1, y))
                 {
                     if (startLeftY == -1)
                     {
@@ -169,16 +163,16 @@ namespace Dwarves.Game.Light
                     if (startLeftY != -1)
                     {
                         var lightFront = new LightFront(
-                            left,
+                            terrainNode.Bounds.X,
                             startLeftY,
                             LightDirection.Right,
-                            y - startLeftY - 1);
+                            y - startLeftY);
                         lightFronts.Add(lightFront);
                         startLeftY = -1;
                     }
                 }
 
-                if (this.IsEmptyTerrain(right, y))
+                if (this.IsEmptyTerrain(terrainNode.Bounds.Right, y))
                 {
                     if (startRightY == -1)
                     {
@@ -190,10 +184,10 @@ namespace Dwarves.Game.Light
                     if (startRightY != -1)
                     {
                         var lightFront = new LightFront(
-                            right,
+                            terrainNode.Bounds.Right - 1,
                             startRightY,
                             LightDirection.Left,
-                            y - startRightY - 1);
+                            y - startRightY);
                         lightFronts.Add(lightFront);
                         startRightY = -1;
                     }
@@ -204,10 +198,10 @@ namespace Dwarves.Game.Light
             if (startLeftY != -1)
             {
                 var lightFront = new LightFront(
-                    left,
+                    terrainNode.Bounds.X,
                     startLeftY,
                     LightDirection.Right,
-                    terrainNode.Bounds.Bottom - startLeftY - 1);
+                    terrainNode.Bounds.Bottom - startLeftY);
                 lightFronts.Add(lightFront);
             }
 
@@ -215,10 +209,10 @@ namespace Dwarves.Game.Light
             if (startRightY != -1)
             {
                 var lightFront = new LightFront(
-                    right,
+                    terrainNode.Bounds.Right - 1,
                     startRightY,
                     LightDirection.Left,
-                    terrainNode.Bounds.Bottom - startRightY - 1);
+                    terrainNode.Bounds.Bottom - startRightY);
                 lightFronts.Add(lightFront);
             }
 
