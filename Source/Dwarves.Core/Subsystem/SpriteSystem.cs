@@ -605,23 +605,35 @@ namespace Dwarves.Subsystem
                     switch (light.Direction)
                     {
                         case LightDirection.Up:
-                            spriteBounds =
-                                new Rectangle(light.Point.X, light.Point.Y, light.BaseLength, lightLength);
+                            spriteBounds = new Rectangle(
+                                light.Point.X,
+                                light.Point.Y - lightLength,
+                                light.BaseLength,
+                                lightLength);
                             break;
 
                         case LightDirection.Down:
-                            spriteBounds =
-                                new Rectangle(light.Point.X, light.Point.Y, light.BaseLength, -lightLength);
+                            spriteBounds = new Rectangle(
+                                light.Point.X,
+                                light.Point.Y,
+                                light.BaseLength,
+                                lightLength);
                             break;
 
                         case LightDirection.Right:
-                            spriteBounds =
-                                new Rectangle(light.Point.X, light.Point.Y, lightLength, -light.BaseLength);
+                            spriteBounds = new Rectangle(
+                                light.Point.X,
+                                light.Point.Y,
+                                lightLength,
+                                light.BaseLength);
                             break;
 
                         case LightDirection.Left:
-                            spriteBounds =
-                                new Rectangle(light.Point.X, light.Point.Y, -lightLength, -light.BaseLength);
+                            spriteBounds = new Rectangle(
+                                light.Point.X - lightLength,
+                                light.Point.Y,
+                                lightLength,
+                                light.BaseLength);
                             break;
 
                         default:
