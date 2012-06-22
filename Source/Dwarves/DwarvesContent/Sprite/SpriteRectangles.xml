@@ -9,5 +9,9 @@
     <Item><Key>body-arm-dwarf-1</Key><Value>19 35 4 5</Value></Item>
     <Item><Key>body-leg-dwarf-1</Key><Value>24 35 4 4</Value></Item>
     <Item><Key>body-beard-dwarf-1</Key><Value>29 35 8 13</Value></Item>
+    <Item><Key>light-lightfront-up-1</Key><Value>126 27 1 100</Value></Item>
+    <Item><Key>light-lightfront-down-1</Key><Value>123 27 1 100</Value></Item>
+    <Item><Key>light-lightfront-left-1</Key><Value>21 126 100 1</Value></Item>
+    <Item><Key>light-lightfront-right-1</Key><Value>21 123 100 1</Value></Item>
   </Asset>
 </XnaContent>
