@@ -112,7 +112,7 @@ namespace Dwarves.Subsystem
 
                         // Render the lighting
                         this.graphics.SetRenderTarget(lightTarget);
-                        this.graphics.Clear(Color.Gray);
+                        this.graphics.Clear(Color.Black);
                         this.DrawLighting(spriteBatch, translateX, translateY, scaleX, scaleY);
 
                         // Blend the game and lighting textures
@@ -542,6 +542,9 @@ namespace Dwarves.Subsystem
             float cameraScaleX,
             float cameraScaleY)
         {
+            // TODO: Make this a configurable variable
+            const int lightLength = 75;
+
             Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
 
             var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
@@ -594,18 +597,15 @@ namespace Dwarves.Subsystem
                 // Draw any light-front sprites
                 foreach (LightFront light in terrainBlock.Data.StaticLightFronts)
                 {
-                    // TODO: Get the source rectangle of the light sprite and use the spritesheet
-                    // For now, just use the white texture
-
-                    // TODO: Make this a configurable variable
-                    const int lightLength = 25;
+                    // Get the source rectangle of the light sprite and use the spritesheet
+                    Rectangle srcRect = this.GetLightfrontRectangle(light.Direction);
 
                     // Calculate the bounds of the light sprite
-                    Rectangle spriteBounds;
+                    Rectangle destRect;
                     switch (light.Direction)
                     {
                         case LightDirection.Up:
-                            spriteBounds = new Rectangle(
+                            destRect = new Rectangle(
                                 light.Point.X,
                                 light.Point.Y - lightLength,
                                 light.BaseLength,
@@ -613,7 +613,7 @@ namespace Dwarves.Subsystem
                             break;
 
                         case LightDirection.Down:
-                            spriteBounds = new Rectangle(
+                            destRect = new Rectangle(
                                 light.Point.X,
                                 light.Point.Y,
                                 light.BaseLength,
@@ -621,7 +621,7 @@ namespace Dwarves.Subsystem
                             break;
 
                         case LightDirection.Right:
-                            spriteBounds = new Rectangle(
+                            destRect = new Rectangle(
                                 light.Point.X,
                                 light.Point.Y,
                                 lightLength,
@@ -629,7 +629,7 @@ namespace Dwarves.Subsystem
                             break;
 
                         case LightDirection.Left:
-                            spriteBounds = new Rectangle(
+                            destRect = new Rectangle(
                                 light.Point.X - lightLength,
                                 light.Point.Y,
                                 lightLength,
@@ -641,12 +641,46 @@ namespace Dwarves.Subsystem
                                 string.Format("Light direction {0} is not supported.", light.Direction));
                     }
 
-                    // Draw the light
-                    spriteBatch.Draw(this.whiteTexture, spriteBounds, Color.White);
+                    // Draw the light sprite
+                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
                 }
             }
 
             spriteBatch.End();
+        }
+
+        /// <summary>
+        /// Gets the 
+        /// </summary>
+        /// <param name="lightDirection"></param>
+        /// <returns></returns>
+        private Rectangle GetLightfrontRectangle(LightDirection lightDirection)
+        {
+            string spriteName;
+            switch (lightDirection)
+            {
+                case LightDirection.Up:
+                    spriteName = this.resources.GetSpriteName("light", "lightfront", "up");
+                    break;
+
+                case LightDirection.Down:
+                    spriteName = this.resources.GetSpriteName("light", "lightfront", "down");
+                    break;
+
+                case LightDirection.Right:
+                    spriteName = this.resources.GetSpriteName("light", "lightfront", "right");
+                    break;
+
+                case LightDirection.Left:
+                    spriteName = this.resources.GetSpriteName("light", "lightfront", "left");
+                    break;
+
+                default:
+                    throw new ApplicationException(
+                        string.Format("Light direction {0} is not supported.", lightDirection));
+            }
+
+            return this.resources.GetSpriteRectangle(spriteName);
         }
 
         /// <summary>
