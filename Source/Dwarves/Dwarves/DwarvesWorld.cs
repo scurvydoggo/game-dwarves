@@ -65,7 +65,7 @@ namespace Dwarves
 
             // Create draw systems
             drawSystems.AddSystem(new SpriteSystem(this.World.EntityManager, this.World.Resources, graphics));
-            drawSystems.AddSystem(new DebugDrawSystem(this.World.EntityManager, this.World.Physics, graphics, content));
+            //drawSystems.AddSystem(new DebugDrawSystem(this.World.EntityManager, this.World.Physics, graphics, content));
 
             // Create the data adapter
             DwarvesConfig config = content.Load<DwarvesConfig>("Config\\DwarvesConfig");
