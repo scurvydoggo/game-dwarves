@@ -43,6 +43,8 @@ namespace Dwarves.Subsystem
         /// </summary>
         private Effect lightShader;
 
+        private BlendState blendStateAdditiveMax;
+
         /// <summary>
         /// A 1x1 white texture.
         /// </summary>
@@ -70,6 +72,17 @@ namespace Dwarves.Subsystem
             // Create a 1x1 white texture
             this.whiteTexture = new Texture2D(this.graphics, 1, 1);
             this.whiteTexture.SetData<Color>(new Color[] { Color.White });
+
+            // Create the blend state for additive blending with the max blend function
+            this.blendStateAdditiveMax = new BlendState()
+            {
+                ColorSourceBlend = Blend.One,
+                ColorDestinationBlend = Blend.One,
+                ColorBlendFunction = BlendFunction.Max,
+                AlphaSourceBlend = Blend.One,
+                AlphaDestinationBlend = Blend.One,
+                AlphaBlendFunction = BlendFunction.Max
+            };
         }
 
         #endregion
@@ -217,7 +230,6 @@ namespace Dwarves.Subsystem
             float cameraScaleY)
         {
             Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
-
             var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
             var cPosition = (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
             var cScale = (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
@@ -544,7 +556,6 @@ namespace Dwarves.Subsystem
             int halfLightLength = lightLength / 2;
 
             Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
-
             var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
             var cPosition = (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
             var cScale = (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
@@ -564,36 +575,28 @@ namespace Dwarves.Subsystem
             int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
             int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
             Rectangle screenRect = new Rectangle(
-                terrainStartX - lightLength - 1,
-                terrainStartY - lightLength - 1,
-                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + lightLength + 1,
-                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + lightLength + 1);
-
-            // Tile sprites for each terrain block
-            ClipQuadTree<TerrainData>[] terrainBlocks =
-                cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
-
-            var blendState = new BlendState()
-            {
-                ColorSourceBlend = Blend.One,
-                ColorDestinationBlend = Blend.One,
-                ColorBlendFunction = BlendFunction.Max,
-                AlphaSourceBlend = Blend.One,
-                AlphaDestinationBlend = Blend.One,
-                AlphaBlendFunction = BlendFunction.Max
-            };
+                terrainStartX - halfLightLength - 1,
+                terrainStartY - halfLightLength - 1,
+                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + halfLightLength + 1,
+                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + halfLightLength + 1);
+            ClipQuadTree<TerrainData>[] terrainBlocks = cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
 
             // Begin the sprite batch with the camera transform
-            spriteBatch.Begin(SpriteSortMode.Deferred, blendState, SamplerState.PointClamp, null, null, null, transform);
+            spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                this.blendStateAdditiveMax,
+                null,
+                null,
+                null,
+                null,
+                transform);
 
             // Draw light-front sprites
+            Rectangle srcRectLight = this.resources.GetSpriteRectangle("light", "lightfront", "radial");
             foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
                 foreach (Edge light in terrainBlock.Data.LightFronts)
                 {
-                    // Get the source rectangle of the light sprite and use the spritesheet
-                    Rectangle srcRect = this.resources.GetSpriteRectangle("light", "lightfront", "radial");
-
                     // Calculate the bounds of the light sprite
                     Rectangle destRect = new Rectangle(
                         light.Point1.X - halfLightLength,
@@ -602,7 +605,7 @@ namespace Dwarves.Subsystem
                         lightLength);
 
                     // Draw the light sprite
-                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRectLight, Color.White);
                 }
             }
 
