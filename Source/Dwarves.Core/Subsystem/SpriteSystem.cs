@@ -553,6 +553,7 @@ namespace Dwarves.Subsystem
         {
             // TODO: Make this a configurable variable
             const int lightLength = 125;
+            const int lightEdgeStep = 1;
             int halfLightLength = lightLength / 2;
 
             Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
@@ -592,20 +593,86 @@ namespace Dwarves.Subsystem
                 transform);
 
             // Draw light-front sprites
-            Rectangle srcRectLight = this.resources.GetSpriteRectangle("light", "lightfront", "radial");
+            Rectangle destRect;
+            Rectangle srcRect = this.resources.GetSpriteRectangle("light", "lightfront", "radial");
             foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
                 foreach (Edge light in terrainBlock.Data.LightFronts)
                 {
-                    // Calculate the bounds of the light sprite
-                    Rectangle destRect = new Rectangle(
+                    // Draw light for the first point
+                    destRect = new Rectangle(
                         light.Point1.X - halfLightLength,
                         light.Point1.Y - halfLightLength,
                         lightLength,
                         lightLength);
+                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
 
-                    // Draw the light sprite
-                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRectLight, Color.White);
+                    if (light.Orientation != EdgeOrientation.Point)
+                    {
+                        // Draw light for the last point
+                        destRect = new Rectangle(
+                            light.Point2.X - halfLightLength,
+                            light.Point2.Y - halfLightLength,
+                            lightLength,
+                            lightLength);
+                        spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+
+                        // Draw light for points along the edge
+                        if (light.Orientation == EdgeOrientation.Horizontal)
+                        {
+                            if (light.Point1.X < light.Point2.X)
+                            {
+                                for (int x = light.Point1.X; x < light.Point2.X; x += lightEdgeStep)
+                                {
+                                    destRect = new Rectangle(
+                                        x - halfLightLength,
+                                        light.Point1.Y - halfLightLength,
+                                        lightLength,
+                                        lightLength);
+                                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                                }
+                            }
+                            else
+                            {
+                                for (int x = light.Point2.X; x < light.Point1.X; x += lightEdgeStep)
+                                {
+                                    destRect = new Rectangle(
+                                        x - halfLightLength,
+                                        light.Point1.Y - halfLightLength,
+                                        lightLength,
+                                        lightLength);
+                                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                                }
+                            }
+                        }
+                        else if (light.Orientation == EdgeOrientation.Vertical)
+                        {
+                            if (light.Point1.Y < light.Point2.Y)
+                            {
+                                for (int y = light.Point1.Y; y < light.Point2.Y; y += lightEdgeStep)
+                                {
+                                    destRect = new Rectangle(
+                                        light.Point1.X - halfLightLength,
+                                        y - halfLightLength,
+                                        lightLength,
+                                        lightLength);
+                                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                                }
+                            }
+                            else
+                            {
+                                for (int y = light.Point2.Y; y < light.Point1.Y; y += lightEdgeStep)
+                                {
+                                    destRect = new Rectangle(
+                                        light.Point1.X - halfLightLength,
+                                        y - halfLightLength,
+                                        lightLength,
+                                        lightLength);
+                                    spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
