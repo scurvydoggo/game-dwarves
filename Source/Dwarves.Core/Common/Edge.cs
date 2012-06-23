@@ -25,7 +25,7 @@ namespace Dwarves.Game.Light
         }
 
         /// <summary>
-        /// Initializes a new instance of the LightFront class.
+        /// Initializes a new instance of the Edge class.
         /// </summary>
         /// <param name="point1">The first point.</param>
         /// <param name="point2">The second point.</param>
