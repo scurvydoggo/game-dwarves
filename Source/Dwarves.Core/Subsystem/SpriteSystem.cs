@@ -562,39 +562,33 @@ namespace Dwarves.Subsystem
                 0);
             Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
 
-            // Begin the sprite batch with the camera transform
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
-
             // Get the terrain nodes for the visible portion of the screen
             int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
             int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
-            int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
-            int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
             Rectangle screenRect = new Rectangle(
-                terrainStartX - tileSize,
-                terrainStartY - tileSize,
-                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
-                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
+                terrainStartX - lightLength - 1,
+                terrainStartY - lightLength - 1,
+                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + lightLength + 1,
+                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + lightLength + 1);
 
             // Tile sprites for each terrain block
             ClipQuadTree<TerrainData>[] terrainBlocks =
                 cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
+
+            var blendState = new BlendState();
+            blendState.ColorBlendFunction = BlendFunction.Max;
+            blendState.ColorSourceBlend = Blend.One;
+            blendState.ColorDestinationBlend = Blend.One;
+            blendState.AlphaBlendFunction = BlendFunction.Max;
+            blendState.AlphaSourceBlend = Blend.One;
+            blendState.AlphaDestinationBlend = Blend.One;
+
+            // Begin the sprite batch with the camera transform
+            spriteBatch.Begin(SpriteSortMode.Deferred, blendState, SamplerState.PointClamp, null, null, null, transform);
+
+            // Draw light-front sprites
             foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
-                TerrainState state = terrainBlock.Data.State;
-
-                // If this block is empty (ie. is just air), then it is fully lit 
-                if (state == TerrainState.Empty)
-                {
-                    var blockBounds = new Rectangle(
-                        terrainBlock.Bounds.X,
-                        terrainBlock.Bounds.Y,
-                        terrainBlock.Bounds.Length,
-                        terrainBlock.Bounds.Length);
-                    spriteBatch.Draw(this.whiteTexture, blockBounds, Color.White);
-                }
-
-                // Draw any light-front sprites
                 foreach (LightFront light in terrainBlock.Data.StaticLightFronts)
                 {
                     // Get the source rectangle of the light sprite and use the spritesheet
@@ -643,6 +637,21 @@ namespace Dwarves.Subsystem
 
                     // Draw the light sprite
                     spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
+                }
+            }
+
+            // Draw ambient light
+            foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
+            {
+                // If this block is empty (ie. is just air), then it is fully lit 
+                if (terrainBlock.Data.State == TerrainState.Empty)
+                {
+                    var blockBounds = new Rectangle(
+                        terrainBlock.Bounds.X,
+                        terrainBlock.Bounds.Y,
+                        terrainBlock.Bounds.Length,
+                        terrainBlock.Bounds.Length);
+                    spriteBatch.Draw(this.whiteTexture, blockBounds, Color.White);
                 }
             }
 
