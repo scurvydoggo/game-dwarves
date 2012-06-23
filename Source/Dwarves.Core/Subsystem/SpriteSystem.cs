@@ -589,15 +589,15 @@ namespace Dwarves.Subsystem
             // Draw light-front sprites
             foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
-                foreach (LightFront light in terrainBlock.Data.StaticLightFronts)
+                foreach (Edge light in terrainBlock.Data.LightFronts)
                 {
                     // Get the source rectangle of the light sprite and use the spritesheet
                     Rectangle srcRect = this.resources.GetSpriteRectangle("light", "lightfront", "radial");
 
                     // Calculate the bounds of the light sprite
                     Rectangle destRect = new Rectangle(
-                        light.Point.X - halfLightLength,
-                        light.Point.Y - halfLightLength,
+                        light.Point1.X - halfLightLength,
+                        light.Point1.Y - halfLightLength,
                         lightLength,
                         lightLength);
 

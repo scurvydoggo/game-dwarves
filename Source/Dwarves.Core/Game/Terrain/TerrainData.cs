@@ -23,7 +23,7 @@ namespace Dwarves.Game.Terrain
             this.Material = material;
             this.State = material == TerrainMaterial.None ? TerrainState.Empty : TerrainState.Terrain;
             this.CreateTime = createTime;
-            this.StaticLightFronts = new LightFront[0];
+            this.LightFronts = new Edge[0];
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace Dwarves.Game.Terrain
         public TimeSpan CreateTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the static (terrain-based) light fronts at this terrain block.
+        /// Gets or sets the set of light fronts at which ambient light transitions into darkness.
         /// </summary>
-        public LightFront[] StaticLightFronts { get; set; }
+        public Edge[] LightFronts { get; set; }
     }
 }

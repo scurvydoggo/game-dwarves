@@ -56,10 +56,10 @@ namespace Dwarves.Game.Light
                 }
 
                 // Get the list of light fronts
-                LightFront[] lightFronts = this.GetNodeLightFronts(terrainNode);
+                Edge[] lightFronts = this.GetNodeLightFronts(terrainNode);
 
                 // Update the node
-                terrainNode.Data.StaticLightFronts = lightFronts;
+                terrainNode.Data.LightFronts = lightFronts;
             }
         }
 
@@ -72,9 +72,9 @@ namespace Dwarves.Game.Light
         /// </summary>
         /// <param name="terrainNode">The terrain node.</param>
         /// <returns>Array of light fronts.</returns>
-        private LightFront[] GetNodeLightFronts(ClipQuadTree<TerrainData> terrainNode)
+        private Edge[] GetNodeLightFronts(ClipQuadTree<TerrainData> terrainNode)
         {
-            var lightFronts = new List<LightFront>();
+            var lightFronts = new List<Edge>();
 
             // Test each point 1 pixel outside of this quad on the top/bottom sides
             int startAboveX = -1;
@@ -92,12 +92,7 @@ namespace Dwarves.Game.Light
                 {
                     if (startAboveX != -1)
                     {
-                        var lightFront = new LightFront(
-                            startAboveX,
-                            terrainNode.Bounds.Y,
-                            LightDirection.Down,
-                            x - startAboveX);
-                        lightFronts.Add(lightFront);
+                        lightFronts.Add(new Edge(startAboveX, terrainNode.Bounds.Y, x - 1, terrainNode.Bounds.Y));
                         startAboveX = -1;
                     }
                 }
@@ -113,12 +108,8 @@ namespace Dwarves.Game.Light
                 {
                     if (startBelowX != -1)
                     {
-                        var lightFront = new LightFront(
-                            startBelowX,
-                            terrainNode.Bounds.Bottom - 1,
-                            LightDirection.Up,
-                            x - startBelowX);
-                        lightFronts.Add(lightFront);
+                        lightFronts.Add(
+                            new Edge(startBelowX, terrainNode.Bounds.Bottom - 1, x - 1, terrainNode.Bounds.Bottom - 1));
                         startBelowX = -1;
                     }
                 }
@@ -127,23 +118,15 @@ namespace Dwarves.Game.Light
             // Add uncompleted fronts
             if (startAboveX != -1)
             {
-                var lightFront = new LightFront(
-                    startAboveX,
-                    terrainNode.Bounds.Y,
-                    LightDirection.Down,
-                    terrainNode.Bounds.Right - startAboveX);
-                lightFronts.Add(lightFront);
+                lightFronts.Add(
+                    new Edge(startAboveX, terrainNode.Bounds.Y, terrainNode.Bounds.Right - 1, terrainNode.Bounds.Y));
             }
 
             // Add uncompleted fronts
             if (startBelowX != -1)
             {
-                var lightFront = new LightFront(
-                    startBelowX,
-                    terrainNode.Bounds.Bottom - 1,
-                    LightDirection.Up,
-                    terrainNode.Bounds.Right - startBelowX);
-                lightFronts.Add(lightFront);
+                lightFronts.Add(
+                    new Edge(startBelowX, terrainNode.Bounds.Bottom - 1, terrainNode.Bounds.Right - 1, terrainNode.Bounds.Bottom - 1));
             }
 
             // Test each point 1 pixel outside of this quad on the left/right sides
@@ -162,12 +145,8 @@ namespace Dwarves.Game.Light
                 {
                     if (startLeftY != -1)
                     {
-                        var lightFront = new LightFront(
-                            terrainNode.Bounds.X,
-                            startLeftY,
-                            LightDirection.Right,
-                            y - startLeftY);
-                        lightFronts.Add(lightFront);
+                        lightFronts.Add(
+                            new Edge(terrainNode.Bounds.X, startLeftY, terrainNode.Bounds.X, y - 1));
                         startLeftY = -1;
                     }
                 }
@@ -183,12 +162,8 @@ namespace Dwarves.Game.Light
                 {
                     if (startRightY != -1)
                     {
-                        var lightFront = new LightFront(
-                            terrainNode.Bounds.Right - 1,
-                            startRightY,
-                            LightDirection.Left,
-                            y - startRightY);
-                        lightFronts.Add(lightFront);
+                        lightFronts.Add(
+                            new Edge(terrainNode.Bounds.Right - 1, startRightY, terrainNode.Bounds.Right - 1, y - 1));
                         startRightY = -1;
                     }
                 }
@@ -197,23 +172,15 @@ namespace Dwarves.Game.Light
             // Add uncompleted fronts
             if (startLeftY != -1)
             {
-                var lightFront = new LightFront(
-                    terrainNode.Bounds.X,
-                    startLeftY,
-                    LightDirection.Right,
-                    terrainNode.Bounds.Bottom - startLeftY);
-                lightFronts.Add(lightFront);
+                lightFronts.Add(
+                    new Edge(terrainNode.Bounds.X, startLeftY, terrainNode.Bounds.X, terrainNode.Bounds.Bottom - 1));
             }
 
             // Add uncompleted fronts
             if (startRightY != -1)
             {
-                var lightFront = new LightFront(
-                    terrainNode.Bounds.Right - 1,
-                    startRightY,
-                    LightDirection.Left,
-                    terrainNode.Bounds.Bottom - startRightY);
-                lightFronts.Add(lightFront);
+                lightFronts.Add(
+                    new Edge(terrainNode.Bounds.Right - 1, startRightY, terrainNode.Bounds.Right - 1, terrainNode.Bounds.Bottom - 1));
             }
 
             return lightFronts.ToArray();
