@@ -325,8 +325,7 @@ namespace Dwarves.Subsystem
             var spriteRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "earth", "mud"))
             {
-                string name = this.resources.GetSpriteName("terrain", "earth", "mud", variation);
-                spriteRects.Add(variation, this.resources.GetSpriteRectangle(name));
+                spriteRects.Add(variation, this.resources.GetSpriteRectangle("terrain", "earth", "mud", variation));
             }
 
             // Calculate the scaled tile size and determine the offset of the top-left corner of the tile
@@ -447,8 +446,7 @@ namespace Dwarves.Subsystem
             var lowerFringeRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "lowerfringe", "mud"))
             {
-                string name = this.resources.GetSpriteName("terrain", "lowerfringe", "mud", variation);
-                lowerFringeRects.Add(variation, this.resources.GetSpriteRectangle(name));
+                lowerFringeRects.Add(variation, this.resources.GetSpriteRectangle("terrain", "lowerfringe", "mud", variation));
             }
 
             // Get the variations of the upper fringe sprites
@@ -456,8 +454,7 @@ namespace Dwarves.Subsystem
             var upperFringeRects = new Dictionary<int, Rectangle>();
             foreach (int variation in this.resources.GetSpriteVariations("terrain", "upperfringe", "mud"))
             {
-                string name = this.resources.GetSpriteName("terrain", "upperfringe", "mud", variation);
-                upperFringeRects.Add(variation, this.resources.GetSpriteRectangle(name));
+                upperFringeRects.Add(variation, this.resources.GetSpriteRectangle("terrain", "upperfringe", "mud", variation));
             }
 
             // Do nothing if no sprites exist for this terrain material
@@ -543,7 +540,8 @@ namespace Dwarves.Subsystem
             float cameraScaleY)
         {
             // TODO: Make this a configurable variable
-            const int lightLength = 75;
+            const int lightLength = 125;
+            int halfLightLength = lightLength / 2;
 
             Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
 
@@ -575,13 +573,15 @@ namespace Dwarves.Subsystem
             ClipQuadTree<TerrainData>[] terrainBlocks =
                 cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
 
-            var blendState = new BlendState();
-            blendState.ColorBlendFunction = BlendFunction.Max;
-            blendState.ColorSourceBlend = Blend.One;
-            blendState.ColorDestinationBlend = Blend.One;
-            blendState.AlphaBlendFunction = BlendFunction.Max;
-            blendState.AlphaSourceBlend = Blend.One;
-            blendState.AlphaDestinationBlend = Blend.One;
+            var blendState = new BlendState()
+            {
+                ColorSourceBlend = Blend.One,
+                ColorDestinationBlend = Blend.One,
+                ColorBlendFunction = BlendFunction.Max,
+                AlphaSourceBlend = Blend.One,
+                AlphaDestinationBlend = Blend.One,
+                AlphaBlendFunction = BlendFunction.Max
+            };
 
             // Begin the sprite batch with the camera transform
             spriteBatch.Begin(SpriteSortMode.Deferred, blendState, SamplerState.PointClamp, null, null, null, transform);
@@ -592,48 +592,14 @@ namespace Dwarves.Subsystem
                 foreach (LightFront light in terrainBlock.Data.StaticLightFronts)
                 {
                     // Get the source rectangle of the light sprite and use the spritesheet
-                    Rectangle srcRect = this.GetLightfrontRectangle(light.Direction);
+                    Rectangle srcRect = this.resources.GetSpriteRectangle("light", "lightfront", "radial");
 
                     // Calculate the bounds of the light sprite
-                    Rectangle destRect;
-                    switch (light.Direction)
-                    {
-                        case LightDirection.Up:
-                            destRect = new Rectangle(
-                                light.Point.X,
-                                light.Point.Y - lightLength,
-                                light.BaseLength,
-                                lightLength);
-                            break;
-
-                        case LightDirection.Down:
-                            destRect = new Rectangle(
-                                light.Point.X,
-                                light.Point.Y,
-                                light.BaseLength,
-                                lightLength);
-                            break;
-
-                        case LightDirection.Right:
-                            destRect = new Rectangle(
-                                light.Point.X,
-                                light.Point.Y,
-                                lightLength,
-                                light.BaseLength);
-                            break;
-
-                        case LightDirection.Left:
-                            destRect = new Rectangle(
-                                light.Point.X - lightLength,
-                                light.Point.Y,
-                                lightLength,
-                                light.BaseLength);
-                            break;
-
-                        default:
-                            throw new ApplicationException(
-                                string.Format("Light direction {0} is not supported.", light.Direction));
-                    }
+                    Rectangle destRect = new Rectangle(
+                        light.Point.X - halfLightLength,
+                        light.Point.Y - halfLightLength,
+                        lightLength,
+                        lightLength);
 
                     // Draw the light sprite
                     spriteBatch.Draw(this.resources.SpriteSheet, destRect, srcRect, Color.White);
@@ -656,40 +622,6 @@ namespace Dwarves.Subsystem
             }
 
             spriteBatch.End();
-        }
-
-        /// <summary>
-        /// Gets the 
-        /// </summary>
-        /// <param name="lightDirection"></param>
-        /// <returns></returns>
-        private Rectangle GetLightfrontRectangle(LightDirection lightDirection)
-        {
-            string spriteName;
-            switch (lightDirection)
-            {
-                case LightDirection.Up:
-                    spriteName = this.resources.GetSpriteName("light", "lightfront", "up");
-                    break;
-
-                case LightDirection.Down:
-                    spriteName = this.resources.GetSpriteName("light", "lightfront", "down");
-                    break;
-
-                case LightDirection.Right:
-                    spriteName = this.resources.GetSpriteName("light", "lightfront", "right");
-                    break;
-
-                case LightDirection.Left:
-                    spriteName = this.resources.GetSpriteName("light", "lightfront", "left");
-                    break;
-
-                default:
-                    throw new ApplicationException(
-                        string.Format("Light direction {0} is not supported.", lightDirection));
-            }
-
-            return this.resources.GetSpriteRectangle(spriteName);
         }
 
         /// <summary>
