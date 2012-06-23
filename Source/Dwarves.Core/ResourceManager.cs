@@ -134,6 +134,19 @@ namespace Dwarves
         }
 
         /// <summary>
+        /// Get the source rectangle of the sprite with the given identifying attributes.
+        /// </summary>
+        /// <param name="category">The sprite category.</param>
+        /// <param name="type">The sprite type.</param>
+        /// <param name="family">The sprite family; Null if the sprite has no family.</param>
+        /// <param name="variation">The variation index of the sprite; -1 if the sprite has no variation.</param>
+        /// <returns>The source rectangle.</returns>
+        public Rectangle GetSpriteRectangle(string category, string type, string family = null, int variation = -1)
+        {
+            return this.GetSpriteRectangle(this.GetSpriteName(category, type, family, variation));
+        }
+
+        /// <summary>
         /// Get the source rectangle for a random variation of the sprite with the given identifying attributes.
         /// </summary>
         /// <param name="category">The sprite category.</param>
