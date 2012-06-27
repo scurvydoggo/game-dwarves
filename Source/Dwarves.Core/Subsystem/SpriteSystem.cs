@@ -99,18 +99,49 @@ namespace Dwarves.Subsystem
             Entity cameraEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(CameraComponent));
             var cCamera =
                 (CameraComponent)this.EntityManager.GetComponent(cameraEntity, typeof(CameraComponent));
-            var cCameraScale =
-                (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
             var cCameraPosition =
                 (PositionComponent)this.EntityManager.GetComponent(cameraEntity, typeof(PositionComponent));
+            var cCameraScale =
+                (ScaleComponent)this.EntityManager.GetComponent(cameraEntity, typeof(ScaleComponent));
+
+            // Get the terrain components
+            Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
+            var cTerrain =
+                (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
+            var cTerrainPosition =
+                (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
+            var cTerrainScale =
+                (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
 
             // Calculate the camera translation and scale values
-            float scaleX = ((float)this.graphics.Viewport.Width / cCamera.ProjectionWidth) * cCameraScale.Scale;
-            float scaleY = ((float)this.graphics.Viewport.Height / cCamera.ProjectionHeight) * cCameraScale.Scale;
-            float translateX =
-                (float)(((float)this.graphics.Viewport.Width * 0.5) / scaleX) - cCameraPosition.Position.X;
-            float translateY =
-                (float)(((float)this.graphics.Viewport.Height * 0.5) / scaleY) + cCameraPosition.Position.Y;
+            float camScaleX =
+                ((float)this.graphics.Viewport.Width / cCamera.ProjectionWidth) * cCameraScale.Scale;
+            float camScaleY =
+                ((float)this.graphics.Viewport.Height / cCamera.ProjectionHeight) * cCameraScale.Scale;
+            float camTranslateX =
+                (float)(((float)this.graphics.Viewport.Width * 0.5) / camScaleX) - cCameraPosition.Position.X;
+            float camTranslateY =
+                (float)(((float)this.graphics.Viewport.Height * 0.5) / camScaleY) + cCameraPosition.Position.Y;
+
+            // Calculate the transformation matrices
+            var terrainTranslation = new Vector3(
+                (camTranslateX + cTerrainPosition.Position.X) / cTerrainScale.Scale,
+                (camTranslateY - cTerrainPosition.Position.Y) / cTerrainScale.Scale,
+                0);
+            var terrainScale = new Vector3(
+                camScaleX * cTerrainScale.Scale,
+                camScaleY * cTerrainScale.Scale,
+                0);
+            Matrix terrainTransform =
+                Matrix.CreateTranslation(terrainTranslation) *
+                Matrix.CreateScale(terrainScale);
+            Matrix spriteTransform =
+                Matrix.CreateTranslation(camTranslateX, camTranslateY, 0) *
+                Matrix.CreateScale(camScaleX, camScaleY, 0);
+
+            // Get the terrain blocks that are in view
+            ClipQuadTree<TerrainData>[] terrainBlocks =
+                this.GetTerrainInView(cTerrain, terrainTranslation, terrainScale, 10, 10);
 
             using (SpriteBatch spriteBatch = new SpriteBatch(this.graphics))
             {
@@ -121,12 +152,12 @@ namespace Dwarves.Subsystem
                         // Render the game
                         this.graphics.SetRenderTarget(mainTarget);
                         this.graphics.Clear(Color.FromNonPremultiplied(150, 200, 255, 255));
-                        this.DrawGame(spriteBatch, translateX, translateY, scaleX, scaleY);
+                        this.DrawGame(spriteBatch, terrainTransform, spriteTransform, terrainBlocks, cTerrain);
 
                         // Render the lighting
                         this.graphics.SetRenderTarget(lightTarget);
                         this.graphics.Clear(Color.Black);
-                        this.DrawLighting(spriteBatch, translateX, translateY, scaleX, scaleY);
+                        this.DrawLighting(spriteBatch, terrainTransform, terrainBlocks);
 
                         // Blend the game and lighting textures
                         this.graphics.SetRenderTarget(null);
@@ -137,6 +168,22 @@ namespace Dwarves.Subsystem
         }
 
         #endregion
+
+        private ClipQuadTree<TerrainData>[] GetTerrainInView(
+            TerrainComponent cTerrain,
+            Vector3 translation,
+            Vector3 scale,
+            int widthPadding,
+            int heightPadding)
+        {
+            var rect = new Rectangle(
+                cTerrain.Terrain.Bounds.X - (int)translation.X - widthPadding,
+                cTerrain.Terrain.Bounds.Y - (int)translation.Y - heightPadding,
+                (int)Math.Ceiling(this.graphics.Viewport.Width / scale.X) + widthPadding,
+                (int)Math.Ceiling(this.graphics.Viewport.Height / scale.Y) + heightPadding);
+
+            return cTerrain.Terrain.GetNodesIntersecting(rect).ToArray();
+        }
 
         #region Render Game
 
@@ -150,16 +197,16 @@ namespace Dwarves.Subsystem
         /// <param name="cameraScaleY">The camera y scale value.</param>
         private void DrawGame(
             SpriteBatch spriteBatch,
-            float cameraTranslateX,
-            float cameraTranslateY,
-            float cameraScaleX,
-            float cameraScaleY)
+            Matrix terrainTransform,
+            Matrix spriteTransform,
+            ClipQuadTree<TerrainData>[] terrainBlocks,
+            TerrainComponent cTerrain)
         {
             // Draw the terrain
-            this.DrawTerrainComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
+            this.DrawTerrainComponents(spriteBatch, terrainTransform, terrainBlocks, cTerrain);
 
             // Draw the sprites
-            this.DrawSpriteComponents(spriteBatch, cameraTranslateX, cameraTranslateY, cameraScaleX, cameraScaleY);
+            this.DrawSpriteComponents(spriteBatch, spriteTransform);
         }
 
         #region Draw Sprites
@@ -172,19 +219,8 @@ namespace Dwarves.Subsystem
         /// <param name="cameraTranslateY">The camera y translation value.</param>
         /// <param name="cameraScaleX">The camera x scale value.</param>
         /// <param name="cameraScaleY">The camera y scale value.</param>
-        private void DrawSpriteComponents(
-            SpriteBatch spriteBatch,
-            float cameraTranslateX,
-            float cameraTranslateY,
-            float cameraScaleX,
-            float cameraScaleY)
+        private void DrawSpriteComponents(SpriteBatch spriteBatch, Matrix transform)
         {
-            // Create the transform matrix
-            Matrix transform =
-                Matrix.Identity *
-                Matrix.CreateTranslation(cameraTranslateX, cameraTranslateY, 0) *
-                Matrix.CreateScale(cameraScaleX, cameraScaleY, 0);
-
             spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
 
             foreach (Entity entity in this.EntityManager.GetEntitiesWithComponent(typeof(SpriteComponent)))
@@ -224,44 +260,13 @@ namespace Dwarves.Subsystem
         /// <param name="cameraScaleY">The camera y scale value.</param>
         private void DrawTerrainComponents(
             SpriteBatch spriteBatch,
-            float cameraTranslateX,
-            float cameraTranslateY,
-            float cameraScaleX,
-            float cameraScaleY)
+            Matrix transform,
+            ClipQuadTree<TerrainData>[] terrainBlocks,
+            TerrainComponent cTerrain)
         {
-            Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
-            var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
-            var cPosition = (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
-            var cScale = (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
-
-            // Create the camera transform matrix
-            var camTranslation = new Vector3(
-                (cameraTranslateX + cPosition.Position.X) / cScale.Scale,
-                (cameraTranslateY - cPosition.Position.Y) / cScale.Scale,
-                0);
-            var camScale = new Vector3(
-                cameraScaleX * cScale.Scale,
-                cameraScaleY * cScale.Scale,
-                0);
-            Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
-
             // Begin the sprite batch with the camera transform
             spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, transform);
 
-            // Get the terrain nodes for the visible portion of the screen
-            int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
-            int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
-            int tileSize = (int)Math.Ceiling(Const.TileSize * cScale.Scale);
-            int tileAndHalfSize = tileSize + (tileSize / 2); // Use tile-and-half size with with fringes (grass)
-            Rectangle screenRect = new Rectangle(
-                terrainStartX - tileSize,
-                terrainStartY - tileSize,
-                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + tileSize + 1,
-                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + tileAndHalfSize);
-
-            // Tile sprites for each terrain block
-            ClipQuadTree<TerrainData>[] terrainBlocks =
-                cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
             foreach (ClipQuadTree<TerrainData> terrainBlock in terrainBlocks)
             {
                 // Don't draw anything if no terrain exists here
@@ -544,43 +549,12 @@ namespace Dwarves.Subsystem
         /// <param name="cameraTranslateY">The camera y translation value.</param>
         /// <param name="cameraScaleX">The camera x scale value.</param>
         /// <param name="cameraScaleY">The camera y scale value.</param>
-        private void DrawLighting(
-            SpriteBatch spriteBatch,
-            float cameraTranslateX,
-            float cameraTranslateY,
-            float cameraScaleX,
-            float cameraScaleY)
+        private void DrawLighting(SpriteBatch spriteBatch, Matrix transform, ClipQuadTree<TerrainData>[] terrainBlocks)
         {
             // TODO: Make this a configurable variable
             const int lightLength = 125;
             const int lightEdgeStep = 1;
             int halfLightLength = lightLength / 2;
-
-            Entity terrainEntity = this.EntityManager.GetFirstEntityWithComponent(typeof(TerrainComponent));
-            var cTerrain = (TerrainComponent)this.EntityManager.GetComponent(terrainEntity, typeof(TerrainComponent));
-            var cPosition = (PositionComponent)this.EntityManager.GetComponent(terrainEntity, typeof(PositionComponent));
-            var cScale = (ScaleComponent)this.EntityManager.GetComponent(terrainEntity, typeof(ScaleComponent));
-
-            // Create the camera transform matrix
-            var camTranslation = new Vector3(
-                (cameraTranslateX + cPosition.Position.X) / cScale.Scale,
-                (cameraTranslateY - cPosition.Position.Y) / cScale.Scale,
-                0);
-            var camScale = new Vector3(
-                cameraScaleX * cScale.Scale,
-                cameraScaleY * cScale.Scale,
-                0);
-            Matrix transform = Matrix.CreateTranslation(camTranslation) * Matrix.CreateScale(camScale);
-
-            // Get the terrain nodes for the visible portion of the screen
-            int terrainStartX = cTerrain.Terrain.Bounds.X - (int)camTranslation.X;
-            int terrainStartY = cTerrain.Terrain.Bounds.Y - (int)camTranslation.Y;
-            Rectangle screenRect = new Rectangle(
-                terrainStartX - halfLightLength - 1,
-                terrainStartY - halfLightLength - 1,
-                (int)Math.Ceiling(this.graphics.Viewport.Width / camScale.X) + halfLightLength + 1,
-                (int)Math.Ceiling(this.graphics.Viewport.Height / camScale.Y) + halfLightLength + 1);
-            ClipQuadTree<TerrainData>[] terrainBlocks = cTerrain.Terrain.GetNodesIntersecting(screenRect).ToArray();
 
             // Begin the sprite batch with the camera transform
             spriteBatch.Begin(
