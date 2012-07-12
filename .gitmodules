@@ -1,3 +1,10 @@
 [submodule "Docs"]
 	path = Docs
 	url = git@github.com:andynygard/Dwarves.Docs.git
+[submodule "Projects/Dwarves_XNA_QuadTree/Libraries/EntitySystem"]
+	path = Projects/Dwarves_XNA_QuadTree/Libraries/EntitySystem
+	url = git@github.com:andynygard/EntitySystem.git
+[submodule "Projects/Dwarves_XNA_QuadTree/Libraries/FarseerPhysics"]
+	path = Projects/Dwarves_XNA_QuadTree/Libraries/FarseerPhysics
+	url = https://github.com/d-snp/Farseer-Physics.git
+	ignore = dirty
