@@ -1,5 +1,7 @@
 bin/
 obj/
+Projects/*Unity*/ProjectSettings/
+Projects/*Unity*/Library/
 *.suo
 *.user
 *.cachefile
