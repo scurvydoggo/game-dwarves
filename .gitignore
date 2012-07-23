@@ -1,7 +1,6 @@
 bin/
 obj/
 Temp/
-Projects/*Unity*/ProjectSettings/
 Projects/*Unity*/Library/
 Projects/*Unity*/*.sln
 Projects/*Unity*/*.csproj
