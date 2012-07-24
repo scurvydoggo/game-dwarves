@@ -110,7 +110,7 @@ public abstract class BlockMeshGenerator
                 }
                 else if (chunkLeft != null)
                 {
-                    blockLeft = chunkLeft[index | Chunk.SizeX];
+                    blockLeft = chunkLeft[index | Chunk.MaskX];
                 }
                 else
                 {
