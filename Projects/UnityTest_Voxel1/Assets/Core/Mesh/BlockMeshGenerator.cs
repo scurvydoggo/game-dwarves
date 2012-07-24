@@ -50,6 +50,13 @@ public abstract class BlockMeshGenerator
                 // Calculate the block position in world coordinates
                 var blockPos = new Vector2I(chunkOrigin.X + x, chunkOrigin.Y + y);
 
+                // If there is no block here, remove any mesh that may exist at this position and continue
+                if (block.BlockType == BlockType.None)
+                {
+                    meshCloud.RemoveMesh(blockPos);
+                    continue;
+                }
+
                 // Get the block above this one
                 Block blockUp;
                 if ((index & Chunk.MaskXNot) != 0)
@@ -62,7 +69,7 @@ public abstract class BlockMeshGenerator
                 }
                 else
                 {
-                    blockUp = Block.Unknown;
+                    blockUp = Block.None;
                 }
 
                 // Get the block to the right of this one
@@ -77,7 +84,7 @@ public abstract class BlockMeshGenerator
                 }
                 else
                 {
-                    blockRight = Block.Unknown;
+                    blockRight = Block.None;
                 }
 
                 // Get the block below this one
@@ -92,7 +99,7 @@ public abstract class BlockMeshGenerator
                 }
                 else
                 {
-                    blockDown = Block.Unknown;
+                    blockDown = Block.None;
                 }
 
                 // Get the block to the left of this one
@@ -107,7 +114,7 @@ public abstract class BlockMeshGenerator
                 }
                 else
                 {
-                    blockLeft = Block.Unknown;
+                    blockLeft = Block.None;
                 }
 
                 // Create the mesh for this block

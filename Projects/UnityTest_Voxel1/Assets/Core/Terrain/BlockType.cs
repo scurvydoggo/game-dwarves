@@ -4,14 +4,9 @@
 public enum BlockType : byte
 {
     /// <summary>
-    /// The block has not been loaded.
-    /// </summary>
-    Unknown,
-
-    /// <summary>
     /// The block contains nothing.
     /// </summary>
-    Air,
+    None,
 
     /// <summary>
     /// The block contains dirt.

@@ -84,7 +84,7 @@ public class Terrain
         }
         else
         {
-            block = Block.Unknown;
+            block = Block.None;
             return false;
         }
     }

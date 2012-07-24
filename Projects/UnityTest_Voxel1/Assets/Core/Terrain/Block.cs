@@ -4,9 +4,9 @@
 public struct Block
 {
     /// <summary>
-    /// An unknown block.
+    /// A block containing no terrain.
     /// </summary>
-    public static readonly Block Unknown = new Block(BlockType.Unknown);
+    public static readonly Block None = new Block(BlockType.None);
 
     /// <summary>
     /// Initializes a new instance of the Block struct.

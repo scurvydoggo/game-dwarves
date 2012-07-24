@@ -33,49 +33,44 @@ public class BlockMeshCloud
     /// <summary>
     /// Gets the block mesh at the given world position.
     /// </summary>
-    /// <param name="worldX">The x position.</param>
-    /// <param name="worldY">The y position.</param>
-    /// <returns>The block mesh; Null if there is no mesh at the given position.</returns>
-    public BlockMesh this[int worldX, int worldY]
+    /// <param name="position">The position.</param>
+    /// <returns>The block mesh.</returns>
+    public BlockMesh this[Vector2I position]
     {
         get
         {
-            return this.meshes[new Vector2I(worldX, worldY)];
+            return this.meshes[position];
         }
 
         set
         {
-            this.SetMesh(worldX, worldY, value);
+            this.SetMesh(position, value);
         }
     }
 
     /// <summary>
     /// Try to get the block mesh at the given world position.
     /// </summary>
-    /// <param name="worldX">The x position.</param>
-    /// <param name="worldY">The y position.</param
+    /// <param name="position">The position.</param>
     /// <param name="mesh">The block mesh.</param>
     /// <returns>True if the block mesh was retrieved.</returns>
-    public bool TryGetMesh(int worldX, int worldY, out BlockMesh mesh)
+    public bool TryGetMesh(Vector2I position, out BlockMesh mesh)
     {
-        return this.meshes.TryGetValue(new Vector2I(worldX, worldY), out mesh);
+        return this.meshes.TryGetValue(position, out mesh);
     }
 
     /// <summary>
     /// Update the mesh at the given world position.
     /// </summary>
-    /// <param name="worldX">The x position.</param>
-    /// <param name="worldY">The y position.</param>
+    /// <param name="position">The position.</param>
     /// <param name="mesh">The block mesh.</param>
-    public void SetMesh(int worldX, int worldY, BlockMesh mesh)
+    public void SetMesh(Vector2I position, BlockMesh mesh)
     {
-        var worldPos = new Vector2I(worldX, worldY);
-
         // Add/Replace the mesh at this position
         BlockMesh existingMesh;
-        if (this.meshes.TryGetValue(worldPos, out existingMesh))
+        if (this.meshes.TryGetValue(position, out existingMesh))
         {
-            this.meshes[worldPos] = mesh;
+            this.meshes[position] = mesh;
 
             // Decrement the vertex/triangle count for the mesh that was replaced
             this.verticeCount -= existingMesh.Vertices.Length;
@@ -83,7 +78,7 @@ public class BlockMeshCloud
         }
         else
         {
-            this.meshes.Add(worldPos, mesh);
+            this.meshes.Add(position, mesh);
         }
 
         // Update the counts for the new mesh
@@ -101,17 +96,14 @@ public class BlockMeshCloud
     /// <summary>
     /// Remove the mesh at the given world position.
     /// </summary>
-    /// <param name="worldX">The x position.</param>
-    /// <param name="worldY">The y position.</param>
-    public void RemoveMesh(int worldX, int worldY)
+    /// <param name="position">The position.</param>
+    public void RemoveMesh(Vector2I position)
     {
-        var worldPos = new Vector2I(worldX, worldY);
-
         BlockMesh mesh;
-        if (this.meshes.TryGetValue(worldPos, out mesh))
+        if (this.meshes.TryGetValue(position, out mesh))
         {
             // Remove the mesh
-            this.meshes.Remove(worldPos);
+            this.meshes.Remove(position);
 
             // Decrement the vertex/triangle count for the mesh that was removed
             this.verticeCount -= mesh.Vertices.Length;
