@@ -4,6 +4,11 @@
 public struct Block
 {
     /// <summary>
+    /// An unknown block.
+    /// </summary>
+    public static readonly Block Unknown = new Block(BlockType.Unknown);
+
+    /// <summary>
     /// Initializes a new instance of the Block struct.
     /// </summary>
     /// <param name="blockType">The block type.</param>

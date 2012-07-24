@@ -159,6 +159,8 @@ public class BlockMeshCloud
     /// <returns>The list of materials.</returns>
     public byte[] GetMaterials()
     {
-        return this.indiceCounts.Keys().ToArray();
+        var materials = new byte[this.indiceCounts.Count];
+        this.indiceCounts.Keys.CopyTo(materials, 0);
+        return materials;
     }
 }

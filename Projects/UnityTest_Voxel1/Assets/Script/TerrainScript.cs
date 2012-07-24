@@ -13,12 +13,7 @@ public class TerrainScript : MonoBehaviour
     /// <summary>
     /// The block meshes.
     /// </summary>
-    private BlockMeshCollection blockMeshes;
-
-    /// <summary>
-    /// The terrain mesh processor.
-    /// </summary>
-    private TerrainMeshProcessor terrainMeshProcessor;
+    private BlockMeshCloud meshCloud;
 
     /// <summary>
     /// Initialises the component.
@@ -26,8 +21,7 @@ public class TerrainScript : MonoBehaviour
     public void Start()
     {
         this.terrain = new Terrain();
-        this.blockMeshes = new BlockMeshCollection();
-        this.terrainMeshProcessor = new TerrainMeshProcessor(this.terrain, this.blockMeshes);
+        this.meshCloud = new BlockMeshCloud();
     }
 
     /// <summary>

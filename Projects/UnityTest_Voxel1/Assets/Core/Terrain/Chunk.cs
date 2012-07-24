@@ -56,6 +56,24 @@ public class Chunk
     }
 
     /// <summary>
+    /// Gets or sets the block at the given block index.
+    /// </summary>
+    /// <param name="blockIndex">The block index.</param>
+    /// <returns>The block.</returns>
+    public Block this[int blockIndex]
+    {
+        get
+        {
+            return this.Blocks[blockIndex];
+        }
+
+        set
+        {
+            this.Blocks[blockIndex] = value;
+        }
+    }
+
+    /// <summary>
     /// Gets or sets the block at the given position in chunk-space.
     /// </summary>
     /// <param name="chunkX">The x position.</param>
@@ -107,7 +125,7 @@ public class Chunk
         }
         else
         {
-            block = null;
+            block = Block.Unknown;
             return false;
         }
     }
@@ -128,14 +146,14 @@ public class Chunk
         public const short Down = Chunk.SizeX;
 
         /// <summary>
-        /// Move the index to the block on the left.
+        /// Move the index to the previous block (to the left or end of prev row).
         /// </summary>
         public const short Left = -1;
 
         /// <summary>
-        /// Move the index to the block on the right.
+        /// Move the index to the next block (to the right or start of next row).
         /// </summary>
-        public const short Right = 1;
+        public const short Next = 1;
 
         /// <summary>
         /// The start index.
@@ -148,7 +166,7 @@ public class Chunk
         public const short End = Chunk.SizeX * Chunk.SizeY - 1;
 
         /// <summary>
-        /// The start of the last row.
+        /// The start of th e last row.
         /// </summary>
         public const short LastRowStart = End & Chunk.MaskXNot;
     }
