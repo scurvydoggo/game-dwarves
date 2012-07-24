@@ -3,23 +3,23 @@
 /// <summary>
 /// Processes the terrain to generate the mesh data for each block.
 /// </summary>
-public class TerrainMeshProcessor
+public abstract class TerrainMeshWorker
 {
     /// <summary>
-    /// The queue of chunks that need to be processed.
+    /// The worker responsible for processing the meshes.
     /// </summary>
-    private Queue<Chunk> queue;
+    private ParallelWorker<Vector2I> worker;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMeshProcessor class.
     /// </summary>
     /// <param name="terrain">The terrain which is processed.</param>
     /// <param name="blockMeshes">The collection of block meshes.</param>
-    public TerrainMeshProcessor(Terrain terrain, BlockMeshCollection blockMeshes)
+    public TerrainMeshWorker(Terrain terrain, BlockMeshCollection blockMeshes)
     {
         this.Terrain = terrain;
         this.BlockMeshes = blockMeshes;
-        this.queue = new Queue<Chunk>();
+        this.worker = new ParallelWorker<Vector2I>();
     }
 
     /// <summary>
@@ -31,4 +31,13 @@ public class TerrainMeshProcessor
     /// Gets the collection of block meshes.
     /// </summary>
     public BlockMeshCollection BlockMeshes { get; private set; }
+
+    /// <summary>
+    /// Enqueues a task to process the chunk with the given index.
+    /// </summary>
+    /// <param name="chunkIndex">The chunk index.</param>
+    public void EnqueueForMeshGeneration(Vector2I chunkIndex)
+    {
+        this.worker.Enqueue(this.ProcessChunk, chunkIndex);
+    }
 }

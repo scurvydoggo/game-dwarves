@@ -3,12 +3,12 @@
 /// <summary>
 /// Manages the mesh data of terrain blocks.
 /// </summary>
-public class BlockMeshCollection
+public class BlockMeshCloud
 {
     /// <summary>
-    /// Initializes a new instance of the BlockMeshCollection class.
+    /// Initializes a new instance of the BlockMeshCloud class.
     /// </summary>
-    public BlockMeshCollection()
+    public BlockMeshCloud()
     {
         this.Meshes = new Dictionary<Vector2I, BlockMesh>();
     }

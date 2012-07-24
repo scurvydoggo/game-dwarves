@@ -81,6 +81,28 @@ public class Chunk
     }
 
     /// <summary>
+    /// Try to get the block at the given position in chunk-space.
+    /// </summary>
+    /// <param name="chunkX">The x position.</param>
+    /// <param name="chunkY">The y position.</param>
+    /// <param name="block">The block.</param>
+    /// <returns>True if the block was retrieved.</returns>
+    public bool TryGetBlock(int chunkX, int chunkY, out Block block)
+    {
+        int blockIndex = Chunk.GetBlockIndex(chunkX, chunkY);
+        if (blockIndex >= 0 && blockIndex < this.Blocks.Length)
+        {
+            block = this.Blocks[blockIndex];
+            return true;
+        }
+        else
+        {
+            block = null;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Provides constants for navigating the chunk's block array.
     /// </summary>
     public static class Navigation
