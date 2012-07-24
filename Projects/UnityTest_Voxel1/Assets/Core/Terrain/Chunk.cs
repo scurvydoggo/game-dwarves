@@ -35,6 +35,16 @@ public class Chunk
     /// </summary>
     public const int MaskY = SizeY - 1;
 
+    /// <summary>
+    /// Mask for performing bitwise modulus operations.
+    /// </summary>
+    public const int MaskXNot = ~MaskX;
+
+    /// <summary>
+    /// Mask for performing bitwise modulus operations.
+    /// </summary>
+    public const int MaskYNot = ~MaskY;
+
     #endregion
 
     /// <summary>
@@ -90,7 +100,7 @@ public class Chunk
     public bool TryGetBlock(int chunkX, int chunkY, out Block block)
     {
         int blockIndex = Chunk.GetBlockIndex(chunkX, chunkY);
-        if (blockIndex >= 0 && blockIndex < this.Blocks.Length)
+        if (blockIndex >= Navigation.Start && blockIndex <= Navigation.End)
         {
             block = this.Blocks[blockIndex];
             return true;
@@ -126,5 +136,20 @@ public class Chunk
         /// Move the index to the block on the right.
         /// </summary>
         public const short Right = 1;
+
+        /// <summary>
+        /// The start index.
+        /// </summary>
+        public const short Start = 0;
+
+        /// <summary>
+        /// The end index (inclusive).
+        /// </summary>
+        public const short End = Chunk.SizeX * Chunk.SizeY - 1;
+
+        /// <summary>
+        /// The start of the last row.
+        /// </summary>
+        public const short LastRowStart = End & Chunk.MaskXNot;
     }
 }
