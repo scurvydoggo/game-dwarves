@@ -148,7 +148,7 @@ public class Chunk
         /// <summary>
         /// Move the index to the previous block (to the left or end of prev row).
         /// </summary>
-        public const short Left = -1;
+        public const short Prev = -1;
 
         /// <summary>
         /// Move the index to the next block (to the right or start of next row).
