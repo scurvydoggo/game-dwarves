@@ -1,3 +1,5 @@
+using UnityEngine;
+
 /// <summary>
 /// Generates meshes for terrain blocks in which blocks are represented by simple cubes.
 /// </summary>
@@ -30,6 +32,15 @@ public class CubedBlockMeshGenerator : BlockMeshGenerator
         Block blockDown,
         Block blockLeft)
     {
-        return null;
+        byte material;
+        Vector3[] vertices;
+        int[] indices;
+
+        // TODO
+        material = 0;
+        vertices = new Vector3[0];
+        indices = new int[0];
+
+        return new BlockMesh(material, vertices, indices);
     }
 }
