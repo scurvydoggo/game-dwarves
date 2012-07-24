@@ -166,8 +166,8 @@ public class Chunk
         public const short End = Chunk.SizeX * Chunk.SizeY - 1;
 
         /// <summary>
-        /// The start of th e last row.
+        /// The start of the last row.
         /// </summary>
-        public const short LastRowStart = End & Chunk.MaskXNot;
+        public const short LastRow = Chunk.SizeX * Chunk.SizeY - Chunk.SizeX;
     }
 }

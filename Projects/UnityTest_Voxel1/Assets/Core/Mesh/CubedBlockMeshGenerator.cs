@@ -39,18 +39,18 @@ public class CubedBlockMeshGenerator : BlockMeshGenerator
 
             // Get the block above this one
             Block blockUp = Block.Unknown;
-            if (index >= Chunk.SizeX)
+            if ((index & Chunk.MaskXNot) != 0)
             {
                 blockUp = chunk[index + Chunk.Navigation.Up];
             }
             else if (chunkUp != null)
             {
-                blockUp = chunkUp[index + Chunk.Navigation.LastRowStart];
+                blockUp = chunkUp[index | Chunk.Navigation.LastRow];
             }
 
             // Get the block to the right of this one
             Block blockRight = Block.Unknown;
-            if ((index & Chunk.MaskX) < Chunk.MaskX)
+            if ((index & Chunk.MaskX) != Chunk.MaskX)
             {
                 blockRight = chunk[index + Chunk.Navigation.Next];
             }
@@ -61,7 +61,7 @@ public class CubedBlockMeshGenerator : BlockMeshGenerator
 
             // Get the block below this one
             Block blockBelow = Block.Unknown;
-            if (index < Chunk.Navigation.LastRowStart)
+            if ((index & Chunk.Navigation.LastRow) != Chunk.Navigation.LastRow)
             {
                 blockBelow = chunk[index + Chunk.Navigation.Down];
             }
@@ -72,13 +72,13 @@ public class CubedBlockMeshGenerator : BlockMeshGenerator
 
             // Get the block to the left of this one
             Block blockLeft = Block.Unknown;
-            if ((index & Chunk.MaskX) > 0)
+            if ((index & Chunk.MaskX) != 0)
             {
                 blockLeft = chunk[index + Chunk.Navigation.Left];
             }
             else if (chunkLeft != null)
             {
-                blockLeft = chunkLeft[index + Chunk.SizeX - 1];
+                blockLeft = chunkLeft[index | Chunk.SizeX];
             }
         }
     }
