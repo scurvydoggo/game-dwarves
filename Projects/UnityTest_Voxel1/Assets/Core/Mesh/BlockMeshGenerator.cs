@@ -119,6 +119,9 @@ public abstract class BlockMeshGenerator
 
                 // Create the mesh for this block
                 BlockMesh mesh = this.CreateBlockMesh(block, blockPos, blockUp, blockRight, blockDown, blockLeft);
+
+                // Add the mesh to the cloud
+                meshCloud.SetMesh(blockPos, mesh);
             }
         }
     }
