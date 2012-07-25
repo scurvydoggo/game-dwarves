@@ -3,7 +3,7 @@
 /// <summary>
 /// Manages the mesh data of terrain blocks.
 /// </summary>
-public class BlockMeshCloud
+public class TerrainMesh
 {
     /// <summary>
     /// The mesh data per block.
@@ -21,9 +21,9 @@ public class BlockMeshCloud
     public Dictionary<byte, int> indiceCounts;
 
     /// <summary>
-    /// Initializes a new instance of the BlockMeshCloud class.
+    /// Initializes a new instance of the TerrainMesh class.
     /// </summary>
-    public BlockMeshCloud()
+    public TerrainMesh()
     {
         this.meshes = new Dictionary<Vector2I, BlockMesh>();
         this.verticeCount = 0;

@@ -1,30 +1,16 @@
 /// <summary>
 /// Generates meshes for terrain blocks.
 /// </summary>
-public abstract class BlockMeshGenerator
+public abstract class TerrainMeshGenerator
 {
     /// <summary>
-    /// Initializes a new instance of the BlockMeshGenerator class.
+    /// Update the terrain's mesh for the given chunk.
     /// </summary>
-    /// <param name="terrain">The terrain object from which the meshes are generated.</param>
-    public BlockMeshGenerator(Terrain terrain)
+    /// <param name="terrain">The terrain.</param>
+    /// <param name="chunkIndex">The index of the chunk to update the mesh for.</param>
+    public virtual void UpdateChunkMesh(Terrain terrain, Vector2I chunkIndex)
     {
-        this.Terrain = terrain;
-    }
-
-    /// <summary>
-    /// Gets the terrain object from which the meshes are generated.
-    /// </summary>
-    public Terrain Terrain { get; private set; }
-
-    /// <summary>
-    /// Populates the mesh cloud with data for the given chunk.
-    /// </summary>
-    /// <param name="meshCloud">The mesh cloud to be populated.</param>
-    /// <param name="chunkIndex">The index of the chunk from which meshes will be generated.</param>
-    public virtual void GenerateBlockMeshes(BlockMeshCloud meshCloud, Vector2I chunkIndex)
-    {
-        Chunk chunk = this.Terrain[chunkIndex];
+        Chunk chunk = terrain.BlockData[chunkIndex];
 
         // Get the origin of the chunk in world coordinates
         Vector2I chunkOrigin = new Vector2I(chunkIndex.X * Chunk.SizeX, chunkIndex.Y * Chunk.SizeY);
@@ -32,10 +18,10 @@ public abstract class BlockMeshGenerator
         // Get the neighbouring chunks so that boundary checks can be made. If a neighbour cannot be retrieved, then
         // we may be at the edge of the world, in which case that region shouldn't be accessible so all is ok
         Chunk chunkUp, chunkRight, chunkDown, chunkLeft;
-        this.Terrain.TryGetChunk(new Vector2I(chunkIndex.Y + 1, chunkIndex.X), out chunkUp);
-        this.Terrain.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X + 1), out chunkRight);
-        this.Terrain.TryGetChunk(new Vector2I(chunkIndex.Y - 1, chunkIndex.X), out chunkDown);
-        this.Terrain.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X - 1), out chunkLeft);
+        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y + 1, chunkIndex.X), out chunkUp);
+        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X + 1), out chunkRight);
+        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y - 1, chunkIndex.X), out chunkDown);
+        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X - 1), out chunkLeft);
 
         for (int x = 0; x < Chunk.SizeX; x++)
         {
@@ -53,7 +39,7 @@ public abstract class BlockMeshGenerator
                 // If there is no block here, remove any mesh that may exist at this position and continue
                 if (block.BlockType == BlockType.None)
                 {
-                    meshCloud.RemoveMesh(blockPos);
+                    terrain.MeshData.RemoveMesh(blockPos);
                     continue;
                 }
 
@@ -121,7 +107,7 @@ public abstract class BlockMeshGenerator
                 BlockMesh mesh = this.CreateBlockMesh(block, blockPos, blockUp, blockRight, blockDown, blockLeft);
 
                 // Add the mesh to the cloud
-                meshCloud.SetMesh(blockPos, mesh);
+                terrain.MeshData.SetMesh(blockPos, mesh);
             }
         }
     }

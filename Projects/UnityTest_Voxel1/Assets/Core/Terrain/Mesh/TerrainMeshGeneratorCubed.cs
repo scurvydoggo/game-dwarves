@@ -3,17 +3,8 @@ using UnityEngine;
 /// <summary>
 /// Generates meshes for terrain blocks in which blocks are represented by simple cubes.
 /// </summary>
-public class CubedBlockMeshGenerator : BlockMeshGenerator
+public class TerrainMeshGeneratorCubed : TerrainMeshGenerator
 {
-    /// <summary>
-    /// Initializes a new instance of the CubedBlockMeshGenerator class.
-    /// </summary>
-    /// <param name="terrain">The terrain object from which the meshes are generated.</param>
-    public CubedBlockMeshGenerator(Terrain terrain)
-        : base(terrain)
-    {
-    }
-
     /// <summary>
     /// Create a mesh for the given block.
     /// </summary>
