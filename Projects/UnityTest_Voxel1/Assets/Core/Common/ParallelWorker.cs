@@ -278,16 +278,6 @@ public class ParallelWorker<T> : IDisposable
     public class Work
     {
         /// <summary>
-        /// Gets the delegate method for executing the work.
-        /// </summary>
-        public Action<T> WorkDelegate { get; private set; }
-
-        /// <summary>
-        /// Gets the parameter that is executed for the delegate method.
-        /// </summary>
-        public T Parameter { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of the Work class.
         /// </summary>
         /// <param name="workDelegate">The delegate method for executing the work.</param>
@@ -297,6 +287,16 @@ public class ParallelWorker<T> : IDisposable
             this.WorkDelegate = workDelegate;
             this.Parameter = parameter;
         }
+
+        /// <summary>
+        /// Gets the delegate method for executing the work.
+        /// </summary>
+        public Action<T> WorkDelegate { get; private set; }
+
+        /// <summary>
+        /// Gets the parameter that is executed for the delegate method.
+        /// </summary>
+        public T Parameter { get; private set; }
     }
 
     /// <summary>
@@ -308,6 +308,17 @@ public class ParallelWorker<T> : IDisposable
         /// The index of the new work event in EventArray.
         /// </summary>
         public const int NewWorkEventIndex = 0;
+
+        /// <summary>
+        /// Initializes a new instance of the QueuedWorkerEvents class.
+        /// </summary>
+        public QueuedWorkerEvents()
+        {
+            this.NewWorkEvent = new AutoResetEvent(false);
+            this.ExitThreadEvent = new ManualResetEvent(false);
+            this.EventArray = new EventWaitHandle[] { this.NewWorkEvent, this.ExitThreadEvent };
+            this.IsDisposed = false;
+        }
 
         /// <summary>
         /// Gets the wait handle that signals new work added to the queue.
@@ -331,17 +342,6 @@ public class ParallelWorker<T> : IDisposable
         public bool IsDisposed { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the QueuedWorkerEvents class.
-        /// </summary>
-        public QueuedWorkerEvents()
-        {
-            this.NewWorkEvent = new AutoResetEvent(false);
-            this.ExitThreadEvent = new ManualResetEvent(false);
-            this.EventArray = new EventWaitHandle[] { NewWorkEvent, ExitThreadEvent };
-            this.IsDisposed = false;
-        }
-
-        /// <summary>
         /// Dispose the instance.
         /// </summary>
         public void Dispose()
@@ -349,7 +349,7 @@ public class ParallelWorker<T> : IDisposable
             if (!this.IsDisposed)
             {
                 this.IsDisposed = true;
-				
+
                 if (this.NewWorkEvent != null)
                 {
                     this.NewWorkEvent.Close();

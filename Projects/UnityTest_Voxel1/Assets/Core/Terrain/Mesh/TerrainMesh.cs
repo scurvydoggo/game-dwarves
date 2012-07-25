@@ -13,12 +13,12 @@ public class TerrainMesh
     /// <summary>
     /// The total number of vertices in the cloud.
     /// </summary>
-    public int verticeCount;
+    private int verticeCount;
 
     /// <summary>
     /// The total number of indices (vertex indices for triangles) per material.
     /// </summary>
-    public Dictionary<byte, int> indiceCounts;
+    private Dictionary<byte, int> indiceCounts;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMesh class.
@@ -85,11 +85,11 @@ public class TerrainMesh
         this.verticeCount += mesh.Vertices.Length;
         if (this.indiceCounts.ContainsKey(mesh.Material))
         {
-            indiceCounts[mesh.Material] += mesh.Indices.Length;
+            this.indiceCounts[mesh.Material] += mesh.Indices.Length;
         }
         else
         {
-            indiceCounts.Add(mesh.Material, mesh.Indices.Length);
+            this.indiceCounts.Add(mesh.Material, mesh.Indices.Length);
         }
     }
 
@@ -131,6 +131,7 @@ public class TerrainMesh
     /// <summary>
     /// Get the total number of indices for the given material.
     /// </summary>
+    /// <param name="material">The material for which to get the indice count.</param>
     /// <returns>The indice count.</returns>
     public int GetIndiceCount(byte material)
     {

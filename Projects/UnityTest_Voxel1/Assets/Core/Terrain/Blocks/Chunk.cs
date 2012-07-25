@@ -56,6 +56,11 @@ public class Chunk
     }
 
     /// <summary>
+    /// Gets the blocks in this chunk. This is a flattened 2D array.
+    /// </summary>
+    public Block[] Blocks { get; private set; }
+
+    /// <summary>
     /// Gets or sets the block at the given block index.
     /// </summary>
     /// <param name="blockIndex">The block index.</param>
@@ -93,11 +98,6 @@ public class Chunk
     }
 
     /// <summary>
-    /// Gets the blocks in this chunk. This is a flattened 2D array.
-    /// </summary>
-    public Block[] Blocks { get; private set; }
-
-    /// <summary>
     /// Gets the array index for the block at the given x and y position.
     /// </summary>
     /// <param name="x">The x position.</param>
@@ -105,7 +105,7 @@ public class Chunk
     /// <returns>The index.</returns>
     public static int GetBlockIndex(int x, int y)
     {
-        return x + y * SizeX;
+        return x + (y * SizeX);
     }
 
     /// <summary>
@@ -163,11 +163,11 @@ public class Chunk
         /// <summary>
         /// The end index (inclusive).
         /// </summary>
-        public const short End = Chunk.SizeX * Chunk.SizeY - 1;
+        public const short End = (Chunk.SizeX * Chunk.SizeY) - 1;
 
         /// <summary>
         /// The start of the last row.
         /// </summary>
-        public const short LastRow = Chunk.SizeX * Chunk.SizeY - Chunk.SizeX;
+        public const short LastRow = (Chunk.SizeX * Chunk.SizeY) - Chunk.SizeX;
     }
 }

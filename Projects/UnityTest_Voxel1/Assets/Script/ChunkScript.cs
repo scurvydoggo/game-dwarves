@@ -7,14 +7,14 @@ using UnityEngine;
 public class ChunkScript : MonoBehaviour
 {
     /// <summary>
-    /// Gets or sets the chunk.
-    /// </summary>
-    public Chunk Chunk { get; set; }
-
-    /// <summary>
     /// The mesh filter for this chunk.
     /// </summary>
     private MeshFilter meshFilter;
+
+    /// <summary>
+    /// Gets or sets the chunk.
+    /// </summary>
+    public Chunk Chunk { get; set; }
 
     /// <summary>
     /// Initialises the component.

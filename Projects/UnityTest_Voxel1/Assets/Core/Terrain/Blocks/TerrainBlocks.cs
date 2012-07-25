@@ -93,7 +93,7 @@ public class TerrainBlocks
     /// Try to get the chunk at the given chunk index.
     /// </summary>
     /// <param name="chunkIndex">The chunk index.</param>
-    /// <param name="blchunkock">The chunk.</param>
+    /// <param name="chunk">The chunk.</param>
     /// <returns>True if the chunk was retrieved.</returns>
     public bool TryGetChunk(Vector2I chunkIndex, out Chunk chunk)
     {
