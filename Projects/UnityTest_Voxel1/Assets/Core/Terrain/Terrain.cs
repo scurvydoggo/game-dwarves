@@ -8,17 +8,17 @@ public class Terrain
     /// </summary>
     public Terrain()
     {
-        this.BlockData = new TerrainBlocks();
-        this.MeshData = new TerrainMesh();
+        this.Blocks = new TerrainBlocks();
+        this.Mesh = new TerrainMesh();
     }
 
     /// <summary>
     /// Gets the terrain block data.
     /// </summary>
-    public TerrainBlocks BlockData { get; private set; }
+    public TerrainBlocks Blocks { get; private set; }
 
     /// <summary>
     /// Gets the terrain mesh data.
     /// </summary>
-    public TerrainMesh MeshData { get; private set; }
+    public TerrainMesh Mesh { get; private set; }
 }

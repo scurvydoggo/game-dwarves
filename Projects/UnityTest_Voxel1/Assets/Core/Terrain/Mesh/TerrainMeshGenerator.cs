@@ -10,7 +10,7 @@ public abstract class TerrainMeshGenerator
     /// <param name="chunkIndex">The index of the chunk to update the mesh for.</param>
     public virtual void UpdateChunkMesh(Terrain terrain, Vector2I chunkIndex)
     {
-        Chunk chunk = terrain.BlockData[chunkIndex];
+        Chunk chunk = terrain.Blocks[chunkIndex];
 
         // Get the origin of the chunk in world coordinates
         Vector2I chunkOrigin = new Vector2I(chunkIndex.X * Chunk.SizeX, chunkIndex.Y * Chunk.SizeY);
@@ -18,10 +18,10 @@ public abstract class TerrainMeshGenerator
         // Get the neighbouring chunks so that boundary checks can be made. If a neighbour cannot be retrieved, then
         // we may be at the edge of the world, in which case that region shouldn't be accessible so all is ok
         Chunk chunkUp, chunkRight, chunkDown, chunkLeft;
-        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y + 1, chunkIndex.X), out chunkUp);
-        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X + 1), out chunkRight);
-        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y - 1, chunkIndex.X), out chunkDown);
-        terrain.BlockData.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X - 1), out chunkLeft);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y + 1, chunkIndex.X), out chunkUp);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X + 1), out chunkRight);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y - 1, chunkIndex.X), out chunkDown);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X - 1), out chunkLeft);
 
         for (int x = 0; x < Chunk.SizeX; x++)
         {
@@ -39,7 +39,7 @@ public abstract class TerrainMeshGenerator
                 // If there is no block here, remove any mesh that may exist at this position and continue
                 if (block.BlockType == BlockType.None)
                 {
-                    terrain.MeshData.RemoveMesh(blockPos);
+                    terrain.Mesh.RemoveMesh(blockPos);
                     continue;
                 }
 
@@ -107,7 +107,7 @@ public abstract class TerrainMeshGenerator
                 BlockMesh mesh = this.CreateBlockMesh(block, blockPos, blockUp, blockRight, blockDown, blockLeft);
 
                 // Add the mesh to the cloud
-                terrain.MeshData.SetMesh(blockPos, mesh);
+                terrain.Mesh.SetMesh(blockPos, mesh);
             }
         }
     }
