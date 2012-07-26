@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// <copyright file="TerrainMeshGenerator.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
 /// <summary>
 /// Generates meshes for terrain blocks.
 /// </summary>

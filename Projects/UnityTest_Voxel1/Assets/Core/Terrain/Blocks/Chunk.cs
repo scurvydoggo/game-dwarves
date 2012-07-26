@@ -1,4 +1,10 @@
-﻿/// <summary>
+﻿// ----------------------------------------------------------------------------
+// <copyright file="Chunk.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
+/// <summary>
 /// Represents a 2D region of terrain blocks.
 /// </summary>
 public class Chunk

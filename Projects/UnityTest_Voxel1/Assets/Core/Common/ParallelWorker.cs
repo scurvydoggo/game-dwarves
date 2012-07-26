@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// <copyright file="ParallelWorker.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
 using System;
 using System.Collections;
 using System.Collections.Generic;

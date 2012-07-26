@@ -1,4 +1,10 @@
-﻿using System.Collections.Generic;
+﻿// ----------------------------------------------------------------------------
+// <copyright file="TerrainMesh.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
+using System.Collections.Generic;
 
 /// <summary>
 /// Manages the mesh data of terrain blocks.

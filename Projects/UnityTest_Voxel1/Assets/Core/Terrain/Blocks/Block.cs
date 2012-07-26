@@ -1,4 +1,10 @@
-﻿/// <summary>
+﻿// ----------------------------------------------------------------------------
+// <copyright file="Block.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
+/// <summary>
 /// Represents a terrain block.
 /// </summary>
 public struct Block

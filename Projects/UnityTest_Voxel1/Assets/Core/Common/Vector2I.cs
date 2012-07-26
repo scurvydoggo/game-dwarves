@@ -1,4 +1,10 @@
-﻿/// <summary>
+﻿// ----------------------------------------------------------------------------
+// <copyright file="Vector2I.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
+/// <summary>
 /// An integer-based 2D vector.
 /// </summary>
 public struct Vector2I

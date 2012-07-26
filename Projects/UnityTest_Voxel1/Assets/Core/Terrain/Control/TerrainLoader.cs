@@ -1,3 +1,9 @@
+// ----------------------------------------------------------------------------
+// <copyright file="TerrainLoader.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
 /// <summary>
 /// Responsible for loading and unloading chunks in the terrain.
 /// </summary>

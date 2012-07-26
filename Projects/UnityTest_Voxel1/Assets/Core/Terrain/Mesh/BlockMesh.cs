@@ -1,4 +1,10 @@
-﻿using UnityEngine;
+﻿// ----------------------------------------------------------------------------
+// <copyright file="BlockMesh.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
+using UnityEngine;
 
 /// <summary>
 /// The mesh data for a terrain block.

@@ -1,4 +1,10 @@
-﻿using UnityEngine;
+﻿// ----------------------------------------------------------------------------
+// <copyright file="TerrainLoaderComponent.cs" company="Acidwashed Games">
+//     Copyright 2012 Acidwashed Games. All right reserved.
+// </copyright>
+// ----------------------------------------------------------------------------
+
+using UnityEngine;
 
 /// <summary>
 /// Component for loading terrain chunks.
