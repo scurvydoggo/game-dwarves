@@ -18,7 +18,7 @@ public class TerrainMesh
     /// <summary>
     /// The total number of indices (vertex indices for triangles) per material.
     /// </summary>
-    private Dictionary<byte, int> indiceCounts;
+    private Dictionary<MaterialType, int> indiceCounts;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMesh class.
@@ -27,7 +27,7 @@ public class TerrainMesh
     {
         this.meshes = new Dictionary<Vector2I, BlockMesh>();
         this.verticeCount = 0;
-        this.indiceCounts = new Dictionary<byte, int>();
+        this.indiceCounts = new Dictionary<MaterialType, int>();
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ public class TerrainMesh
     /// </summary>
     /// <param name="material">The material for which to get the indice count.</param>
     /// <returns>The indice count.</returns>
-    public int GetIndiceCount(byte material)
+    public int GetIndiceCount(MaterialType material)
     {
         int count;
         if (this.indiceCounts.TryGetValue(material, out count))
@@ -150,9 +150,9 @@ public class TerrainMesh
     /// Gets the materials the exist in the meshes.
     /// </summary>
     /// <returns>The list of materials.</returns>
-    public byte[] GetMaterials()
+    public MaterialType[] GetMaterials()
     {
-        var materials = new byte[this.indiceCounts.Count];
+        var materials = new MaterialType[this.indiceCounts.Count];
         this.indiceCounts.Keys.CopyTo(materials, 0);
         return materials;
     }

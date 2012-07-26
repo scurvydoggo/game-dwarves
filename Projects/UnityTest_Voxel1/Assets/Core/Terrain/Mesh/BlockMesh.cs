@@ -11,7 +11,7 @@ public class BlockMesh
     /// <param name="material">The material of this block.</param>
     /// <param name="vertices">The vertices of this block.</param>
     /// <param name="indices">The triangle indices of this block.</param>
-    public BlockMesh(byte material, Vector3[] vertices, int[] indices)
+    public BlockMesh(MaterialType material, Vector3[] vertices, int[] indices)
     {
         this.Material = material;
         this.Vertices = vertices;
@@ -21,7 +21,7 @@ public class BlockMesh
     /// <summary>
     /// Gets or sets the material of this block.
     /// </summary>
-    public byte Material { get; set; }
+    public MaterialType Material { get; set; }
 
     /// <summary>
     /// Gets or sets the vertices of this block.

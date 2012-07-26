@@ -23,7 +23,7 @@ public class TerrainMeshGeneratorCubed : TerrainMeshGenerator
         Block blockDown,
         Block blockLeft)
     {
-        byte material;
+        MaterialType material;
         Vector3[] vertices;
         int[] indices;
 
