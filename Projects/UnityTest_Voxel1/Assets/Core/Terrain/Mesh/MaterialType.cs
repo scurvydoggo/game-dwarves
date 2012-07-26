@@ -4,7 +4,7 @@
 public enum MaterialType : byte
 {
     /// <summary>
-    /// Grass.
+    /// Dirt.
     /// </summary>
-    Grass
+    Dirt
 }

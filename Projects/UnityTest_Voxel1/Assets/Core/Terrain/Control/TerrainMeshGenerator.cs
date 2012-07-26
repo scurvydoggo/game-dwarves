@@ -4,6 +4,24 @@
 public abstract class TerrainMeshGenerator
 {
     /// <summary>
+    /// Indicates how many blocks should be rendered depth-wise for terrain walls.
+    /// </summary>
+	public const int BlockDepth = 3;
+
+    /// <summary>
+    /// Initializes a new instance of the TerrainMeshGenerator class.
+    /// </summary>
+	public TerrainMeshGenerator()
+	{
+		this.materialLookup = new MaterialLookup();
+	}
+	
+    /// <summary>
+    /// Gets or sets the material lookup instance.
+    /// </summary>
+	protected MaterialLookup materialLookup { get; set; }
+
+    /// <summary>
     /// Update the terrain's mesh for the given chunk.
     /// </summary>
     /// <param name="terrain">The terrain.</param>
