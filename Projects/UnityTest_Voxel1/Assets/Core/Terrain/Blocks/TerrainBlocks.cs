@@ -34,14 +34,14 @@ public class TerrainBlocks
     {
         get
         {
-            return this.activeChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)]
-                [worldX & Chunk.MaskX, worldY & Chunk.MaskY];
+            Chunk chunk = this.activeChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)];
+            return chunk[worldX & Chunk.MaskX, worldY & Chunk.MaskY];
         }
 
         set
         {
-            this.activeChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)]
-                [worldX & Chunk.MaskX, worldY & Chunk.MaskY] = value;
+            Chunk chunk = this.activeChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)];
+            chunk[worldX & Chunk.MaskX, worldY & Chunk.MaskY] = value;
         }
     }
 
