@@ -26,63 +26,95 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         MaterialType material;
         Vector3[] vertices;
         int[] indices;
-		
-		// Look up the base material for this block
-		material = this.materialLookup.GetMaterial(block.BlockType);
-		
-		// Determine how many quads will exist for this block (ie. how many block faces)
-		int quadCount = 1; // Front face
-		if (blockUp.BlockType == BlockType.None)
-		{
-			quadCount += TerrainMeshGenerator.BlockDepth;
-		}
-		if (blockRight.BlockType == BlockType.None)
-		{
-			quadCount += TerrainMeshGenerator.BlockDepth;
-		}
-		if (blockDown.BlockType == BlockType.None)
-		{
-			quadCount += TerrainMeshGenerator.BlockDepth;
-		}
-		if (blockLeft.BlockType == BlockType.None)
-		{
-			quadCount += TerrainMeshGenerator.BlockDepth;
-		}
-		
-		// Initialise the mesh arrays
-		vertices = new Vector3[quadCount * 4];
-		indices = new int[quadCount * 6];
-		
-		// Populate the quads
-		this.AddFaceQuad(position, 0, vertices, indices);
-		
-		if (quadCount > 1)
-		{
-			int quadIndex = 1;
-			for (int z = 0; z > -TerrainMeshGenerator.BlockDepth; z--)
-			{
-				if (blockUp.BlockType == BlockType.None)
-				{
-					this.AddUpQuad(position, z, quadIndex++, vertices, indices);
-				}
-				if (blockRight.BlockType == BlockType.None)
-				{
-					this.AddRightQuad(position, z, quadIndex++, vertices, indices);
-				}
-				if (blockDown.BlockType == BlockType.None)
-				{
-					this.AddDownQuad(position, z, quadIndex++, vertices, indices);
-				}
-				if (blockLeft.BlockType == BlockType.None)
-				{
-					this.AddLeftQuad(position, z, quadIndex++, vertices, indices);
-				}
-			}
-		}
-		
+
+        // Look up the base material for this block
+        material = this.MaterialLookup.GetMaterial(block.BlockType);
+
+        // Determine how many quads will exist for this block (ie. how many block faces)
+        int quadCount = 1; // Front face
+        if (blockUp.BlockType == BlockType.None)
+        {
+            quadCount += TerrainMeshGenerator.BlockDepth;
+        }
+
+        if (blockRight.BlockType == BlockType.None)
+        {
+            quadCount += TerrainMeshGenerator.BlockDepth;
+        }
+
+        if (blockDown.BlockType == BlockType.None)
+        {
+            quadCount += TerrainMeshGenerator.BlockDepth;
+        }
+
+        if (blockLeft.BlockType == BlockType.None)
+        {
+            quadCount += TerrainMeshGenerator.BlockDepth;
+        }
+
+        // Initialise the mesh arrays
+        vertices = new Vector3[quadCount * 4];
+        indices = new int[quadCount * 6];
+
+        // Populate the quads
+        this.AddFaceQuad(position, 0, vertices, indices);
+
+        if (quadCount > 1)
+        {
+            int quadIndex = 1;
+            for (int z = 0; z > -TerrainMeshGenerator.BlockDepth; z--)
+            {
+                if (blockUp.BlockType == BlockType.None)
+                {
+                    this.AddUpQuad(position, z, quadIndex++, vertices, indices);
+                }
+
+                if (blockRight.BlockType == BlockType.None)
+                {
+                    this.AddRightQuad(position, z, quadIndex++, vertices, indices);
+                }
+
+                if (blockDown.BlockType == BlockType.None)
+                {
+                    this.AddDownQuad(position, z, quadIndex++, vertices, indices);
+                }
+
+                if (blockLeft.BlockType == BlockType.None)
+                {
+                    this.AddLeftQuad(position, z, quadIndex++, vertices, indices);
+                }
+            }
+        }
+
         return new BlockMesh(material, vertices, indices);
     }
-	
+
+    /// <summary>
+    /// Add a quad to the mesh arrays.
+    /// </summary>
+    /// <param name="basePos">The base position of the block.</param>
+    /// <param name="quadIndex">The index of the current quad.</param>
+    /// <param name="vertices">The vertice array.</param>
+    /// <param name="indices">The indices array.</param>
+    private void AddFaceQuad(Vector2I basePos, int quadIndex, Vector3[] vertices, int[] indices)
+    {
+        // Add the vertices
+        int vertIndex = quadIndex * 4;
+        vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, 0);
+        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, 0);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, 0);
+        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, 0);
+
+        // Add the indices
+        int indiceIndex = quadIndex * 6;
+        indices[indiceIndex++] = vertIndex;
+        indices[indiceIndex++] = vertIndex + 1;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 3;
+        indices[indiceIndex++] = vertIndex;
+    }
+
     /// <summary>
     /// Add a quad to the mesh arrays.
     /// </summary>
@@ -91,25 +123,25 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="quadIndex">The index of the current quad.</param>
     /// <param name="vertices">The vertice array.</param>
     /// <param name="indices">The indices array.</param>
-	private void AddFaceQuad(Vector2I basePos, int quadIndex, Vector3[] vertices, int[] indices)
-	{
-		// Add the vertices
-		int vertIndex = quadIndex * 4;
-		vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, 0);
-		vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, 0);
-		vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, 0);
-		vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, 0);
-		
-		// Add the indices
-		int indiceIndex = quadIndex * 6;
-		indices[indiceIndex++] = vertIndex;
-		indices[indiceIndex++] = vertIndex + 1;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 3;
-		indices[indiceIndex++] = vertIndex;
-	}
-	
+    private void AddUpQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
+    {
+        // Add the vertices
+        int vertIndex = quadIndex * 4;
+        vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, depth);
+        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, depth);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y, depth - 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y, depth - 1);
+
+        // Add the indices
+        int indiceIndex = quadIndex * 6;
+        indices[indiceIndex++] = vertIndex;
+        indices[indiceIndex++] = vertIndex + 1;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 3;
+        indices[indiceIndex++] = vertIndex;
+    }
+
     /// <summary>
     /// Add a quad to the mesh arrays.
     /// </summary>
@@ -118,25 +150,25 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="quadIndex">The index of the current quad.</param>
     /// <param name="vertices">The vertice array.</param>
     /// <param name="indices">The indices array.</param>
-	private void AddUpQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
-	{
-		// Add the vertices
-		int vertIndex = quadIndex * 4;
-		vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, z);
-		vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, z);
-		vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y, z - 1);
-		vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y, z - 1);
-		
-		// Add the indices
-		int indiceIndex = quadIndex * 6;
-		indices[indiceIndex++] = vertIndex;
-		indices[indiceIndex++] = vertIndex + 1;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 3;
-		indices[indiceIndex++] = vertIndex;
-	}
-	
+    private void AddRightQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
+    {
+        // Add the vertices
+        int vertIndex = quadIndex * 4;
+        vertices[vertIndex] = new Vector3(basePos.X + 1, basePos.Y, depth);
+        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y - 1, depth);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, depth - 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y, depth - 1);
+
+        // Add the indices
+        int indiceIndex = quadIndex * 6;
+        indices[indiceIndex++] = vertIndex;
+        indices[indiceIndex++] = vertIndex + 1;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 3;
+        indices[indiceIndex++] = vertIndex;
+    }
+
     /// <summary>
     /// Add a quad to the mesh arrays.
     /// </summary>
@@ -145,25 +177,25 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="quadIndex">The index of the current quad.</param>
     /// <param name="vertices">The vertice array.</param>
     /// <param name="indices">The indices array.</param>
-	private void AddRightQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
-	{
-		// Add the vertices
-		int vertIndex = quadIndex * 4;
-		vertices[vertIndex] = new Vector3(basePos.X + 1, basePos.Y, z);
-		vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y - 1, z);
-		vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, z - 1);
-		vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y, z - 1);
-		
-		// Add the indices
-		int indiceIndex = quadIndex * 6;
-		indices[indiceIndex++] = vertIndex;
-		indices[indiceIndex++] = vertIndex + 1;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 3;
-		indices[indiceIndex++] = vertIndex;
-	}
-	
+    private void AddDownQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
+    {
+        // Add the vertices
+        int vertIndex = quadIndex * 4;
+        vertices[vertIndex] = new Vector3(basePos.X, basePos.Y - 1, depth);
+        vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y - 1, depth - 1);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, depth - 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y - 1, depth);
+
+        // Add the indices
+        int indiceIndex = quadIndex * 6;
+        indices[indiceIndex++] = vertIndex;
+        indices[indiceIndex++] = vertIndex + 1;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 3;
+        indices[indiceIndex++] = vertIndex;
+    }
+
     /// <summary>
     /// Add a quad to the mesh arrays.
     /// </summary>
@@ -172,49 +204,22 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="quadIndex">The index of the current quad.</param>
     /// <param name="vertices">The vertice array.</param>
     /// <param name="indices">The indices array.</param>
-	private void AddDownQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
-	{
-		// Add the vertices
-		int vertIndex = quadIndex * 4;
-		vertices[vertIndex] = new Vector3(basePos.X, basePos.Y - 1, z);
-		vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y - 1, z - 1);
-		vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, z - 1);
-		vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y - 1, z);
-		
-		// Add the indices
-		int indiceIndex = quadIndex * 6;
-		indices[indiceIndex++] = vertIndex;
-		indices[indiceIndex++] = vertIndex + 1;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 3;
-		indices[indiceIndex++] = vertIndex;
-	}
-	
-    /// <summary>
-    /// Add a quad to the mesh arrays.
-    /// </summary>
-    /// <param name="basePos">The base position of the block.</param>
-    /// <param name="depth">The z-depth of the current quad.</param>
-    /// <param name="quadIndex">The index of the current quad.</param>
-    /// <param name="vertices">The vertice array.</param>
-    /// <param name="indices">The indices array.</param>
-	private void AddLeftQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
-	{
-		// Add the vertices
-		int vertIndex = quadIndex * 4;
-		vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, z);
-		vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y, z - 1);
-		vertices[vertIndex + 2] = new Vector3(basePos.X, basePos.Y - 1, z - 1);
-		vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, z);
-		
-		// Add the indices
-		int indiceIndex = quadIndex * 6;
-		indices[indiceIndex++] = vertIndex;
-		indices[indiceIndex++] = vertIndex + 1;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 2;
-		indices[indiceIndex++] = vertIndex + 3;
-		indices[indiceIndex++] = vertIndex;
-	}
+    private void AddLeftQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
+    {
+        // Add the vertices
+        int vertIndex = quadIndex * 4;
+        vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, depth);
+        vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y, depth - 1);
+        vertices[vertIndex + 2] = new Vector3(basePos.X, basePos.Y - 1, depth - 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, depth);
+
+        // Add the indices
+        int indiceIndex = quadIndex * 6;
+        indices[indiceIndex++] = vertIndex;
+        indices[indiceIndex++] = vertIndex + 1;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 2;
+        indices[indiceIndex++] = vertIndex + 3;
+        indices[indiceIndex++] = vertIndex;
+    }
 }
