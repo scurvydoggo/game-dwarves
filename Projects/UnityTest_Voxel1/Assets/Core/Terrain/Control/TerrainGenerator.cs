@@ -17,6 +17,21 @@ public class TerrainGenerator
     /// <param name="terrain">The terrain object to provide neighbouring chunk context.</param>
 	public Chunk GenerateChunk(Vector2I chunkIndex, Terrain terrain)
 	{
-		// TODO
+		Chunk chunk = new Chunk();
+		
+		// TODO: Implement Perlin Noise algorithm for generating terrain blocks. For now, just hardcode some junk
+		for (int index = Chunk.Navigation.Start; index <= Chunk.Navigation.End; index++)
+		{
+			if (index % 3 != 0)
+			{
+				chunk[index] = new Block(BlockType.Dirt);
+			}
+			else
+			{
+				chunk[index] = new Block(BlockType.Air);
+			}
+		}
+		
+		return chunk;
 	}
 }
