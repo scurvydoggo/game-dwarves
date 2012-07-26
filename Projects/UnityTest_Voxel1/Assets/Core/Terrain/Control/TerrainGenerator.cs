@@ -4,19 +4,12 @@
 public class TerrainGenerator
 {
     /// <summary>
-    /// Initializes a new instance of the TerrainGenerator class.
+    /// Generate a chunk and return it. The terrain object remains unmodified.
     /// </summary>
-    public TerrainGenerator()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the TerrainGenerator class.
-    /// </summary>
+    /// <param name="terrain">The terrain.</param>
     /// <param name="chunkIndex">The chunk index.</param>
-    /// <param name="terrain">The terrain object to provide neighbouring chunk context.</param>
     /// <returns>The chunk.</returns>
-    public Chunk GenerateChunk(Vector2I chunkIndex, Terrain terrain)
+    public Chunk GenerateChunk(Terrain terrain, Vector2I chunkIndex)
     {
         Chunk chunk = new Chunk();
 

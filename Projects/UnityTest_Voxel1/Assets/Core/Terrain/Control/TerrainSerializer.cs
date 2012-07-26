@@ -25,9 +25,9 @@ public class TerrainSerializer
     /// <summary>
     /// Serialize a chunk.
     /// </summary>
-    /// <param name="chunkIndex">The chunk index.</param>
     /// <param name="chunk">The chunk to serialize.</param>
-    public void SerializeChunk(Vector2I chunkIndex, Chunk chunk)
+    /// <param name="chunkIndex">The chunk index.</param>
+    public void SerializeChunk(Chunk chunk, Vector2I chunkIndex)
     {
         // NOTE: This should occur in a seperate thread, since terrain serialization isn't high priority.
         // However, care should be taken to consider the situation when a terrain is being serialized in another thread

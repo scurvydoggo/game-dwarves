@@ -16,55 +16,50 @@ public class TerrainLoader
     /// <summary>
     /// Initializes a new instance of the TerrainLoader class.
     /// </summary>
-    /// <param name="terrain">The terrain.</param>
-    public TerrainLoader(Terrain terrain)
+    public TerrainLoader()
     {
-        this.Terrain = terrain;
         this.terrainSerializer = new TerrainSerializer();
         this.terrainGenerator = new TerrainGenerator();
     }
 
     /// <summary>
-    /// Gets the terrain.
+    /// Load a chunk into the terrain object.
     /// </summary>
-    public Terrain Terrain { get; private set; }
-
-    /// <summary>
-    /// Load a chunk.
-    /// </summary>
+    /// <param name="terrain">The terrain.</param>
     /// <param name="chunkIndex">The chunk index.</param>
-    public void LoadChunk(Vector2I chunkIndex)
+    public void LoadChunk(Terrain terrain, Vector2I chunkIndex)
     {
         // Deserialize or generate the chunk
         Chunk chunk;
         if (!this.terrainSerializer.TryDeserializeChunk(chunkIndex, out chunk))
         {
             // The chunk doesn't yet exist, so generate it
-            chunk = this.terrainGenerator.GenerateChunk(chunkIndex, this.Terrain);
+            chunk = this.terrainGenerator.GenerateChunk(terrain, chunkIndex);
 
             // Serialize the generated chunk
-            this.terrainSerializer.SerializeChunk(chunkIndex, chunk);
+            this.terrainSerializer.SerializeChunk(chunk, chunkIndex);
         }
 
         // TODO: Add the chunk to the Terrain object
     }
 
     /// <summary>
-    /// Unload a chunk.
+    /// Unload a chunk from the terrain object.
     /// </summary>
+    /// <param name="terrain">The terrain.</param>
     /// <param name="chunkIndex">The chunk index.</param>
-    public void UnloadChunk(Vector2I chunkIndex)
+    public void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
     {
         // Get the chunk
         Chunk chunk;
-        if (!this.Terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
+        if (!terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
         {
             // The chunk isn't loaded so do nothing
             return;
         }
 
         // Serialize the chunk
-        this.terrainSerializer.SerializeChunk(chunkIndex, chunk);
+        this.terrainSerializer.SerializeChunk(chunk, chunkIndex);
 
         // TODO: Remove the chunk from the Terrain object
     }
