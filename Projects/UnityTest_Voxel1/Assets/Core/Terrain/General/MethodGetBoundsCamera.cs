@@ -18,8 +18,11 @@ public class MethodGetBoundsCamera : IMethodGetBounds
     /// <returns>The bounds.</returns>
     public RectI GetBounds(ActorComponent actor)
     {
-        Camera.main.ViewportPointToRay(new Vector3(0, 0, 0)).GetPoint(actor.camera.transform.position.z);
+        Ray topRay = Camera.main.ScreenPointToRay(new Vector3(0, 0, 0));
+        Vector3 top = topRay.GetPoint(actor.camera.transform.position.z);
+        Ray bottomRay = Camera.main.ScreenPointToRay(new Vector3(Screen.width, Screen.height, 0));
+        Vector3 bottom = bottomRay.GetPoint(actor.camera.transform.position.z);
 
-        return RectI.Empty; // NOT IMPLEMENTED
+        return new RectI((int)top.x, (int)top.y, (int)(bottom.x + 0.5f), (int)(bottom.y + 0.5f));
     }
 }
