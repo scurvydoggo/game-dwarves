@@ -18,9 +18,10 @@ public class MethodGetBoundsCamera : IMethodGetBounds
     /// <returns>The bounds.</returns>
     public RectI GetBounds(ActorComponent actor)
     {
-        actor.camera.ViewportToWorldPoint(new Vector3(0, 0, 0));
-
         return new RectI(
-            );
+            (int)Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0)).x,
+            (int)Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0)).y,
+            (int)Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x,
+            (int)Camera.main.ScreenToWorldPoint(new Vector3(0, Screen.height, 0)).y);
     }
 }
