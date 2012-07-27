@@ -13,6 +13,18 @@ using UnityEngine;
 public class ActorComponent : MonoBehaviour
 {
     /// <summary>
+    /// Gets or sets a value indicating the actor requires render-related processing to be performed on the terrain
+	/// chunks in which it resides.
+    /// </summary>
+	public bool RequiresTerrainRendering;
+	
+    /// <summary>
+    /// Gets or sets a value indicating the actor requires physics-related processing to be performed on the terrain
+	/// chunks in which it resides.
+    /// </summary>
+	public bool RequiresTerrainPhysics;
+
+    /// <summary>
     /// Gets the lower coordinate of the actor's bounding box (in terrain chunk coordinates).
     /// </summary>
 	public Vector2I LowerBounds { get; private set; }
