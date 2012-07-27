@@ -14,16 +14,16 @@ public class ActorComponent : MonoBehaviour
 {
     /// <summary>
     /// Gets or sets a value indicating the actor requires render-related processing to be performed on the terrain
-	/// chunks in which it resides.
+    /// chunks in which it resides.
     /// </summary>
-	public bool RequiresTerrainRendering;
-	
+    public bool RequiresTerrainRendering;
+
     /// <summary>
     /// Gets or sets a value indicating the actor requires physics-related processing to be performed on the terrain
-	/// chunks in which it resides.
+    /// chunks in which it resides.
     /// </summary>
-	public bool RequiresTerrainPhysics;
-	
+    public bool RequiresTerrainPhysics;
+
     /// <summary>
     /// Initialises the component.
     /// </summary>
@@ -37,14 +37,14 @@ public class ActorComponent : MonoBehaviour
     public void Update()
     {
     }
-	
+
     /// <summary>
     /// Determine the bounds of this actor in chunk-coordinates.
     /// </summary>
-	/// <returns>The bounds.</returns>
-	public RectI GetChunkBounds()
-	{
-		// TODO
-		return RectI.Empty;
-	}
+    /// <returns>The bounds.</returns>
+    public RectI GetChunkBounds()
+    {
+        // TODO
+        return RectI.Empty;
+    }
 }

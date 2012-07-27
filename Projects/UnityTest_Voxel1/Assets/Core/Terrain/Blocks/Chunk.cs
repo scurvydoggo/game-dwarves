@@ -59,7 +59,7 @@ public class Chunk
     public Chunk()
     {
         this.Blocks = new Block[SizeX * SizeY];
-		this.Usage = ChunkUsage.Blocks;
+        this.Usage = ChunkUsage.Blocks;
     }
 
     /// <summary>
@@ -70,8 +70,8 @@ public class Chunk
     /// <summary>
     /// Gets or sets a value indicating how the chunk is to be used.
     /// </summary>
-	public ChunkUsage Usage { get; set; }
-	
+    public ChunkUsage Usage { get; set; }
+
     /// <summary>
     /// Gets or sets the block at the given block index.
     /// </summary>
