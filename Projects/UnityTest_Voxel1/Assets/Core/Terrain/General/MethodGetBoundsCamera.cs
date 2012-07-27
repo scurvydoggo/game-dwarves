@@ -4,6 +4,8 @@
 // </copyright>
 // ----------------------------------------------------------------------------
 
+using UnityEngine;
+
 /// <summary>
 /// Implements a method of obtaining a camera's bounds.
 /// </summary>
@@ -16,7 +18,9 @@ public class MethodGetBoundsCamera : IMethodGetBounds
     /// <returns>The bounds.</returns>
     public RectI GetBounds(ActorComponent actor)
     {
-        // TODO
-        return RectI.Empty;
+        actor.camera.ViewportToWorldPoint(new Vector3(0, 0, 0));
+
+        return new RectI(
+            );
     }
 }
