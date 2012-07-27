@@ -97,31 +97,4 @@ public class TerrainLoaderComponent : MonoBehaviour
 		// Load the new chunks
 		// TODO
 	}
-	
-    /// <summary>
-    /// Indicates the capacity in which a chunk is required.
-    /// </summary>
-	[Flags]
-	private enum ChunkUsage : byte
-	{
-		/// <summary>
-		/// Only the block data is required.
-		/// </summary>
-		Blocks = 0,
-		
-		/// <summary>
-		/// The chunk needs to be processed for rendering.
-		/// </summary>
-		Rendering = 1,
-		
-		/// <summary>
-		/// The chunk needs to be processed for physics.
-		/// </summary>
-		Physics = 2,
-		
-		/// <summary>
-		/// The chunk needs to be processed for rednering and physics.
-		/// </summary>
-		RenderingAndPhysics = 3
-	}
 }
