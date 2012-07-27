@@ -69,6 +69,7 @@ public class ActorComponent : MonoBehaviour
     {
         RectI worldBounds = this.getBounds.GetBounds(this);
 
+        // Get the chunk coordinates for the world bounds
         Vector2I topCoords = TerrainBlocks.GetChunkIndex(worldBounds.X, worldBounds.Y);
         Vector2I bottomCoords = TerrainBlocks.GetChunkIndex(worldBounds.Right - 1, worldBounds.Bottom - 1);
 
