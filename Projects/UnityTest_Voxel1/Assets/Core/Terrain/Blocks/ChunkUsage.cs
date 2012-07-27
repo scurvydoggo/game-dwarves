@@ -11,7 +11,7 @@
 public enum ChunkUsage : byte
 {
 	/// <summary>
-	/// Only the block data is required.
+	/// Only the block data is required. This is the default.
 	/// </summary>
 	Blocks = 0,
 	
