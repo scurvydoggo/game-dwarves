@@ -12,7 +12,7 @@ using UnityEngine;
 public class MethodGetBoundsCamera : IMethodGetBounds
 {
     /// <summary>
-    /// Get the actor's bounds in chunk-coordinates.
+    /// Get the actor's bounds in world-coordinates.
     /// </summary>
     /// <param name="actor">The actor.</param>
     /// <returns>The bounds.</returns>
