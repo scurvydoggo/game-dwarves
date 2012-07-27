@@ -39,10 +39,10 @@ public class ActorComponent : MonoBehaviour
     }
 	
     /// <summary>
-    /// Determine the bounds of this actor.
+    /// Determine the bounds of this actor in chunk-coordinates.
     /// </summary>
 	/// <returns>The bounds.</returns>
-	public RectI GetBounds()
+	public RectI GetChunkBounds()
 	{
 		// TODO
 		return RectI.Empty;
