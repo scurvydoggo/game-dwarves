@@ -9,6 +9,11 @@
 /// </summary>
 public struct RectI
 {
+    /// <summary>
+    /// An empty rectangle.
+    /// </summary>
+	public const RectI Empty = new RectI(0, 0, 0, 0);
+
 	#region Constructor
 	
     /// <summary>
