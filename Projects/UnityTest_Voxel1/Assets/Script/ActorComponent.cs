@@ -67,7 +67,6 @@ public class ActorComponent : MonoBehaviour
     /// <returns>The bounds.</returns>
     public RectI GetChunkBounds()
     {
-        // TODO
-        return RectI.Empty;
+        return this.getBounds.GetBounds(this);
     }
 }
