@@ -23,24 +23,12 @@ public class ActorComponent : MonoBehaviour
 	/// chunks in which it resides.
     /// </summary>
 	public bool RequiresTerrainPhysics;
-
-    /// <summary>
-    /// Gets the lower coordinate of the actor's bounding box (in terrain chunk coordinates).
-    /// </summary>
-	public Vector2I LowerBounds { get; private set; }
 	
-    /// <summary>
-    /// Gets the upper coordinate of the actor's bounding box (in terrain chunk coordinates).
-    /// </summary>
-	public Vector2I UpperBounds { get; private set; }
-
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-		// Get the initial bounds of the actor
-		// TODO
     }
 
     /// <summary>
@@ -48,10 +36,15 @@ public class ActorComponent : MonoBehaviour
     /// </summary>
     public void Update()
     {
-		// See if the actor has moved into new chunks and/or left chunks
-		// TODO
-		
-		// Load/unload the chunks
-		// TODO
     }
+	
+    /// <summary>
+    /// Determine the bounds of this actor.
+    /// </summary>
+	/// <returns>The bounds.</returns>
+	public RectI GetBounds()
+	{
+		// TODO
+		return RectI.Empty;
+	}
 }
