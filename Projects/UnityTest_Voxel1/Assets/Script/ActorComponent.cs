@@ -4,6 +4,7 @@
 // </copyright>
 // ----------------------------------------------------------------------------
 
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -30,10 +31,27 @@ public class ActorComponent : MonoBehaviour
     public ActorBoundsType BoundsType;
 
     /// <summary>
+    /// Provides the method of obtaining the actor's bounds.
+    /// </summary>
+    private IMethodGetBounds getBounds;
+
+    /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
+        switch (this.BoundsType)
+        {
+            case ActorBoundsType.Camera:
+                this.getBounds = new MethodGetBoundsCamera();
+                break;
+
+            case ActorBoundsType.Mesh:
+                throw new NotImplementedException();
+
+            default:
+                throw new ApplicationException("Unexpected bounds type: " + this.BoundsType);
+        }
     }
 
     /// <summary>
