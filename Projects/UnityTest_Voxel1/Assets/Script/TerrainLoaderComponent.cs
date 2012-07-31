@@ -20,16 +20,16 @@ public class TerrainLoaderComponent : MonoBehaviour
     private Dictionary<Vector2I, ChunkUsage> actorChunks;
 
     /// <summary>
-    /// Gets the terrain loader.
+    /// Gets the terrain block loader.
     /// </summary>
-    public TerrainLoader TerrainLoader { get; private set; }
+    public TerrainBlockLoader TerrainBlockLoader { get; private set; }
 
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.TerrainLoader = new TerrainLoader();
+        this.TerrainBlockLoader = new TerrainBlockLoader();
         this.actorChunks = new Dictionary<Vector2I, ChunkUsage>();
     }
 
@@ -91,36 +91,47 @@ public class TerrainLoaderComponent : MonoBehaviour
                 }
             }
         }
-		
-		// Get the terrain component
-		Terrain terrain = this.GetComponent<TerrainComponent>().Terrain;
-		
+
+        // Get the terrain component
+        Terrain terrain = this.GetComponent<TerrainComponent>().Terrain;
+
         // Unload chunks that are no longer used
-		foreach (Vector2I chunkIndex in terrain.Blocks.ActiveChunks.Keys)
-		{
-			if (!this.actorChunks.ContainsKey(chunkIndex))
-			{
-				this.UnloadChunk(terrain, chunkIndex);
-			}
-		}
+        foreach (Vector2I chunkIndex in terrain.Blocks.ActiveChunks.Keys)
+        {
+            if (!this.actorChunks.ContainsKey(chunkIndex))
+            {
+                this.UnloadChunk(terrain, chunkIndex);
+            }
+        }
 
         // Load the new chunks
-		foreach (KeyValuePair<Vector2I, ChunkUsage> kvp in this.actorChunks)
-		{
-			if (!terrain.Blocks.ActiveChunks.ContainsKey(kvp.Key))
-			{
-				this.LoadChunk(terrain, kvp.Key, kvp.Value);
-			}
-		}
+        foreach (KeyValuePair<Vector2I, ChunkUsage> kvp in this.actorChunks)
+        {
+            if (!terrain.Blocks.ActiveChunks.ContainsKey(kvp.Key))
+            {
+                this.LoadChunk(terrain, kvp.Key, kvp.Value);
+            }
+        }
     }
-	
-	private void LoadChunk(Terrain terrain, Vector2I chunkIndex, ChunkUsage usage)
-	{
-		this.TerrainLoader.LoadChunk(terrain, chunkIndex);
-	}
-	
-	private void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
-	{
-		this.TerrainLoader.UnloadChunk(terrain, chunkIndex);
-	}
+
+    /// <summary>
+    /// Load the given chunk.
+    /// </summary>
+    /// <param name="terrain">The terrain object.</param>
+    /// <param name="chunkIndex">The chunk index.</param>
+    /// <param name="usage">The chunk usage.</param>
+    private void LoadChunk(Terrain terrain, Vector2I chunkIndex, ChunkUsage usage)
+    {
+        this.TerrainBlockLoader.LoadChunk(terrain, chunkIndex);
+    }
+
+    /// <summary>
+    /// Unload the given chunk.
+    /// </summary>
+    /// <param name="terrain">The terrain object.</param>
+    /// <param name="chunkIndex">The chunk index.</param>
+    private void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
+    {
+        this.TerrainBlockLoader.UnloadChunk(terrain, chunkIndex);
+    }
 }

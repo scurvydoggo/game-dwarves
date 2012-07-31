@@ -18,7 +18,7 @@ public class TerrainBlocks
     {
         this.ActiveChunks = new Dictionary<Vector2I, Chunk>();
     }
-	
+
     /// <summary>
     /// Gets the currently active chunks, keyed by chunk index.
     /// </summary>
@@ -62,7 +62,7 @@ public class TerrainBlocks
             this.ActiveChunks[chunkIndex] = value;
         }
     }
-	
+
     /// <summary>
     /// Get the index of the chunk for the given world coordinates.
     /// </summary>

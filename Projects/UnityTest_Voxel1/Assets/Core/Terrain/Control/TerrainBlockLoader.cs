@@ -1,31 +1,31 @@
 // ----------------------------------------------------------------------------
-// <copyright file="TerrainLoader.cs" company="Acidwashed Games">
+// <copyright file="TerrainBlockLoader.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
 
 /// <summary>
-/// Responsible for loading and unloading chunks in the terrain.
+/// Responsible for loading and unloading terrain blocks.
 /// </summary>
-public class TerrainLoader
+public class TerrainBlockLoader
 {
     /// <summary>
     /// Serializes and deserializes terrain chunks.
     /// </summary>
-    private TerrainSerializer terrainSerializer;
+    private TerrainBlockSerializer serializer;
 
     /// <summary>
     /// Dynamically generates terrain chunks.
     /// </summary>
-    private TerrainGenerator terrainGenerator;
+    private TerrainBlockGenerator generator;
 
     /// <summary>
-    /// Initializes a new instance of the TerrainLoader class.
+    /// Initializes a new instance of the TerrainBlockLoader class.
     /// </summary>
-    public TerrainLoader()
+    public TerrainBlockLoader()
     {
-        this.terrainSerializer = new TerrainSerializer();
-        this.terrainGenerator = new TerrainGenerator();
+        this.serializer = new TerrainBlockSerializer();
+        this.generator = new TerrainBlockGenerator();
     }
 
     /// <summary>
@@ -37,17 +37,17 @@ public class TerrainLoader
     {
         // Deserialize or generate the chunk
         Chunk chunk;
-        if (!this.terrainSerializer.TryDeserializeChunk(chunkIndex, out chunk))
+        if (!this.serializer.TryDeserializeChunk(chunkIndex, out chunk))
         {
             // The chunk doesn't yet exist, so generate it
-            chunk = this.terrainGenerator.GenerateChunk(terrain, chunkIndex);
+            chunk = this.generator.GenerateChunk(terrain, chunkIndex);
 
             // Serialize the generated chunk
-            this.terrainSerializer.SerializeChunk(chunk, chunkIndex);
+            this.serializer.SerializeChunk(chunk, chunkIndex);
         }
-		
-		// Add the chunk from the Terrain object
-		terrain.Blocks.ActiveChunks.Add(chunkIndex, chunk);
+
+        // Add the chunk from the Terrain object
+        terrain.Blocks.ActiveChunks.Add(chunkIndex, chunk);
     }
 
     /// <summary>
@@ -66,9 +66,9 @@ public class TerrainLoader
         }
 
         // Serialize the chunk
-        this.terrainSerializer.SerializeChunk(chunk, chunkIndex);
+        this.serializer.SerializeChunk(chunk, chunkIndex);
 
-		// Remove the chunk from the Terrain object
-		terrain.Blocks.ActiveChunks.Remove(chunkIndex);
+        // Remove the chunk from the Terrain object
+        terrain.Blocks.ActiveChunks.Remove(chunkIndex);
     }
 }

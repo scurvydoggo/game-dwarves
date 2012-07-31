@@ -25,9 +25,9 @@ public class MethodGetBoundsCamera : IMethodGetBounds
         Vector3 topRight = topRightRay.GetPoint(Math.Abs(actor.transform.position.z));
 
         return new RectI(
-			(int)bottomLeft.x,
-			(int)topRight.y,
-			(int)(topRight.x - bottomLeft.x + 0.5f),
-			(int)(topRight.y - bottomLeft.y + 0.5f));
+            (int)bottomLeft.x,
+            (int)topRight.y,
+            (int)(topRight.x - bottomLeft.x + 0.5f),
+            (int)(topRight.y - bottomLeft.y + 0.5f));
     }
 }
