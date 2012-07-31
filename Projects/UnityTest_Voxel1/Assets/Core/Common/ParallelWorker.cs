@@ -147,7 +147,7 @@ public class ParallelWorker<T> : IDisposable
     /// </summary>
     /// <param name="workDelegate">The delegate method for executing the work.</param>
     /// <param name="parameter">The parameter that is executed for the delegate method.</param>
-    public void Enqueue(Action<T> workDelegate, T parameter = default(T))
+    public void Enqueue(Action<T> workDelegate, T parameter)
     {
         // Queue the work item
         lock ((this.queuedWork as ICollection).SyncRoot)
