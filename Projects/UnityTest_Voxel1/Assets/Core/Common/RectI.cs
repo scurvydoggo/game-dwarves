@@ -63,7 +63,7 @@ public struct RectI
     {
         get
         {
-            return this.Y + this.Height;
+            return this.Y - this.Height;
         }
     }
 
