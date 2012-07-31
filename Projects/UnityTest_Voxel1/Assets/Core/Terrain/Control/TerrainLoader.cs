@@ -45,8 +45,9 @@ public class TerrainLoader
             // Serialize the generated chunk
             this.terrainSerializer.SerializeChunk(chunk, chunkIndex);
         }
-
-        // TODO: Add the chunk to the Terrain object
+		
+		// Add the chunk from the Terrain object
+		terrain.Blocks.ActiveChunks.Add(chunkIndex, chunk);
     }
 
     /// <summary>
@@ -67,6 +68,7 @@ public class TerrainLoader
         // Serialize the chunk
         this.terrainSerializer.SerializeChunk(chunk, chunkIndex);
 
-        // TODO: Remove the chunk from the Terrain object
+		// Remove the chunk from the Terrain object
+		terrain.Blocks.ActiveChunks.Remove(chunkIndex);
     }
 }

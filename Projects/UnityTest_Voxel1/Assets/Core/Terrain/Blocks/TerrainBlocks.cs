@@ -12,17 +12,17 @@ using System.Collections.Generic;
 public class TerrainBlocks
 {
     /// <summary>
-    /// The currently active chunks, keyed by chunk index.
-    /// </summary>
-    private Dictionary<Vector2I, Chunk> activeChunks;
-
-    /// <summary>
     /// Initializes a new instance of the TerrainBlocks class.
     /// </summary>
     public TerrainBlocks()
     {
-        this.activeChunks = new Dictionary<Vector2I, Chunk>();
+        this.ActiveChunks = new Dictionary<Vector2I, Chunk>();
     }
+	
+    /// <summary>
+    /// Gets the currently active chunks, keyed by chunk index.
+    /// </summary>
+    public Dictionary<Vector2I, Chunk> ActiveChunks { get; private set; }
 
     /// <summary>
     /// Gets the block at the given world position.
@@ -34,13 +34,13 @@ public class TerrainBlocks
     {
         get
         {
-            Chunk chunk = this.activeChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)];
+            Chunk chunk = this.ActiveChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)];
             return chunk[worldX & Chunk.MaskX, worldY & Chunk.MaskY];
         }
 
         set
         {
-            Chunk chunk = this.activeChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)];
+            Chunk chunk = this.ActiveChunks[TerrainBlocks.GetChunkIndex(worldX, worldY)];
             chunk[worldX & Chunk.MaskX, worldY & Chunk.MaskY] = value;
         }
     }
@@ -54,15 +54,15 @@ public class TerrainBlocks
     {
         get
         {
-            return this.activeChunks[chunkIndex];
+            return this.ActiveChunks[chunkIndex];
         }
 
         set
         {
-            this.activeChunks[chunkIndex] = value;
+            this.ActiveChunks[chunkIndex] = value;
         }
     }
-
+	
     /// <summary>
     /// Get the index of the chunk for the given world coordinates.
     /// </summary>
@@ -103,6 +103,6 @@ public class TerrainBlocks
     /// <returns>True if the chunk was retrieved.</returns>
     public bool TryGetChunk(Vector2I chunkIndex, out Chunk chunk)
     {
-        return this.activeChunks.TryGetValue(chunkIndex, out chunk);
+        return this.ActiveChunks.TryGetValue(chunkIndex, out chunk);
     }
 }

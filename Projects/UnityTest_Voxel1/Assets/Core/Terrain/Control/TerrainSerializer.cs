@@ -39,7 +39,7 @@ public class TerrainSerializer
         // However, care should be taken to consider the situation when a terrain is being serialized in another thread
         // and then a new deserialization request comes in for that chunk. In this case the deserialization thread
         // should block
-        throw new NotImplementedException("Chunk serialization is not yet implemented.");
+        //throw new NotImplementedException("Chunk serialization is not yet implemented.");
     }
 
     /// <summary>

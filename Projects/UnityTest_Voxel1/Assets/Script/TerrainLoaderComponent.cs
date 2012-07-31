@@ -91,11 +91,36 @@ public class TerrainLoaderComponent : MonoBehaviour
                 }
             }
         }
-
+		
+		// Get the terrain component
+		Terrain terrain = this.GetComponent<TerrainComponent>().Terrain;
+		
         // Unload chunks that are no longer used
-        // TODO
+		foreach (Vector2I chunkIndex in terrain.Blocks.ActiveChunks.Keys)
+		{
+			if (!this.actorChunks.ContainsKey(chunkIndex))
+			{
+				this.UnloadChunk(terrain, chunkIndex);
+			}
+		}
 
         // Load the new chunks
-        // TODO
+		foreach (KeyValuePair<Vector2I, ChunkUsage> kvp in this.actorChunks)
+		{
+			if (!terrain.Blocks.ActiveChunks.ContainsKey(kvp.Key))
+			{
+				this.LoadChunk(terrain, kvp.Key, kvp.Value);
+			}
+		}
     }
+	
+	private void LoadChunk(Terrain terrain, Vector2I chunkIndex, ChunkUsage usage)
+	{
+		this.TerrainLoader.LoadChunk(terrain, chunkIndex);
+	}
+	
+	private void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
+	{
+		this.TerrainLoader.UnloadChunk(terrain, chunkIndex);
+	}
 }
