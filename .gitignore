@@ -7,5 +7,7 @@ Projects/*Unity*/*.csproj
 *.suo
 *.user
 *.cachefile
+*.pidb
+*.userprefs
 StyleCop.Cache
 Settings.StyleCop
