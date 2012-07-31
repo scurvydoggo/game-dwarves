@@ -4,6 +4,7 @@
 // </copyright>
 // ----------------------------------------------------------------------------
 
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -18,11 +19,15 @@ public class MethodGetBoundsCamera : IMethodGetBounds
     /// <returns>The bounds.</returns>
     public RectI GetBounds(ActorComponent actor)
     {
-        Ray topRay = Camera.main.ScreenPointToRay(new Vector3(0, 0, 0));
-        Vector3 top = topRay.GetPoint(actor.camera.transform.position.z);
-        Ray bottomRay = Camera.main.ScreenPointToRay(new Vector3(Screen.width, Screen.height, 0));
-        Vector3 bottom = bottomRay.GetPoint(actor.camera.transform.position.z);
+        Ray bottomLeftRay = Camera.main.ViewportPointToRay(new Vector3(0, 0, 0));
+        Vector3 bottomLeft = bottomLeftRay.GetPoint(Math.Abs(actor.transform.position.z));
+        Ray topRightRay = Camera.main.ViewportPointToRay(new Vector3(1, 1, 0));
+        Vector3 topRight = topRightRay.GetPoint(Math.Abs(actor.transform.position.z));
 
-        return new RectI((int)top.x, (int)top.y, (int)(bottom.x + 0.5f), (int)(bottom.y + 0.5f));
+        return new RectI(
+			(int)bottomLeft.x,
+			(int)topRight.y,
+			(int)(topRight.x - bottomLeft.x + 0.5f),
+			(int)(topRight.y - bottomLeft.y + 0.5f));
     }
 }
