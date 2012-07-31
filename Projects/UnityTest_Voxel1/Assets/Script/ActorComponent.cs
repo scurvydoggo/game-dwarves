@@ -77,7 +77,7 @@ public class ActorComponent : MonoBehaviour
         return new RectI(
             topCoords.X,
             topCoords.Y,
-            bottomCoords.X - topCoords.X,
-            topCoords.Y - bottomCoords.Y);
+            bottomCoords.X - topCoords.X + 1,
+            topCoords.Y - bottomCoords.Y + 1);
     }
 }
