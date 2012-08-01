@@ -15,6 +15,11 @@ using UnityEngine;
 public class TerrainLoaderComponent : MonoBehaviour
 {
     /// <summary>
+    /// The terrain chunk loader.
+    /// </summary>
+    private TerrainChunkLoader BlockLoader;
+	
+    /// <summary>
     /// The chunks which contain actors.
     /// </summary>
     private Dictionary<Vector2I, ChunkUsage> actorChunks;
@@ -28,18 +33,13 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// The mesh generator component.
     /// </summary>
 	private TerrainRenderComponent cTerrainRender;
-	
-    /// <summary>
-    /// Gets the terrain block loader.
-    /// </summary>
-    public TerrainBlockLoader BlockLoader { get; private set; }
 
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.BlockLoader = new TerrainBlockLoader();
+        this.chunkLoader = new TerrainChunkLoader();
         this.actorChunks = new Dictionary<Vector2I, ChunkUsage>();
 
         // Get a reference to the related terrain components
@@ -151,8 +151,8 @@ public class TerrainLoaderComponent : MonoBehaviour
 		}
 		else
 		{
-			// Load the block data
-			chunk = this.BlockLoader.LoadChunk(terrain, chunkIndex);
+			// Load the chunk data
+			chunk = this.chunkLoader.LoadChunk(terrain, chunkIndex);
 			
 			// Set the chunk usage flag
 			chunk.Usage = newUsage;
@@ -185,7 +185,7 @@ public class TerrainLoaderComponent : MonoBehaviour
 			this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
 		}
 		
-		// Unload the block data
-        this.BlockLoader.UnloadChunk(terrain, chunkIndex);
+		// Unload the chunk data
+        this.chunkLoader.UnloadChunk(terrain, chunkIndex);
     }
 }

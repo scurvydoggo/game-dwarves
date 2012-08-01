@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// <copyright file="TerrainBlockLoader.cs" company="Acidwashed Games">
+// <copyright file="TerrainChunkLoader.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -7,25 +7,25 @@
 /// <summary>
 /// Responsible for loading and unloading terrain blocks.
 /// </summary>
-public class TerrainBlockLoader
+public class TerrainChunkLoader
 {
     /// <summary>
     /// Serializes and deserializes terrain chunks.
     /// </summary>
-    private TerrainBlockSerializer serializer;
+    private TerrainChunkSerializer serializer;
 
     /// <summary>
     /// Dynamically generates terrain chunks.
     /// </summary>
-    private TerrainBlockGenerator generator;
+    private TerrainChunkGenerator generator;
 
     /// <summary>
-    /// Initializes a new instance of the TerrainBlockLoader class.
+    /// Initializes a new instance of the TerrainChunkLoader class.
     /// </summary>
-    public TerrainBlockLoader()
+    public TerrainChunkLoader()
     {
-        this.serializer = new TerrainBlockSerializer();
-        this.generator = new TerrainBlockGenerator();
+        this.serializer = new TerrainChunkSerializer();
+        this.generator = new TerrainChunkGenerator();
     }
 
     /// <summary>

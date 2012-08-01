@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// <copyright file="TerrainBlockSerializer.cs" company="Acidwashed Games">
+// <copyright file="TerrainChunkSerializer.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Provides serialization and deserialization of terrain chunks.
 /// </summary>
-public class TerrainBlockSerializer
+public class TerrainChunkSerializer
 {
     /// <summary>
     /// The path to each chunk file, keyed by chunk index.
@@ -18,9 +18,9 @@ public class TerrainBlockSerializer
     private Dictionary<Vector2I, string> chunkFiles;
 
     /// <summary>
-    /// Initializes a new instance of the TerrainBlockSerializer class.
+    /// Initializes a new instance of the TerrainChunkSerializer class.
     /// </summary>
-    public TerrainBlockSerializer()
+    public TerrainChunkSerializer()
     {
         this.chunkFiles = new Dictionary<Vector2I, string>();
 

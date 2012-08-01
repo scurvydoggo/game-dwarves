@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------
-// <copyright file="TerrainBlockGenerator.cs" company="Acidwashed Games">
+// <copyright file="TerrainChunkGenerator.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -7,7 +7,7 @@
 /// <summary>
 /// Responsible for dynamically generating terrain chunks.
 /// </summary>
-public class TerrainBlockGenerator
+public class TerrainChunkGenerator
 {
     /// <summary>
     /// Generate a chunk and return it. The terrain object remains unmodified.
