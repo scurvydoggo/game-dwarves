@@ -143,7 +143,8 @@ public abstract class TerrainMeshGenerator
     }
 	
     /// <summary>
-    /// Remove the terrain's mesh for the given chunk.
+    /// Remove the terrain's mesh for the given chunk. This will not generate walls for bordering chunks that are cut
+	/// off, as this method is to be used for cleanup/housekeeping purposes.
     /// </summary>
     /// <param name="terrain">The terrain.</param>
     /// <param name="chunkIndex">The index of the chunk to remove the mesh for.</param>
