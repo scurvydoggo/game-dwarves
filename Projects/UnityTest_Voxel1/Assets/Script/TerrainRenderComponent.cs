@@ -47,6 +47,9 @@ public class TerrainRenderComponent : MonoBehaviour
         this.cTerrain = this.GetComponent<TerrainComponent>();
         this.cMeshFilter = this.GetComponent<MeshFilter>();
         this.cMeshRenderer = this.GetComponent<MeshRenderer>();
+		
+		// Create the empty mesh
+		this.cMeshFilter.mesh = new Mesh();
     }
 
     /// <summary>
@@ -89,8 +92,8 @@ public class TerrainRenderComponent : MonoBehaviour
             // Copy the indices
             int[] indices = materialIndices[blockMesh.Material];
             int indiceArrayIndex = materialArrayIndexes[blockMesh.Material];
-            Array.Copy(blockMesh.Indices, 0, indices, indiceArrayIndex, indices.Length);
-            materialArrayIndexes[blockMesh.Material] = indiceArrayIndex + indices.Length;
+            Array.Copy(blockMesh.Indices, 0, indices, indiceArrayIndex, blockMesh.Indices.Length);
+            materialArrayIndexes[blockMesh.Material] = indiceArrayIndex + blockMesh.Indices.Length;
         }
 
         // Update the mesh filter geometry
@@ -113,6 +116,9 @@ public class TerrainRenderComponent : MonoBehaviour
             // Increment the index
             materialIndex++;
         }
+		
+		// Recalculate the mesh normals
+		this.cMeshFilter.mesh.RecalculateNormals();
 
         // Reset the mesh changed flag
         this.cTerrain.Terrain.Mesh.ResetMeshChanged();

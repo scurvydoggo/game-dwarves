@@ -14,7 +14,7 @@ public abstract class TerrainMeshGenerator
     /// <summary>
     /// Indicates how many blocks should be rendered depth-wise for terrain walls.
     /// </summary>
-    public const int BlockDepth = 3;
+    public const int BlockDepth = 0;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMeshGenerator class.

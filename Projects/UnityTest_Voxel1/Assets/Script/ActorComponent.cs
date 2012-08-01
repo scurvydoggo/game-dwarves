@@ -8,6 +8,22 @@ using System;
 using UnityEngine;
 
 /// <summary>
+/// Indicates the method of obtaining an actor's bounds.
+/// </summary>
+public enum ActorBoundsType
+{
+    /// <summary>
+    /// The actor bounds are determined via the actor's camera view port.
+    /// </summary>
+    Camera,
+
+    /// <summary>
+    /// The actor bounds are determined by the actor's mesh.
+    /// </summary>
+    Mesh
+}
+
+/// <summary>
 /// Component representing an actor that can move through the world. The significance of this is that the terrain must
 /// be loaded wherever the actor is.
 /// </summary>
