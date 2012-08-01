@@ -18,6 +18,11 @@ public class TerrainRenderComponent : MonoBehaviour
 	private TerrainComponent cTerrain;
 	
     /// <summary>
+    /// The mesh filter component.
+    /// </summary>
+	private MeshFilter cMeshFilter;
+	
+    /// <summary>
     /// Gets the mesh generator.
     /// </summary>
     public TerrainMeshGenerator MeshGenerator { get; private set; }
@@ -31,6 +36,7 @@ public class TerrainRenderComponent : MonoBehaviour
 		
         // Get a reference to the related terrain components
         this.cTerrain = this.GetComponent<TerrainComponent>();
+        this.cMeshFilter = this.GetComponent<MeshFilter>();
     }
 
     /// <summary>
@@ -38,5 +44,21 @@ public class TerrainRenderComponent : MonoBehaviour
     /// </summary>
     public void Update()
     {
+		// Check if the terrain mesh needs to be rebuilt
+		if (this.cTerrain.Terrain.Mesh.MeshChanged)
+		{
+			this.RebuildMesh();
+		}
     }
+	
+    /// <summary>
+    /// Rebuild the geometry on the mesh filter.
+    /// </summary>
+    private void RebuildMesh()
+    {
+		// TODO
+		
+		// Reset the mesh changed flag
+		this.cTerrain.Terrain.Mesh.ResetMeshChanged();
+	}
 }
