@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="TerrainMeshGeneratorComponent.cs" company="Acidwashed Games">
+// <copyright file="TerrainRenderComponent.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -7,22 +7,30 @@
 using UnityEngine;
 
 /// <summary>
-/// Component for generating terrain mesh data.
+/// Component for rendering the terrain.
 /// </summary>
 [RequireComponent(typeof(TerrainComponent))]
-public class TerrainMeshGeneratorComponent : MonoBehaviour
+public class TerrainRenderComponent : MonoBehaviour
 {
+    /// <summary>
+    /// The core terrain component.
+    /// </summary>
+	private TerrainComponent cTerrain;
+	
     /// <summary>
     /// Gets the mesh generator.
     /// </summary>
-    public TerrainMeshGenerator TerrainMeshGenerator { get; private set; }
+    public TerrainMeshGenerator MeshGenerator { get; private set; }
 
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.TerrainMeshGenerator = new TerrainMeshGeneratorCubes();
+        this.MeshGenerator = new TerrainMeshGeneratorCubes();
+		
+        // Get a reference to the related terrain components
+        this.cTerrain = this.GetComponent<TerrainComponent>();
     }
 
     /// <summary>

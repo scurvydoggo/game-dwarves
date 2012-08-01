@@ -8,10 +8,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Component for loading terrain chunks.
+/// Component for loading the terrain.
 /// </summary>
 [RequireComponent(typeof(TerrainComponent))]
-[RequireComponent(typeof(TerrainMeshGeneratorComponent))]
+[RequireComponent(typeof(TerrainRenderComponent))]
 public class TerrainLoaderComponent : MonoBehaviour
 {
     /// <summary>
@@ -27,24 +27,24 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// <summary>
     /// The mesh generator component.
     /// </summary>
-	private TerrainMeshGeneratorComponent cMeshGenerator;
+	private TerrainRenderComponent cTerrainRender;
 	
     /// <summary>
     /// Gets the terrain block loader.
     /// </summary>
-    public TerrainBlockLoader TerrainBlockLoader { get; private set; }
+    public TerrainBlockLoader BlockLoader { get; private set; }
 
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.TerrainBlockLoader = new TerrainBlockLoader();
+        this.BlockLoader = new TerrainBlockLoader();
         this.actorChunks = new Dictionary<Vector2I, ChunkUsage>();
 
         // Get a reference to the related terrain components
         this.cTerrain = this.GetComponent<TerrainComponent>();
-        this.cMeshGenerator = this.GetComponent<TerrainMeshGeneratorComponent>();
+        this.cTerrainRender = this.GetComponent<TerrainRenderComponent>();
     }
 
     /// <summary>
@@ -140,19 +140,19 @@ public class TerrainLoaderComponent : MonoBehaviour
 				if (chunk.Usage & ChunkUsage.Rendering == 0 && newUsage & ChunkUsage.Rendering != 0)
 				{
 					// The chunk mesh data is now required
-					this.cMeshGenerator.TerrainMeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
+					this.cTerrainRender.MeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
 				}
 				else if (chunk.Usage & ChunkUsage.Rendering != 0 && newUsage & ChunkUsage.Rendering == 0)
 				{
 					// The mesh data is no longer required
-					this.cMeshGenerator.TerrainMeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
+					this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
 				}
 			}
 		}
 		else
 		{
 			// Load the block data
-			chunk = this.TerrainBlockLoader.LoadChunk(terrain, chunkIndex);
+			chunk = this.BlockLoader.LoadChunk(terrain, chunkIndex);
 			
 			// Set the chunk usage flag
 			chunk.Usage = newUsage;
@@ -160,7 +160,7 @@ public class TerrainLoaderComponent : MonoBehaviour
 			if (chunk.Usage & ChunkUsage.Rendering != 0)
 			{
 				// The chunk mesh data is required
-				this.cMeshGenerator.TerrainMeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
+				this.cTerrainRender.MeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
 			}
 		}
     }
@@ -182,10 +182,10 @@ public class TerrainLoaderComponent : MonoBehaviour
 		// Unload the mesh data if the chunk was rendered
 		if (chunk.Usage & ChunkUsage.Rendering != 0)
 		{
-			this.cMeshGenerator.TerrainMeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
+			this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
 		}
 		
 		// Unload the block data
-        this.TerrainBlockLoader.UnloadChunk(terrain, chunkIndex);
+        this.BlockLoader.UnloadChunk(terrain, chunkIndex);
     }
 }
