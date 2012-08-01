@@ -10,6 +10,7 @@ using UnityEngine;
 /// Component for rendering the terrain.
 /// </summary>
 [RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(TerrainComponent))]
 public class TerrainRenderComponent : MonoBehaviour
 {
@@ -22,6 +23,11 @@ public class TerrainRenderComponent : MonoBehaviour
     /// The mesh filter component.
     /// </summary>
 	private MeshFilter cMeshFilter;
+	
+    /// <summary>
+    /// The mesh renderer component.
+    /// </summary>
+	private MeshRenderer cMeshRenderer;
 	
     /// <summary>
     /// Gets the mesh generator.
@@ -38,6 +44,7 @@ public class TerrainRenderComponent : MonoBehaviour
         // Get a reference to the related terrain components
         this.cTerrain = this.GetComponent<TerrainComponent>();
         this.cMeshFilter = this.GetComponent<MeshFilter>();
+		this.cMeshRenderer = this.GetComponent<MeshRenderer>();
     }
 
     /// <summary>
@@ -83,7 +90,25 @@ public class TerrainRenderComponent : MonoBehaviour
 		}
 		
 		// Update the mesh filter geometry
-		// TODO
+		this.cMeshFilter.mesh.Clear();
+		this.cMeshFilter.mesh.vertices = vertices;
+		
+		// Populate the submesh triangles and materials
+		int materialIndex = 0;
+		this.cMeshFilter.mesh.subMeshCount = materialIndices.Count;
+		this.cMeshRenderer.materials = new Material[materialIndices.Count];
+		foreach (KeyValuePair<MaterialType, int[]> kvp in materialIndices)
+		{
+			// Set the triangles
+			mesh.SetTriangles(kvp.Value, materialIndex);
+			
+			// Set the material on the mesh renderer
+			// TODO: Do this properly. Right now it just uses the generic diffuse material
+			this.cMeshRenderer.materials[materialIndex] = new Material(Shader.Find("Diffuse"));
+			
+			// Increment the index
+			materialIndex++;
+		}
 		
 		// Reset the mesh changed flag
 		this.cTerrain.Terrain.Mesh.ResetMeshChanged();
