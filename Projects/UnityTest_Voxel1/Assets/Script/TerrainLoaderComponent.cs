@@ -15,11 +15,6 @@ using UnityEngine;
 public class TerrainLoaderComponent : MonoBehaviour
 {
     /// <summary>
-    /// The terrain chunk loader.
-    /// </summary>
-    private TerrainChunkLoader BlockLoader;
-	
-    /// <summary>
     /// The chunks which contain actors.
     /// </summary>
     private Dictionary<Vector2I, ChunkUsage> actorChunks;
@@ -35,11 +30,16 @@ public class TerrainLoaderComponent : MonoBehaviour
 	private TerrainRenderComponent cTerrainRender;
 
     /// <summary>
+    /// Gets the terrain chunk loader.
+    /// </summary>
+    public TerrainChunkLoader ChunkLoader { get; private set; }
+	
+    /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.chunkLoader = new TerrainChunkLoader();
+        this.ChunkLoader = new TerrainChunkLoader();
         this.actorChunks = new Dictionary<Vector2I, ChunkUsage>();
 
         // Get a reference to the related terrain components
@@ -152,7 +152,7 @@ public class TerrainLoaderComponent : MonoBehaviour
 		else
 		{
 			// Load the chunk data
-			chunk = this.chunkLoader.LoadChunk(terrain, chunkIndex);
+			chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex);
 			
 			// Set the chunk usage flag
 			chunk.Usage = newUsage;
@@ -186,6 +186,6 @@ public class TerrainLoaderComponent : MonoBehaviour
 		}
 		
 		// Unload the chunk data
-        this.chunkLoader.UnloadChunk(terrain, chunkIndex);
+        this.ChunkLoader.UnloadChunk(terrain, chunkIndex);
     }
 }
