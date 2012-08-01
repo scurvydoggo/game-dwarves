@@ -35,7 +35,13 @@ public abstract class TerrainMeshGenerator
     public virtual void UpdateChunkMesh(Terrain terrain, Vector2I chunkIndex)
     {
         Chunk chunk = terrain.Blocks[chunkIndex];
-
+		
+		// Ensure that the chunk is of the render type
+		if (chunk.Usage & ChunkUsage.Rendering == 0)
+		{
+			throw new ApplicationException(string.Format("The chunk {0} does not support rendering.", chunkIndex));
+		}
+		
         // Get the origin of the chunk in world coordinates
         Vector2I chunkOrigin = new Vector2I(chunkIndex.X * Chunk.SizeX, chunkIndex.Y * Chunk.SizeY);
 
@@ -135,6 +141,28 @@ public abstract class TerrainMeshGenerator
             }
         }
     }
+	
+    /// <summary>
+    /// Remove the terrain's mesh for the given chunk.
+    /// </summary>
+    /// <param name="terrain">The terrain.</param>
+    /// <param name="chunkIndex">The index of the chunk to remove the mesh for.</param>
+    public virtual void RemoveChunkMesh(Terrain terrain, Vector2I chunkIndex)
+    {
+        Chunk chunk = terrain.Blocks[chunkIndex];
+		
+        // Get the origin of the chunk in world coordinates
+        Vector2I chunkOrigin = new Vector2I(chunkIndex.X * Chunk.SizeX, chunkIndex.Y * Chunk.SizeY);
+		
+		// Remove all blocks for the chunk from the mesh
+        for (int x = chunkOrigin.X; x < chunkOrigin.X + Chunk.SizeX; x++)
+        {
+            for (int y = chunkOrigin.Y; y < chunkOrigin.Y + Chunk.SizeY; y++)
+            {
+                terrain.Mesh.RemoveMesh(new Vector2I(x, y));
+			}
+		}
+	}
 
     /// <summary>
     /// Create a mesh for the given block.
