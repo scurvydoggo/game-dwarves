@@ -35,6 +35,11 @@ public class TerrainMesh
         this.verticeCount = 0;
         this.indiceCounts = new Dictionary<MaterialType, int>();
     }
+	
+    /// <summary>
+    /// Gets a value indicating whether the mesh has been changed.
+    /// </summary>
+	public bool MeshChanged { get; private set; }
 
     /// <summary>
     /// Gets the block mesh at the given world position.
@@ -97,6 +102,8 @@ public class TerrainMesh
         {
             this.indiceCounts.Add(mesh.Material, mesh.Indices.Length);
         }
+		
+		this.MeshChanged = true;
     }
 
     /// <summary>
@@ -123,6 +130,8 @@ public class TerrainMesh
                 this.indiceCounts.Remove(mesh.Material);
             }
         }
+		
+		this.MeshChanged = true;
     }
 
     /// <summary>
@@ -162,4 +171,12 @@ public class TerrainMesh
         this.indiceCounts.Keys.CopyTo(materials, 0);
         return materials;
     }
+	
+    /// <summary>
+    /// Resets the MeshChanged flag.
+    /// </summary>
+	public void ResetMeshChanged()
+	{
+		this.MeshChanged = false;
+	}
 }
