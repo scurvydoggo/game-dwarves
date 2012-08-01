@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Manages the mesh data of terrain blocks.
 /// </summary>
-public class TerrainMesh
+public class TerrainMesh : IEnumerable<KeyValuePair<Vector2I, BlockMesh>>
 {
     /// <summary>
     /// The mesh data per block.
@@ -58,6 +58,15 @@ public class TerrainMesh
             this.SetMesh(position, value);
         }
     }
+	
+    /// <summary>
+    /// Gets an enumerator that iterates through the block meshes.
+    /// </summary>
+    /// <returns>The enumerator.</returns>
+	public IEnumerator<KeyValuePair<Vector2I, BlockMesh>> GetEnumerator()
+	{
+		return this.meshes.GetEnumerator();
+	}
 
     /// <summary>
     /// Try to get the block mesh at the given world position.
