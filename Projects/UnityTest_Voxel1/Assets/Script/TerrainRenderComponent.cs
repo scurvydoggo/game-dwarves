@@ -9,6 +9,7 @@ using UnityEngine;
 /// <summary>
 /// Component for rendering the terrain.
 /// </summary>
+[RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(TerrainComponent))]
 public class TerrainRenderComponent : MonoBehaviour
 {
