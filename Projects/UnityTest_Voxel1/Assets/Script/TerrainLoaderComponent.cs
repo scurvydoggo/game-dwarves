@@ -18,22 +18,22 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// The chunks which contain actors.
     /// </summary>
     private Dictionary<Vector2I, ChunkUsage> actorChunks;
-	
+
     /// <summary>
     /// The core terrain component.
     /// </summary>
-	private TerrainComponent cTerrain;
+    private TerrainComponent cTerrain;
 
     /// <summary>
     /// The mesh generator component.
     /// </summary>
-	private TerrainRenderComponent cTerrainRender;
+    private TerrainRenderComponent cTerrainRender;
 
     /// <summary>
     /// Gets the terrain chunk loader.
     /// </summary>
     public TerrainChunkLoader ChunkLoader { get; private set; }
-	
+
     /// <summary>
     /// Initialises the component.
     /// </summary>
@@ -118,7 +118,7 @@ public class TerrainLoaderComponent : MonoBehaviour
         // Load/update the new/modified chunks
         foreach (KeyValuePair<Vector2I, ChunkUsage> kvp in this.actorChunks)
         {
-			this.LoadUpdateChunk(this.cTerrain.Terrain, kvp.Key, kvp.Value);
+            this.LoadUpdateChunk(this.cTerrain.Terrain, kvp.Key, kvp.Value);
         }
     }
 
@@ -130,39 +130,39 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// <param name="newUsage">The chunk usage.</param>
     private void LoadUpdateChunk(Terrain terrain, Vector2I chunkIndex, ChunkUsage newUsage)
     {
-		// Load the chunk or get the existing chunk
-		Chunk chunk;
-		if (this.cTerrain.Terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
-		{
-			// The chunk is already loaded. Check if the chunk usage needs to be updated.
-			if (chunk.Usage != newUsage)
-			{
-				if (chunk.Usage & ChunkUsage.Rendering == 0 && newUsage & ChunkUsage.Rendering != 0)
-				{
-					// The chunk mesh data is now required
-					this.cTerrainRender.MeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
-				}
-				else if (chunk.Usage & ChunkUsage.Rendering != 0 && newUsage & ChunkUsage.Rendering == 0)
-				{
-					// The mesh data is no longer required
-					this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
-				}
-			}
-		}
-		else
-		{
-			// Load the chunk data
-			chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex);
-			
-			// Set the chunk usage flag
-			chunk.Usage = newUsage;
-		
-			if (chunk.Usage & ChunkUsage.Rendering != 0)
-			{
-				// The chunk mesh data is required
-				this.cTerrainRender.MeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
-			}
-		}
+        // Load the chunk or get the existing chunk
+        Chunk chunk;
+        if (this.cTerrain.Terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
+        {
+            // The chunk is already loaded. Check if the chunk usage needs to be updated.
+            if (chunk.Usage != newUsage)
+            {
+                if ((chunk.Usage & ChunkUsage.Rendering) == 0 && (newUsage & ChunkUsage.Rendering) != 0)
+                {
+                    // The chunk mesh data is now required
+                    this.cTerrainRender.MeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
+                }
+                else if ((chunk.Usage & ChunkUsage.Rendering) != 0 && (newUsage & ChunkUsage.Rendering) == 0)
+                {
+                    // The mesh data is no longer required
+                    this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
+                }
+            }
+        }
+        else
+        {
+            // Load the chunk data
+            chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex);
+
+            // Set the chunk usage flag
+            chunk.Usage = newUsage;
+
+            if ((chunk.Usage & ChunkUsage.Rendering) != 0)
+            {
+                // The chunk mesh data is required
+                this.cTerrainRender.MeshGenerator.UpdateChunkMesh(this.cTerrain.Terrain, chunkIndex);
+            }
+        }
     }
 
     /// <summary>
@@ -172,20 +172,20 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// <param name="chunkIndex">The chunk index.</param>
     private void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
     {
-		// Get the chunk
-		Chunk chunk;
-		if (!this.cTerrain.Terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
-		{
-			return;
-		}
-		
-		// Unload the mesh data if the chunk was rendered
-		if (chunk.Usage & ChunkUsage.Rendering != 0)
-		{
-			this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
-		}
-		
-		// Unload the chunk data
+        // Get the chunk
+        Chunk chunk;
+        if (!this.cTerrain.Terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
+        {
+            return;
+        }
+
+        // Unload the mesh data if the chunk was rendered
+        if ((chunk.Usage & ChunkUsage.Rendering) != 0)
+        {
+            this.cTerrainRender.MeshGenerator.RemoveChunkMesh(this.cTerrain.Terrain, chunkIndex);
+        }
+
+        // Unload the chunk data
         this.ChunkLoader.UnloadChunk(terrain, chunkIndex);
     }
 }
