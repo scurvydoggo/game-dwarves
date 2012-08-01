@@ -18,7 +18,17 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// The chunks which contain actors.
     /// </summary>
     private Dictionary<Vector2I, ChunkUsage> actorChunks;
+	
+    /// <summary>
+    /// The core terrain component.
+    /// </summary>
+	private TerrainComponent terrainComponent;
 
+    /// <summary>
+    /// The core terrain component.
+    /// </summary>
+	private TerrainMeshGeneratorComponent meshGeneratorComponent;
+	
     /// <summary>
     /// Gets the terrain block loader.
     /// </summary>
@@ -31,6 +41,10 @@ public class TerrainLoaderComponent : MonoBehaviour
     {
         this.TerrainBlockLoader = new TerrainBlockLoader();
         this.actorChunks = new Dictionary<Vector2I, ChunkUsage>();
+
+        // Get a reference to the related terrain components
+        this.terrainComponent = this.GetComponent<TerrainComponent>();
+        this.meshGeneratorComponent = this.GetComponent<TerrainMeshGeneratorComponent>();
     }
 
     /// <summary>
@@ -92,37 +106,64 @@ public class TerrainLoaderComponent : MonoBehaviour
             }
         }
 
-        // Get the terrain component
-        Terrain terrain = this.GetComponent<TerrainComponent>().Terrain;
-
         // Unload chunks that are no longer used
-        foreach (Vector2I chunkIndex in terrain.Blocks.ActiveChunks.Keys)
+        foreach (Vector2I chunkIndex in this.terrainComponent.Terrain.Blocks.ActiveChunks.Keys)
         {
             if (!this.actorChunks.ContainsKey(chunkIndex))
             {
-                this.UnloadChunk(terrain, chunkIndex);
+                this.UnloadChunk(this.terrainComponent.Terrain, chunkIndex);
             }
         }
 
-        // Load the new chunks
+        // Load/update the new/modified chunks
         foreach (KeyValuePair<Vector2I, ChunkUsage> kvp in this.actorChunks)
         {
-            if (!terrain.Blocks.ActiveChunks.ContainsKey(kvp.Key))
-            {
-                this.LoadChunk(terrain, kvp.Key, kvp.Value);
-            }
+			this.LoadUpdateChunk(this.terrainComponent.Terrain, kvp.Key, kvp.Value);
         }
     }
 
     /// <summary>
-    /// Load the given chunk.
+    /// Load or update the given chunk.
     /// </summary>
     /// <param name="terrain">The terrain object.</param>
     /// <param name="chunkIndex">The chunk index.</param>
-    /// <param name="usage">The chunk usage.</param>
-    private void LoadChunk(Terrain terrain, Vector2I chunkIndex, ChunkUsage usage)
+    /// <param name="newUsage">The chunk usage.</param>
+    private void LoadUpdateChunk(Terrain terrain, Vector2I chunkIndex, ChunkUsage newUsage)
     {
-        this.TerrainBlockLoader.LoadChunk(terrain, chunkIndex);
+		// Load the chunk or get the existing chunk
+		Chunk chunk;
+		bool doLoadMesh = false;
+		if (this.terrainComponent.Terrain.Blocks.TryGetChunk(kvp.Key, out chunk))
+		{
+			// The chunk is already loaded. Check if the chunk usage needs to be updated.
+			if (chunk.Usage != kvp.Value)
+			{
+				if (chunk.Usage & ChunkUsage.Rendering == 0 && newUsage & ChunkUsage.Rendering != 0)
+				{
+					// The chunk mesh data is now required
+					// TODO
+				}
+				else if (chunk.Usage & ChunkUsage.Rendering != 0 && newUsage & ChunkUsage.Rendering == 0)
+				{
+					// The mesh data is no longer required
+					// TODO
+				}
+			}
+		}
+		else
+		{
+			// Load the block data
+			chunk = this.TerrainBlockLoader.LoadChunk(terrain, chunkIndex);
+			
+			// Set the chunk usage flag
+			chunk.Usage = newUsage;
+		
+			if (chunk.Usage & ChunkUsage.Rendering != 0)
+			{
+				// The chunk mesh data is required
+				// TODO
+			}
+		}
     }
 
     /// <summary>
@@ -132,6 +173,13 @@ public class TerrainLoaderComponent : MonoBehaviour
     /// <param name="chunkIndex">The chunk index.</param>
     private void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
     {
-        this.TerrainBlockLoader.UnloadChunk(terrain, chunkIndex);
+		// Unload the block data
+        Chunk chunk = this.TerrainBlockLoader.UnloadChunk(terrain, chunkIndex);
+		
+		if (chunk.Usage & ChunkUsage.Rendering != 0)
+		{
+			// Unload the mesh data
+			// TODO
+		}
     }
 }

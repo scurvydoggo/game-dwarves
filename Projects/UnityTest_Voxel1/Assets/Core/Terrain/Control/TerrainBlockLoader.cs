@@ -33,7 +33,8 @@ public class TerrainBlockLoader
     /// </summary>
     /// <param name="terrain">The terrain.</param>
     /// <param name="chunkIndex">The chunk index.</param>
-    public void LoadChunk(Terrain terrain, Vector2I chunkIndex)
+	/// <returns>The chunk that was loaded.</returns>
+    public Chunk LoadChunk(Terrain terrain, Vector2I chunkIndex)
     {
         // Deserialize or generate the chunk
         Chunk chunk;
@@ -48,6 +49,8 @@ public class TerrainBlockLoader
 
         // Add the chunk from the Terrain object
         terrain.Blocks.ActiveChunks.Add(chunkIndex, chunk);
+		
+		return chunk;
     }
 
     /// <summary>
@@ -55,14 +58,15 @@ public class TerrainBlockLoader
     /// </summary>
     /// <param name="terrain">The terrain.</param>
     /// <param name="chunkIndex">The chunk index.</param>
-    public void UnloadChunk(Terrain terrain, Vector2I chunkIndex)
+	/// <returns>The chunk that was unloaded; Null if the chunk was never loaded.</returns>
+    public Chunk UnloadChunk(Terrain terrain, Vector2I chunkIndex)
     {
         // Get the chunk
         Chunk chunk;
         if (!terrain.Blocks.TryGetChunk(chunkIndex, out chunk))
         {
             // The chunk isn't loaded so do nothing
-            return;
+            return null;
         }
 
         // Serialize the chunk
@@ -70,5 +74,7 @@ public class TerrainBlockLoader
 
         // Remove the chunk from the Terrain object
         terrain.Blocks.ActiveChunks.Remove(chunkIndex);
+		
+		return chunk;
     }
 }
