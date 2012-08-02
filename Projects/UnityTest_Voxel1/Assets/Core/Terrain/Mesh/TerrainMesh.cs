@@ -35,7 +35,7 @@ public class TerrainMesh : IEnumerable<KeyValuePair<Vector2I, BlockMesh>>
         this.meshes = new Dictionary<Vector2I, BlockMesh>();
         this.verticeCount = 0;
         this.indiceCounts = new Dictionary<MaterialType, int>();
-		this.MeshChanged = false;
+        this.MeshChanged = false;
     }
 
     /// <summary>

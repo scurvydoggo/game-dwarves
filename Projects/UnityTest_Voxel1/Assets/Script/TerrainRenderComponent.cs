@@ -47,9 +47,9 @@ public class TerrainRenderComponent : MonoBehaviour
         this.cTerrain = this.GetComponent<TerrainComponent>();
         this.cMeshFilter = this.GetComponent<MeshFilter>();
         this.cMeshRenderer = this.GetComponent<MeshRenderer>();
-		
-		// Create the empty mesh
-		this.cMeshFilter.mesh = new Mesh();
+
+        // Create the empty mesh
+        this.cMeshFilter.mesh = new Mesh();
     }
 
     /// <summary>
@@ -116,9 +116,9 @@ public class TerrainRenderComponent : MonoBehaviour
             // Increment the index
             materialIndex++;
         }
-		
-		// Recalculate the mesh normals
-		this.cMeshFilter.mesh.RecalculateNormals();
+
+        // Recalculate the mesh normals
+        this.cMeshFilter.mesh.RecalculateNormals();
 
         // Reset the mesh changed flag
         this.cTerrain.Terrain.Mesh.ResetMeshChanged();
