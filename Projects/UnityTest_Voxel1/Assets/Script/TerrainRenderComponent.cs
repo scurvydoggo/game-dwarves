@@ -92,8 +92,11 @@ public class TerrainRenderComponent : MonoBehaviour
             // Copy the indices
             int[] indices = materialIndices[blockMesh.Material];
             int indiceArrayIndex = materialArrayIndexes[blockMesh.Material];
-            Array.Copy(blockMesh.Indices, 0, indices, indiceArrayIndex, blockMesh.Indices.Length);
-            materialArrayIndexes[blockMesh.Material] = indiceArrayIndex + blockMesh.Indices.Length;
+			materialArrayIndexes[blockMesh.Material] = indiceArrayIndex + blockMesh.Indices.Length;
+        	for (int i = 0; i < blockMesh.Indices.Length; i++)
+			{
+				indices[indiceArrayIndex + i] = blockMesh.Indices[i] + verticeArrayIndex;
+			}
         }
 
         // Update the mesh filter geometry
@@ -108,7 +111,7 @@ public class TerrainRenderComponent : MonoBehaviour
         {
             // Set the triangles
             this.cMeshFilter.mesh.SetTriangles(kvp.Value, materialIndex);
-
+			
             // Set the material on the mesh renderer
             // TODO: Do this properly. Right now it just uses the generic diffuse material
             this.cMeshRenderer.materials[materialIndex] = new Material(Shader.Find("Diffuse"));
