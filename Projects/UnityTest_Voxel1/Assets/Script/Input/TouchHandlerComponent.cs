@@ -33,10 +33,11 @@ public class TouchHandlerComponent : MonoBehaviour
         Vector3 touchPosition;
         if (this.TryGetTouchPosition(out touchPosition))
         {
-            TouchableComponent touched = this.GetTouchedComponent(touchPosition);
-            if (touched != null)
+            TouchableComponent touched;
+            Vector3 hitPoint;
+            if (this.TryGetTouchedComponent(touchPosition, out touched, out hitPoint))
             {
-                touched.OnTouch();
+                touched.OnTouch(hitPoint);
             }
         }
     }
@@ -75,11 +76,11 @@ public class TouchHandlerComponent : MonoBehaviour
     /// Get the component that lies at the given screen position.
     /// </summary>
     /// <param name="touchPosition">The screen position of the touch.</param>
+    /// <param name="touchable">The touchable component.</param>
+    /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
     /// <returns>The touchable component; Null if touchable object exists at the postion.</returns>
-    private TouchableComponent GetTouchedComponent(Vector2 touchPosition)
+    private bool TryGetTouchedComponent(Vector2 touchPosition, out TouchableComponent touchable, out Vector3 hitPoint)
     {
-        TouchableComponent touchable = null;
-
         // Determine which object was hit
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(touchPosition);
@@ -87,8 +88,14 @@ public class TouchHandlerComponent : MonoBehaviour
         {
             // A physics object was hit. Get the TouchableComponent of this object (if any)
             touchable = hit.transform.GetComponent<TouchableComponent>();
+            hitPoint = hit.point;
+            return true;
         }
-
-        return touchable;
+        else
+        {
+            touchable = null;
+            hitPoint = Vector3.zero;
+            return false;
+        }
     }
 }
