@@ -87,16 +87,18 @@ public class TerrainRenderComponent : MonoBehaviour
 
             // Copy the vertices
             Array.Copy(blockMesh.Vertices, 0, vertices, verticeArrayIndex, blockMesh.Vertices.Length);
-            verticeArrayIndex += blockMesh.Vertices.Length;
 
             // Copy the indices
             int[] indices = materialIndices[blockMesh.Material];
             int indiceArrayIndex = materialArrayIndexes[blockMesh.Material];
-			materialArrayIndexes[blockMesh.Material] = indiceArrayIndex + blockMesh.Indices.Length;
-        	for (int i = 0; i < blockMesh.Indices.Length; i++)
+			for (int i = 0; i < blockMesh.Indices.Length; i++)
 			{
 				indices[indiceArrayIndex + i] = blockMesh.Indices[i] + verticeArrayIndex;
 			}
+			
+			// Update array indexers
+            verticeArrayIndex += blockMesh.Vertices.Length;
+			materialArrayIndexes[blockMesh.Material] = indiceArrayIndex + blockMesh.Indices.Length;
         }
 
         // Update the mesh filter geometry
@@ -108,7 +110,7 @@ public class TerrainRenderComponent : MonoBehaviour
         this.cMeshFilter.mesh.subMeshCount = materialIndices.Count;
         this.cMeshRenderer.materials = new Material[materialIndices.Count];
         foreach (KeyValuePair<MaterialType, int[]> kvp in materialIndices)
-        {
+        {	
             // Set the triangles
             this.cMeshFilter.mesh.SetTriangles(kvp.Value, materialIndex);
 			
