@@ -68,7 +68,7 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         if (quadCount > 1)
         {
             int quadIndex = 1;
-            for (int z = 0; z > -TerrainMeshGenerator.BlockDepth; z--)
+            for (int z = 0; z < TerrainMeshGenerator.BlockDepth; z++)
             {
                 if (blockUp.BlockType == BlockType.None)
                 {
@@ -131,12 +131,12 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="indices">The indices array.</param>
     private void AddUpQuad(Vector2I basePos, int depth, int quadIndex, Vector3[] vertices, int[] indices)
     {
-        // Add the vertices
+        // Add the vetices
         int vertIndex = quadIndex * 4;
         vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, depth);
-        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, depth);
-        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y, depth - 1);
-        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y, depth - 1);
+        vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y, depth + 1);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y, depth + 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y, depth);
 
         // Add the indices
         int indiceIndex = quadIndex * 6;
@@ -161,9 +161,9 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         // Add the vertices
         int vertIndex = quadIndex * 4;
         vertices[vertIndex] = new Vector3(basePos.X + 1, basePos.Y, depth);
-        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y - 1, depth);
-        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, depth - 1);
-        vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y, depth - 1);
+        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, depth + 1);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, depth + 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y - 1, depth);
 
         // Add the indices
         int indiceIndex = quadIndex * 6;
@@ -188,9 +188,9 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         // Add the vertices
         int vertIndex = quadIndex * 4;
         vertices[vertIndex] = new Vector3(basePos.X, basePos.Y - 1, depth);
-        vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y - 1, depth - 1);
-        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, depth - 1);
-        vertices[vertIndex + 3] = new Vector3(basePos.X + 1, basePos.Y - 1, depth);
+        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y - 1, depth);
+        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, depth + 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, depth + 1);
 
         // Add the indices
         int indiceIndex = quadIndex * 6;
@@ -215,9 +215,9 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         // Add the vertices
         int vertIndex = quadIndex * 4;
         vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, depth);
-        vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y, depth - 1);
-        vertices[vertIndex + 2] = new Vector3(basePos.X, basePos.Y - 1, depth - 1);
-        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, depth);
+        vertices[vertIndex + 1] = new Vector3(basePos.X, basePos.Y - 1, depth);
+        vertices[vertIndex + 2] = new Vector3(basePos.X, basePos.Y - 1, depth + 1);
+        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y, depth + 1);
 
         // Add the indices
         int indiceIndex = quadIndex * 6;
