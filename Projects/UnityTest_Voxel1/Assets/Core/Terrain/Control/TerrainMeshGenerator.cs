@@ -14,7 +14,7 @@ public abstract class TerrainMeshGenerator
     /// <summary>
     /// Indicates how many blocks should be rendered depth-wise for terrain walls.
     /// </summary>
-    public const int BlockDepth = 0;
+    public const int BlockDepth = 1;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMeshGenerator class.
@@ -77,13 +77,13 @@ public abstract class TerrainMeshGenerator
 
                 // Get the block above this one
                 Block blockUp;
-                if ((index & Chunk.MaskXNot) != 0)
+                if (y != Chunk.SizeY - 1)
                 {
-                    blockUp = chunk[index + Chunk.Navigation.Up];
+                    blockUp = Block.None;//chunk[x, y + 1];
                 }
                 else if (chunkUp != null)
                 {
-                    blockUp = chunkUp[index | Chunk.Navigation.LastRow];
+                    blockUp = Block.None;//chunkUp[x, 0];
                 }
                 else
                 {
@@ -92,13 +92,13 @@ public abstract class TerrainMeshGenerator
 
                 // Get the block to the right of this one
                 Block blockRight;
-                if ((index & Chunk.MaskX) != Chunk.MaskX)
+                if (x != Chunk.SizeX - 1)
                 {
-                    blockRight = chunk[index + Chunk.Navigation.Next];
+                    blockRight = Block.None;//chunk[x + 1, y];
                 }
                 else if (chunkRight != null)
                 {
-                    blockRight = chunkRight[index & Chunk.MaskXNot];
+                    blockRight = Block.None;//chunkRight[0, y];
                 }
                 else
                 {
@@ -107,13 +107,13 @@ public abstract class TerrainMeshGenerator
 
                 // Get the block below this one
                 Block blockDown;
-                if ((index & Chunk.Navigation.LastRow) != Chunk.Navigation.LastRow)
+                if (y != 0)
                 {
-                    blockDown = chunk[index + Chunk.Navigation.Down];
+                    blockDown = Block.None;//chunk[x, y - 1];
                 }
                 else if (chunkDown != null)
                 {
-                    blockDown = chunkDown[index & Chunk.MaskX];
+                    blockDown = Block.None;//chunkDown[x, Chunk.SizeY - 1];
                 }
                 else
                 {
@@ -122,13 +122,13 @@ public abstract class TerrainMeshGenerator
 
                 // Get the block to the left of this one
                 Block blockLeft;
-                if ((index & Chunk.MaskX) != 0)
+                if (x != 0)
                 {
-                    blockLeft = chunk[index + Chunk.Navigation.Prev];
+                    blockLeft = Block.None;//chunk[x - 1, y];
                 }
                 else if (chunkLeft != null)
                 {
-                    blockLeft = chunkLeft[index | Chunk.MaskX];
+                    blockLeft = Block.None;//chunkLeft[Chunk.SizeX - 1, y];
                 }
                 else
                 {

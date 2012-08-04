@@ -14,12 +14,12 @@ public class Chunk
     /// <summary>
     /// The power-of-2 size of the chunk for quickly determining chunk index.
     /// </summary>
-    public const byte LogSizeX = 5;
+    public const byte LogSizeX = 4;
 
     /// <summary>
     /// The power-of-2 size of the chunk for quickly determining chunk index.
     /// </summary>
-    public const byte LogSizeY = 5;
+    public const byte LogSizeY = 4;
 
     /// <summary>
     /// The block width of a chunk.
@@ -40,16 +40,6 @@ public class Chunk
     /// Mask for performing bitwise modulus operations.
     /// </summary>
     public const int MaskY = SizeY - 1;
-
-    /// <summary>
-    /// Mask for performing bitwise modulus operations.
-    /// </summary>
-    public const int MaskXNot = ~MaskX;
-
-    /// <summary>
-    /// Mask for performing bitwise modulus operations.
-    /// </summary>
-    public const int MaskYNot = ~MaskY;
 
     #endregion
 
