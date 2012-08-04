@@ -12,17 +12,23 @@ using System;
 public abstract class TerrainMeshGenerator
 {
     /// <summary>
-    /// Indicates how many blocks should be rendered depth-wise for terrain walls.
+    /// The default block depth.
     /// </summary>
-    public const int BlockDepth = 1;
+    public const int DefaultBlockDepth = 1;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMeshGenerator class.
     /// </summary>
     public TerrainMeshGenerator()
     {
+        this.BlockDepth = DefaultBlockDepth;
         this.MaterialLookup = new MaterialLookup();
     }
+
+    /// <summary>
+    /// Gets or sets how many blocks should be rendered depth-wise for terrain walls.
+    /// </summary>
+    public int BlockDepth { get; set; }
 
     /// <summary>
     /// Gets or sets the material lookup instance.
