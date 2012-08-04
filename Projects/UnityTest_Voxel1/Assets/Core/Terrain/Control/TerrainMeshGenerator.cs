@@ -50,10 +50,10 @@ public abstract class TerrainMeshGenerator
         // Get the neighbouring chunks so that boundary checks can be made. If a neighbour cannot be retrieved, then
         // we may be at the edge of the world, in which case that region shouldn't be accessible so all is ok
         Chunk chunkUp, chunkRight, chunkDown, chunkLeft;
-        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y + 1, chunkIndex.X), out chunkUp);
-        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X + 1), out chunkRight);
-        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y - 1, chunkIndex.X), out chunkDown);
-        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.Y, chunkIndex.X - 1), out chunkLeft);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.X, chunkIndex.Y + 1), out chunkUp);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.X + 1, chunkIndex.Y), out chunkRight);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.X, chunkIndex.Y - 1), out chunkDown);
+        terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.X - 1, chunkIndex.Y), out chunkLeft);
 
         for (int x = 0; x < Chunk.SizeX; x++)
         {
@@ -79,11 +79,11 @@ public abstract class TerrainMeshGenerator
                 Block blockUp;
                 if (y != Chunk.SizeY - 1)
                 {
-                    blockUp = Block.None;//chunk[x, y + 1];
+                    blockUp = chunk[x, y + 1];
                 }
                 else if (chunkUp != null)
                 {
-                    blockUp = Block.None;//chunkUp[x, 0];
+                    blockUp = chunkUp[x, 0];
                 }
                 else
                 {
@@ -94,11 +94,11 @@ public abstract class TerrainMeshGenerator
                 Block blockRight;
                 if (x != Chunk.SizeX - 1)
                 {
-                    blockRight = Block.None;//chunk[x + 1, y];
+                    blockRight = chunk[x + 1, y];
                 }
                 else if (chunkRight != null)
                 {
-                    blockRight = Block.None;//chunkRight[0, y];
+                    blockRight = chunkRight[0, y];
                 }
                 else
                 {
@@ -109,11 +109,11 @@ public abstract class TerrainMeshGenerator
                 Block blockDown;
                 if (y != 0)
                 {
-                    blockDown = Block.None;//chunk[x, y - 1];
+                    blockDown = chunk[x, y - 1];
                 }
                 else if (chunkDown != null)
                 {
-                    blockDown = Block.None;//chunkDown[x, Chunk.SizeY - 1];
+                    blockDown = chunkDown[x, Chunk.SizeY - 1];
                 }
                 else
                 {
@@ -124,11 +124,11 @@ public abstract class TerrainMeshGenerator
                 Block blockLeft;
                 if (x != 0)
                 {
-                    blockLeft = Block.None;//chunk[x - 1, y];
+                    blockLeft = chunk[x - 1, y];
                 }
                 else if (chunkLeft != null)
                 {
-                    blockLeft = Block.None;//chunkLeft[Chunk.SizeX - 1, y];
+                    blockLeft = chunkLeft[Chunk.SizeX - 1, y];
                 }
                 else
                 {
