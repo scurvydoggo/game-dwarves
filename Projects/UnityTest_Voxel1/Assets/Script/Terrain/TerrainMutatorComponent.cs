@@ -25,11 +25,14 @@ public class TerrainMutatorComponent : MonoBehaviour
         // Get a reference to the related terrain components
         this.cTerrain = this.GetComponent<TerrainComponent>();
     }
-
+	
     /// <summary>
-    /// Called once per frame.
+    /// Remove the block at the given x/y position.
     /// </summary>
-    public void Update()
-    {
-    }
+    /// <param name="worldX">The x position.</param>
+    /// <param name="worldY">The y position.</param>
+	public void RemoveBlock(int worldX, int worldY)
+	{
+		// TODO
+	}
 }

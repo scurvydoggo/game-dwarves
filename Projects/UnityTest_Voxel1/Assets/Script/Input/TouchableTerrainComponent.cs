@@ -32,5 +32,7 @@ public class TouchableTerrainComponent : TouchableComponent
     /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
     public override void OnTouch(Vector3 hitPoint)
     {
+		// Remove the block at the touched point
+		this.cTerrainMutator.RemoveBlock((int)Math.Round(hitPoint.X), (int)Math.Round(hitPoint.Y));
     }
 }
