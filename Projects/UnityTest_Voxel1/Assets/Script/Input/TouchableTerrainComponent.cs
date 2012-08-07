@@ -33,6 +33,6 @@ public class TouchableTerrainComponent : TouchableComponent
     public override void OnTouch(Vector3 hitPoint)
     {
 		// Remove the block at the touched point
-		this.cTerrainMutator.RemoveBlock((int)Math.Round(hitPoint.X), (int)Math.Round(hitPoint.Y));
+		this.cTerrainMutator.RemoveBlock(new Vector2I((int)Math.Round(hitPoint.X), (int)Math.Round(hitPoint.Y)));
     }
 }

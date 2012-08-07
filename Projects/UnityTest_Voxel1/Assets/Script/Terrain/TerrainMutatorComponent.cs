@@ -27,12 +27,15 @@ public class TerrainMutatorComponent : MonoBehaviour
     }
 	
     /// <summary>
-    /// Remove the block at the given x/y position.
+    /// Remove the block at the given world position.
     /// </summary>
-    /// <param name="worldX">The x position.</param>
-    /// <param name="worldY">The y position.</param>
-	public void RemoveBlock(int worldX, int worldY)
+    /// <param name="position">The position.</param>
+	public void RemoveBlock(Vector2I position)
 	{
-		// TODO
+		// Remove the block data
+		this.cTerrain.Terrain.Blocks[position.X, position.Y] = Block.None;
+		
+		// Remove the block's mesh
+		this.cTerrain.Terrain.Mesh.RemoveMesh(position);
 	}
 }
