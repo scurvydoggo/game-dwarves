@@ -4,8 +4,8 @@
 // </copyright>
 // ----------------------------------------------------------------------------
 
-using UnityEngine;
 using System;
+using UnityEngine;
 
 /// <summary>
 /// A component that responds to being touched.
@@ -26,14 +26,14 @@ public class TouchableTerrainComponent : TouchableComponent
         // Get a reference to the related terrain components
         this.cTerrainMutator = this.GetComponent<TerrainMutatorComponent>();
     }
-	
+
     /// <summary>
     /// Handles the on-touch behaviour for the component.
     /// </summary>
     /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
     public override void OnTouch(Vector3 hitPoint)
     {
-		// Remove the block at the touched point
-		this.cTerrainMutator.RemoveBlock(new Vector2I((int)Math.Floor(hitPoint.x), (int)Math.Ceiling(hitPoint.y)));
+        // Remove the block at the touched point
+        this.cTerrainMutator.RemoveBlock(new Vector2I((int)Math.Floor(hitPoint.x), (int)Math.Ceiling(hitPoint.y)));
     }
 }
