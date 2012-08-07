@@ -88,14 +88,15 @@ public class TouchHandlerComponent : MonoBehaviour
         {
             // A physics object was hit. Get the TouchableComponent of this object (if any)
             touchable = hit.transform.GetComponent<TouchableComponent>();
-            hitPoint = hit.point;
-            return true;
+			if (touchable != null)
+			{
+				hitPoint = hit.point;
+				return true;
+			}
         }
-        else
-        {
-            touchable = null;
-            hitPoint = Vector3.zero;
-            return false;
-        }
+		
+		touchable = null;
+		hitPoint = Vector3.zero;
+		return false;
     }
 }
