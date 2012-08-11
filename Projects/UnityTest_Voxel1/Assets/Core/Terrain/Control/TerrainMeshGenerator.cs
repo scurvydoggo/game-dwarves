@@ -109,7 +109,7 @@ public abstract class TerrainMeshGenerator
         else if (chunkUp != null)
         {
             this.UpdateBlockMesh(
-                terrain, chunkX, 0, chunkUp, chunkIndexUp, null, chunkRight, chunkDown, chunkLeft);
+                terrain, chunkX, 0, chunkUp, chunkIndexUp, null, chunkRight, chunk, chunkLeft);
         }
 
         // Update the block to the right of this one
@@ -121,7 +121,7 @@ public abstract class TerrainMeshGenerator
         else if (chunkRight != null)
         {
             this.UpdateBlockMesh(
-                   terrain, 0, chunkY, chunkRight, chunkIndexRight, chunkUp, null, chunkDown, chunkLeft);
+                   terrain, 0, chunkY, chunkRight, chunkIndexRight, chunkUp, null, chunkDown, chunk);
         }
 
         // Update the block below this one
@@ -133,7 +133,7 @@ public abstract class TerrainMeshGenerator
         else if (chunkDown != null)
         {
             this.UpdateBlockMesh(
-                terrain, chunkX, Chunk.SizeY - 1, chunkDown, chunkIndexDown, chunkUp, chunkRight, null, chunkLeft);
+                terrain, chunkX, Chunk.SizeY - 1, chunkDown, chunkIndexDown, chunk, chunkRight, null, chunkLeft);
         }
 
         // Update the block to the left of this one
@@ -145,7 +145,7 @@ public abstract class TerrainMeshGenerator
         else if (chunkLeft != null)
         {
             this.UpdateBlockMesh(
-               terrain, Chunk.SizeX - 1, chunkY, chunkLeft, chunkIndexLeft, chunkUp, chunkRight, chunkDown, null);
+               terrain, Chunk.SizeX - 1, chunkY, chunkLeft, chunkIndexLeft, chunkUp, chunk, chunkDown, null);
         }
     }
 
