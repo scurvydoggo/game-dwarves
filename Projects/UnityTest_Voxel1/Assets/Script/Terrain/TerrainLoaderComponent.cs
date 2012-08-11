@@ -106,13 +106,20 @@ public class TerrainLoaderComponent : MonoBehaviour
             }
         }
 
-        // Unload chunks that are no longer used
+        // Check if any chunks are now off screen
+        List<Vector2I> toRemove = new List<Vector2I>();
         foreach (Vector2I chunkIndex in this.cTerrain.Terrain.Blocks.ActiveChunks.Keys)
         {
             if (!this.actorChunks.ContainsKey(chunkIndex))
             {
-                this.UnloadChunk(this.cTerrain.Terrain, chunkIndex);
+                toRemove.Add(chunkIndex);
             }
+        }
+
+        // Unload chunks that are no longer used
+        foreach (Vector2I chunkIndex in toRemove)
+        {
+            this.UnloadChunk(this.cTerrain.Terrain, chunkIndex);
         }
 
         // Load/update the new/modified chunks

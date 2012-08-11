@@ -12,10 +12,16 @@ using UnityEngine;
 public class CameraMovementComponent: MonoBehaviour
 {
     /// <summary>
+    /// The movement speed.
+    /// </summary>
+    public float Speed;
+
+    /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
+        this.Speed = 10;
     }
 
     /// <summary>
@@ -27,21 +33,26 @@ public class CameraMovementComponent: MonoBehaviour
 #if UNITY_IPHONE || UNITY_ANDRIOD
         // TODO        
 #else
+        float distance = this.Speed * Time.deltaTime;
+
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-
+            this.transform.position += new Vector3(-distance, 0, 0);
         }
-        else if (Input.GetKey(KeyCode.RightArrow))
+        
+        if (Input.GetKey(KeyCode.RightArrow))
         {
-
+            this.transform.position += new Vector3(distance, 0, 0);
         }
-        else if (Input.GetKey(KeyCode.UpArrow))
+        
+        if (Input.GetKey(KeyCode.UpArrow))
         {
-
+            this.transform.position += new Vector3(0, distance, 0);
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        
+        if (Input.GetKey(KeyCode.DownArrow))
         {
-
+            this.transform.position += new Vector3(0, -distance, 0);
         }
 #endif
     }
