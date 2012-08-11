@@ -33,26 +33,24 @@ public class CameraMovementComponent: MonoBehaviour
 #if UNITY_IPHONE || UNITY_ANDRIOD
         // TODO        
 #else
-        float distance = this.Speed * Time.deltaTime;
+        float moveDistance = this.Speed * Time.deltaTime;
 
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            this.transform.position += new Vector3(-distance, 0, 0);
+            this.transform.position += new Vector3(-moveDistance, 0, 0);
         }
-        
-        if (Input.GetKey(KeyCode.RightArrow))
+        else if (Input.GetKey(KeyCode.RightArrow))
         {
-            this.transform.position += new Vector3(distance, 0, 0);
+            this.transform.position += new Vector3(moveDistance, 0, 0);
         }
         
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            this.transform.position += new Vector3(0, distance, 0);
+            this.transform.position += new Vector3(0, moveDistance, 0);
         }
-        
-        if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow))
         {
-            this.transform.position += new Vector3(0, -distance, 0);
+            this.transform.position += new Vector3(0, -moveDistance, 0);
         }
 #endif
     }
