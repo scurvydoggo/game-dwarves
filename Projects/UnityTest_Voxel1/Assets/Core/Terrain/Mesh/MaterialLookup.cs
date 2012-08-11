@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // <copyright file="MaterialLookup.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
@@ -21,7 +21,7 @@ public class MaterialLookup
     /// </summary>
     private static readonly Dictionary<BlockType, MaterialType> BaseMaterials = new Dictionary<BlockType, MaterialType>
         {
-            { BlockType.Dirt, MaterialType.Dirt }
+            { BlockType.Mud, MaterialType.Mud }
         };
 
     /// <summary>

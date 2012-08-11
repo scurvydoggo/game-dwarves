@@ -12,5 +12,5 @@ public enum MaterialType : byte
     /// <summary>
     /// A material type.
     /// </summary>
-    Dirt
+    Mud
 }

@@ -15,7 +15,7 @@ public enum BlockType : byte
     None,
 
     /// <summary>
-    /// The block contains dirt.
+    /// The block contains mud.
     /// </summary>
-    Dirt
+    Mud
 }

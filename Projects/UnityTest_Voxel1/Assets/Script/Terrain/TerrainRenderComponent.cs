@@ -112,22 +112,29 @@ public class TerrainRenderComponent : MonoBehaviour
         this.cMeshFilter.mesh.Clear();
         this.cMeshFilter.mesh.vertices = vertices;
 
+        // Set the UV coordinates
+        Vector2[] uvs = new Vector2[vertices.Length];
+        for (int i = 0; i < uvs.Length; i++)
+        {
+            uvs[i] = new Vector2(vertices[i].x, vertices[i].y);
+        }
+
+        this.cMeshFilter.mesh.uv = uvs;
+
         // Populate the submesh triangles and materials
         int materialIndex = 0;
         this.cMeshFilter.mesh.subMeshCount = materialIndices.Count;
-        this.cMeshRenderer.materials = new Material[materialIndices.Count];
+        Material[] materials = new Material[materialIndices.Count];
         foreach (KeyValuePair<MaterialType, int[]> kvp in materialIndices)
         {
             // Set the triangles
             this.cMeshFilter.mesh.SetTriangles(kvp.Value, materialIndex);
 
-            // Set the material on the mesh renderer
-            // TODO: Do this properly. Right now it just uses the generic diffuse material
-            this.cMeshRenderer.materials[materialIndex] = new Material(Shader.Find("Diffuse"));
-
-            // Increment the index
-            materialIndex++;
+            // Set the material for this sub mesh
+            materials[materialIndex++] = (Material)Resources.Load("Materials/" + kvp.Key.ToString());
         }
+
+        this.cMeshRenderer.materials = materials;
 
         // Recalculate the mesh normals
         this.cMeshFilter.mesh.RecalculateNormals();

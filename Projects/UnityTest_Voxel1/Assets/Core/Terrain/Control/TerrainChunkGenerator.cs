@@ -26,7 +26,7 @@ public class TerrainChunkGenerator
         {
             if (Random.value >= 0.1f)
             {
-                chunk[index] = new Block(BlockType.Dirt);
+                chunk[index] = new Block(BlockType.Mud);
             }
             else
             {
