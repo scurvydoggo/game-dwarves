@@ -181,7 +181,7 @@ public abstract class TerrainMeshGenerator
     /// <param name="blockDown">The block below.</param>
     /// <param name="blockLeft">The block to the left.</param>
     /// <returns>The mesh data for the block.</returns>
-    protected abstract BlockMesh CreateBlockMesh(
+    public abstract BlockMesh CreateBlockMesh(
         Block block,
         Vector2I position,
         Block blockUp,

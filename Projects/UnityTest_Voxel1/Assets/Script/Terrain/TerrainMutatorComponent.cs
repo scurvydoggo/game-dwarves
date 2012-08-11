@@ -17,6 +17,8 @@ public class TerrainMutatorComponent : MonoBehaviour
     /// </summary>
     private TerrainComponent cTerrain;
 
+    private TerrainRenderComponent cTerrainRender;
+
     /// <summary>
     /// Initialises the component.
     /// </summary>
@@ -24,6 +26,7 @@ public class TerrainMutatorComponent : MonoBehaviour
     {
         // Get a reference to the related terrain components
         this.cTerrain = this.GetComponent<TerrainComponent>();
+        this.cTerrainRender = this.GetComponent<TerrainRenderComponent>();
     }
 
     /// <summary>
