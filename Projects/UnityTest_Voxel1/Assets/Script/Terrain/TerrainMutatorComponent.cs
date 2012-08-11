@@ -17,6 +17,9 @@ public class TerrainMutatorComponent : MonoBehaviour
     /// </summary>
     private TerrainComponent cTerrain;
 
+    /// <summary>
+    /// The terrain render component.
+    /// </summary>
     private TerrainRenderComponent cTerrainRender;
 
     /// <summary>
@@ -40,5 +43,8 @@ public class TerrainMutatorComponent : MonoBehaviour
 
         // Remove the block's mesh
         this.cTerrain.Terrain.Mesh.RemoveMesh(position);
+
+        // Recreate the neighbouring meshes
+        this.cTerrainRender.MeshGenerator.UpdateBlockNeighbours(this.cTerrain.Terrain, position);
     }
 }

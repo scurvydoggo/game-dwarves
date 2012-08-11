@@ -9,7 +9,7 @@ using UnityEngine;
 /// <summary>
 /// Component for moving the camera component.
 /// </summary>
-public class CameraMovementComponent: MonoBehaviour
+public class CameraMovementComponent : MonoBehaviour
 {
     /// <summary>
     /// The movement speed.
@@ -43,7 +43,7 @@ public class CameraMovementComponent: MonoBehaviour
         {
             this.transform.position += new Vector3(moveDistance, 0, 0);
         }
-        
+
         if (Input.GetKey(KeyCode.UpArrow))
         {
             this.transform.position += new Vector3(0, moveDistance, 0);

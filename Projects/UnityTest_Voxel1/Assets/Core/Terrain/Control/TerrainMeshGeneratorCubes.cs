@@ -21,7 +21,7 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="blockDown">The block below.</param>
     /// <param name="blockLeft">The block to the left.</param>
     /// <returns>The mesh data for the block.</returns>
-    public override BlockMesh CreateBlockMesh(
+    protected override BlockMesh CreateBlockMesh(
         Block block,
         Vector2I position,
         Block blockUp,

@@ -50,9 +50,6 @@ public abstract class TerrainMeshGenerator
             throw new ApplicationException(string.Format("The chunk {0} does not support rendering.", chunkIndex));
         }
 
-        // Get the origin of the chunk in world coordinates
-        Vector2I chunkOrigin = new Vector2I(chunkIndex.X * Chunk.SizeX, chunkIndex.Y * Chunk.SizeY);
-
         // Get the neighbouring chunks so that boundary checks can be made. If a neighbour cannot be retrieved, then
         // we may be at the edge of the world, in which case that region shouldn't be accessible so all is ok
         Chunk chunkUp, chunkRight, chunkDown, chunkLeft;
@@ -61,92 +58,94 @@ public abstract class TerrainMeshGenerator
         terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.X, chunkIndex.Y - 1), out chunkDown);
         terrain.Blocks.TryGetChunk(new Vector2I(chunkIndex.X - 1, chunkIndex.Y), out chunkLeft);
 
+        // Update the block meshes
         for (int x = 0; x < Chunk.SizeX; x++)
         {
             for (int y = 0; y < Chunk.SizeY; y++)
             {
-                // Get the block index
-                int index = Chunk.GetBlockIndex(x, y);
-
-                // Get the block
-                Block block = chunk[index];
-
-                // Calculate the block position in world coordinates
-                var blockPos = new Vector2I(chunkOrigin.X + x, chunkOrigin.Y + y);
-
-                // If there is no block here, remove any mesh that may exist at this position and continue
-                if (block.BlockType == BlockType.None)
-                {
-                    terrain.Mesh.RemoveMesh(blockPos);
-                    continue;
-                }
-
-                // Get the block above this one
-                Block blockUp;
-                if (y != Chunk.SizeY - 1)
-                {
-                    blockUp = chunk[x, y + 1];
-                }
-                else if (chunkUp != null)
-                {
-                    blockUp = chunkUp[x, 0];
-                }
-                else
-                {
-                    blockUp = Block.None;
-                }
-
-                // Get the block to the right of this one
-                Block blockRight;
-                if (x != Chunk.SizeX - 1)
-                {
-                    blockRight = chunk[x + 1, y];
-                }
-                else if (chunkRight != null)
-                {
-                    blockRight = chunkRight[0, y];
-                }
-                else
-                {
-                    blockRight = Block.None;
-                }
-
-                // Get the block below this one
-                Block blockDown;
-                if (y != 0)
-                {
-                    blockDown = chunk[x, y - 1];
-                }
-                else if (chunkDown != null)
-                {
-                    blockDown = chunkDown[x, Chunk.SizeY - 1];
-                }
-                else
-                {
-                    blockDown = Block.None;
-                }
-
-                // Get the block to the left of this one
-                Block blockLeft;
-                if (x != 0)
-                {
-                    blockLeft = chunk[x - 1, y];
-                }
-                else if (chunkLeft != null)
-                {
-                    blockLeft = chunkLeft[Chunk.SizeX - 1, y];
-                }
-                else
-                {
-                    blockLeft = Block.None;
-                }
-
-                // Create the mesh for this block
-                BlockMesh mesh = this.CreateBlockMesh(block, blockPos, blockUp, blockRight, blockDown, blockLeft);
-
-                // Add the mesh to the cloud
-                terrain.Mesh.SetMesh(blockPos, mesh);
+                this.UpdateBlockMesh(terrain, x, y, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
             }
+        }
+    }
+
+    /// <summary>
+    /// Update the neighbours of the block at the given world position.
+    /// </summary>
+    /// <param name="terrain">The terrain.</param>
+    /// <param name="position">The position in world coordinates.</param>
+    public void UpdateBlockNeighbours(Terrain terrain, Vector2I position)
+    {
+        Vector2I chunkIndex = TerrainBlocks.GetChunkIndex(position.X, position.Y);
+        Chunk chunk = terrain.Blocks[chunkIndex];
+
+        // Ensure that the chunk is of the render type
+        if ((chunk.Usage & ChunkUsage.Rendering) == 0)
+        {
+            throw new ApplicationException(string.Format("The chunk {0} does not support rendering.", chunkIndex));
+        }
+
+        // Get the neighbouring chunks so that boundary checks can be made. If a neighbour cannot be retrieved, then
+        // we may be at the edge of the world, in which case that region shouldn't be accessible so all is ok
+        Vector2I chunkIndexUp = new Vector2I(chunkIndex.X, chunkIndex.Y + 1);
+        Vector2I chunkIndexRight = new Vector2I(chunkIndex.X + 1, chunkIndex.Y);
+        Vector2I chunkIndexDown = new Vector2I(chunkIndex.X, chunkIndex.Y - 1);
+        Vector2I chunkIndexLeft = new Vector2I(chunkIndex.X - 1, chunkIndex.Y);
+        Chunk chunkUp, chunkRight, chunkDown, chunkLeft;
+        terrain.Blocks.TryGetChunk(chunkIndexUp, out chunkUp);
+        terrain.Blocks.TryGetChunk(chunkIndexRight, out chunkRight);
+        terrain.Blocks.TryGetChunk(chunkIndexDown, out chunkDown);
+        terrain.Blocks.TryGetChunk(chunkIndexLeft, out chunkLeft);
+
+        // Get the position in chunk coordiantes
+        int chunkX = position.X & Chunk.MaskX;
+        int chunkY = position.Y & Chunk.MaskY;
+
+        // Update the block above this one
+        if (chunkY != Chunk.SizeY - 1)
+        {
+            this.UpdateBlockMesh(
+                terrain, chunkX, chunkY + 1, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+        }
+        else if (chunkUp != null)
+        {
+            this.UpdateBlockMesh(
+                terrain, chunkX, 0, chunkUp, chunkIndexUp, null, chunkRight, chunkDown, chunkLeft);
+        }
+
+        // Update the block to the right of this one
+        if (chunkX != Chunk.SizeX - 1)
+        {
+            this.UpdateBlockMesh(
+                terrain, chunkX + 1, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+        }
+        else if (chunkRight != null)
+        {
+            this.UpdateBlockMesh(
+                   terrain, 0, chunkY, chunkRight, chunkIndexRight, chunkUp, null, chunkDown, chunkLeft);
+        }
+
+        // Update the block below this one
+        if (chunkY != 0)
+        {
+            this.UpdateBlockMesh(
+                terrain, chunkX, chunkY - 1, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+        }
+        else if (chunkDown != null)
+        {
+            this.UpdateBlockMesh(
+                terrain, chunkX, Chunk.SizeY - 1, chunkDown, chunkIndexDown, chunkUp, chunkRight, null, chunkLeft);
+        }
+
+        // Update the block to the left of this one
+        if (chunkX != 0)
+        {
+            this.UpdateBlockMesh(
+                terrain, chunkX - 1, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+        }
+        else if (chunkLeft != null)
+        {
+            this.UpdateBlockMesh(
+               terrain, Chunk.SizeX - 1, chunkY, chunkLeft, chunkIndexLeft, chunkUp, chunkRight, chunkDown, null);
         }
     }
 
@@ -172,6 +171,112 @@ public abstract class TerrainMeshGenerator
     }
 
     /// <summary>
+    /// Update the block mesh in regards to its neighbours.
+    /// </summary>
+    /// <param name="terrain">The terrain.</param>
+    /// <param name="chunkX">The x position in chunk coordinates.</param>
+    /// <param name="chunkY">The y position in chunk coordinates.</param>
+    /// <param name="chunk">The chunk.</param>
+    /// <param name="chunkIndex">The index of the chunk.</param>
+    /// <param name="chunkUp">The chunk above.</param>
+    /// <param name="chunkRight">The chunk to the right.</param>
+    /// <param name="chunkDown">The chunk below.</param>
+    /// <param name="chunkLeft">The chunk to the left.</param>
+    protected virtual void UpdateBlockMesh(
+        Terrain terrain,
+        int chunkX,
+        int chunkY,
+        Chunk chunk,
+        Vector2I chunkIndex,
+        Chunk chunkUp,
+        Chunk chunkRight,
+        Chunk chunkDown,
+        Chunk chunkLeft)
+    {
+        // Get the block index
+        int index = Chunk.GetBlockIndex(chunkX, chunkY);
+
+        // Get the block
+        Block block = chunk[index];
+
+        // Calculate the block position in world coordinates
+        var blockPos = new Vector2I(chunkIndex.X * Chunk.SizeX + chunkX, chunkIndex.Y * Chunk.SizeY + chunkY);
+
+        // If there is no block here, remove any mesh that may exist at this position and continue
+        if (block.BlockType == BlockType.None)
+        {
+            terrain.Mesh.RemoveMesh(blockPos);
+            return;
+        }
+
+        // Get the block above this one
+        Block blockUp;
+        if (chunkY != Chunk.SizeY - 1)
+        {
+            blockUp = chunk[chunkX, chunkY + 1];
+        }
+        else if (chunkUp != null)
+        {
+            blockUp = chunkUp[chunkX, 0];
+        }
+        else
+        {
+            blockUp = Block.None;
+        }
+
+        // Get the block to the right of this one
+        Block blockRight;
+        if (chunkX != Chunk.SizeX - 1)
+        {
+            blockRight = chunk[chunkX + 1, chunkY];
+        }
+        else if (chunkRight != null)
+        {
+            blockRight = chunkRight[0, chunkY];
+        }
+        else
+        {
+            blockRight = Block.None;
+        }
+
+        // Get the block below this one
+        Block blockDown;
+        if (chunkY != 0)
+        {
+            blockDown = chunk[chunkX, chunkY - 1];
+        }
+        else if (chunkDown != null)
+        {
+            blockDown = chunkDown[chunkX, Chunk.SizeY - 1];
+        }
+        else
+        {
+            blockDown = Block.None;
+        }
+
+        // Get the block to the left of this one
+        Block blockLeft;
+        if (chunkX != 0)
+        {
+            blockLeft = chunk[chunkX - 1, chunkY];
+        }
+        else if (chunkLeft != null)
+        {
+            blockLeft = chunkLeft[Chunk.SizeX - 1, chunkY];
+        }
+        else
+        {
+            blockLeft = Block.None;
+        }
+
+        // Create the mesh for this block
+        BlockMesh mesh = this.CreateBlockMesh(block, blockPos, blockUp, blockRight, blockDown, blockLeft);
+
+        // Add the mesh to the cloud
+        terrain.Mesh.SetMesh(blockPos, mesh);
+    }
+
+    /// <summary>
     /// Create a mesh for the given block.
     /// </summary>
     /// <param name="block">The block to create the mesh for.</param>
@@ -181,7 +286,7 @@ public abstract class TerrainMeshGenerator
     /// <param name="blockDown">The block below.</param>
     /// <param name="blockLeft">The block to the left.</param>
     /// <returns>The mesh data for the block.</returns>
-    public abstract BlockMesh CreateBlockMesh(
+    protected abstract BlockMesh CreateBlockMesh(
         Block block,
         Vector2I position,
         Block blockUp,
