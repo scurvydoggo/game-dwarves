@@ -60,7 +60,7 @@ public class TouchHandlerComponent : MonoBehaviour
             }
         }
 #else
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0))
         {
             touchPosition = Input.mousePosition;
             return true;
