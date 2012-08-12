@@ -17,7 +17,12 @@ public class TerrainChunkGenerator
     /// <summary>
     /// Gets the maxiumum Y distance that the surface can fluctuate from the surface origin (above or below).
     /// </summary>
-    public const int SurfaceMaxDistanceY = 100;
+    public const int SurfaceMaxDistanceY = 30;
+
+    /// <summary>
+    /// The period of the surface noise.
+    /// </summary>
+    public const float SurfaceNoisePeriod = 75;
 
     /// <summary>
     /// Generate a chunk and return it. The terrain object remains unmodified.
@@ -67,22 +72,25 @@ public class TerrainChunkGenerator
             {
                 for (int x = 0; x < Chunk.SizeX; x++)
                 {
+					// Calculate the point of the position to input into the noise function.
+					float surfaceX = (chunkPos.X + x) / SurfaceNoisePeriod;
+					
                     // Get the noise for this point
-                    float noise = SimplexNoise.Generate(x);
+                    float noise = SimplexNoise.Generate(surfaceX);
 
                     // Calculate the height of the surface relative to (0,0) in chunk coordinates
                     int surfaceDistance = (int)((noise * SurfaceMaxDistanceY) + (noise > 0 ? 0.5f : -0.5f));
                     int surfaceHeight = SurfaceOriginY + surfaceDistance - chunkPos.Y;
-                    
-					// Check the limits
-					if (surfaceHeight < 0)
+
+                    // Check the limits
+                    if (surfaceHeight < 0)
                     {
                         surfaceHeight = 0;
                     }
-					else if (surfaceHeight > Chunk.SizeY)
-					{
-						surfaceHeight = Chunk.SizeY;
-					}
+                    else if (surfaceHeight > Chunk.SizeY)
+                    {
+                        surfaceHeight = Chunk.SizeY;
+                    }
 
                     heights[x] = surfaceHeight;
                 }

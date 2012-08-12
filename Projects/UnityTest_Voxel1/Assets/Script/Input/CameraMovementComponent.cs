@@ -14,14 +14,13 @@ public class CameraMovementComponent : MonoBehaviour
     /// <summary>
     /// The movement speed.
     /// </summary>
-    public float Speed;
+    public float Speed = 20;
 
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.Speed = 10;
     }
 
     /// <summary>
