@@ -140,6 +140,7 @@ public class TerrainRenderComponent : MonoBehaviour
         this.cMeshFilter.mesh.RecalculateNormals();
 
         // Update the mesh collider's mesh
+        this.cMeshCollider.sharedMesh = null;
         this.cMeshCollider.sharedMesh = this.cMeshFilter.mesh;
 
         // Reset the mesh changed flag
