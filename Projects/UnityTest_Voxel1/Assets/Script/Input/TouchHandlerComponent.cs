@@ -14,14 +14,13 @@ public class TouchHandlerComponent : MonoBehaviour
     /// <summary>
     /// The max distance that an object can be in order to be touchable.
     /// </summary>
-    public float TouchDistance;
+    public float TouchDistance = 100;
 
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
-        this.TouchDistance = 100;
     }
 
     /// <summary>
@@ -83,7 +82,8 @@ public class TouchHandlerComponent : MonoBehaviour
     {
         // Determine which object was hit
         RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(touchPosition);
+        Vector3 viewPoint = Camera.main.ScreenToViewportPoint(touchPosition);
+		Ray ray = Camera.main.ViewportPointToRay(viewPoint);
         if (Physics.Raycast(ray, out hit, this.TouchDistance))
         {
             // A physics object was hit. Get the TouchableComponent of this object (if any)
