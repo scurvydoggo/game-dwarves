@@ -83,7 +83,7 @@ public class TouchHandlerComponent : MonoBehaviour
         // Determine which object was hit
         RaycastHit hit;
         Vector3 viewPoint = Camera.main.ScreenToViewportPoint(touchPosition);
-		Ray ray = Camera.main.ViewportPointToRay(viewPoint);
+        Ray ray = Camera.main.ViewportPointToRay(viewPoint);
         if (Physics.Raycast(ray, out hit, this.TouchDistance))
         {
             // A physics object was hit. Get the TouchableComponent of this object (if any)
