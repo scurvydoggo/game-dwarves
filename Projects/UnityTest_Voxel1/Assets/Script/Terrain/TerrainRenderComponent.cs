@@ -11,7 +11,6 @@ using UnityEngine;
 /// <summary>
 /// Component for rendering the terrain.
 /// </summary>
-[RequireComponent(typeof(MeshCollider))]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(TerrainComponent))]
@@ -33,11 +32,6 @@ public class TerrainRenderComponent : MonoBehaviour
     private MeshRenderer cMeshRenderer;
 
     /// <summary>
-    /// The mesh collider component.
-    /// </summary>
-    private MeshCollider cMeshCollider;
-
-    /// <summary>
     /// Gets the mesh generator.
     /// </summary>
     public TerrainMeshGenerator MeshGenerator { get; private set; }
@@ -53,7 +47,6 @@ public class TerrainRenderComponent : MonoBehaviour
         this.cTerrain = this.GetComponent<TerrainComponent>();
         this.cMeshFilter = this.GetComponent<MeshFilter>();
         this.cMeshRenderer = this.GetComponent<MeshRenderer>();
-        this.cMeshCollider = this.GetComponent<MeshCollider>();
 
         // Create the empty mesh
         this.cMeshFilter.mesh = new Mesh();
@@ -138,10 +131,6 @@ public class TerrainRenderComponent : MonoBehaviour
 
         // Recalculate the mesh normals
         this.cMeshFilter.mesh.RecalculateNormals();
-
-        // Update the mesh collider's mesh
-        this.cMeshCollider.sharedMesh = null;
-        this.cMeshCollider.sharedMesh = this.cMeshFilter.mesh;
 
         // Reset the mesh changed flag
         this.cTerrain.Terrain.Mesh.ResetMeshChanged();
