@@ -72,9 +72,9 @@ public class TerrainChunkGenerator
             {
                 for (int x = 0; x < Chunk.SizeX; x++)
                 {
-					// Calculate the point of the position to input into the noise function.
-					float surfaceX = (chunkPos.X + x) / SurfaceNoisePeriod;
-					
+                    // Calculate the point of the position to input into the noise function.
+                    float surfaceX = (chunkPos.X + x) / SurfaceNoisePeriod;
+
                     // Get the noise for this point
                     float noise = SimplexNoise.Generate(surfaceX);
 

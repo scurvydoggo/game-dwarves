@@ -15,22 +15,22 @@ public class TouchHandlerComponent : MonoBehaviour
     /// The plane at Z=0.
     /// </summary>
     private Plane planeZ;
-	
+
     /// <summary>
     /// The Terrain's touchable component.
     /// </summary>
-	private TouchableComponent terrainTouchable;
-	
+    private TouchableComponent terrainTouchable;
+
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
         this.planeZ = new Plane(Vector3.back, Vector3.zero);
-		
-		// Get a refernce to the terrain's touchable component
-		GameObject terrain = GameObject.Find("Terrain");
-		this.terrainTouchable = terrain.GetComponent<TouchableComponent>();
+
+        // Get a refernce to the terrain's touchable component
+        GameObject terrain = GameObject.Find("Terrain");
+        this.terrainTouchable = terrain.GetComponent<TouchableComponent>();
     }
 
     /// <summary>
@@ -91,20 +91,19 @@ public class TouchHandlerComponent : MonoBehaviour
     private bool TryGetTouchedComponent(Vector2 touchPosition, out TouchableComponent touchable, out Vector3 hitPoint)
     {
         // Cast a ray into the scene at the touched point
-        RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(touchPosition);
-		
-		// See if an actor was hit
-		// TODO
-		
-		// No actors were hit. See where the ray hits the terrain on the Z = 0 plane
-		float distance;
-		if (this.planeZ.Raycast(ray, out distance))
-		{
-			touchable = this.terrainTouchable;
-			hitPoint = ray.GetPoint(distance);
-			return true;
-		}
+
+        // See if an actor was hit
+        // TODO
+
+        // No actors were hit. See where the ray hits the terrain on the Z = 0 plane
+        float distance;
+        if (this.planeZ.Raycast(ray, out distance))
+        {
+            touchable = this.terrainTouchable;
+            hitPoint = ray.GetPoint(distance);
+            return true;
+        }
 
         touchable = null;
         hitPoint = Vector3.zero;

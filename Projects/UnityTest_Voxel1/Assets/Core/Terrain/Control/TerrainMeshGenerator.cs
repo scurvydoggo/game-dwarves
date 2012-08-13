@@ -200,7 +200,7 @@ public abstract class TerrainMeshGenerator
         Block block = chunk[index];
 
         // Calculate the block position in world coordinates
-        var blockPos = new Vector2I(chunkIndex.X * Chunk.SizeX + chunkX, chunkIndex.Y * Chunk.SizeY + chunkY);
+        var blockPos = new Vector2I((chunkIndex.X * Chunk.SizeX) + chunkX, (chunkIndex.Y * Chunk.SizeY) + chunkY);
 
         // If there is no block here, remove any mesh that may exist at this position and continue
         if (block.BlockType == BlockType.None)
