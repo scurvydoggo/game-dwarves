@@ -12,15 +12,25 @@ using UnityEngine;
 public class TouchHandlerComponent : MonoBehaviour
 {
     /// <summary>
-    /// The max distance that an object can be in order to be touchable.
+    /// The plane at Z=0.
     /// </summary>
-    public float TouchDistance = 100;
-
+    private Plane planeZ;
+	
+    /// <summary>
+    /// The Terrain's touchable component.
+    /// </summary>
+	private TouchableComponent terrainTouchable;
+	
     /// <summary>
     /// Initialises the component.
     /// </summary>
     public void Start()
     {
+        this.planeZ = new Plane(Vector3.back, Vector3.zero);
+		
+		// Get a refernce to the terrain's touchable component
+		GameObject terrain = GameObject.Find("Terrain");
+		this.terrainTouchable = terrain.GetComponent<TouchableComponent>();
     }
 
     /// <summary>
@@ -80,20 +90,21 @@ public class TouchHandlerComponent : MonoBehaviour
     /// <returns>The touchable component; Null if touchable object exists at the postion.</returns>
     private bool TryGetTouchedComponent(Vector2 touchPosition, out TouchableComponent touchable, out Vector3 hitPoint)
     {
-        // Determine which object was hit
+        // Cast a ray into the scene at the touched point
         RaycastHit hit;
-        Vector3 viewPoint = Camera.main.ScreenToViewportPoint(touchPosition);
-        Ray ray = Camera.main.ViewportPointToRay(viewPoint);
-        if (Physics.Raycast(ray, out hit, this.TouchDistance))
-        {
-            // A physics object was hit. Get the TouchableComponent of this object (if any)
-            touchable = hit.transform.GetComponent<TouchableComponent>();
-            if (touchable != null)
-            {
-                hitPoint = hit.point;
-                return true;
-            }
-        }
+        Ray ray = Camera.main.ScreenPointToRay(viewPoint);
+		
+		// See if an actor was hit
+		// TODO
+		
+		// No actors were hit. See where the ray hits the terrain on the Z = 0 plane
+		float distance;
+		if (this.planeZ.RayCast(ray, out distance)
+		{
+			touchable = this.terrainTouchable;
+			hitPoint = ray.GetPoint(distance);
+			return true;
+		}
 
         touchable = null;
         hitPoint = Vector3.zero;
