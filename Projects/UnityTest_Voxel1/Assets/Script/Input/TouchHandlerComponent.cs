@@ -92,14 +92,14 @@ public class TouchHandlerComponent : MonoBehaviour
     {
         // Cast a ray into the scene at the touched point
         RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(viewPoint);
+        Ray ray = Camera.main.ScreenPointToRay(touchPosition);
 		
 		// See if an actor was hit
 		// TODO
 		
 		// No actors were hit. See where the ray hits the terrain on the Z = 0 plane
 		float distance;
-		if (this.planeZ.RayCast(ray, out distance)
+		if (this.planeZ.Raycast(ray, out distance))
 		{
 			touchable = this.terrainTouchable;
 			hitPoint = ray.GetPoint(distance);
