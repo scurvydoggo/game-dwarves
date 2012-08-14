@@ -45,7 +45,7 @@ public class MethodGetBoundsCamera : IMethodGetBounds
             Vector3 bottom = bottomRay.GetPoint(Math.Abs(bottomDistance));
             Vector3 top = topRay.GetPoint(Math.Abs(topDistance));
 
-            return new RectI((int)bottom.x, (int)top.y, (int)(top.x - bottom.x + 0.5f), (int)(top.y - bottom.y + 0.5f));
+            return new RectI((int)bottom.x - 2, (int)top.y + 1, (int)(top.x - bottom.x) + 4, (int)(top.y - bottom.y) + 2);
         }
         else
         {
