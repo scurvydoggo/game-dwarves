@@ -17,12 +17,12 @@ public class TerrainChunkGenerator
     /// <summary>
     /// Gets the maxiumum Y distance that the surface can fluctuate from the surface origin (above or below).
     /// </summary>
-    public const int SurfaceMaxDistanceY = 30;
+    public const int SurfaceMaxDistanceY = 75;
 
     /// <summary>
     /// The period of the surface noise.
     /// </summary>
-    public const float SurfaceNoisePeriod = 75;
+    public const float SurfaceNoisePeriod = 200;
 
     /// <summary>
     /// Generate a chunk and return it. The terrain object remains unmodified.
