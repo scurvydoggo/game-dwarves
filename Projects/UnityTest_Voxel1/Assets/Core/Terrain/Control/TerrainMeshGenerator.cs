@@ -14,7 +14,7 @@ public abstract class TerrainMeshGenerator
     /// <summary>
     /// The default block depth.
     /// </summary>
-    public const int DefaultBlockDepth = 1;
+    public const int DefaultBlockDepth = 2;
 
     /// <summary>
     /// Initializes a new instance of the TerrainMeshGenerator class.
