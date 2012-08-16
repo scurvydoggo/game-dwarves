@@ -7,15 +7,40 @@
 /// <summary>
 /// Represents a terrain block type.
 /// </summary>
-public enum BlockType : byte
+public enum BlockType
 {
     /// <summary>
-    /// The block contains nothing.
+    /// Empty block.
     /// </summary>
-    None,
+    None = 0x00,
 
     /// <summary>
-    /// The block contains mud.
+    /// A block type.
     /// </summary>
-    Mud
+    DirtDug = 0x02,
+
+    /// <summary>
+    /// A block type.
+    /// </summary>
+    Dirt = 0x03,
+
+    /// <summary>
+    /// A block type.
+    /// </summary>
+    StoneDug = 0x04,
+
+    /// <summary>
+    /// A block type.
+    /// </summary>
+    Stone = 0x05,
+
+    /// <summary>
+    /// A block type.
+    /// </summary>
+    ClayDug = 0x06,
+
+    /// <summary>
+    /// A block type.
+    /// </summary>
+    Clay = 0x07
 }

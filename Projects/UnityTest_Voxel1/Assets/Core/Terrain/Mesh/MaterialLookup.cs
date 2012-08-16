@@ -21,7 +21,7 @@ public class MaterialLookup
     /// </summary>
     private static readonly Dictionary<BlockType, MaterialType> BaseMaterials = new Dictionary<BlockType, MaterialType>
         {
-            { BlockType.Mud, MaterialType.Mud }
+            { BlockType.Dirt, MaterialType.Dirt }
         };
 
     /// <summary>

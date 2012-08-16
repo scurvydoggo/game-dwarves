@@ -48,7 +48,7 @@ public class TerrainChunkGenerator
             {
                 for (int y = 0; y < surfaceHeight; y++)
                 {
-                    chunk[x, y] = new Block(BlockType.Mud);
+                    chunk[x, y] = new Block(BlockType.Dirt);
                 }
             }
         }
