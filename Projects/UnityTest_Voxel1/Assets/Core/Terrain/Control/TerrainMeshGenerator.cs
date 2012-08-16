@@ -11,10 +11,16 @@ using System;
 /// </summary>
 public abstract class TerrainMeshGenerator
 {
+    #region Constants
+
     /// <summary>
     /// The default block depth.
     /// </summary>
     public const int DefaultBlockDepth = 2;
+
+    #endregion
+
+    #region Constructor
 
     /// <summary>
     /// Initializes a new instance of the TerrainMeshGenerator class.
@@ -25,6 +31,10 @@ public abstract class TerrainMeshGenerator
         this.MaterialLookup = new MaterialLookup();
     }
 
+    #endregion
+
+    #region Properties
+
     /// <summary>
     /// Gets or sets how many blocks should be rendered depth-wise for terrain walls.
     /// </summary>
@@ -34,6 +44,10 @@ public abstract class TerrainMeshGenerator
     /// Gets or sets the material lookup instance.
     /// </summary>
     protected MaterialLookup MaterialLookup { get; set; }
+
+    #endregion
+
+    #region Public Methods
 
     /// <summary>
     /// Update the terrain's mesh for the given chunk.
@@ -66,6 +80,16 @@ public abstract class TerrainMeshGenerator
                 this.UpdateBlockMesh(terrain, x, y, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
             }
         }
+    }
+
+    /// <summary>
+    /// Update the block at the given world position.
+    /// </summary>
+    /// <param name="terrain">The terrain.</param>
+    /// <param name="position">The position in world coordinates.</param>
+    public void UpdateBlock(Terrain terrain, Vector2I position)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -169,6 +193,10 @@ public abstract class TerrainMeshGenerator
             }
         }
     }
+
+    #endregion
+
+    #region Protected Methods
 
     /// <summary>
     /// Update the block mesh in regards to its neighbours.
@@ -293,4 +321,6 @@ public abstract class TerrainMeshGenerator
         Block blockRight,
         Block blockDown,
         Block blockLeft);
+
+    #endregion
 }

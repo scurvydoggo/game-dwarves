@@ -10,6 +10,16 @@
 public struct Block
 {
     /// <summary>
+    /// Bitmask for determining if a BlockType can be dug.
+    /// </summary>
+    public const int MaskDiggable = 0x01;
+
+    /// <summary>
+    /// Bitmask to apply to a BlockType to make it dug.
+    /// </summary>
+    public const int MaskDig = ~MaskDiggable;
+
+    /// <summary>
     /// A block containing no terrain.
     /// </summary>
     public static readonly Block None = new Block(BlockType.None);
