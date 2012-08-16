@@ -50,9 +50,8 @@ public class TerrainMutatorComponent : MonoBehaviour
         this.cTerrain.Terrain.Blocks[position.X, position.Y] =
             new Block((BlockType)((byte)block.BlockType & Block.MaskDig));
 
-        // Update the block and neighbours
-        this.cTerrainRender.MeshGenerator.UpdateBlock(this.cTerrain.Terrain, position);
-        this.cTerrainRender.MeshGenerator.UpdateBlockNeighbours(this.cTerrain.Terrain, position);
+        // Update the block mesh and neighbours
+        this.cTerrainRender.MeshGenerator.UpdateBlock(this.cTerrain.Terrain, position, true);
     }
 
     /// <summary>
@@ -70,10 +69,7 @@ public class TerrainMutatorComponent : MonoBehaviour
         // Remove the block data
         this.cTerrain.Terrain.Blocks[position.X, position.Y] = Block.None;
 
-        // Remove the block's mesh
-        this.cTerrain.Terrain.Mesh.RemoveMesh(position);
-
-        // Recreate the neighbouring meshes
-        this.cTerrainRender.MeshGenerator.UpdateBlockNeighbours(this.cTerrain.Terrain, position);
+        // Update the block mesh and neighbours
+        this.cTerrainRender.MeshGenerator.UpdateBlock(this.cTerrain.Terrain, position, true);
     }
 }

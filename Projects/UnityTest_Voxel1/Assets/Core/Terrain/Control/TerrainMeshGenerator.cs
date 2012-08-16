@@ -87,17 +87,8 @@ public abstract class TerrainMeshGenerator
     /// </summary>
     /// <param name="terrain">The terrain.</param>
     /// <param name="position">The position in world coordinates.</param>
-    public void UpdateBlock(Terrain terrain, Vector2I position)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Update the neighbours of the block at the given world position.
-    /// </summary>
-    /// <param name="terrain">The terrain.</param>
-    /// <param name="position">The position in world coordinates.</param>
-    public void UpdateBlockNeighbours(Terrain terrain, Vector2I position)
+    /// <param name="updateNeighbours">Indicates whether the neighbours (up/down/left/right) should be updated.</param>
+    public void UpdateBlock(Terrain terrain, Vector2I position, bool updateNeighbours)
     {
         Vector2I chunkIndex = TerrainBlocks.GetChunkIndex(position.X, position.Y);
         Chunk chunk = terrain.Blocks[chunkIndex];
@@ -124,52 +115,58 @@ public abstract class TerrainMeshGenerator
         int chunkX = position.X & Chunk.MaskX;
         int chunkY = position.Y & Chunk.MaskY;
 
-        // Update the block above this one
-        if (chunkY != Chunk.SizeY - 1)
-        {
-            this.UpdateBlockMesh(
-                terrain, chunkX, chunkY + 1, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
-        }
-        else if (chunkUp != null)
-        {
-            this.UpdateBlockMesh(
-                terrain, chunkX, 0, chunkUp, chunkIndexUp, null, chunkRight, chunk, chunkLeft);
-        }
+        // Update the block
+        this.UpdateBlockMesh(terrain, chunkX, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
 
-        // Update the block to the right of this one
-        if (chunkX != Chunk.SizeX - 1)
+        if (updateNeighbours)
         {
-            this.UpdateBlockMesh(
-                terrain, chunkX + 1, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
-        }
-        else if (chunkRight != null)
-        {
-            this.UpdateBlockMesh(
-                   terrain, 0, chunkY, chunkRight, chunkIndexRight, chunkUp, null, chunkDown, chunk);
-        }
+            // Update the block above this one
+            if (chunkY != Chunk.SizeY - 1)
+            {
+                this.UpdateBlockMesh(
+                    terrain, chunkX, chunkY + 1, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+            }
+            else if (chunkUp != null)
+            {
+                this.UpdateBlockMesh(
+                    terrain, chunkX, 0, chunkUp, chunkIndexUp, null, chunkRight, chunk, chunkLeft);
+            }
 
-        // Update the block below this one
-        if (chunkY != 0)
-        {
-            this.UpdateBlockMesh(
-                terrain, chunkX, chunkY - 1, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
-        }
-        else if (chunkDown != null)
-        {
-            this.UpdateBlockMesh(
-                terrain, chunkX, Chunk.SizeY - 1, chunkDown, chunkIndexDown, chunk, chunkRight, null, chunkLeft);
-        }
+            // Update the block to the right of this one
+            if (chunkX != Chunk.SizeX - 1)
+            {
+                this.UpdateBlockMesh(
+                    terrain, chunkX + 1, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+            }
+            else if (chunkRight != null)
+            {
+                this.UpdateBlockMesh(
+                       terrain, 0, chunkY, chunkRight, chunkIndexRight, chunkUp, null, chunkDown, chunk);
+            }
 
-        // Update the block to the left of this one
-        if (chunkX != 0)
-        {
-            this.UpdateBlockMesh(
-                terrain, chunkX - 1, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
-        }
-        else if (chunkLeft != null)
-        {
-            this.UpdateBlockMesh(
-               terrain, Chunk.SizeX - 1, chunkY, chunkLeft, chunkIndexLeft, chunkUp, chunk, chunkDown, null);
+            // Update the block below this one
+            if (chunkY != 0)
+            {
+                this.UpdateBlockMesh(
+                    terrain, chunkX, chunkY - 1, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+            }
+            else if (chunkDown != null)
+            {
+                this.UpdateBlockMesh(
+                    terrain, chunkX, Chunk.SizeY - 1, chunkDown, chunkIndexDown, chunk, chunkRight, null, chunkLeft);
+            }
+
+            // Update the block to the left of this one
+            if (chunkX != 0)
+            {
+                this.UpdateBlockMesh(
+                    terrain, chunkX - 1, chunkY, chunk, chunkIndex, chunkUp, chunkRight, chunkDown, chunkLeft);
+            }
+            else if (chunkLeft != null)
+            {
+                this.UpdateBlockMesh(
+                   terrain, Chunk.SizeX - 1, chunkY, chunkLeft, chunkIndexLeft, chunkUp, chunk, chunkDown, null);
+            }
         }
     }
 

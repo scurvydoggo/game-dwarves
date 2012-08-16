@@ -33,6 +33,8 @@ public class MaterialLookup
     {
         MaterialType material;
 
+        blockType = (BlockType)((int)blockType | Block.MaskDiggable);
+
         if (!BaseMaterials.TryGetValue(blockType, out material))
         {
             throw new ApplicationException("Material not defined for block type: " + blockType.ToString());

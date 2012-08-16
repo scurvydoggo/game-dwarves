@@ -36,24 +36,31 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         // Look up the base material for this block
         material = this.MaterialLookup.GetMaterial(block.BlockType);
 
+        // Check if the block and its neighbours have been dug or are empty
+        bool isDug = ((int)block.BlockType & Block.MaskDiggable) == 0;
+        bool isDugUp = ((int)blockUp.BlockType & Block.MaskDiggable) == 0;
+        bool isDugRight = ((int)blockRight.BlockType & Block.MaskDiggable) == 0;
+        bool isDugDown = ((int)blockDown.BlockType & Block.MaskDiggable) == 0;
+        bool isDugLeft = ((int)blockLeft.BlockType & Block.MaskDiggable) == 0;
+
         // Determine how many quads will exist for this block (ie. how many block faces)
         int quadCount = 1; // Front face
-        if (blockUp.BlockType == BlockType.None)
+        if (!isDug && isDugUp || isDug && !isDugUp)
         {
             quadCount += this.BlockDepth;
         }
 
-        if (blockRight.BlockType == BlockType.None)
+        if (!isDug && isDugRight || isDug && !isDugRight)
         {
             quadCount += this.BlockDepth;
         }
 
-        if (blockDown.BlockType == BlockType.None)
+        if (!isDug && isDugDown || isDug && !isDugDown)
         {
             quadCount += this.BlockDepth;
         }
 
-        if (blockLeft.BlockType == BlockType.None)
+        if (!isDug && isDugLeft || isDug && !isDugLeft)
         {
             quadCount += this.BlockDepth;
         }
@@ -63,27 +70,27 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         indices = new int[quadCount * 6];
 
         // Populate the quads
-        this.AddFaceQuad(position, 0, vertices, indices);
+        this.AddFaceQuad(position, 0, vertices, indices, isDug);
 
         if (quadCount > 1)
         {
             int quadIndex = 1;
-            if (blockUp.BlockType == BlockType.None)
+            if (!isDug && isDugUp || isDug && !isDugUp)
             {
                 this.AddUpQuad(position, quadIndex++, vertices, indices);
             }
 
-            if (blockRight.BlockType == BlockType.None)
+            if (!isDug && isDugRight || isDug && !isDugRight)
             {
                 this.AddRightQuad(position, quadIndex++, vertices, indices);
             }
 
-            if (blockDown.BlockType == BlockType.None)
+            if (!isDug && isDugDown || isDug && !isDugDown)
             {
                 this.AddDownQuad(position, quadIndex++, vertices, indices);
             }
 
-            if (blockLeft.BlockType == BlockType.None)
+            if (!isDug && isDugLeft || isDug && !isDugLeft)
             {
                 this.AddLeftQuad(position, quadIndex++, vertices, indices);
             }
@@ -99,14 +106,25 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
     /// <param name="quadIndex">The index of the current quad.</param>
     /// <param name="vertices">The vertice array.</param>
     /// <param name="indices">The indices array.</param>
-    private void AddFaceQuad(Vector2I basePos, int quadIndex, Vector3[] vertices, int[] indices)
+    /// <param name="isDug">Indicates whether this block has been dug out or is empty.</param>
+    private void AddFaceQuad(Vector2I basePos, int quadIndex, Vector3[] vertices, int[] indices, bool isDug)
     {
         // Add the vertices
         int vertIndex = quadIndex * 4;
-        vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, 0);
-        vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, 0);
-        vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, 0);
-        vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, 0);
+        if (isDug)
+        {
+            vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, this.BlockDepth);
+            vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, this.BlockDepth);
+            vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, this.BlockDepth);
+            vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, this.BlockDepth);
+        }
+        else
+        {
+            vertices[vertIndex] = new Vector3(basePos.X, basePos.Y, 0);
+            vertices[vertIndex + 1] = new Vector3(basePos.X + 1, basePos.Y, 0);
+            vertices[vertIndex + 2] = new Vector3(basePos.X + 1, basePos.Y - 1, 0);
+            vertices[vertIndex + 3] = new Vector3(basePos.X, basePos.Y - 1, 0);
+        }
 
         // Add the indices
         int indiceIndex = quadIndex * 6;
