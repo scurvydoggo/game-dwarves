@@ -45,22 +45,22 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
 
         // Determine how many quads will exist for this block (ie. how many block faces)
         int quadCount = 1; // Front face
-        if (!isDug && isDugUp || isDug && !isDugUp)
+        if (isDug ^ isDugUp)
         {
             quadCount += this.BlockDepth;
         }
 
-        if (!isDug && isDugRight || isDug && !isDugRight)
+        if (isDug ^ isDugRight)
         {
             quadCount += this.BlockDepth;
         }
 
-        if (!isDug && isDugDown || isDug && !isDugDown)
+        if (isDug ^ isDugDown)
         {
             quadCount += this.BlockDepth;
         }
 
-        if (!isDug && isDugLeft || isDug && !isDugLeft)
+        if (isDug ^ isDugLeft)
         {
             quadCount += this.BlockDepth;
         }
@@ -75,22 +75,22 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         if (quadCount > 1)
         {
             int quadIndex = 1;
-            if (!isDug && isDugUp || isDug && !isDugUp)
+            if (isDug & isDugUp)
             {
                 this.AddUpQuad(position, quadIndex++, vertices, indices);
             }
 
-            if (!isDug && isDugRight || isDug && !isDugRight)
+            if (isDug ^ isDugRight)
             {
                 this.AddRightQuad(position, quadIndex++, vertices, indices);
             }
 
-            if (!isDug && isDugDown || isDug && !isDugDown)
+            if (isDug ^ isDugDown)
             {
                 this.AddDownQuad(position, quadIndex++, vertices, indices);
             }
 
-            if (!isDug && isDugLeft || isDug && !isDugLeft)
+            if (isDug ^ isDugLeft)
             {
                 this.AddLeftQuad(position, quadIndex++, vertices, indices);
             }
