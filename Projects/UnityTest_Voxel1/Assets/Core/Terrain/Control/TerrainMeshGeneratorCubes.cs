@@ -75,7 +75,7 @@ public class TerrainMeshGeneratorCubes : TerrainMeshGenerator
         if (quadCount > 1)
         {
             int quadIndex = 1;
-            if (isDug & isDugUp)
+            if (isDug ^ isDugUp)
             {
                 this.AddUpQuad(position, quadIndex++, vertices, indices);
             }
