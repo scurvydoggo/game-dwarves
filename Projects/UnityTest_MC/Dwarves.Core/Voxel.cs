@@ -11,14 +11,28 @@ namespace Dwarves.Core
     public struct Voxel
     {
         /// <summary>
-        /// Gets or sets the density.
+        /// Initializes a new instance of the Voxel struct.
         /// </summary>
-        public byte Density { get; set; }
+        /// <param name="material">The material.</param>
+        /// <param name="density">The density.</param>
+        /// <param name="color">The color.</param>
+        public Voxel(Material material, byte density, short color)
+            : this()
+        {
+            this.Material = material;
+            this.Density = density;
+            this.Color = color;
+        }
 
         /// <summary>
         /// Gets or sets the material.
         /// </summary>
         public Material Material { get; set; }
+
+        /// <summary>
+        /// Gets or sets the density.
+        /// </summary>
+        public byte Density { get; set; }
 
         /// <summary>
         /// Gets or sets the color. 15-bit RGB color with 5 bits per component. The last bit is unused.
