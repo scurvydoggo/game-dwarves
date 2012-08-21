@@ -10,8 +10,6 @@ namespace Dwarves.Core
     /// </summary>
     public class VoxelChunk
     {
-        #region Constants
-
         /// <summary>
         /// The power-of-2 size of the chunk for quickly determining chunk index.
         /// </summary>
@@ -32,9 +30,15 @@ namespace Dwarves.Core
         /// </summary>
         public const int Height = 1 << LogSizeY;
 
-        #endregion
+        /// <summary>
+        /// Mask for converting from world coordinates to chunk coordinates.
+        /// </summary>
+        public const int MaskX = Width - 1;
 
-        #region Constructor
+        /// <summary>
+        /// Mask for converting from world coordinates to chunk coordinates.
+        /// </summary>
+        public const int MaskY = Height - 1;
 
         /// <summary>
         /// Initializes a new instance of the VoxelChunk class.
@@ -49,10 +53,6 @@ namespace Dwarves.Core
         /// </summary>
         public Voxel[] Voxels { get; private set; }
 
-        #endregion
-
-        #region Public Methods
-
         /// <summary>
         /// Gets the array index for the voxel at the given chunk coordinates.
         /// </summary>
@@ -63,7 +63,5 @@ namespace Dwarves.Core
         {
             return chunkX + (chunkY * Width);
         }
-
-        #endregion
     }
 }
