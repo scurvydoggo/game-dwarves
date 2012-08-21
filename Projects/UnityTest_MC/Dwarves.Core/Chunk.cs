@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="VoxelChunk.cs" company="Acidwashed Games">
+// <copyright file="Chunk.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -8,7 +8,7 @@ namespace Dwarves.Core
     /// <summary>
     /// A 2D chunk of voxels.
     /// </summary>
-    public class VoxelChunk
+    public class Chunk
     {
         /// <summary>
         /// The power-of-2 size of the chunk for quickly determining chunk index.
@@ -41,9 +41,9 @@ namespace Dwarves.Core
         public const int MaskY = Height - 1;
 
         /// <summary>
-        /// Initializes a new instance of the VoxelChunk class.
+        /// Initializes a new instance of the Chunk class.
         /// </summary>
-        public VoxelChunk()
+        public Chunk()
         {
             this.Voxels = new Voxel[Width * Height];
         }

@@ -17,13 +17,13 @@ namespace Dwarves.Core
         /// </summary>
         public Terrain()
         {
-            this.Chunks = new Dictionary<Position, VoxelChunk>();
+            this.Chunks = new Dictionary<Position, Chunk>();
         }
 
         /// <summary>
         /// Gets the currently active chunks.
         /// </summary>
-        public Dictionary<Position, VoxelChunk> Chunks { get; private set; }
+        public Dictionary<Position, Chunk> Chunks { get; private set; }
 
         /// <summary>
         /// Get the index of the chunk at the given world coordinates.
@@ -33,7 +33,7 @@ namespace Dwarves.Core
         /// <returns>The chunk index.</returns>
         public static Position GetChunkIndex(int worldX, int worldY)
         {
-            return new Position(worldX >> VoxelChunk.LogSizeX, worldY >> VoxelChunk.LogSizeY);
+            return new Position(worldX >> Chunk.LogSizeX, worldY >> Chunk.LogSizeY);
         }
 
         /// <summary>
@@ -44,8 +44,8 @@ namespace Dwarves.Core
         /// <returns>The voxel.</returns>
         public Voxel GetVoxel(int worldX, int worldY)
         {
-            VoxelChunk chunk = this.Chunks[Terrain.GetChunkIndex(worldX, worldY)];
-            return chunk.Voxels[VoxelChunk.GetVoxelIndex(worldX & VoxelChunk.MaskX, worldY & VoxelChunk.MaskY)];
+            Chunk chunk = this.Chunks[Terrain.GetChunkIndex(worldX, worldY)];
+            return chunk.Voxels[Chunk.GetVoxelIndex(worldX & Chunk.MaskX, worldY & Chunk.MaskY)];
         }
     }
 }
