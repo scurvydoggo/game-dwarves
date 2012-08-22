@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core
+namespace Dwarves.Core.VoxelTerrain
 {
     using System.Collections;
     using System.Collections.Generic;

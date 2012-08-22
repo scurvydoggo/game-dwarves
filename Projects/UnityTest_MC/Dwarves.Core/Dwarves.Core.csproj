@@ -39,18 +39,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChunkMesh.cs" />
-    <Compile Include="ChunkVoxels.cs" />
+    <Compile Include="Noise\SimplexNoise.cs" />
+    <Compile Include="VoxelTerrain\ChunkMesh.cs" />
+    <Compile Include="VoxelTerrain\ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
-    <Compile Include="Material.cs" />
+    <Compile Include="VoxelTerrain\Material.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Terrain.cs" />
-    <Compile Include="Voxel.cs" />
-    <Compile Include="Chunk.cs" />
+    <Compile Include="VoxelTerrain\Terrain.cs" />
+    <Compile Include="VoxelTerrain\Voxel.cs" />
+    <Compile Include="VoxelTerrain\Chunk.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MarchingCubes\" />
+    <Folder Include="VoxelTerrain\MarchingCubes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
