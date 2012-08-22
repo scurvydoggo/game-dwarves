@@ -8,7 +8,7 @@ namespace Dwarves.Core.VoxelTerrain
     /// <summary>
     /// Represents a terrain material.
     /// </summary>
-    public enum Material : byte
+    public enum TerrainMaterial : byte
     {
         /// <summary>
         /// Air (ie. nothing).

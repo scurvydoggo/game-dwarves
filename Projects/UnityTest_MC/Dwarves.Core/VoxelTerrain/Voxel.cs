@@ -13,7 +13,7 @@ namespace Dwarves.Core.VoxelTerrain
         /// <summary>
         /// An empty voxel.
         /// </summary>
-        public static readonly Voxel Empty = new Voxel(Material.Air, 0, 0);
+        public static readonly Voxel Empty = new Voxel(TerrainMaterial.Air, 0, 0);
 
         /// <summary>
         /// Initializes a new instance of the Voxel struct.
@@ -21,7 +21,7 @@ namespace Dwarves.Core.VoxelTerrain
         /// <param name="material">The material.</param>
         /// <param name="density">The density.</param>
         /// <param name="color">The color.</param>
-        public Voxel(Material material, byte density, short color)
+        public Voxel(TerrainMaterial material, byte density, short color)
             : this()
         {
             this.Material = material;
@@ -32,7 +32,7 @@ namespace Dwarves.Core.VoxelTerrain
         /// <summary>
         /// Gets or sets the material.
         /// </summary>
-        public Material Material { get; set; }
+        public TerrainMaterial Material { get; set; }
 
         /// <summary>
         /// Gets or sets the density.
