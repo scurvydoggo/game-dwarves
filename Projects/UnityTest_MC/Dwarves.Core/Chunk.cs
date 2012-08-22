@@ -45,23 +45,29 @@ namespace Dwarves.Core
         /// </summary>
         public Chunk()
         {
-            this.Voxels = new Voxel[Width * Height];
+            this.Voxels = new ChunkVoxels();
+            this.Mesh = new ChunkMesh();
         }
 
         /// <summary>
         /// Gets the voxels in this chunk.
         /// </summary>
-        public Voxel[] Voxels { get; private set; }
+        public ChunkVoxels Voxels { get; private set; }
 
         /// <summary>
-        /// Gets the array index for the voxel at the given chunk coordinates.
+        /// Gets the meshes in this chunk.
         /// </summary>
-        /// <param name="chunkX">The x position.</param>
-        /// <param name="chunkY">The y position.</param>
-        /// <returns>The index.</returns>
-        public static int GetVoxelIndex(int chunkX, int chunkY)
+        public ChunkMesh Mesh { get; private set; }
+
+        /// <summary>
+        /// Get the voxel at the given chunk coorinates.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <returns>The voxel.</returns>
+        public Voxel GetVoxel(int x, int y)
         {
-            return chunkX + (chunkY * Width);
+            return this.Voxels[ChunkVoxels.GetIndex(x, y)];
         }
     }
 }

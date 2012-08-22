@@ -13,17 +13,17 @@ namespace Dwarves.Core
     public class Terrain
     {
         /// <summary>
+        /// The currently active chunks.
+        /// </summary>
+        private Dictionary<Position, Chunk> chunks;
+
+        /// <summary>
         /// Initializes a new instance of the Terrain class.
         /// </summary>
         public Terrain()
         {
-            this.Chunks = new Dictionary<Position, Chunk>();
+            this.chunks = new Dictionary<Position, Chunk>();
         }
-
-        /// <summary>
-        /// Gets the currently active chunks.
-        /// </summary>
-        public Dictionary<Position, Chunk> Chunks { get; private set; }
 
         /// <summary>
         /// Get the index of the chunk at the given world coordinates.
@@ -37,15 +37,26 @@ namespace Dwarves.Core
         }
 
         /// <summary>
-        /// Get the voxel at the given world coorinates.
+        /// Try to get the chunk at the given chunk coordinates.
         /// </summary>
-        /// <param name="worldX">The x position.</param>
-        /// <param name="worldY">The y position.</param>
-        /// <returns>The voxel.</returns>
-        public Voxel GetVoxel(int worldX, int worldY)
+        /// <param name="chunkX">The x position.</param>
+        /// <param name="chunkY">The y position.</param>
+        /// <param name="chunk">The chunk.</param>
+        /// <returns>True if the chunk was retrieved.</returns>
+        public bool TryGetChunk(int chunkX, int chunkY, out Chunk chunk)
         {
-            Chunk chunk = this.Chunks[Terrain.GetChunkIndex(worldX, worldY)];
-            return chunk.Voxels[Chunk.GetVoxelIndex(worldX & Chunk.MaskX, worldY & Chunk.MaskY)];
+            return this.TryGetChunk(Terrain.GetChunkIndex(chunkX, chunkY), out chunk);
+        }
+
+        /// <summary>
+        /// Try to get the chunk at the given chunk index.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="chunk">The chunk.</param>
+        /// <returns>True if the chunk was retrieved.</returns>
+        public bool TryGetChunk(Position chunkIndex, out Chunk chunk)
+        {
+            return this.chunks.TryGetValue(chunkIndex, out chunk);
         }
     }
 }

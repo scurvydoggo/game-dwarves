@@ -11,6 +11,11 @@ namespace Dwarves.Core
     public struct Voxel
     {
         /// <summary>
+        /// An empty voxel.
+        /// </summary>
+        public static readonly Voxel Empty = new Voxel(Material.Air, 0, 0);
+
+        /// <summary>
         /// Initializes a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>

@@ -39,6 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChunkMesh.cs" />
+    <Compile Include="ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Position.cs" />
