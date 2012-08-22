@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.Core", "Dwarves.Core\Dwarves.Core.csproj", "{D9FD5F54-0CB6-43C0-A261-73ADC0616555}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.Test", "Dwarves.Test\Dwarves.Test.csproj", "{18C5EA28-F7FE-4F33-84C6-340D3F0EF34B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9FD5F54-0CB6-43C0-A261-73ADC0616555}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9FD5F54-0CB6-43C0-A261-73ADC0616555}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9FD5F54-0CB6-43C0-A261-73ADC0616555}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9FD5F54-0CB6-43C0-A261-73ADC0616555}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18C5EA28-F7FE-4F33-84C6-340D3F0EF34B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18C5EA28-F7FE-4F33-84C6-340D3F0EF34B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18C5EA28-F7FE-4F33-84C6-340D3F0EF34B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18C5EA28-F7FE-4F33-84C6-340D3F0EF34B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
