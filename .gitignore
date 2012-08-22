@@ -2,8 +2,8 @@ bin/
 obj/
 Temp/
 Projects/*Unity*/Library/
-Projects/*Unity*/*.sln
-Projects/*Unity*/*.csproj
+Projects/*UnityTest_Voxel1/*.sln
+Projects/*UnityTest_Voxel1/*.csproj
 *.suo
 *.user
 *.cachefile
