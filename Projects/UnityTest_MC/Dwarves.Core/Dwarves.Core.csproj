@@ -39,7 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Const.cs" />
     <Compile Include="Noise\SimplexNoise.cs" />
+    <Compile Include="UnityEngine\Vector3.cs" />
     <Compile Include="VoxelTerrain\ChunkMesh.cs" />
     <Compile Include="VoxelTerrain\ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
