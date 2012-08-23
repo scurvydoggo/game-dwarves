@@ -20,6 +20,16 @@ namespace Dwarves.Core.VoxelTerrain
         /// </summary>
         /// <param name="material">The material.</param>
         /// <param name="density">The density.</param>
+        public Voxel(TerrainMaterial material, byte density)
+            : this(material, density, short.MaxValue)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the Voxel struct.
+        /// </summary>
+        /// <param name="material">The material.</param>
+        /// <param name="density">The density.</param>
         /// <param name="color">The color.</param>
         public Voxel(TerrainMaterial material, byte density, short color)
             : this()

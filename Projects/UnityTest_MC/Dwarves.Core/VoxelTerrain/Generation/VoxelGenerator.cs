@@ -66,29 +66,50 @@ namespace Dwarves.Core.VoxelTerrain.Generation
                 if (chunkIndex.Y <= this.SurfaceOrigin + this.SurfaceMaxHeight)
                 {
                     // The surface may cut through this chunk
-                    for (int x = 0; x < Chunk.Width; x++)
+                    for (int chunkX = 0; chunkX < Chunk.Width; chunkX++)
                     {
                         // Calculate the point of the position to input into the noise function.
-                        float surfaceX = (chunkIndex.X + x) / this.SurfacePeriod;
+                        float surfaceX = (chunkIndex.X + chunkX) / this.SurfacePeriod;
 
                         // Get the noise for this point
                         float noise = SimplexNoise.Generate(surfaceX, this.Seed);
 
-                        // Calculate the height of the surface relative to (0,0) in chunk coordinates
-                        int surfaceDistance = (int)((noise * this.SurfaceMaxHeight) + (noise > 0 ? 0.5f : -0.5f));
-                        int surfaceHeight = this.SurfaceOrigin + surfaceDistance - chunkIndex.Y;
+                        // Calculate the height from the surface origin
+                        float offsetYFloat = noise * this.SurfaceMaxHeight;
+                        int offsetY = (int)offsetYFloat;
+
+                        // Determine the y coordinate of the surface in chunk coordinates
+                        int chunkY = this.SurfaceOrigin + offsetY - chunkIndex.Y;
 
                         // Check the limits
-                        if (surfaceHeight < 0)
+                        if (chunkY < 0)
                         {
-                            surfaceHeight = 0;
+                            surfaceBoundary[chunkX] = 0;
                         }
-                        else if (surfaceHeight > Chunk.Height)
+                        else if (chunkY > Chunk.Height)
                         {
-                            surfaceHeight = Chunk.Height;
+                            surfaceBoundary[chunkX] = Chunk.Height;
                         }
+                        else
+                        {
+                            // The surface cuts inside this chunk
+                            surfaceBoundary[chunkX] = chunkY;
 
-                        surfaceBoundary[x] = surfaceHeight;
+                            // Now calculate the density of the voxel at this height
+                            byte density;
+                            float densityFloat = (offsetYFloat - offsetY) * byte.MaxValue;
+                            if (densityFloat >= byte.MaxValue)
+                            {
+                                density = byte.MaxValue;
+                            }
+                            else
+                            {
+                                density = (byte)(densityFloat + 0.5f);
+                            }
+
+                            // Update the surface voxel
+                            chunk[ChunkVoxels.GetIndex(chunkX, chunkY)] = new Voxel(TerrainMaterial.Dirt, density);
+                        }
                     }
                 }
                 else
