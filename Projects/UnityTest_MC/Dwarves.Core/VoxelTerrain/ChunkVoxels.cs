@@ -42,6 +42,25 @@ namespace Dwarves.Core.VoxelTerrain
         }
 
         /// <summary>
+        /// Gets or sets the voxel at the given chunk coordinates.
+        /// </summary>
+        /// <param name="chunkX">The x position.</param>
+        /// <param name="chunkY">The y position.</param>
+        /// <returns>The voxel.</returns>
+        public Voxel this[int chunkX, int chunkY]
+        {
+            get
+            {
+                return this.voxels[GetIndex(chunkX, chunkY)];
+            }
+
+            set
+            {
+                this.voxels[GetIndex(chunkX, chunkY)] = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the index for the voxel at the given chunk coordinates.
         /// </summary>
         /// <param name="chunkX">The x position.</param>

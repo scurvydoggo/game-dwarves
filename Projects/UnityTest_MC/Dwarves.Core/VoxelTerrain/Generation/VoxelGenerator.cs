@@ -48,16 +48,21 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <param name="chunkIndex">The chunk index.</param>
         public void Generate(ChunkVoxels chunk, Position chunkIndex)
         {
-            int[] surfaceBoundary = this.GenerateSurface(chunk, chunkIndex);
+            // Create the surface voxels, which have densities between 0.0 and 1.0
+            int[] surfaceHeights = this.GenerateSurface(chunk, chunkIndex, TerrainMaterial.Dirt);
+
+            // Now fill the rest of the terrain with full/empty voxels (density = 0 or 1)
+            this.FillBelowSurface(chunk, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
         }
 
         /// <summary>
-        /// Generate the surface voxels and return an array indicating the Y value of each surface point.
+        /// Generate the surface voxels and return an array indicating the y value of each surface point.
         /// </summary>
         /// <param name="chunk">The chunk.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        /// <returns>Array indicating the Y value of each surface point.</returns>
-        private int[] GenerateSurface(ChunkVoxels chunk, Position chunkIndex)
+        /// <param name="surfaceMaterial">The surface material.</param>
+        /// <returns>Array indicating the y value of each surface point.</returns>
+        private int[] GenerateSurface(ChunkVoxels chunk, Position chunkIndex, TerrainMaterial surfaceMaterial)
         {
             int[] surfaceBoundary = new int[Chunk.Width];
 
@@ -108,7 +113,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
                             }
 
                             // Update the surface voxel
-                            chunk[ChunkVoxels.GetIndex(chunkX, chunkY)] = new Voxel(TerrainMaterial.Dirt, density);
+                            chunk[chunkX, chunkY] = new Voxel(surfaceMaterial, density);
                         }
                     }
                 }
@@ -127,6 +132,37 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             }
 
             return surfaceBoundary;
+        }
+
+        /// <summary>
+        /// Fill the terrain with the given material below the surface and air above.
+        /// </summary>
+        /// <param name="chunk">The chunk</param>
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="surfaceHeights">The y value of each surface point.</param>
+        /// <param name="material">The material to fill below surface.</param>
+        private void FillBelowSurface(
+            ChunkVoxels chunk,
+            Position chunkIndex,
+            int[] surfaceHeights,
+            TerrainMaterial material)
+        {
+            for (int chunkX = 0; chunkX < Chunk.Width; chunkX++)
+            {
+                int surfaceHeight = surfaceHeights[chunkX];
+
+                for (int chunkY = 0; chunkY < Chunk.Height; chunkX++)
+                {
+                    if (chunkY < surfaceHeight)
+                    {
+                        chunk[chunkX, chunkY] = new Voxel(material, byte.MinValue);
+                    }
+                    else if (chunkY > surfaceHeight)
+                    {
+                        chunk[chunkX, chunkY] = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+                    }
+                }
+            }
         }
     }
 }
