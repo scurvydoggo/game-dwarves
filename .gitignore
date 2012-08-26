@@ -4,6 +4,8 @@ Temp/
 Projects/*Unity*/Library/
 Projects/*UnityTest_Voxel1/*.sln
 Projects/*UnityTest_Voxel1/*.csproj
+Projects/*UnityTest_MC/Unity/*.sln
+Projects/*UnityTest_MC/Unity/*.csproj
 *.suo
 *.user
 *.cachefile
