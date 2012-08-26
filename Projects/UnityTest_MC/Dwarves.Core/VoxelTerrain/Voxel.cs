@@ -13,7 +13,7 @@ namespace Dwarves.Core.VoxelTerrain
         /// <summary>
         /// An empty voxel.
         /// </summary>
-        public static readonly Voxel Empty = new Voxel(TerrainMaterial.Air, 0, 0);
+        public static readonly Voxel Empty = new Voxel(TerrainMaterial.Air, byte.MaxValue, 0);
 
         /// <summary>
         /// Initializes a new instance of the Voxel struct.
