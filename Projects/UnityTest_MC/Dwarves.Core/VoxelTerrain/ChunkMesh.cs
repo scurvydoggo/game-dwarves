@@ -12,19 +12,19 @@ namespace Dwarves.Core.VoxelTerrain
     /// <summary>
     /// The mesh data for a terrain chunk.
     /// </summary>
-    public class ChunkMesh : IEnumerable<KeyValuePair<Position, MeshData[]>>
+    public class ChunkMesh : IEnumerable<KeyValuePair<Position, MeshData>>
     {
         /// <summary>
-        /// The meshes for each voxel in the chunk.
+        /// The mesh for each voxel in the chunk.
         /// </summary>
-        private Dictionary<Position, MeshData[]> voxelMeshes;
+        private Dictionary<Position, MeshData> voxelMeshes;
 
         /// <summary>
         /// Initializes a new instance of the ChunkMesh class.
         /// </summary>
         public ChunkMesh()
         {
-            this.voxelMeshes = new Dictionary<Position, MeshData[]>();
+            this.voxelMeshes = new Dictionary<Position, MeshData>();
             this.MeshChanged = false;
             this.VertexCount = 0;
             this.TriangleIndicesCount = 0;
@@ -49,7 +49,7 @@ namespace Dwarves.Core.VoxelTerrain
         /// Gets an enumerator that iterates through the block meshes.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public IEnumerator<KeyValuePair<Position, MeshData[]>> GetEnumerator()
+        public IEnumerator<KeyValuePair<Position, MeshData>> GetEnumerator()
         {
             return this.voxelMeshes.GetEnumerator();
         }
@@ -64,47 +64,41 @@ namespace Dwarves.Core.VoxelTerrain
         }
 
         /// <summary>
-        /// Update the meshes for the voxel at the given chunk coordinates.
+        /// Update the mesh for the voxel at the given chunk coordinates.
         /// </summary>
         /// <param name="chunkX">The x position.</param>
         /// <param name="chunkY">The y position.</param>
-        /// <param name="meshes">The meshes.</param>
-        public void SetMesh(int chunkX, int chunkY, MeshData[] meshes)
+        /// <param name="mesh">The mesh.</param>
+        public void SetMesh(int chunkX, int chunkY, MeshData mesh)
         {
-            this.SetMeshes(new Position(chunkX, chunkY), meshes);
+            this.SetMesh(new Position(chunkX, chunkY), mesh);
         }
 
         /// <summary>
-        /// Update the meshes for the voxel at the given chunk coordinates.
+        /// Update the mesh for the voxel at the given chunk coordinates.
         /// </summary>
         /// <param name="chunkPos">The position.</param>
-        /// <param name="meshes">The meshes.</param>
-        public void SetMeshes(Position chunkPos, MeshData[] meshes)
+        /// <param name="mesh">The mesh.</param>
+        public void SetMesh(Position chunkPos, MeshData mesh)
         {
-            // Add/Replace the meshes
-            MeshData[] existingMeshes;
-            if (this.voxelMeshes.TryGetValue(chunkPos, out existingMeshes))
+            // Add/Replace the mesh
+            MeshData existingMesh;
+            if (this.voxelMeshes.TryGetValue(chunkPos, out existingMesh))
             {
-                this.voxelMeshes[chunkPos] = meshes;
+                this.voxelMeshes[chunkPos] = mesh;
 
-                // Decrement the counts for the meshes that were replaced
-                foreach (MeshData mesh in existingMeshes)
-                {
-                    this.VertexCount -= mesh.Vertices.Length;
-                    this.TriangleIndicesCount -= mesh.TriangleIndices.Length;
-                }
+                // Decrement the counts for the mesh that was replaced
+                this.VertexCount -= existingMesh.Vertices.Length;
+                this.TriangleIndicesCount -= existingMesh.TriangleIndices.Length;
             }
             else
             {
-                this.voxelMeshes.Add(chunkPos, meshes);
+                this.voxelMeshes.Add(chunkPos, mesh);
             }
 
-            // Increment the counts for the new meshes
-            foreach (MeshData mesh in meshes)
-            {
-                this.VertexCount += mesh.Vertices.Length;
-                this.TriangleIndicesCount += mesh.TriangleIndices.Length;
-            }
+            // Increment the counts for the new mesh
+            this.VertexCount += mesh.Vertices.Length;
+            this.TriangleIndicesCount += mesh.TriangleIndices.Length;
 
             this.MeshChanged = true;
         }
