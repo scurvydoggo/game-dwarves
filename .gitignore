@@ -1,11 +1,12 @@
 bin/
 obj/
 Temp/
-Projects/*Unity*/Library/
-Projects/*UnityTest_Voxel1/*.sln
-Projects/*UnityTest_Voxel1/*.csproj
-Projects/*UnityTest_MC/Unity/*.sln
-Projects/*UnityTest_MC/Unity/*.csproj
+Projects/UnityTest_Voxel1/*.sln
+Projects/UnityTest_Voxel1/*.csproj
+Projects/UnityTest_Voxel1/Library/
+Projects/UnityTest_MC/Unity/MarchingCubesTest/*.sln
+Projects/UnityTest_MC/Unity/MarchingCubesTest/*.csproj
+Projects/UnityTest_MC/Unity/MarchingCubesTest/Library/
 *.suo
 *.user
 *.cachefile
