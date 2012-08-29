@@ -37,6 +37,27 @@ namespace Dwarves.Core.VoxelTerrain
         }
 
         /// <summary>
+        /// Convert the world coordinates into chunk coordinates.
+        /// </summary>
+        /// <param name="worldPos">The position in world coordinates.</param>
+        /// <returns>The position in chunk coordinates.</returns>
+        public static Position GetChunkCoordinates(Position worldPos)
+        {
+            return new Position(worldPos.X & Chunk.Width, worldPos.Y & Chunk.Height);
+        }
+
+        /// <summary>
+        /// Convert the chunk coordinates into world coordinates.
+        /// </summary>
+        /// <param name="chunkPos">The position in chunk coordinates.</param>
+        /// <param name="chunkIndex">The index of the chunk in which the position lies.</param>
+        /// <returns>The position in world coordinates.</returns>
+        public static Position GetWorldCoordinates(Position chunkPos, Position chunkIndex)
+        {
+            return new Position(chunkIndex.X * Chunk.Width + chunkPos.X, chunkIndex.Y * Chunk.Height + chunkPos.Y);
+        }
+
+        /// <summary>
         /// Get the chunk at the given chunk index.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
