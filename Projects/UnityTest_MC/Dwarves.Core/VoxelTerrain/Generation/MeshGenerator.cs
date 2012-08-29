@@ -5,10 +5,13 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.VoxelTerrain.Generation
 {
+    using System.Collections;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Generates the mesh for a chunk.
     /// </summary>
-    public class MeshGenerator
+    public abstract class MeshGenerator
     {
         /// <summary>
         /// Initializes a new instance of the MeshGenerator class.
@@ -27,13 +30,19 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             Chunk chunk = terrain.GetChunk(chunkIndex);
 
             // Get the neighbours of the chunk
-            ChunkNeighbours neighbours = this.GetNeighbourChunks(terrain, chunkIndex);
+            ChunkNeighbours chunkNeighbours = this.GetNeighbourChunks(terrain, chunkIndex);
 
             // Update the meshes for each voxel in the chunk
             for (int x = 0; x < Chunk.Width; x++)
             {
                 for (int y = 0; y < Chunk.Height; y++)
                 {
+                    // Get the voxel and its neighbours
+                    Voxel voxel = chunk.GetVoxel(x, y);
+                    VoxelNeighbours voxelNeighbours = this.GetNeighbourVoxels(x, y, chunk, chunkNeighbours);
+
+                    // Update the voxel's mesh
+                    this.UpdateVoxelMesh(chunk, voxel, voxelNeighbours);
                 }
             }
         }
@@ -49,11 +58,40 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             Position chunkIndex = Terrain.GetChunkIndex(position.X, position.Y);
             Chunk chunk = terrain.GetChunk(chunkIndex);
 
-            // Get the neighbours of the chunk
-            ChunkNeighbours neighbours = this.GetNeighbourChunks(terrain, chunkIndex);
+            // Get the position in chunk coordinates
+            Position chunkPos = Terrain.GetChunkCoordinates(position);
 
-            // TODO
+            // Get the neighbours of the chunk
+            ChunkNeighbours chunkNeighbours = this.GetNeighbourChunks(terrain, chunkIndex);
+
+            // Get the voxel and its neighbours
+            Voxel voxel = chunk.GetVoxel(position.X, position.Y);
+            VoxelNeighbours voxelNeighbours = this.GetNeighbourVoxels(chunkPos.X, chunkPos.Y, chunk, chunkNeighbours);
+
+            // Update the voxel's mesh
+            this.UpdateVoxelMesh(chunk, voxel, voxelNeighbours);
+
+            if (updateNeighbours)
+            {
+                foreach (VoxelNeighbour neighbour in voxelNeighbours)
+                {
+                    // Get the neighbour's neighbors
+                    VoxelNeighbours neighbourNeighbours =
+                        this.GetNeighbourVoxels(chunkPos.X, chunkPos.Y, chunk, chunkNeighbours);
+
+                    // Update the neighbour voxel's mesh
+                    this.UpdateVoxelMesh(neighbour.Chunk, neighbour.Voxel, neighbourNeighbours);
+                }
+            }
         }
+
+        /// <summary>
+        /// Update the mesh for the given voxel.
+        /// </summary>
+        /// <param name="chunk">The chunk.</param>
+        /// <param name="voxel">The voxel.</param>
+        /// <param name="neighbours">The neighbouring voxels.</param>
+        protected abstract void UpdateVoxelMesh(Chunk chunk, Voxel voxel, VoxelNeighbours neighbours);
 
         /// <summary>
         /// Get the neighbouring chunks.
@@ -92,147 +130,275 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             bool isBorderN = chunkY == Chunk.Height - 1;
             bool isBorderS = chunkY == 0;
 
-            Voxel voxelN, voxelNE, voxelE, voxelSE, voxelS, voxelSW, voxelW, voxelNW;
+            VoxelNeighbour voxelN, voxelNE, voxelE, voxelSE, voxelS, voxelSW, voxelW, voxelNW;
 
             if (!isBorderN && !isBorderE && !isBorderS && !isBorderW)
             {
-                voxelN = chunk.GetVoxel(chunkX, chunkY + 1);
-                voxelNE = chunk.GetVoxel(chunkX + 1, chunkY + 1);
-                voxelE = chunk.GetVoxel(chunkX + 1, chunkY);
-                voxelSE = chunk.GetVoxel(chunkX + 1, chunkY - 1);
-                voxelS = chunk.GetVoxel(chunkX, chunkY - 1);
-                voxelSW = chunk.GetVoxel(chunkX - 1, chunkY - 1);
-                voxelW = chunk.GetVoxel(chunkX - 1, chunkY);
-                voxelNW = chunk.GetVoxel(chunkX - 1, chunkY + 1);
+                voxelN = new VoxelNeighbour(chunk.GetVoxel(chunkX, chunkY + 1), chunk);
+                voxelNE = new VoxelNeighbour(chunk.GetVoxel(chunkX + 1, chunkY + 1), chunk);
+                voxelE = new VoxelNeighbour(chunk.GetVoxel(chunkX + 1, chunkY), chunk);
+                voxelSE = new VoxelNeighbour(chunk.GetVoxel(chunkX + 1, chunkY - 1), chunk);
+                voxelS = new VoxelNeighbour(chunk.GetVoxel(chunkX, chunkY - 1), chunk);
+                voxelSW = new VoxelNeighbour(chunk.GetVoxel(chunkX - 1, chunkY - 1), chunk);
+                voxelW = new VoxelNeighbour(chunk.GetVoxel(chunkX - 1, chunkY), chunk);
+                voxelNW = new VoxelNeighbour(chunk.GetVoxel(chunkX - 1, chunkY + 1), chunk);
             }
             else
             {
                 // N
                 if (isBorderN)
                 {
-                    voxelN = chunkNeighbours.ChunkN != null ?
-                        chunkNeighbours.ChunkN.GetVoxel(chunkX, 0) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkN != null)
+                    {
+                        voxelN = new VoxelNeighbour(
+                            chunkNeighbours.ChunkN.GetVoxel(chunkX, 0),
+                            chunkNeighbours.ChunkN);
+                    }
+                    else
+                    {
+                        voxelN = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelN = chunk.GetVoxel(chunkX, chunkY + 1);
+                    voxelN = new VoxelNeighbour(chunk.GetVoxel(chunkX, chunkY + 1), chunk);
                 }
 
                 // NE
                 if (isBorderN && isBorderE)
                 {
-                    voxelNE = chunkNeighbours.ChunkNE != null ?
-                        chunkNeighbours.ChunkNE.GetVoxel(0, 0) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkNE != null)
+                    {
+                        voxelNE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkNE.GetVoxel(0, 0),
+                            chunkNeighbours.ChunkNE);
+                    }
+                    else
+                    {
+                        voxelNE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (isBorderN && !isBorderE)
                 {
-                    voxelNE = chunkNeighbours.ChunkN != null ?
-                        chunkNeighbours.ChunkN.GetVoxel(chunkX + 1, 0) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkN != null)
+                    {
+                        voxelNE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkN.GetVoxel(chunkX + 1, 0),
+                            chunkNeighbours.ChunkN);
+                    }
+                    else
+                    {
+                        voxelNE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (!isBorderN && isBorderE)
                 {
-                    voxelNE = chunkNeighbours.ChunkE != null ?
-                        chunkNeighbours.ChunkE.GetVoxel(0, chunkY + 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkE != null)
+                    {
+                        voxelNE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkE.GetVoxel(0, chunkY + 1),
+                            chunkNeighbours.ChunkE);
+                    }
+                    else
+                    {
+                        voxelNE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelNE = chunk.GetVoxel(chunkX + 1, chunkY + 1);
+                    voxelNE = new VoxelNeighbour(chunk.GetVoxel(chunkX + 1, chunkY + 1), chunk);
                 }
 
                 // E
                 if (isBorderE)
                 {
-                    voxelE = chunkNeighbours.ChunkE != null ?
-                        chunkNeighbours.ChunkE.GetVoxel(0, chunkY) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkE != null)
+                    {
+                        voxelE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkE.GetVoxel(0, chunkY),
+                            chunkNeighbours.ChunkE);
+                    }
+                    else
+                    {
+                        voxelE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelE = chunk.GetVoxel(chunkX + 1, chunkY);
+                    voxelE = new VoxelNeighbour(chunk.GetVoxel(chunkX + 1, chunkY), chunk);
                 }
 
                 // SE
                 if (isBorderS && isBorderE)
                 {
-                    voxelSE = chunkNeighbours.ChunkSE != null ?
-                        chunkNeighbours.ChunkSE.GetVoxel(0, Chunk.Height - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkSE != null)
+                    {
+                        voxelSE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkSE.GetVoxel(0, Chunk.Height - 1),
+                            chunkNeighbours.ChunkSE);
+                    }
+                    else
+                    {
+                        voxelSE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (isBorderS && !isBorderE)
                 {
-                    voxelSE = chunkNeighbours.ChunkS != null ?
-                        chunkNeighbours.ChunkS.GetVoxel(chunkX + 1, Chunk.Height - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkS != null)
+                    {
+                        voxelSE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkS.GetVoxel(chunkX + 1, Chunk.Height - 1),
+                            chunkNeighbours.ChunkS);
+                    }
+                    else
+                    {
+                        voxelSE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (!isBorderS && isBorderE)
                 {
-                    voxelSE = chunkNeighbours.ChunkE != null ?
-                        chunkNeighbours.ChunkE.GetVoxel(0, chunkY - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkE != null)
+                    {
+                        voxelSE = new VoxelNeighbour(
+                            chunkNeighbours.ChunkE.GetVoxel(0, chunkY - 1),
+                            chunkNeighbours.ChunkE);
+                    }
+                    else
+                    {
+                        voxelSE = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelSE = chunk.GetVoxel(chunkX + 1, chunkY - 1);
+                    voxelSE = new VoxelNeighbour(chunk.GetVoxel(chunkX + 1, chunkY - 1), chunk);
                 }
 
                 // S
                 if (isBorderS)
                 {
-                    voxelS = chunkNeighbours.ChunkS != null ?
-                        chunkNeighbours.ChunkS.GetVoxel(chunkX, Chunk.Height - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkS != null)
+                    {
+                        voxelS = new VoxelNeighbour(
+                            chunkNeighbours.ChunkS.GetVoxel(chunkX, Chunk.Height - 1),
+                            chunkNeighbours.ChunkS);
+                    }
+                    else
+                    {
+                        voxelS = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelS = chunk.GetVoxel(chunkX, chunkY - 1);
+                    voxelS = new VoxelNeighbour(chunk.GetVoxel(chunkX, chunkY - 1), chunk);
                 }
 
                 // SW
                 if (isBorderS && isBorderW)
                 {
-                    voxelSW = chunkNeighbours.ChunkSW != null ?
-                        chunkNeighbours.ChunkSW.GetVoxel(Chunk.Width - 1, Chunk.Height - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkSW != null)
+                    {
+                        voxelSW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkSW.GetVoxel(Chunk.Width - 1, Chunk.Height - 1),
+                            chunkNeighbours.ChunkSW);
+                    }
+                    else
+                    {
+                        voxelSW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (isBorderS && !isBorderW)
                 {
-                    voxelSW = chunkNeighbours.ChunkS != null ?
-                        chunkNeighbours.ChunkS.GetVoxel(chunkX - 1, Chunk.Height - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkS != null)
+                    {
+                        voxelSW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkS.GetVoxel(chunkX - 1, Chunk.Height - 1),
+                            chunkNeighbours.ChunkS);
+                    }
+                    else
+                    {
+                        voxelSW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (!isBorderS && isBorderW)
                 {
-                    voxelSW = chunkNeighbours.ChunkW != null ?
-                        chunkNeighbours.ChunkW.GetVoxel(Chunk.Width - 1, chunkY - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkW != null)
+                    {
+                        voxelSW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkW.GetVoxel(Chunk.Width - 1, chunkY - 1),
+                            chunkNeighbours.ChunkW);
+                    }
+                    else
+                    {
+                        voxelSW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelSW = chunk.GetVoxel(chunkX - 1, chunkY - 1);
+                    voxelSW = new VoxelNeighbour(chunk.GetVoxel(chunkX - 1, chunkY - 1), chunk);
                 }
 
                 // W
                 if (isBorderW)
                 {
-                    voxelW = chunkNeighbours.ChunkW != null ?
-                        chunkNeighbours.ChunkW.GetVoxel(Chunk.Width - 1, chunkY) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkW != null)
+                    {
+                        voxelW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkW.GetVoxel(Chunk.Width - 1, chunkY),
+                            chunkNeighbours.ChunkW);
+                    }
+                    else
+                    {
+                        voxelW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelW = chunk.GetVoxel(chunkX - 1, chunkY);
+                    voxelW = new VoxelNeighbour(chunk.GetVoxel(chunkX - 1, chunkY), chunk);
                 }
 
                 // NW
                 if (isBorderN && isBorderW)
                 {
-                    voxelNW = chunkNeighbours.ChunkNW != null ?
-                        chunkNeighbours.ChunkNW.GetVoxel(Chunk.Width - 1, 0) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkNW != null)
+                    {
+                        voxelNW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkNW.GetVoxel(Chunk.Width - 1, 0),
+                            chunkNeighbours.ChunkNW);
+                    }
+                    else
+                    {
+                        voxelNW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (isBorderN && !isBorderW)
                 {
-                    voxelNW = chunkNeighbours.ChunkN != null ?
-                        chunkNeighbours.ChunkN.GetVoxel(chunkX - 1, 0) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkN != null)
+                    {
+                        voxelNW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkN.GetVoxel(chunkX - 1, 0),
+                            chunkNeighbours.ChunkN);
+                    }
+                    else
+                    {
+                        voxelNW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else if (!isBorderN && isBorderW)
                 {
-                    voxelNW = chunkNeighbours.ChunkW != null ?
-                        chunkNeighbours.ChunkW.GetVoxel(Chunk.Width - 1, chunkY - 1) : Voxel.Empty;
+                    if (chunkNeighbours.ChunkW != null)
+                    {
+                        voxelNW = new VoxelNeighbour(
+                            chunkNeighbours.ChunkW.GetVoxel(Chunk.Width - 1, chunkY - 1),
+                            chunkNeighbours.ChunkW);
+                    }
+                    else
+                    {
+                        voxelNW = new VoxelNeighbour(Voxel.Air, null);
+                    }
                 }
                 else
                 {
-                    voxelNW = chunk.GetVoxel(chunkX - 1, chunkY + 1);
+                    voxelNW = new VoxelNeighbour(chunk.GetVoxel(chunkX - 1, chunkY + 1), chunk);
                 }
             }
 
@@ -242,7 +408,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <summary>
         /// The neighbours of a chunk. If a neighbour is null, then the chunk is at the edge of the world.
         /// </summary>
-        private class ChunkNeighbours
+        protected class ChunkNeighbours
         {
             /// <summary>
             /// Initializes a new instance of the ChunkNeighbours class.
@@ -317,9 +483,36 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         }
 
         /// <summary>
+        /// Information on a neighbouring voxel.
+        /// </summary>
+        protected class VoxelNeighbour
+        {
+            /// <summary>
+            /// Initializes a new instance of the VoxelNeighbour class.
+            /// </summary>
+            /// <param name="voxel">The voxel.</param>
+            /// <param name="chunk">The chunk that the neighbour belongs to.</param>
+            public VoxelNeighbour(Voxel voxel, Chunk chunk)
+            {
+                this.Voxel = voxel;
+                this.Chunk = chunk;
+            }
+
+            /// <summary>
+            /// Gets the voxel.
+            /// </summary>
+            public Voxel Voxel { get; private set; }
+
+            /// <summary>
+            /// Gets the chunk that the neighbour belongs to.
+            /// </summary>
+            public Chunk Chunk { get; private set; }
+        }
+
+        /// <summary>
         /// The neighbours of a voxel.
         /// </summary>
-        private class VoxelNeighbours
+        protected class VoxelNeighbours : IEnumerable<VoxelNeighbour>
         {
             /// <summary>
             /// Initializes a new instance of the VoxelNeighbours class.
@@ -333,14 +526,14 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             /// <param name="voxelW">The voxel to the left.</param>
             /// <param name="voxelNW">The voxel to the top-left.</param>
             public VoxelNeighbours(
-                Voxel voxelN,
-                Voxel voxelNE,
-                Voxel voxelE,
-                Voxel voxelSE,
-                Voxel voxelS,
-                Voxel voxelSW,
-                Voxel voxelW,
-                Voxel voxelNW)
+                VoxelNeighbour voxelN,
+                VoxelNeighbour voxelNE,
+                VoxelNeighbour voxelE,
+                VoxelNeighbour voxelSE,
+                VoxelNeighbour voxelS,
+                VoxelNeighbour voxelSW,
+                VoxelNeighbour voxelW,
+                VoxelNeighbour voxelNW)
             {
                 this.VoxelN = voxelN;
                 this.VoxelNE = voxelNE;
@@ -355,42 +548,67 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             /// <summary>
             /// Gets the voxel to the top.
             /// </summary>
-            public Voxel VoxelN { get; private set; }
+            public VoxelNeighbour VoxelN { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the top-right.
             /// </summary>
-            public Voxel VoxelNE { get; private set; }
+            public VoxelNeighbour VoxelNE { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the right.
             /// </summary>
-            public Voxel VoxelE { get; private set; }
+            public VoxelNeighbour VoxelE { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the bottom-right.
             /// </summary>
-            public Voxel VoxelSE { get; private set; }
+            public VoxelNeighbour VoxelSE { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the bottom.
             /// </summary>
-            public Voxel VoxelS { get; private set; }
+            public VoxelNeighbour VoxelS { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the bottom-left.
             /// </summary>
-            public Voxel VoxelSW { get; private set; }
+            public VoxelNeighbour VoxelSW { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the left.
             /// </summary>
-            public Voxel VoxelW { get; private set; }
+            public VoxelNeighbour VoxelW { get; private set; }
 
             /// <summary>
             /// Gets the voxel to the top-left.
             /// </summary>
-            public Voxel VoxelNW { get; private set; }
+            public VoxelNeighbour VoxelNW { get; private set; }
+
+            /// <summary>
+            /// Enumerate the neighbouring voxels.
+            /// </summary>
+            /// <returns>An enumerator for the neighbouring voxels.</returns>
+            public IEnumerator<VoxelNeighbour> GetEnumerator()
+            {
+                yield return this.VoxelN;
+                yield return this.VoxelNE;
+                yield return this.VoxelE;
+                yield return this.VoxelSE;
+                yield return this.VoxelS;
+                yield return this.VoxelSW;
+                yield return this.VoxelW;
+                yield return this.VoxelNW;
+            }
+
+            /// <summary>
+            /// Enumerate the neighbouring voxels.
+            /// </summary>
+            /// <returns>An enumerator for the neighbouring voxels.</returns>
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
         }
     }
 }
