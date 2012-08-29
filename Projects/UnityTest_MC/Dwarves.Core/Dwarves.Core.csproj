@@ -48,6 +48,7 @@
     <Compile Include="VoxelTerrain\ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
     <Compile Include="VoxelTerrain\Generation\VoxelGenerator.cs" />
+    <Compile Include="VoxelTerrain\Generation\MeshGenerator.cs" />
     <Compile Include="VoxelTerrain\TerrainMaterial.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
