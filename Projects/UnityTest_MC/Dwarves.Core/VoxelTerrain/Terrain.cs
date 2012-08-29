@@ -54,7 +54,7 @@ namespace Dwarves.Core.VoxelTerrain
         /// <returns>The position in world coordinates.</returns>
         public static Position GetWorldCoordinates(Position chunkPos, Position chunkIndex)
         {
-            return new Position(chunkIndex.X * Chunk.Width + chunkPos.X, chunkIndex.Y * Chunk.Height + chunkPos.Y);
+            return new Position((chunkIndex.X * Chunk.Width) + chunkPos.X, (chunkIndex.Y * Chunk.Height) + chunkPos.Y);
         }
 
         /// <summary>
