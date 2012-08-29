@@ -14,13 +14,6 @@ namespace Dwarves.Core.VoxelTerrain.Generation
     public abstract class MeshGenerator
     {
         /// <summary>
-        /// Initializes a new instance of the MeshGenerator class.
-        /// </summary>
-        public MeshGenerator()
-        {
-        }
-
-        /// <summary>
         /// Update the mesh for the given terrain chunk.
         /// </summary>
         /// <param name="terrain">The terrain.</param>
