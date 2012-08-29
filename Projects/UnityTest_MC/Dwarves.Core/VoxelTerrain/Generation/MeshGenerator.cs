@@ -75,12 +75,16 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             {
                 foreach (VoxelNeighbour neighbour in voxelNeighbours)
                 {
-                    // Get the neighbour's neighbors
-                    VoxelNeighbours neighbourNeighbours =
-                        this.GetNeighbourVoxels(chunkPos.X, chunkPos.Y, chunk, chunkNeighbours);
+                    // A neighbour with a null chunk is one which is outside the world
+                    if (neighbour.Chunk != null)
+                    {
+                        // Get the neighbour's neighbors
+                        VoxelNeighbours neighbourNeighbours =
+                            this.GetNeighbourVoxels(chunkPos.X, chunkPos.Y, chunk, chunkNeighbours);
 
-                    // Update the neighbour voxel's mesh
-                    this.UpdateVoxelMesh(neighbour.Chunk, neighbour.Voxel, neighbourNeighbours);
+                        // Update the neighbour voxel's mesh
+                        this.UpdateVoxelMesh(neighbour.Chunk, neighbour.Voxel, neighbourNeighbours);
+                    }
                 }
             }
         }
