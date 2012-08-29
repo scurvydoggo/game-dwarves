@@ -60,7 +60,7 @@ namespace Dwarves.Core.VoxelTerrain
         public ChunkMesh Mesh { get; private set; }
 
         /// <summary>
-        /// Get the voxel at the given chunk coorinates.
+        /// Get the voxel at the given chunk coordinates.
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
