@@ -50,11 +50,11 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         {
             Chunk chunk = terrain.GetChunk(chunkIndex);
 
-            // Create the surface voxels, which have densities between 0.0 and 1.0
+            // Create the surface voxels
             int[] surfaceHeights = this.GenerateSurface(chunk.Voxels, chunkIndex, TerrainMaterial.Dirt);
 
-            // Now fill the rest of the terrain with full/empty voxels (density = 0 or 1)
-            this.FillBelowSurface(chunk.Voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
+            // Now fill the rest of the terrain
+            this.FillAroundSurface(chunk.Voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="surfaceHeights">The y value of each surface point.</param>
         /// <param name="material">The material to fill below surface.</param>
-        private void FillBelowSurface(
+        private void FillAroundSurface(
             ChunkVoxels chunk,
             Position chunkIndex,
             int[] surfaceHeights,
