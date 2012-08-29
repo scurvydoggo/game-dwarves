@@ -8,7 +8,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
     using Dwarves.Core.Noise;
 
     /// <summary>
-    /// Generates the voxels.
+    /// Generates the voxels for a chunk.
     /// </summary>
     public class VoxelGenerator
     {
@@ -42,17 +42,19 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         public int SurfacePeriod { get; set; }
 
         /// <summary>
-        /// Generate the voxels for the chunk.
+        /// Generate the voxels for the given terrain chunk.
         /// </summary>
-        /// <param name="chunk">The chunk.</param>
+        /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void Generate(ChunkVoxels chunk, Position chunkIndex)
+        public void Generate(Terrain terrain, Position chunkIndex)
         {
+            Chunk chunk = terrain.GetChunk(chunkIndex);
+
             // Create the surface voxels, which have densities between 0.0 and 1.0
-            int[] surfaceHeights = this.GenerateSurface(chunk, chunkIndex, TerrainMaterial.Dirt);
+            int[] surfaceHeights = this.GenerateSurface(chunk.Voxels, chunkIndex, TerrainMaterial.Dirt);
 
             // Now fill the rest of the terrain with full/empty voxels (density = 0 or 1)
-            this.FillBelowSurface(chunk, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
+            this.FillBelowSurface(chunk.Voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
         }
 
         /// <summary>

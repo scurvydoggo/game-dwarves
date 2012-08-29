@@ -37,15 +37,13 @@ namespace Dwarves.Core.VoxelTerrain
         }
 
         /// <summary>
-        /// Try to get the chunk at the given chunk coordinates.
+        /// Get the chunk at the given chunk index.
         /// </summary>
-        /// <param name="chunkX">The x position.</param>
-        /// <param name="chunkY">The y position.</param>
-        /// <param name="chunk">The chunk.</param>
-        /// <returns>True if the chunk was retrieved.</returns>
-        public bool TryGetChunk(int chunkX, int chunkY, out Chunk chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <returns>The chunk.</returns>
+        public Chunk GetChunk(Position chunkIndex)
         {
-            return this.TryGetChunk(Terrain.GetChunkIndex(chunkX, chunkY), out chunk);
+            return this.chunks[chunkIndex];
         }
 
         /// <summary>
