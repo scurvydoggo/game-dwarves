@@ -40,6 +40,9 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
                 Vector3[] vertices;
                 int[] indices;
 
+                // This point represents the front-lower-left corner of the cube
+                var cubePos = new Vector3(voxelSquare.LowerLeft.Position.X, voxelSquare.LowerLeft.Position.Y, z);
+
                 // Get the densities of the 8 corners of the cube at this depth
                 byte d0 = voxelSquare.LowerLeft.Voxel.GetDensity(z + 1);
                 byte d1 = voxelSquare.LowerRight.Voxel.GetDensity(z + 1);
@@ -52,7 +55,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
 
                 // Get the cube index for the given corner densities.
                 // This is an 8-bit bitmask with bits indicating if a corner is underneath the isolevel surface
-                byte cubeIndex = MarchingCubesLookup.GetCubeIndex(this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
+                byte cubeIndex = MarchingCubes.GetCubeIndex(this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
 
                 // The voxel is fully inside or outside the surface if cube index is 0 or 255
                 if (cubeIndex == 0 || cubeIndex == 255)
@@ -63,18 +66,19 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
 
                 // Get the edge index, which indicates which edges of the cube are intersected by the isolevel surface
                 // This is a 12-bit bitmask with bits indicating if an edge is intersected
-                int edgeIndex = MarchingCubesLookup.EdgeTable[cubeIndex];
+                int edgeIndex = MarchingCubes.EdgeTable[cubeIndex];
 
-                // Interpolate the 12 vertice points on the cube edges
-                vertices = null; // TODO
+                // Get the array of vertices for the cube
+                vertices =
+                    MarchingCubes.GetCubeVertices(cubePos, edgeIndex, this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
 
                 // Get the triangle indices
                 var indiceList = new List<int>();
-                for (int i = 0; MarchingCubesLookup.TriTable[cubeIndex][i] != -1; i += 3)
+                for (int i = 0; MarchingCubes.TriTable[cubeIndex][i] != -1; i += 3)
                 {
-                    indiceList.Add(MarchingCubesLookup.TriTable[cubeIndex][i]);
-                    indiceList.Add(MarchingCubesLookup.TriTable[cubeIndex][i + 2]);
-                    indiceList.Add(MarchingCubesLookup.TriTable[cubeIndex][i + 1]);
+                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i]);
+                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i + 2]);
+                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i + 1]);
                 }
 
                 // Set the value of the indices array

@@ -1,14 +1,17 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="MarchingCubesLookup.cs" company="Acidwashed Games">
+// <copyright file="MarchingCubes.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
 {
+    using System;
+    using UnityEngine;
+
     /// <summary>
-    /// Provides access to the Marching Cubes lookup tables.
+    /// Provides access to the Marching Cubes algorithm methods and lookup tables.
     /// </summary>
-    public static class MarchingCubesLookup
+    public static class MarchingCubes
     {
         #region Edge Table
 
@@ -292,6 +295,8 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
 
         #endregion
 
+        #region Public Methods
+
         /// <summary>
         /// Get the cube index for the cube with the given densities.
         /// </summary>
@@ -360,5 +365,152 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
 
             return cubeIndex;
         }
+
+        /// <summary>
+        /// Get the vertices on the 12 edges of the cube.
+        /// </summary>
+        /// <param name="position">The position of the cube.</param>
+        /// <param name="cubeIndex">The cube index.</param>
+        /// <param name="isolevel">The isolevel.</param>
+        /// <param name="density0">The density at vertex 0.</param>
+        /// <param name="density1">The density at vertex 1.</param>
+        /// <param name="density2">The density at vertex 2.</param>
+        /// <param name="density3">The density at vertex 3.</param>
+        /// <param name="density4">The density at vertex 4.</param>
+        /// <param name="density5">The density at vertex 5.</param>
+        /// <param name="density6">The density at vertex 6.</param>
+        /// <param name="density7">The density at vertex 7.</param>
+        /// <returns>The vertices on the 12 edges of the cube.</returns>
+        public static Vector3[] GetCubeVertices(
+            Vector3 position,
+            int cubeIndex,
+            byte isolevel,
+            byte density0,
+            byte density1,
+            byte density2,
+            byte density3,
+            byte density4,
+            byte density5,
+            byte density6,
+            byte density7)
+        {
+            var vertices = new Vector3[12];
+
+            // Get the vertices of the 8 corners of the cube
+            var vertex0 = new Vector3(position.x, position.y, position.z + 1);
+            var vertex1 = new Vector3(position.x + 1, position.y, position.z + 1);
+            var vertex2 = new Vector3(position.x + 1, position.y, position.z);
+            var vertex3 = new Vector3(position.x, position.y, position.z);
+            var vertex4 = new Vector3(position.x, position.y + 1, position.z + 1);
+            var vertex5 = new Vector3(position.x + 1, position.y + 1, position.z + 1);
+            var vertex6 = new Vector3(position.x + 1, position.y + 1, position.z);
+            var vertex7 = new Vector3(position.x, position.y + 1, position.z);
+
+            if ((cubeIndex & 1) != 0)
+            {
+                vertices[0] = MarchingCubes.Interpolate(isolevel, vertex0, vertex1, density0, density1);
+            }
+
+            if ((cubeIndex & 2) != 0)
+            {
+                vertices[1] = MarchingCubes.Interpolate(isolevel, vertex1, vertex2, density1, density2);
+            }
+
+            if ((cubeIndex & 4) != 0)
+            {
+                vertices[2] = MarchingCubes.Interpolate(isolevel, vertex2, vertex3, density2, density3);
+            }
+
+            if ((cubeIndex & 8) != 0)
+            {
+                vertices[3] = MarchingCubes.Interpolate(isolevel, vertex3, vertex0, density3, density0);
+            }
+
+            if ((cubeIndex & 16) != 0)
+            {
+                vertices[4] = MarchingCubes.Interpolate(isolevel, vertex4, vertex5, density4, density5);
+            }
+
+            if ((cubeIndex & 32) != 0)
+            {
+                vertices[5] = MarchingCubes.Interpolate(isolevel, vertex5, vertex6, density5, density6);
+            }
+
+            if ((cubeIndex & 64) != 0)
+            {
+                vertices[6] = MarchingCubes.Interpolate(isolevel, vertex6, vertex7, density6, density7);
+            }
+
+            if ((cubeIndex & 128) != 0)
+            {
+                vertices[7] = MarchingCubes.Interpolate(isolevel, vertex7, vertex4, density7, density4);
+            }
+
+            if ((cubeIndex & 256) != 0)
+            {
+                vertices[8] = MarchingCubes.Interpolate(isolevel, vertex0, vertex4, density0, density4);
+            }
+
+            if ((cubeIndex & 512) != 0)
+            {
+                vertices[9] = MarchingCubes.Interpolate(isolevel, vertex1, vertex5, density1, density5);
+            }
+
+            if ((cubeIndex & 1024) != 0)
+            {
+                vertices[10] = MarchingCubes.Interpolate(isolevel, vertex2, vertex6, density2, density6);
+            }
+
+            if ((cubeIndex & 2048) != 0)
+            {
+                vertices[11] = MarchingCubes.Interpolate(isolevel, vertex3, vertex7, density3, density7);
+            }
+
+            return vertices;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Interpolate the vertex position between the points A and B.
+        /// </summary>
+        /// <param name="isolevel">The isolevel.</param>
+        /// <param name="pointA">The first position.</param>
+        /// <param name="pointB">The second position.</param>
+        /// <param name="densityA">Density at the first position.</param>
+        /// <param name="densityB">Density at the second position.</param>
+        /// <returns>The vertex.</returns>
+        private static Vector3 Interpolate(
+            float isolevel,
+            Vector3 pointA,
+            Vector3 pointB,
+            float densityA,
+            float densityB)
+        {
+            if (Math.Abs(isolevel - densityA) < Const.Epsilon)
+            {
+                return pointA;
+            }
+            else if (Math.Abs(isolevel - densityB) < Const.Epsilon)
+            {
+                return pointB;
+            }
+            else if (Math.Abs(densityA - densityB) < Const.Epsilon)
+            {
+                return pointA;
+            }
+            else
+            {
+                float mu = (isolevel - densityA) / (densityB - densityA);
+                return new Vector3(
+                    pointA.x + (mu * (pointB.x - pointA.x)),
+                    pointA.y + (mu * (pointB.y - pointA.y)),
+                    pointA.z + (mu * (pointB.z - pointA.z)));
+            }
+        }
+
+        #endregion
     }
 }
