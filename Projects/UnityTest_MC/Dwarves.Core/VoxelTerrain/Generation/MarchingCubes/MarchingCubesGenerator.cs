@@ -35,7 +35,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
         protected override void UpdateVoxelMesh(VoxelSquare voxelSquare)
         {
             // Create a mesh within the each 'cube' of squares along the Z-axis
-            for (int z = 0; z < Voxel.Depth; z++)
+            for (int z = -1; z < Voxel.Depth; z++)
             {
                 Vector3[] vertices;
                 int[] indices;
