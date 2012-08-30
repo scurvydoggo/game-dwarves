@@ -7,6 +7,8 @@ namespace Dwarves.TestApplication
 {
     using Dwarves.Core;
     using Dwarves.Core.VoxelTerrain;
+    using Dwarves.Core.VoxelTerrain.Generation;
+    using Dwarves.Core.VoxelTerrain.Generation.MarchingCubes;
     using Dwarves.Core.VoxelTerrain.Load;
 
     /// <summary>
@@ -30,9 +32,15 @@ namespace Dwarves.TestApplication
         {
             var terrain = new Terrain();
 
+            var chunkIndex = new Position(0, 0);
+
             // Load the chunk
             var chunkLoader = new ChunkLoader(0);
-            chunkLoader.LoadChunk(terrain, new Position(0, 0));
+            chunkLoader.LoadChunk(terrain, chunkIndex);
+
+            // Generate the mesh
+            var meshGenerator = new MarchingCubesGenerator(127);
+            meshGenerator.UpdateChunk(terrain, chunkIndex);
         }
     }
 }
