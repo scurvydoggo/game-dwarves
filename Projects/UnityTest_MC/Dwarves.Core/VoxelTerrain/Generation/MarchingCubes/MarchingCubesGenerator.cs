@@ -85,7 +85,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
                 indices = indiceList.ToArray();
 
                 // Create the mesh object
-                // TODO
+                throw new NotImplementedException("Create marching cubes mesh not implemented!");
             }
         }
     }
