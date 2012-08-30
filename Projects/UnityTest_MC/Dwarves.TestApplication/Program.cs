@@ -5,7 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestApplication
 {
-    using Dwarves.Test;
     using UnityEngine;
 
     /// <summary>
@@ -19,11 +18,6 @@ namespace Dwarves.TestApplication
         /// <param name="args">The application args.</param>
         public static void Main(string[] args)
         {
-            var test = new MarchingCubesTest(128);
-
-            Vector3[] vertices;
-            int[] triangleIndices;
-            test.Load(out vertices, out triangleIndices);
         }
     }
 }

@@ -55,10 +55,6 @@
       <Project>{d9fd5f54-0cb6-43c0-a261-73adc0616555}</Project>
       <Name>Dwarves.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Dwarves.Test\Dwarves.Test.csproj">
-      <Project>{18c5ea28-f7fe-4f33-84c6-340d3f0ef34b}</Project>
-      <Name>Dwarves.Test</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
