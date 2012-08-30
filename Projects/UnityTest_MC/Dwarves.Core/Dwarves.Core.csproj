@@ -47,10 +47,13 @@
     <Compile Include="VoxelTerrain\ChunkMesh.cs" />
     <Compile Include="VoxelTerrain\ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
+    <Compile Include="VoxelTerrain\Generation\ChunkGenerator.cs" />
     <Compile Include="VoxelTerrain\Generation\MarchingCubes\MarchingCubesGenerator.cs" />
     <Compile Include="VoxelTerrain\Generation\MarchingCubes\MarchingCubes.cs" />
     <Compile Include="VoxelTerrain\Generation\VoxelGenerator.cs" />
     <Compile Include="VoxelTerrain\Generation\MeshGenerator.cs" />
+    <Compile Include="VoxelTerrain\Load\ChunkLoader.cs" />
+    <Compile Include="VoxelTerrain\Load\ChunkSerializer.cs" />
     <Compile Include="VoxelTerrain\TerrainMaterial.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -22,9 +22,9 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         }
 
         /// <summary>
-        /// Gets or sets the seed value.
+        /// Gets the seed value.
         /// </summary>
-        public float Seed { get; set; }
+        public float Seed { get; private set; }
 
         /// <summary>
         /// Gets or sets the Y position around which the generated surface oscillates
@@ -44,17 +44,15 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <summary>
         /// Generate the voxels for the given terrain chunk.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
+        /// <param name="voxels">The voxels to populate.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void Generate(Terrain terrain, Position chunkIndex)
+        public void Generate(ChunkVoxels voxels, Position chunkIndex)
         {
-            Chunk chunk = terrain.GetChunk(chunkIndex);
-
             // Create the surface voxels
-            int[] surfaceHeights = this.GenerateSurface(chunk.Voxels, chunkIndex, TerrainMaterial.Dirt);
+            int[] surfaceHeights = this.GenerateSurface(voxels, chunkIndex, TerrainMaterial.Dirt);
 
             // Now fill the rest of the terrain
-            this.FillAroundSurface(chunk.Voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
+            this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
         }
 
         /// <summary>

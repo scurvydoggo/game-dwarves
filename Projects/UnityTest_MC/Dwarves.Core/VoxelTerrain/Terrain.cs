@@ -77,5 +77,24 @@ namespace Dwarves.Core.VoxelTerrain
         {
             return this.chunks.TryGetValue(chunkIndex, out chunk);
         }
+        
+        /// <summary>
+        /// Add the chunk to the terrain.
+        /// </summary>
+        /// <param name="chunk">The chunk.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void AddChunk(Chunk chunk, Position chunkIndex)
+        {
+            this.chunks.Add(chunkIndex, chunk);
+        }
+
+        /// <summary>
+        /// Remove the chunk to the terrain.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void RemoveChunk(Position chunkIndex)
+        {
+            this.chunks.Remove(chunkIndex);
+        }
     }
 }

@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestApplication
 {
-    using UnityEngine;
+    using Dwarves.Core.VoxelTerrain;
 
     /// <summary>
     /// Entry point.
@@ -17,6 +17,14 @@ namespace Dwarves.TestApplication
         /// </summary>
         /// <param name="args">The application args.</param>
         public static void Main(string[] args)
+        {
+            TestMarchingCubes();
+        }
+
+        /// <summary>
+        /// Run a test for the marching cubes algorithm.
+        /// </summary>
+        private static void TestMarchingCubes()
         {
         }
     }
