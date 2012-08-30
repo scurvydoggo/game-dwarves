@@ -5,7 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestApplication
 {
+    using Dwarves.Core;
     using Dwarves.Core.VoxelTerrain;
+    using Dwarves.Core.VoxelTerrain.Load;
 
     /// <summary>
     /// Entry point.
@@ -26,6 +28,11 @@ namespace Dwarves.TestApplication
         /// </summary>
         private static void TestMarchingCubes()
         {
+            var terrain = new Terrain();
+
+            // Load the chunk
+            var chunkLoader = new ChunkLoader(0);
+            chunkLoader.LoadChunk(terrain, new Position(0, 0));
         }
     }
 }
