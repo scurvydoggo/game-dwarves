@@ -116,7 +116,8 @@ namespace Dwarves.Core.VoxelTerrain
                     return this.Density3;
 
                 default:
-                    throw new InvalidOperationException("Invalid z depth: " + z);
+                    // For depths outside the allowed range, treat it as empty space by returning max density
+                    return byte.MaxValue;
             }
         }
     }
