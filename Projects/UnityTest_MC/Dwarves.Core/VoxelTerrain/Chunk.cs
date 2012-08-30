@@ -69,5 +69,15 @@ namespace Dwarves.Core.VoxelTerrain
         {
             return this.Voxels[ChunkVoxels.GetIndex(x, y)];
         }
+
+        /// <summary>
+        /// Get the voxel at the given chunk coordinates.
+        /// </summary>
+        /// <param name="position">The position.</param>
+        /// <returns>The voxel.</returns>
+        public Voxel GetVoxel(Position position)
+        {
+            return this.GetVoxel(position.X, position.Y);
+        }
     }
 }

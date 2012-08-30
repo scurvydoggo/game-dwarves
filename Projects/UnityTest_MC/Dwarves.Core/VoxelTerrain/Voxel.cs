@@ -5,11 +5,19 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.VoxelTerrain
 {
+    using System;
+
     /// <summary>
-    /// A voxel.
+    /// A voxel, which represent the density of a point in a plane. Each 'cube' in the terrain is drawn in the space
+    /// between voxel points.
     /// </summary>
     public struct Voxel
     {
+        /// <summary>
+        /// The number of cubes drawn in the Z direction for voxels.
+        /// </summary>
+        public const int Depth = 4;
+
         /// <summary>
         /// An empty voxel.
         /// </summary>
@@ -85,5 +93,31 @@ namespace Dwarves.Core.VoxelTerrain
         /// Gets or sets the color. 15-bit RGB color with 5 bits per component. The last bit is unused.
         /// </summary>
         public short Color { get; set; }
+
+        /// <summary>
+        /// Gets the voxel density at the given Z depth.
+        /// </summary>
+        /// <param name="z">The z depth, which must be between 0 and Voxel.Depth inclusively.</param>
+        /// <returns>The density.</returns>
+        public byte GetDensity(int z)
+        {
+            switch (z)
+            {
+                case 0:
+                    return this.Density0;
+
+                case 1:
+                    return this.Density1;
+
+                case 2:
+                    return this.Density2;
+
+                case 3:
+                    return this.Density3;
+
+                default:
+                    throw new InvalidOperationException("Invalid z depth: " + z);
+            }
+        }
     }
 }

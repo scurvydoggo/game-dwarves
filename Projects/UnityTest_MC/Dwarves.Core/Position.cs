@@ -11,6 +11,11 @@ namespace Dwarves.Core
     public struct Position
     {
         /// <summary>
+        /// A position at 0,0.
+        /// </summary>
+        public static readonly Position Zero = new Position(0, 0);
+
+        /// <summary>
         /// Initializes a new instance of the Position struct.
         /// </summary>
         /// <param name="x">The x position.</param>

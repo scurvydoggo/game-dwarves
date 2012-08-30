@@ -23,16 +23,18 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
         /// Gets or sets the isolevel, which is the density at which the mesh surface lies.
         /// </summary>
         public byte IsoLevel { get; set; }
-
+        
         /// <summary>
-        /// Update the mesh for the given voxel.
+        /// Update the mesh for the given 2x2 square of voxels.
         /// </summary>
-        /// <param name="chunk">The chunk.</param>
-        /// <param name="voxel">The voxel.</param>
-        /// <param name="neighbours">The neighbouring voxels.</param>
-        protected override void UpdateVoxelMesh(Chunk chunk, Voxel voxel, MeshGenerator.VoxelNeighbours neighbours)
+        /// <param name="voxelSquare">The 2x2 square of voxels surrounding the mesh to update.</param>
+        protected override void UpdateVoxelMesh(VoxelSquare voxelSquare)
         {
-            // TODO
+            for (int z = 0; z < Voxel.Depth; z++)
+            {
+                // Get the density of each point for corners around the cube with bounds (x, y, z) to (x+1, y+1, x+1)
+                // ie. this voxel represents the cube's left-bottom-front corner
+            }
         }
     }
 }
