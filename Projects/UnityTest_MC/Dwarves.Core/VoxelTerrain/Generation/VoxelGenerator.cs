@@ -13,12 +13,30 @@ namespace Dwarves.Core.VoxelTerrain.Generation
     public class VoxelGenerator
     {
         /// <summary>
+        /// Default value.
+        /// </summary>
+        public const int DefaultSurfaceOrigin = 0;
+
+        /// <summary>
+        /// Default value.
+        /// </summary>
+        public const int DefaultSurfaceMaxHeight = 50;
+
+        /// <summary>
+        /// Default value.
+        /// </summary>
+        public const int DefaultSurfacePeriod = 100;
+
+        /// <summary>
         /// Initializes a new instance of the VoxelGenerator class.
         /// </summary>
         /// <param name="seed">The seed value.</param>
         public VoxelGenerator(float seed)
         {
             this.Seed = seed;
+            this.SurfaceOrigin = DefaultSurfaceOrigin;
+            this.SurfaceMaxHeight = DefaultSurfaceMaxHeight;
+            this.SurfacePeriod = DefaultSurfacePeriod;
         }
 
         /// <summary>
@@ -151,7 +169,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             {
                 int surfaceHeight = surfaceHeights[chunkX];
 
-                for (int chunkY = 0; chunkY < Chunk.Height; chunkX++)
+                for (int chunkY = 0; chunkY < Chunk.Height; chunkY++)
                 {
                     if (chunkY < surfaceHeight)
                     {
