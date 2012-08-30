@@ -13,6 +13,8 @@ namespace Dwarves.Core.VoxelTerrain.Generation
     /// </summary>
     public abstract class MeshGenerator
     {
+        #region Public Methods
+
         /// <summary>
         /// Update the mesh for the given terrain chunk.
         /// </summary>
@@ -86,11 +88,19 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             }
         }
 
+        #endregion
+
+        #region Protected Methods
+
         /// <summary>
         /// Update the mesh for the given 2x2 square of voxels.
         /// </summary>
         /// <param name="voxelSquare">The 2x2 square of voxels surrounding the mesh to update.</param>
         protected abstract void UpdateVoxelMesh(VoxelSquare voxelSquare);
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// Get the 2x2 square of adjacent voxels with the given voxel in the lower-left corner.
@@ -204,6 +214,10 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             return new VoxelSquare(voxel, voxelN, voxelNE, voxelE);
         }
 
+        #endregion
+
+        #region Inner Classes
+
         /// <summary>
         /// Information on a voxel.
         /// </summary>
@@ -307,5 +321,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
                 return this.GetEnumerator();
             }
         }
+
+        #endregion
     }
 }
