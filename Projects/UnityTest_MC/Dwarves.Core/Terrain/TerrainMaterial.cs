@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain
+namespace Dwarves.Core.Terrain
 {
     /// <summary>
     /// Represents a terrain material.

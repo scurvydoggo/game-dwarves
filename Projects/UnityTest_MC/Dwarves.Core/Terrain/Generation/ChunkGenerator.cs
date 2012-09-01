@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Generation
+namespace Dwarves.Core.Terrain.Generation
 {
     using System;
     using System.Collections.Generic;
@@ -41,7 +41,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>The generated chunk.</returns>
-        public Chunk Generate(Terrain terrain, Position chunkIndex)
+        public Chunk Generate(VoxelTerrain terrain, Position chunkIndex)
         {
             var chunk = new Chunk();
 

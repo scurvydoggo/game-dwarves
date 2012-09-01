@@ -3,12 +3,12 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Load
+namespace Dwarves.Core.Terrain.Load
 {
     using System;
     using System.Collections.Generic;
     using Dwarves.Core;
-    using Dwarves.Core.VoxelTerrain;
+    using Dwarves.Core.Terrain;
 
     /// <summary>
     /// Provides serialization and deserialization of terrain chunks.

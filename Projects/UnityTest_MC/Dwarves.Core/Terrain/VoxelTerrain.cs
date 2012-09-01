@@ -1,16 +1,16 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="Terrain.cs" company="Acidwashed Games">
+// <copyright file="VoxelTerrain.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain
+namespace Dwarves.Core.Terrain
 {
     using System.Collections.Generic;
 
     /// <summary>
     /// Represents the terrain.
     /// </summary>
-    public class Terrain
+    public class VoxelTerrain
     {
         /// <summary>
         /// The currently active chunks.
@@ -18,9 +18,9 @@ namespace Dwarves.Core.VoxelTerrain
         private Dictionary<Position, Chunk> chunks;
 
         /// <summary>
-        /// Initializes a new instance of the Terrain class.
+        /// Initializes a new instance of the VoxelTerrain class.
         /// </summary>
-        public Terrain()
+        public VoxelTerrain()
         {
             this.chunks = new Dictionary<Position, Chunk>();
         }

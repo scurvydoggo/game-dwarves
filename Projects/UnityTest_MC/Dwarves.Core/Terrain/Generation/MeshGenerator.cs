@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Generation
+namespace Dwarves.Core.Terrain.Generation
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void UpdateChunk(Terrain terrain, Position chunkIndex)
+        public void UpdateChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             Chunk chunk = terrain.GetChunk(chunkIndex);
 
@@ -52,10 +52,10 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <param name="terrain">The terrain.</param>
         /// <param name="position">The voxel position.</param>
         /// <param name="updateNeighbours">Indicates whether the neighbouring voxels should be updated.</param>
-        public void UpdateVoxel(Terrain terrain, Position position, bool updateNeighbours)
+        public void UpdateVoxel(VoxelTerrain terrain, Position position, bool updateNeighbours)
         {
             // Get the chunk
-            Position chunkIndex = Terrain.GetChunkIndex(position.X, position.Y);
+            Position chunkIndex = VoxelTerrain.GetChunkIndex(position.X, position.Y);
             Chunk chunk = terrain.GetChunk(chunkIndex);
             if (chunk == null)
             {
@@ -64,7 +64,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             }
 
             // Get the position in chunk coordinates
-            Position chunkPos = Terrain.GetChunkCoordinates(position);
+            Position chunkPos = VoxelTerrain.GetChunkCoordinates(position);
 
             // Get the neighbours of the chunk
             Chunk chunkN, chunkNE, chunkE;

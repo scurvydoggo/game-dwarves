@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
+namespace Dwarves.Core.Terrain.Generation.MarchingCubes
 {
     using System;
     using UnityEngine;

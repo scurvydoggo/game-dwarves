@@ -3,9 +3,9 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Load
+namespace Dwarves.Core.Terrain.Load
 {
-    using Dwarves.Core.VoxelTerrain.Generation;
+    using Dwarves.Core.Terrain.Generation;
 
     /// <summary>
     /// Responsible for loading and unloading terrain chunks.
@@ -49,7 +49,7 @@ namespace Dwarves.Core.VoxelTerrain.Load
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>The chunk that was loaded.</returns>
-        public Chunk LoadChunk(Terrain terrain, Position chunkIndex)
+        public Chunk LoadChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             // Deserialize or generate the chunk
             Chunk chunk;
@@ -74,7 +74,7 @@ namespace Dwarves.Core.VoxelTerrain.Load
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>The chunk that was unloaded; Null if the chunk was never loaded.</returns>
-        public Chunk UnloadChunk(Terrain terrain, Position chunkIndex)
+        public Chunk UnloadChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             // Get the chunk
             Chunk chunk;
