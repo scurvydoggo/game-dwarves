@@ -43,6 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actor\ActorComponent.cs" />
+    <Compile Include="Input\CameraMovementComponent.cs" />
+    <Compile Include="Input\TouchableComponent.cs" />
+    <Compile Include="Input\TouchableTerrainComponent.cs" />
+    <Compile Include="Input\TouchHandlerComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Terrain\ChunkComponent.cs" />
     <Compile Include="Terrain\TerrainComponent.cs" />
