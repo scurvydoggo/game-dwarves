@@ -43,10 +43,12 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initializes a new instance of the Chunk class.
         /// </summary>
-        public Chunk()
+        /// <param name="usage">The chunk usage type.</param>
+        public Chunk(ChunkUsage usage)
         {
             this.Voxels = new ChunkVoxels();
             this.Mesh = new ChunkMesh();
+            this.Usage = usage;
         }
 
         /// <summary>

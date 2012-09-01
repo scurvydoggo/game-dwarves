@@ -20,7 +20,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void UpdateChunk(VoxelTerrain terrain, Position chunkIndex)
+        public virtual void UpdateChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             Chunk chunk = terrain.GetChunk(chunkIndex);
 
@@ -52,7 +52,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="terrain">The terrain.</param>
         /// <param name="position">The voxel position.</param>
         /// <param name="updateNeighbours">Indicates whether the neighbouring voxels should be updated.</param>
-        public void UpdateVoxel(VoxelTerrain terrain, Position position, bool updateNeighbours)
+        public virtual void UpdateVoxel(VoxelTerrain terrain, Position position, bool updateNeighbours)
         {
             // Get the chunk
             Position chunkIndex = VoxelTerrain.GetChunkIndex(position.X, position.Y);

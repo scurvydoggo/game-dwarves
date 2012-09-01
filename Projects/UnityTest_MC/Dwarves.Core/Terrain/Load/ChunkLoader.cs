@@ -21,7 +21,7 @@ namespace Dwarves.Core.Terrain.Load
         /// <summary>
         /// Dynamically generates chunk voxels.
         /// </summary>
-        private ChunkVoxelGenerator generator;
+        private ChunkVoxelGenerator voxelGenerator;
 
         /// <summary>
         /// Initializes a new instance of the ChunkLoader class.
@@ -30,7 +30,7 @@ namespace Dwarves.Core.Terrain.Load
         public ChunkLoader(float seed)
         {
             this.serializer = new ChunkSerializer();
-            this.generator = new ChunkVoxelGenerator(seed);
+            this.voxelGenerator = new ChunkVoxelGenerator(seed);
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Dwarves.Core.Terrain.Load
         {
             get
             {
-                return this.generator.Seed;
+                return this.voxelGenerator.Seed;
             }
         }
 
@@ -49,22 +49,23 @@ namespace Dwarves.Core.Terrain.Load
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="usage">The chunk usage type.</param>
         /// <returns>The chunk that was loaded.</returns>
-        public Chunk LoadChunk(VoxelTerrain terrain, Position chunkIndex)
+        public Chunk LoadChunk(VoxelTerrain terrain, Position chunkIndex, ChunkUsage usage)
         {
             // Deserialize or generate the chunk
             Chunk chunk;
             if (!this.serializer.TryDeserializeChunk(chunkIndex, out chunk))
             {
                 // The chunk doesn't yet exist, so generate a new one
-                chunk = new Chunk();
-                this.generator.Generate(chunk.Voxels, chunkIndex);
+                chunk = new Chunk(usage);
+                this.voxelGenerator.Generate(chunk.Voxels, chunkIndex);
 
                 // Serialize the generated chunk
                 this.serializer.SerializeChunk(chunk, chunkIndex);
             }
 
-            // Add the chunk from the Terrain object
+            // Add the chunk to the terrain object
             terrain.AddChunk(chunk, chunkIndex);
 
             return chunk;

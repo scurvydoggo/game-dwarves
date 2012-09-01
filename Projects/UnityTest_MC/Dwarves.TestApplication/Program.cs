@@ -36,7 +36,7 @@ namespace Dwarves.TestApplication
 
             // Load the chunk
             var chunkLoader = new ChunkLoader(0);
-            chunkLoader.LoadChunk(terrain, chunkIndex);
+            chunkLoader.LoadChunk(terrain, chunkIndex, ChunkUsage.RenderingAndPhysics);
 
             // Generate the mesh
             var meshGenerator = new MarchingCubesGenerator(127);

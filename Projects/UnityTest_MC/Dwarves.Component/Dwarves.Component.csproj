@@ -51,7 +51,7 @@
     <Compile Include="Terrain\ChunkComponent.cs" />
     <Compile Include="Terrain\TerrainComponent.cs" />
     <Compile Include="Terrain\TerrainLoaderComponent.cs" />
-    <Compile Include="Terrain\ChunkRenderComponent.cs" />
+    <Compile Include="Terrain\TerrainMeshComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dwarves.Core\Dwarves.Core.csproj">

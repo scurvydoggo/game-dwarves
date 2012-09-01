@@ -16,6 +16,7 @@ namespace Dwarves.Component.Terrain
     /// Component for loading the terrain.
     /// </summary>
     [RequireComponent(typeof(TerrainComponent))]
+    [RequireComponent(typeof(TerrainMeshComponent))]
     public class TerrainLoaderComponent : MonoBehaviour
     {
         /// <summary>
@@ -29,9 +30,9 @@ namespace Dwarves.Component.Terrain
         private TerrainComponent cTerrain;
 
         /// <summary>
-        /// The mesh generator component.
+        /// The terrain render component.
         /// </summary>
-        private ChunkRenderComponent cTerrainRender;
+        private TerrainMeshComponent cTerrainRender;
 
         /// <summary>
         /// Gets the terrain chunk loader.
@@ -45,9 +46,9 @@ namespace Dwarves.Component.Terrain
         {
             this.actorChunks = new Dictionary<Position, ChunkUsage>();
 
-            // Get a reference to the related terrain components
+            // Get a reference to the related components
             this.cTerrain = this.GetComponent<TerrainComponent>();
-            this.cTerrainRender = this.GetComponent<ChunkRenderComponent>();
+            this.cTerrainRender = this.GetComponent<TerrainMeshComponent>();
 
             // Create the chunk loader
             this.ChunkLoader = new ChunkLoader(this.cTerrain.Seed);
@@ -153,27 +154,29 @@ namespace Dwarves.Component.Terrain
                     if ((chunk.Usage & ChunkUsage.Rendering) != 0 && (usage & ChunkUsage.Rendering) == 0)
                     {
                         // The mesh data is no longer required
-                        ChunkRenderComponent cChunk = this.GetChunkRenderComponent(chunkIndex);
-                        cChunk.ClearMesh();
+                        chunk.Mesh.ClearMesh();
                     }
                 }
             }
             else
             {
                 // Load the chunk data
-                chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex);
-
-                // Set the chunk usage flag
-                chunk.Usage = usage;
+                chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex, usage);
 
                 // Create the chunk game object
-                var chunkObject = new GameObject();
+                var chunkObject = new GameObject(this.GetChunkLabel(chunkIndex));
                 chunkObject.transform.parent = this.transform;
                 ChunkComponent cChunk = chunkObject.AddComponent<ChunkComponent>();
-                ChunkRenderComponent cChunkRender = chunkObject.AddComponent<ChunkRenderComponent>();
                 cChunk.Chunk = chunk;
                 cChunk.ChunkIndex = chunkIndex;
-                cChunkRender.IsoLevel = this.cTerrain.IsoLevel;
+
+                // Generate the chunk mesh if necessary
+                if ((usage & ChunkUsage.Rendering) != 0)
+                {
+                    Debug.Log("Generating mesh...");
+                    this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
+                    Debug.Log("Mesh generated!");
+                }
             }
         }
 
@@ -185,7 +188,7 @@ namespace Dwarves.Component.Terrain
         private void UnloadChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             // Destroy the chunk's game object
-            ChunkRenderComponent cChunk = this.GetChunkRenderComponent(chunkIndex);
+            ChunkComponent cChunk = this.GetChunkComponent(chunkIndex);
             if (cChunk != null)
             {
                 GameObject.Destroy(cChunk.gameObject);
@@ -196,21 +199,24 @@ namespace Dwarves.Component.Terrain
         }
 
         /// <summary>
-        /// Gets the chunk render component with the given index.
+        /// Gets the chunk component with the given index.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
-        /// <returns>The chunk render component; Null if it does not exist.</returns>
-        private ChunkRenderComponent GetChunkRenderComponent(Position chunkIndex)
+        /// <returns>The chunk component; Null if it does not exist.</returns>
+        private ChunkComponent GetChunkComponent(Position chunkIndex)
         {
-            foreach (ChunkRenderComponent cRender in this.GetComponentsInChildren<ChunkRenderComponent>(true))
-            {
-                if (cRender.ChunkIndex.Equals(chunkIndex))
-                {
-                    return cRender;
-                }
-            }
+            Transform chunkTransform = this.transform.FindChild(this.GetChunkLabel(chunkIndex));
+            return chunkTransform != null ? chunkTransform.GetComponent<ChunkComponent>() : null;
+        }
 
-            return null;
+        /// <summary>
+        /// Gets the label for the given chunk index.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <returns>The chunk label.</returns>
+        private string GetChunkLabel(Position chunkIndex)
+        {
+            return string.Format("Chunk[{0},{1}]", chunkIndex.X, chunkIndex.Y);
         }
     }
 }
