@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.Core", "Dwarves.Cor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.TestApplication", "Dwarves.TestApplication\Dwarves.TestApplication.csproj", "{1C0242D4-54E1-4981-9535-175CB9AAD037}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dwarves.Component", "Dwarves.Component\Dwarves.Component.csproj", "{510179E4-C7DD-4CD4-81AA-3412E7608450}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{1C0242D4-54E1-4981-9535-175CB9AAD037}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C0242D4-54E1-4981-9535-175CB9AAD037}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C0242D4-54E1-4981-9535-175CB9AAD037}.Release|Any CPU.Build.0 = Release|Any CPU
+		{510179E4-C7DD-4CD4-81AA-3412E7608450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{510179E4-C7DD-4CD4-81AA-3412E7608450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{510179E4-C7DD-4CD4-81AA-3412E7608450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{510179E4-C7DD-4CD4-81AA-3412E7608450}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
