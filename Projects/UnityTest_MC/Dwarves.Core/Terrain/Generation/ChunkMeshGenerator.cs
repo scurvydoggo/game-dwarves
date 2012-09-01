@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="MeshGenerator.cs" company="Acidwashed Games">
+// <copyright file="ChunkMeshGenerator.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -11,7 +11,7 @@ namespace Dwarves.Core.Terrain.Generation
     /// <summary>
     /// Generates the mesh for a chunk.
     /// </summary>
-    public abstract class MeshGenerator
+    public abstract class ChunkMeshGenerator
     {
         #region Public Methods
 

@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="VoxelGenerator.cs" company="Acidwashed Games">
+// <copyright file="ChunkVoxelGenerator.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -10,7 +10,7 @@ namespace Dwarves.Core.Terrain.Generation
     /// <summary>
     /// Generates the voxels for a chunk.
     /// </summary>
-    public class VoxelGenerator
+    public class ChunkVoxelGenerator
     {
         /// <summary>
         /// Default value.
@@ -28,10 +28,10 @@ namespace Dwarves.Core.Terrain.Generation
         public const int DefaultSurfacePeriod = 100;
 
         /// <summary>
-        /// Initializes a new instance of the VoxelGenerator class.
+        /// Initializes a new instance of the ChunkVoxelGenerator class.
         /// </summary>
         /// <param name="seed">The seed value.</param>
-        public VoxelGenerator(float seed)
+        public ChunkVoxelGenerator(float seed)
         {
             this.Seed = seed;
             this.SurfaceOrigin = DefaultSurfaceOrigin;

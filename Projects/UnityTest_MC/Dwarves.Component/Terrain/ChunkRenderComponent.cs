@@ -45,7 +45,7 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// Gets the mesh generator.
         /// </summary>
-        public MeshGenerator MeshGenerator { get; private set; }
+        public ChunkMeshGenerator MeshGenerator { get; private set; }
 
         /// <summary>
         /// Gets the chunk index.

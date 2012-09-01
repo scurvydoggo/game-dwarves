@@ -51,11 +51,10 @@
     <Compile Include="Terrain\ChunkUsage.cs" />
     <Compile Include="Terrain\ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
-    <Compile Include="Terrain\Generation\ChunkGenerator.cs" />
     <Compile Include="Terrain\Generation\MarchingCubes\MarchingCubesGenerator.cs" />
     <Compile Include="Terrain\Generation\MarchingCubes\MarchingCubes.cs" />
-    <Compile Include="Terrain\Generation\VoxelGenerator.cs" />
-    <Compile Include="Terrain\Generation\MeshGenerator.cs" />
+    <Compile Include="Terrain\Generation\ChunkVoxelGenerator.cs" />
+    <Compile Include="Terrain\Generation\ChunkMeshGenerator.cs" />
     <Compile Include="Terrain\Load\ChunkLoader.cs" />
     <Compile Include="Terrain\Load\ChunkSerializer.cs" />
     <Compile Include="Terrain\TerrainMaterial.cs" />

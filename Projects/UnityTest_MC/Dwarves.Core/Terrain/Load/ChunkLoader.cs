@@ -21,7 +21,7 @@ namespace Dwarves.Core.Terrain.Load
         /// <summary>
         /// Dynamically generates chunk voxels.
         /// </summary>
-        private ChunkGenerator generator;
+        private ChunkVoxelGenerator generator;
 
         /// <summary>
         /// Initializes a new instance of the ChunkLoader class.
@@ -30,7 +30,7 @@ namespace Dwarves.Core.Terrain.Load
         public ChunkLoader(float seed)
         {
             this.serializer = new ChunkSerializer();
-            this.generator = new ChunkGenerator(seed);
+            this.generator = new ChunkVoxelGenerator(seed);
         }
 
         /// <summary>
@@ -57,7 +57,8 @@ namespace Dwarves.Core.Terrain.Load
             if (!this.serializer.TryDeserializeChunk(chunkIndex, out chunk))
             {
                 // The chunk doesn't yet exist, so generate a new one
-                chunk = this.generator.Generate(terrain, chunkIndex);
+                chunk = new Chunk();
+                this.generator.Generate(chunk.Voxels, chunkIndex);
 
                 // Serialize the generated chunk
                 this.serializer.SerializeChunk(chunk, chunkIndex);

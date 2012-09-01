@@ -13,7 +13,7 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
     /// <summary>
     /// Generates the mesh for a chunk using the Marching Cubes algorithm.
     /// </summary>
-    public class MarchingCubesGenerator : MeshGenerator
+    public class MarchingCubesGenerator : ChunkMeshGenerator
     {
         /// <summary>
         /// Initializes a new instance of the MarchingCubesGenerator class.
