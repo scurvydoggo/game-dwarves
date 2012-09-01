@@ -72,7 +72,7 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
                 int edgeIndex = MarchingCubes.EdgeTable[cubeIndex];
 
                 // Get the array of vertices for the cube
-                var lowerLeft = new Vector3(voxelSquare.LowerLeft.Position.X, voxelSquare.LowerLeft.Position.Y, z);
+                var lowerLeft = new Vector3(voxelSquare.WorldOrigin.X, voxelSquare.WorldOrigin.Y, z);
                 Vector3[] vertices =
                     MarchingCubes.GetCubeVertices(lowerLeft, edgeIndex, this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
                 vertexList.AddRange(vertices);

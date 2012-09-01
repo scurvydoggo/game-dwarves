@@ -30,15 +30,20 @@ namespace Dwarves.Core.Terrain.Generation
             terrain.TryGetChunk(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
             terrain.TryGetChunk(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
+            // Get the origin point of the chunk
+            var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
+            
             // Update the meshes for each voxel in the chunk
             for (int x = 0; x < Chunk.Width; x++)
             {
                 for (int y = 0; y < Chunk.Height; y++)
                 {
+                    var chunkPos = new Position(x, y);
+                    var worldPos = new Position(chunkOrigin.X + x, chunkOrigin.Y + y);
+
                     // Get the voxel 2x2 voxel square with this position in the lower-left corner
-                    var position = new Position(x, y);
-                    VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(position), chunk, position);
-                    VoxelSquare voxelSquare = this.GetVoxelSquare(voxel, chunkN, chunkNE, chunkE);
+                    VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(chunkPos), chunk, chunkPos);
+                    VoxelSquare voxelSquare = this.GetVoxelSquare(voxel, worldPos, chunkN, chunkNE, chunkE);
 
                     // Update the voxel's mesh
                     this.UpdateVoxelMesh(voxelSquare);
@@ -74,7 +79,7 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Get the voxel 2x2 voxel square with this position in the lower-left corner
             VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(chunkPos), chunk, chunkPos);
-            VoxelSquare voxelSquare = this.GetVoxelSquare(voxel, chunkN, chunkNE, chunkE);
+            VoxelSquare voxelSquare = this.GetVoxelSquare(voxel, position, chunkN, chunkNE, chunkE);
 
             // Update the voxel's mesh
             this.UpdateVoxelMesh(voxelSquare);
@@ -106,11 +111,17 @@ namespace Dwarves.Core.Terrain.Generation
         /// Get the 2x2 square of adjacent voxels with the given voxel in the lower-left corner.
         /// </summary>
         /// <param name="voxel">The voxel in the square's lower-left corner.</param>
+        /// <param name="worldOrigin">The world position of the lower-left corner.</param>
         /// <param name="chunkN">The chunk above the voxel's chunk.</param>
         /// <param name="chunkNE">The chunk to the upper-right of the voxel's chunk.</param>
         /// <param name="chunkE">The chunk to the left of the voxel's chunk.</param>
         /// <returns>The voxel square.</returns>
-        private VoxelSquare GetVoxelSquare(VoxelInfo voxel, Chunk chunkN, Chunk chunkNE, Chunk chunkE)
+        private VoxelSquare GetVoxelSquare(
+            VoxelInfo voxel,
+            Position worldOrigin,
+            Chunk chunkN,
+            Chunk chunkNE,
+            Chunk chunkE)
         {
             VoxelInfo voxelN, voxelNE, voxelE;
 
@@ -211,7 +222,7 @@ namespace Dwarves.Core.Terrain.Generation
                 }
             }
 
-            return new VoxelSquare(voxel, voxelN, voxelNE, voxelE);
+            return new VoxelSquare(worldOrigin, voxel, voxelN, voxelNE, voxelE);
         }
 
         #endregion
@@ -268,17 +279,29 @@ namespace Dwarves.Core.Terrain.Generation
             /// <summary>
             /// Initializes a new instance of the VoxelSquare class.
             /// </summary>
+            /// <param name="worldOrigin">The world position of the lower-left corner.</param>
             /// <param name="lowerLeft">The voxel at the lower-left corner.</param>
             /// <param name="lowerRight">The voxel at the lower-right corner.</param>
             /// <param name="upperLeft">The voxel at the upper-left corner.</param>
             /// <param name="upperRight">The voxel at the upper-right corner.</param>
-            public VoxelSquare(VoxelInfo lowerLeft, VoxelInfo lowerRight, VoxelInfo upperLeft, VoxelInfo upperRight)
+            public VoxelSquare(
+                Position worldOrigin,
+                VoxelInfo lowerLeft,
+                VoxelInfo lowerRight,
+                VoxelInfo upperLeft,
+                VoxelInfo upperRight)
             {
+                this.WorldOrigin = worldOrigin;
                 this.LowerLeft = lowerLeft;
                 this.LowerRight = upperRight;
                 this.UpperLeft = lowerRight;
                 this.UpperRight = upperLeft;
             }
+
+            /// <summary>
+            /// Gets the world position of the lower-left corner.
+            /// </summary>
+            public Position WorldOrigin { get; private set; }
 
             /// <summary>
             /// Gets the voxel at the lower-left corner.
