@@ -103,6 +103,9 @@ namespace Dwarves.Component.Terrain
             // Recalculate the mesh normals
             this.cMeshFilter.mesh.RecalculateNormals();
 
+            // TODO: FIXME: Test code. Use Dirt material by default for now
+            this.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Dirt");
+
             // Reset the mesh changed flag
             this.Chunk.Mesh.ResetMeshChanged();
         }
