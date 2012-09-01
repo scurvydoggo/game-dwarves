@@ -8,7 +8,7 @@ Projects/UnityTest_MC/Unity/MarchingCubesTest/*.sln
 Projects/UnityTest_MC/Unity/MarchingCubesTest/*.csproj
 Projects/UnityTest_MC/Unity/MarchingCubesTest/Library/
 *Dwarves.Core.dll
-*Dwarves.Test.dll
+*Dwarves.Component.dll
 *.suo
 *.user
 *.cachefile
