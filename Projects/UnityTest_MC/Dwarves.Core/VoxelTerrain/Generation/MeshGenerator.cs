@@ -115,8 +115,8 @@ namespace Dwarves.Core.VoxelTerrain.Generation
             VoxelInfo voxelN, voxelNE, voxelE;
 
             // Check if the voxel position is on the border of the chunk
-            bool isBorderN = voxel.Position.X == Chunk.Height - 1;
-            bool isBorderE = voxel.Position.Y == Chunk.Width - 1;
+            bool isBorderN = voxel.Position.Y == Chunk.Height - 1;
+            bool isBorderE = voxel.Position.X == Chunk.Width - 1;
             
             // Get the positions of the neighbouring voxels
             var positionN = new Position(voxel.Position.X, voxel.Position.Y + 1);
