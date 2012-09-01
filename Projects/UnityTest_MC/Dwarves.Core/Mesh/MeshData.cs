@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Mesh
 {
+    using UnityEngine;
+
     /// <summary>
     /// Contains data used in contructing unity meshes.
     /// </summary>
@@ -18,7 +20,7 @@ namespace Dwarves.Core.Mesh
         /// <param name="uvs">The UV coordinates.</param>
         /// <param name="normals">The normals.</param>
         /// <param name="colors">The colors.</param>
-        public MeshData(object[] vertices, int[] triangles, object[] uvs, object[] normals, object[] colors)
+        public MeshData(Vector3[] vertices, int[] triangles, object[] uvs, object[] normals, object[] colors)
         {
             this.Vertices = vertices;
             this.TriangleIndices = triangles;
@@ -30,7 +32,7 @@ namespace Dwarves.Core.Mesh
         /// <summary>
         /// Gets the vertices.
         /// </summary>
-        public object[] Vertices { get; private set; }
+        public Vector3[] Vertices { get; private set; }
 
         /// <summary>
         /// Gets the triangle indices.

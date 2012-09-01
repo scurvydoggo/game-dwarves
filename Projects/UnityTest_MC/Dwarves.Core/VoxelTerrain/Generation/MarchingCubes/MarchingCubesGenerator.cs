@@ -7,6 +7,7 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
 {
     using System;
     using System.Collections.Generic;
+    using Dwarves.Core.Mesh;
     using UnityEngine;
 
     /// <summary>
@@ -34,15 +35,12 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
         /// <param name="voxelSquare">The 2x2 square of voxels surrounding the mesh to update.</param>
         protected override void UpdateVoxelMesh(VoxelSquare voxelSquare)
         {
-            // Create a mesh within the each 'cube' of squares along the Z-axis
+            // Build the list of vertices for each 'cube' of squares along the Z-axis
+            var vertexList = new List<Vector3>();
+            var indiceList = new List<int>();
+            int vertexOffset = 0;
             for (int z = -1; z < Voxel.Depth; z++)
             {
-                Vector3[] vertices;
-                int[] indices;
-
-                // This point represents the front-lower-left corner of the cube
-                var cubePos = new Vector3(voxelSquare.LowerLeft.Position.X, voxelSquare.LowerLeft.Position.Y, z);
-
                 // Get the densities of the 8 corners of the cube at this depth
                 byte d0 = voxelSquare.LowerLeft.Voxel.GetDensity(z + 1);
                 byte d1 = voxelSquare.LowerRight.Voxel.GetDensity(z + 1);
@@ -57,11 +55,16 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
                 // This is an 8-bit bitmask with bits indicating if a corner is underneath the isolevel surface
                 byte cubeIndex = MarchingCubes.GetCubeIndex(this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
 
-                // The voxel is fully inside or outside the surface if cube index is 0 or 255
-                if (cubeIndex == 0 || cubeIndex == 255)
+                // Check if the voxel is fully inside or outside the surface
+                if (cubeIndex == 0)
                 {
-                    // TODO: Clear any voxel mesh at this position and return
-                    throw new NotImplementedException("Clear empty mesh not implemented!");
+                    // The point is fully inside the surface, which means no need to iterate deeper
+                    break;
+                }
+                else if (cubeIndex == 255)
+                {
+                    // The point is outside of the surface, so continue with the next Z-depth
+                    continue;
                 }
 
                 // Get the edge index, which indicates which edges of the cube are intersected by the isolevel surface
@@ -69,23 +72,41 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
                 int edgeIndex = MarchingCubes.EdgeTable[cubeIndex];
 
                 // Get the array of vertices for the cube
-                vertices =
-                    MarchingCubes.GetCubeVertices(cubePos, edgeIndex, this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
+                var lowerLeft = new Vector3(voxelSquare.LowerLeft.Position.X, voxelSquare.LowerLeft.Position.Y, z);
+                Vector3[] vertices =
+                    MarchingCubes.GetCubeVertices(lowerLeft, edgeIndex, this.IsoLevel, d0, d1, d2, d3, d4, d5, d6, d7);
+                vertexList.AddRange(vertices);
 
-                // Get the triangle indices
-                var indiceList = new List<int>();
+                // Get the indices which indicate which vertices each triangle will use
                 for (int i = 0; MarchingCubes.TriTable[cubeIndex][i] != -1; i += 3)
                 {
-                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i]);
-                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i + 2]);
-                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i + 1]);
+                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i] + vertexOffset);
+                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i + 2] + vertexOffset);
+                    indiceList.Add(MarchingCubes.TriTable[cubeIndex][i + 1] + vertexOffset);
                 }
 
-                // Set the value of the indices array
-                indices = indiceList.ToArray();
+                // Update the vertex offset so that indices are correct for the next Z-depth
+                vertexOffset += vertices.Length;
+            }
 
+            // Create/Clear the mesh in the chunk
+            if (indiceList.Count > 0)
+            {
                 // Create the mesh object
-                throw new NotImplementedException("Create marching cubes mesh not implemented!");
+                var mesh = new MeshData(
+                    vertexList.ToArray(),
+                    indiceList.ToArray(),
+                    null,
+                    null,
+                    null);
+
+                // Update the chunk
+                voxelSquare.LowerLeft.Chunk.Mesh.SetMesh(voxelSquare.LowerLeft.Position, mesh);
+            }
+            else
+            {
+                // The mesh is empty, so make sure it is cleared on the chunk
+                voxelSquare.LowerLeft.Chunk.Mesh.RemoveMesh(voxelSquare.LowerLeft.Position);
             }
         }
     }

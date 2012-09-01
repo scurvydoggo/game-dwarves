@@ -66,17 +66,6 @@ namespace Dwarves.Core.VoxelTerrain
         /// <summary>
         /// Update the mesh for the voxel at the given chunk coordinates.
         /// </summary>
-        /// <param name="chunkX">The x position.</param>
-        /// <param name="chunkY">The y position.</param>
-        /// <param name="mesh">The mesh.</param>
-        public void SetMesh(int chunkX, int chunkY, MeshData mesh)
-        {
-            this.SetMesh(new Position(chunkX, chunkY), mesh);
-        }
-
-        /// <summary>
-        /// Update the mesh for the voxel at the given chunk coordinates.
-        /// </summary>
         /// <param name="chunkPos">The position.</param>
         /// <param name="mesh">The mesh.</param>
         public void SetMesh(Position chunkPos, MeshData mesh)
@@ -101,6 +90,25 @@ namespace Dwarves.Core.VoxelTerrain
             this.TriangleIndicesCount += mesh.TriangleIndices.Length;
 
             this.MeshChanged = true;
+        }
+
+        /// <summary>
+        /// Remove the mesh at the given chunk coordinates.
+        /// </summary>
+        /// <param name="chunkPos">The position.</param>
+        public void RemoveMesh(Position chunkPos)
+        {
+            MeshData mesh;
+            if (this.voxelMeshes.TryGetValue(chunkPos, out mesh))
+            {
+                this.voxelMeshes.Remove(chunkPos);
+
+                // Decrement the counts for the mesh that was removed
+                this.VertexCount -= mesh.Vertices.Length;
+                this.TriangleIndicesCount -= mesh.TriangleIndices.Length;
+
+                this.MeshChanged = true;
+            }
         }
 
         /// <summary>
