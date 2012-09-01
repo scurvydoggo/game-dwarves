@@ -66,11 +66,17 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// <param name="chunkIndex">The chunk index.</param>
         public void Generate(ChunkVoxels voxels, Position chunkIndex)
         {
+            // TEST: Just fill all with dirt
+            for (int i = 0; i < Chunk.Width * Chunk.Height; i++)
+            {
+                voxels[i] = new Voxel(TerrainMaterial.Dirt, byte.MinValue);
+            }
+
             // Create the surface voxels
-            int[] surfaceHeights = this.GenerateSurface(voxels, chunkIndex, TerrainMaterial.Dirt);
+            //int[] surfaceHeights = this.GenerateSurface(voxels, chunkIndex, TerrainMaterial.Dirt);
 
             // Now fill the rest of the terrain
-            this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
+            //this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
         }
 
         /// <summary>
