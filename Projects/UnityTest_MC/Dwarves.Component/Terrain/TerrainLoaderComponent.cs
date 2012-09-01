@@ -16,7 +16,6 @@ namespace Dwarves.Component.Terrain
     /// Component for loading the terrain.
     /// </summary>
     [RequireComponent(typeof(TerrainComponent))]
-    [RequireComponent(typeof(ChunkRenderComponent))]
     public class TerrainLoaderComponent : MonoBehaviour
     {
         /// <summary>
@@ -44,12 +43,14 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.ChunkLoader = new ChunkLoader(this.cTerrain.Seed);
             this.actorChunks = new Dictionary<Position, ChunkUsage>();
 
             // Get a reference to the related terrain components
             this.cTerrain = this.GetComponent<TerrainComponent>();
             this.cTerrainRender = this.GetComponent<ChunkRenderComponent>();
+
+            // Create the chunk loader
+            this.ChunkLoader = new ChunkLoader(this.cTerrain.Seed);
         }
 
         /// <summary>

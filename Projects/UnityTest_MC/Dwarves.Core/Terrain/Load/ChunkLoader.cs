@@ -6,6 +6,7 @@
 namespace Dwarves.Core.Terrain.Load
 {
     using Dwarves.Core.Terrain.Generation;
+    using UnityEngine;
 
     /// <summary>
     /// Responsible for loading and unloading terrain chunks.
