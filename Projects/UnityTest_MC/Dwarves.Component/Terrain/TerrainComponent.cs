@@ -15,16 +15,6 @@ namespace Dwarves.Component.Terrain
     public class TerrainComponent : MonoBehaviour
     {
         /// <summary>
-        /// The seed for generating terrain.
-        /// </summary>
-        public float Seed;
-
-        /// <summary>
-        /// The isolevel for the rendered terrain. This is the density at which the surface is rendered.
-        /// </summary>
-        public byte IsoLevel;
-
-        /// <summary>
         /// Gets the terrain.
         /// </summary>
         public VoxelTerrain Terrain { get; private set; }

@@ -16,6 +16,8 @@ namespace Dwarves.Component.Terrain
     /// <summary>
     /// Core component for chunk entity.
     /// </summary>
+    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
     public class ChunkComponent : MonoBehaviour
     {
         /// <summary>

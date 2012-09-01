@@ -20,6 +20,11 @@ namespace Dwarves.Component.Terrain
     public class TerrainLoaderComponent : MonoBehaviour
     {
         /// <summary>
+        /// The seed for generating terrain.
+        /// </summary>
+        public float Seed;
+
+        /// <summary>
         /// The chunks which contain actors.
         /// </summary>
         private Dictionary<Position, ChunkUsage> actorChunks;
@@ -51,7 +56,7 @@ namespace Dwarves.Component.Terrain
             this.cTerrainRender = this.GetComponent<TerrainMeshComponent>();
 
             // Create the chunk loader
-            this.ChunkLoader = new ChunkLoader(this.cTerrain.Seed);
+            this.ChunkLoader = new ChunkLoader(this.Seed);
         }
 
         /// <summary>
@@ -173,9 +178,7 @@ namespace Dwarves.Component.Terrain
                 // Generate the chunk mesh if necessary
                 if ((usage & ChunkUsage.Rendering) != 0)
                 {
-                    Debug.Log("Generating mesh...");
                     this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
-                    Debug.Log("Mesh generated!");
                 }
             }
         }

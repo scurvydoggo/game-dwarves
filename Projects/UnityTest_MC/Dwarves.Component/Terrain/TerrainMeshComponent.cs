@@ -18,7 +18,7 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// The isolevel for the rendered terrain. This is the density at which the surface is rendered.
         /// </summary>
-        public byte IsoLevel;
+        public int IsoLevel = 127;
 
         /// <summary>
         /// Gets the mesh generator component.
@@ -30,7 +30,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.MeshGenerator = new MarchingCubesGenerator(this.IsoLevel);
+            this.MeshGenerator = new MarchingCubesGenerator((byte)this.IsoLevel);
         }
         
         /// <summary>
