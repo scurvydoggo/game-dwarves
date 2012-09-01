@@ -60,6 +60,11 @@ namespace Dwarves.Core.Terrain
         public ChunkMesh Mesh { get; private set; }
 
         /// <summary>
+        /// Gets or sets the chunk usage.
+        /// </summary>
+        public ChunkUsage Usage { get; set; }
+
+        /// <summary>
         /// Get the voxel at the given chunk coordinates.
         /// </summary>
         /// <param name="x">The x position.</param>

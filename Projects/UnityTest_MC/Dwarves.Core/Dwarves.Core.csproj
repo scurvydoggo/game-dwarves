@@ -42,9 +42,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bounds\IMethodGetBounds.cs" />
+    <Compile Include="Bounds\MethodGetBoundsCamera.cs" />
     <Compile Include="Const.cs" />
     <Compile Include="Noise\SimplexNoise.cs" />
+    <Compile Include="Rectangle.cs" />
     <Compile Include="Terrain\ChunkMesh.cs" />
+    <Compile Include="Terrain\ChunkUsage.cs" />
     <Compile Include="Terrain\ChunkVoxels.cs" />
     <Compile Include="Mesh\MeshData.cs" />
     <Compile Include="Terrain\Generation\ChunkGenerator.cs" />

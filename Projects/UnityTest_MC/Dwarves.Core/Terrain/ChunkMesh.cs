@@ -64,7 +64,7 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Update the mesh for the voxel at the given chunk coordinates.
+        /// Update the voxel mesh at the given chunk coordinates.
         /// </summary>
         /// <param name="chunkPos">The position.</param>
         /// <param name="mesh">The mesh.</param>
@@ -93,7 +93,7 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Remove the mesh at the given chunk coordinates.
+        /// Remove the voxel mesh at the given chunk coordinates.
         /// </summary>
         /// <param name="chunkPos">The position.</param>
         public void RemoveMesh(Position chunkPos)
@@ -109,6 +109,17 @@ namespace Dwarves.Core.Terrain
 
                 this.MeshChanged = true;
             }
+        }
+
+        /// <summary>
+        /// Clear the mesh data.
+        /// </summary>
+        public void ClearMesh()
+        {
+            this.voxelMeshes = new Dictionary<Position, MeshData>();
+            this.VertexCount = 0;
+            this.TriangleIndicesCount = 0;
+            this.MeshChanged = true;
         }
 
         /// <summary>

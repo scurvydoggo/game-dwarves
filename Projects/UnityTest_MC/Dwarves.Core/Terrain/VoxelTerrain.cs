@@ -5,12 +5,13 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
+    using System.Collections;
     using System.Collections.Generic;
 
     /// <summary>
     /// Represents the terrain.
     /// </summary>
-    public class VoxelTerrain
+    public class VoxelTerrain : IEnumerable<KeyValuePair<Position, Chunk>>
     {
         /// <summary>
         /// The currently active chunks.
@@ -95,6 +96,24 @@ namespace Dwarves.Core.Terrain
         public void RemoveChunk(Position chunkIndex)
         {
             this.chunks.Remove(chunkIndex);
+        }
+
+        /// <summary>
+        /// Gets an enumerator for the each active chunk. Key = Chunk Index; Value = Chunk.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
+        public IEnumerator<KeyValuePair<Position, Chunk>> GetEnumerator()
+        {
+            return this.chunks.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Gets an enumerator for the each active chunk.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
