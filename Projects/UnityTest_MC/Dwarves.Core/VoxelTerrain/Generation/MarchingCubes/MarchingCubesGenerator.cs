@@ -58,13 +58,13 @@ namespace Dwarves.Core.VoxelTerrain.Generation.MarchingCubes
                 // Check if the voxel is fully inside or outside the surface
                 if (cubeIndex == 0)
                 {
-                    // The point is fully inside the surface, which means no need to iterate deeper
-                    break;
+                    // The point is outside of the surface, so continue with the next Z-depth
+                    continue;
                 }
                 else if (cubeIndex == 255)
                 {
-                    // The point is outside of the surface, so continue with the next Z-depth
-                    continue;
+                    // The point is fully inside the surface, which means no need to iterate deeper
+                    break;
                 }
 
                 // Get the edge index, which indicates which edges of the cube are intersected by the isolevel surface
