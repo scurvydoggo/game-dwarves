@@ -43,12 +43,10 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initializes a new instance of the Chunk class.
         /// </summary>
-        /// <param name="usage">The chunk usage type.</param>
-        public Chunk(ChunkUsage usage)
+        public Chunk()
         {
             this.Voxels = new ChunkVoxels();
             this.Mesh = new ChunkMesh();
-            this.Usage = usage;
         }
 
         /// <summary>
@@ -60,11 +58,6 @@ namespace Dwarves.Core.Terrain
         /// Gets the meshes in this chunk.
         /// </summary>
         public ChunkMesh Mesh { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the chunk usage.
-        /// </summary>
-        public ChunkUsage Usage { get; set; }
 
         /// <summary>
         /// Get the voxel at the given chunk coordinates.

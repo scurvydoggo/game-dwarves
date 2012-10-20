@@ -50,7 +50,7 @@ namespace Dwarves.Component.Terrain
         public void Update()
         {
             // Check if the chunk mesh needs to be rebuilt
-            if ((this.Chunk.Usage & ChunkUsage.Rendering) != 0 && this.Chunk.Mesh.MeshChanged)
+            if (this.Chunk.Mesh.MeshChanged)
             {
                 this.RebuildMesh();
             }

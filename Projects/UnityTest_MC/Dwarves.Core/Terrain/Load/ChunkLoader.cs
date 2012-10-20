@@ -50,15 +50,14 @@ namespace Dwarves.Core.Terrain.Load
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="usage">The chunk usage type.</param>
-        /// <returns>The chunk that was loaded.</returns>
-        public Chunk LoadChunk(VoxelTerrain terrain, Position chunkIndex, ChunkUsage usage)
+        public Chunk LoadChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             // Deserialize or generate the chunk
             Chunk chunk;
             if (!this.serializer.TryDeserializeChunk(chunkIndex, out chunk))
             {
                 // The chunk doesn't yet exist, so generate a new one
-                chunk = new Chunk(usage);
+                chunk = new Chunk();
                 this.voxelGenerator.Generate(chunk.Voxels, chunkIndex);
 
                 // Serialize the generated chunk

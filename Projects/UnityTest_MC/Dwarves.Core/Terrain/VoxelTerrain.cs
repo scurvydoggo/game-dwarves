@@ -69,6 +69,16 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
+        /// Gets a value indicating whether chunk with the given given index is loaded.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <returns>True if the chunk was retrieved.</returns>
+        public bool IsChunkLoaded(Position chunkIndex)
+        {
+            return this.chunks.ContainsKey(chunkIndex);
+        }
+
+        /// <summary>
         /// Try to get the chunk at the given chunk index.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>

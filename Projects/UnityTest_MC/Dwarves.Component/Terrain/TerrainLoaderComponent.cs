@@ -27,7 +27,7 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// The chunks which contain actors.
         /// </summary>
-        private Dictionary<Position, ChunkUsage> actorChunks;
+        private HashSet<Position> loadedChunks;
 
         /// <summary>
         /// The core terrain component.
@@ -49,7 +49,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.actorChunks = new Dictionary<Position, ChunkUsage>();
+            this.loadedChunks = new HashSet<Position>();
 
             // Get a reference to the related components
             this.cTerrain = this.GetComponent<TerrainComponent>();
@@ -72,25 +72,13 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         private void LoadUnloadActorChunks()
         {
-            this.actorChunks.Clear();
+            this.loadedChunks.Clear();
 
             // Iterate through each actor in the scene
             foreach (ActorComponent actor in GameObject.FindObjectsOfType(typeof(ActorComponent)))
             {
                 // Get the chunk-bounds of the actor
                 Rectangle bounds = actor.GetChunkBounds();
-
-                // Determine the usage that the actor requires
-                ChunkUsage usage = ChunkUsage.Data;
-                if (actor.RequiresTerrainRendering)
-                {
-                    usage |= ChunkUsage.Rendering;
-                }
-
-                if (actor.RequiresTerrainPhysics)
-                {
-                    usage |= ChunkUsage.Physics;
-                }
 
                 // Step through each chunk index in the actor bounds
                 for (int x = bounds.X; x < bounds.Right; x++)
@@ -99,20 +87,10 @@ namespace Dwarves.Component.Terrain
                     {
                         Position chunkIndex = new Position(x, y);
 
-                        // Update the actor chunks dictionary
-                        ChunkUsage existingUsage;
-                        if (this.actorChunks.TryGetValue(chunkIndex, out existingUsage))
+                        // Update the loaded chunks list
+                        if (!this.loadedChunks.Contains(chunkIndex))
                         {
-                            // Escalate the chunk usage if this actor requires more from it
-                            ChunkUsage newUsage = existingUsage | usage;
-                            if (newUsage != existingUsage)
-                            {
-                                this.actorChunks[chunkIndex] = newUsage;
-                            }
-                        }
-                        else
-                        {
-                            this.actorChunks.Add(chunkIndex, usage);
+                            this.loadedChunks.Add(chunkIndex);
                         }
                     }
                 }
@@ -122,7 +100,7 @@ namespace Dwarves.Component.Terrain
             var toRemove = new List<Position>();
             foreach (KeyValuePair<Position, Chunk> kvp in this.cTerrain.Terrain)
             {
-                if (!this.actorChunks.ContainsKey(kvp.Key))
+                if (!this.loadedChunks.Contains(kvp.Key))
                 {
                     toRemove.Add(kvp.Key);
                 }
@@ -135,9 +113,9 @@ namespace Dwarves.Component.Terrain
             }
 
             // Load/update the new/modified chunks
-            foreach (KeyValuePair<Position, ChunkUsage> kvp in this.actorChunks)
+            foreach (Position chunkIndex in this.loadedChunks)
             {
-                this.LoadUpdateChunk(this.cTerrain.Terrain, kvp.Key, kvp.Value);
+                this.LoadUpdateChunk(this.cTerrain.Terrain, chunkIndex);
             }
         }
 
@@ -146,40 +124,22 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         /// <param name="terrain">The terrain object.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        /// <param name="usage">The chunk usage.</param>
-        private void LoadUpdateChunk(VoxelTerrain terrain, Position chunkIndex, ChunkUsage usage)
+        private void LoadUpdateChunk(VoxelTerrain terrain, Position chunkIndex)
         {
-            // Load the chunk or get the existing chunk
-            Chunk chunk;
-            if (this.cTerrain.Terrain.TryGetChunk(chunkIndex, out chunk))
-            {
-                // The chunk is already loaded. Check if the chunk usage needs to be updated.
-                if (chunk.Usage != usage)
-                {
-                    if ((chunk.Usage & ChunkUsage.Rendering) != 0 && (usage & ChunkUsage.Rendering) == 0)
-                    {
-                        // The mesh data is no longer required
-                        chunk.Mesh.ClearMesh();
-                    }
-                }
-            }
-            else
+            if (!this.cTerrain.Terrain.IsChunkLoaded(chunkIndex))
             {
                 // Load the chunk data
-                chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex, usage);
+                Chunk chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex);
 
                 // Create the chunk game object
                 var chunkObject = new GameObject(this.GetChunkLabel(chunkIndex));
                 chunkObject.transform.parent = this.transform;
-                ChunkComponent cChunk = chunkObject.AddComponent<ChunkComponent>();
-                cChunk.Chunk = chunk;
-                cChunk.ChunkIndex = chunkIndex;
+                ChunkComponent chunkComponent = chunkObject.AddComponent<ChunkComponent>();
+                chunkComponent.Chunk = chunk;
+                chunkComponent.ChunkIndex = chunkIndex;
 
-                // Generate the chunk mesh if necessary
-                if ((usage & ChunkUsage.Rendering) != 0)
-                {
-                    this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
-                }
+                // Generate the chunk mesh
+                this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
             }
         }
 
