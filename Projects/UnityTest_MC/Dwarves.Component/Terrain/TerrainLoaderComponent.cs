@@ -85,37 +85,34 @@ namespace Dwarves.Component.Terrain
                 {
                     for (int y = bounds.Y; y > bounds.Bottom; y--)
                     {
-                        Position chunkIndex = new Position(x, y);
+                        var chunkIndex = new Position(x, y);
 
                         // Update the loaded chunks list
-                        if (!this.loadedChunks.Contains(chunkIndex))
-                        {
-                            this.loadedChunks.Add(chunkIndex);
-                        }
+                        this.loadedChunks.Add(chunkIndex);
                     }
                 }
             }
 
             // Check if any chunks are now off screen
             var toRemove = new List<Position>();
-            foreach (KeyValuePair<Position, Chunk> kvp in this.cTerrain.Terrain)
+            foreach (Position chunkIndex in this.cTerrain.Terrain.Chunks.Keys)
             {
-                if (!this.loadedChunks.Contains(kvp.Key))
+                if (!this.loadedChunks.Contains(chunkIndex))
                 {
-                    toRemove.Add(kvp.Key);
+                    toRemove.Add(chunkIndex);
                 }
-            }
-
-            // Unload chunks that are no longer used
-            foreach (Position chunkIndex in toRemove)
-            {
-                this.UnloadChunk(this.cTerrain.Terrain, chunkIndex);
             }
 
             // Load/update the new/modified chunks
             foreach (Position chunkIndex in this.loadedChunks)
             {
                 this.LoadUpdateChunk(this.cTerrain.Terrain, chunkIndex);
+            }
+
+            // Unload chunks that are no longer used
+            foreach (Position chunkIndex in toRemove)
+            {
+                this.UnloadChunk(this.cTerrain.Terrain, chunkIndex);
             }
         }
 
@@ -126,7 +123,7 @@ namespace Dwarves.Component.Terrain
         /// <param name="chunkIndex">The chunk index.</param>
         private void LoadUpdateChunk(VoxelTerrain terrain, Position chunkIndex)
         {
-            if (!this.cTerrain.Terrain.IsChunkLoaded(chunkIndex))
+            if (!this.cTerrain.Terrain.Chunks.ContainsKey(chunkIndex))
             {
                 // Load the chunk data
                 Chunk chunk = this.ChunkLoader.LoadChunk(terrain, chunkIndex);

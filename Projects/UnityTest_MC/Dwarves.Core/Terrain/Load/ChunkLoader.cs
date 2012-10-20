@@ -65,7 +65,7 @@ namespace Dwarves.Core.Terrain.Load
             }
 
             // Add the chunk to the terrain object
-            terrain.AddChunk(chunk, chunkIndex);
+            terrain.Chunks.Add(chunkIndex, chunk);
 
             return chunk;
         }
@@ -80,7 +80,7 @@ namespace Dwarves.Core.Terrain.Load
         {
             // Get the chunk
             Chunk chunk;
-            if (!terrain.TryGetChunk(chunkIndex, out chunk))
+            if (!terrain.Chunks.TryGetValue(chunkIndex, out chunk))
             {
                 // The chunk isn't loaded so do nothing
                 return null;
@@ -90,7 +90,7 @@ namespace Dwarves.Core.Terrain.Load
             this.serializer.SerializeChunk(chunk, chunkIndex);
 
             // Remove the chunk from the Terrain object
-            terrain.RemoveChunk(chunkIndex);
+            terrain.Chunks.Remove(chunkIndex);
 
             return chunk;
         }

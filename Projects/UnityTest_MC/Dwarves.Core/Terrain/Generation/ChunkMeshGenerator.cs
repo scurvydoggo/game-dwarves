@@ -22,13 +22,13 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="chunkIndex">The chunk index.</param>
         public virtual void UpdateChunk(VoxelTerrain terrain, Position chunkIndex)
         {
-            Chunk chunk = terrain.GetChunk(chunkIndex);
+            Chunk chunk = terrain.Chunks[chunkIndex];
 
             // Get the neighbours of the chunk
             Chunk chunkN, chunkNE, chunkE;
-            terrain.TryGetChunk(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
-            terrain.TryGetChunk(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
-            terrain.TryGetChunk(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
             // Get the origin point of the chunk
             var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
@@ -61,8 +61,8 @@ namespace Dwarves.Core.Terrain.Generation
         {
             // Get the chunk
             Position chunkIndex = VoxelTerrain.GetChunkIndex(position.X, position.Y);
-            Chunk chunk = terrain.GetChunk(chunkIndex);
-            if (chunk == null)
+            Chunk chunk;
+            if (!terrain.Chunks.TryGetValue(chunkIndex, out chunk))
             {
                 // The given position is outside the known world, so do nothing
                 return;
@@ -73,9 +73,9 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Get the neighbours of the chunk
             Chunk chunkN, chunkNE, chunkE;
-            terrain.TryGetChunk(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
-            terrain.TryGetChunk(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
-            terrain.TryGetChunk(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
             // Get the voxel 2x2 voxel square with this position in the lower-left corner
             VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(chunkPos), chunk, chunkPos);

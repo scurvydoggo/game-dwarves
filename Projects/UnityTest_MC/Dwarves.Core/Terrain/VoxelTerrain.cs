@@ -11,20 +11,20 @@ namespace Dwarves.Core.Terrain
     /// <summary>
     /// Represents the terrain.
     /// </summary>
-    public class VoxelTerrain : IEnumerable<KeyValuePair<Position, Chunk>>
+    public class VoxelTerrain
     {
-        /// <summary>
-        /// The currently active chunks.
-        /// </summary>
-        private Dictionary<Position, Chunk> chunks;
-
         /// <summary>
         /// Initializes a new instance of the VoxelTerrain class.
         /// </summary>
         public VoxelTerrain()
         {
-            this.chunks = new Dictionary<Position, Chunk>();
+            this.Chunks = new Dictionary<Position, Chunk>();
         }
+
+        /// <summary>
+        /// Gets the currently active chunks.
+        /// </summary>
+        public Dictionary<Position, Chunk> Chunks { get; private set; }
 
         /// <summary>
         /// Get the index of the chunk at the given world coordinates.
@@ -56,74 +56,6 @@ namespace Dwarves.Core.Terrain
         public static Position GetWorldCoordinates(Position chunkPos, Position chunkIndex)
         {
             return new Position((chunkIndex.X * Chunk.Width) + chunkPos.X, (chunkIndex.Y * Chunk.Height) + chunkPos.Y);
-        }
-
-        /// <summary>
-        /// Get the chunk at the given chunk index.
-        /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        /// <returns>The chunk.</returns>
-        public Chunk GetChunk(Position chunkIndex)
-        {
-            return this.chunks[chunkIndex];
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether chunk with the given given index is loaded.
-        /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        /// <returns>True if the chunk was retrieved.</returns>
-        public bool IsChunkLoaded(Position chunkIndex)
-        {
-            return this.chunks.ContainsKey(chunkIndex);
-        }
-
-        /// <summary>
-        /// Try to get the chunk at the given chunk index.
-        /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        /// <param name="chunk">The chunk.</param>
-        /// <returns>True if the chunk was retrieved.</returns>
-        public bool TryGetChunk(Position chunkIndex, out Chunk chunk)
-        {
-            return this.chunks.TryGetValue(chunkIndex, out chunk);
-        }
-        
-        /// <summary>
-        /// Add the chunk to the terrain.
-        /// </summary>
-        /// <param name="chunk">The chunk.</param>
-        /// <param name="chunkIndex">The chunk index.</param>
-        public void AddChunk(Chunk chunk, Position chunkIndex)
-        {
-            this.chunks.Add(chunkIndex, chunk);
-        }
-
-        /// <summary>
-        /// Remove the chunk to the terrain.
-        /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        public void RemoveChunk(Position chunkIndex)
-        {
-            this.chunks.Remove(chunkIndex);
-        }
-
-        /// <summary>
-        /// Gets an enumerator for the each active chunk. Key = Chunk Index; Value = Chunk.
-        /// </summary>
-        /// <returns>The enumerator.</returns>
-        public IEnumerator<KeyValuePair<Position, Chunk>> GetEnumerator()
-        {
-            return this.chunks.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Gets an enumerator for the each active chunk.
-        /// </summary>
-        /// <returns>The enumerator.</returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
         }
     }
 }
