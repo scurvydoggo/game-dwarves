@@ -22,9 +22,8 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="chunkIndex">The chunk index.</param>
         public virtual void UpdateChunk(VoxelTerrain terrain, Position chunkIndex)
         {
+            // Get the chunk and the neighbours
             Chunk chunk = terrain.Chunks[chunkIndex];
-
-            // Get the neighbours of the chunk
             Chunk chunkN, chunkNE, chunkE;
             terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
             terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
@@ -48,6 +47,72 @@ namespace Dwarves.Core.Terrain.Generation
                     // Update the voxel's mesh
                     this.UpdateVoxelMesh(voxelSquare);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Update the mesh for each voxel along the top border of the given terrain chunk.
+        /// </summary>
+        /// <param name="terrain">The terrain.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void UpdateChunkBorderTop(VoxelTerrain terrain, Position chunkIndex)
+        {
+            // Get the chunk and the neighbours
+            Chunk chunk = terrain.Chunks[chunkIndex];
+            Chunk chunkN, chunkNE, chunkE;
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+
+            // Get the origin point of the chunk
+            var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
+
+            // Update the meshes for each voxel along the top border of the chunk
+            int y = Chunk.Height - 1;
+            for (int x = 0; x < Chunk.Width; x++)
+            {
+                var chunkPos = new Position(x, y);
+                var worldPos = new Position(chunkOrigin.X + x, chunkOrigin.Y + y);
+
+                // Get the voxel 2x2 voxel square with this position in the lower-left corner
+                VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(chunkPos), chunk, chunkPos);
+                VoxelSquare voxelSquare = this.GetVoxelSquare(voxel, worldPos, chunkN, chunkNE, chunkE);
+
+                // Update the voxel's mesh
+                this.UpdateVoxelMesh(voxelSquare);
+            }
+        }
+
+        /// <summary>
+        /// Update the mesh for each voxel along the right border of the given terrain chunk.
+        /// </summary>
+        /// <param name="terrain">The terrain.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void UpdateChunkBorderRight(VoxelTerrain terrain, Position chunkIndex)
+        {
+            // Get the chunk and the neighbours
+            Chunk chunk = terrain.Chunks[chunkIndex];
+            Chunk chunkN, chunkNE, chunkE;
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+
+            // Get the origin point of the chunk
+            var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
+
+            // Update the meshes for each voxel in the chunk
+            int x = Chunk.Width - 1;
+            for (int y = 0; y < Chunk.Height; y++)
+            {
+                var chunkPos = new Position(x, y);
+                var worldPos = new Position(chunkOrigin.X + x, chunkOrigin.Y + y);
+
+                // Get the voxel 2x2 voxel square with this position in the lower-left corner
+                VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(chunkPos), chunk, chunkPos);
+                VoxelSquare voxelSquare = this.GetVoxelSquare(voxel, worldPos, chunkN, chunkNE, chunkE);
+
+                // Update the voxel's mesh
+                this.UpdateVoxelMesh(voxelSquare);
             }
         }
 

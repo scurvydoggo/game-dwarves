@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
+    using System;
     using System.Collections.Generic;
     using Dwarves.Component.Bounds;
     using Dwarves.Core;
@@ -33,6 +34,23 @@ namespace Dwarves.Component.Terrain
         /// The terrain render component.
         /// </summary>
         private TerrainMeshComponent cTerrainRender;
+
+        /// <summary>
+        /// Bitwise values indicating chunk border.
+        /// </summary>
+        [Flags]
+        private enum ChunkNeighbour
+        {
+            /// <summary>
+            /// The neighbour to the top.
+            /// </summary>
+            Top = 1,
+
+            /// <summary>
+            /// The neighbour to the right.
+            /// </summary>
+            Right = 2
+        }
 
         /// <summary>
         /// Gets the terrain chunk loader.
@@ -75,11 +93,8 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         private void LoadUnloadActorChunks()
         {
-            var activeChunks = new HashSet<Position>();
-            var toRemove = new HashSet<Position>();
-            var toGenerateMesh = new List<Position>();
-
             // Check which chunks are currently active
+            var activeChunks = new HashSet<Position>();
             foreach (ActorComponent actor in GameObject.FindObjectsOfType(typeof(ActorComponent)))
             {
                 // Get the chunk-bounds of the actor
@@ -96,38 +111,13 @@ namespace Dwarves.Component.Terrain
             }
 
             // Check if any chunks are now off screen and will need to be removed
+            var toRemove = new HashSet<Position>();
             foreach (Position chunkIndex in this.cTerrain.Terrain.Chunks.Keys)
             {
                 if (!activeChunks.Contains(chunkIndex))
                 {
                     toRemove.Add(chunkIndex);
                 }
-            }
-
-            // Load the new chunk data
-            foreach (Position chunkIndex in activeChunks)
-            {
-                if (!this.cTerrain.Terrain.Chunks.ContainsKey(chunkIndex))
-                {
-                    // Load the chunk data
-                    Chunk chunk = this.ChunkLoader.LoadChunk(this.cTerrain.Terrain, chunkIndex);
-
-                    // Create the chunk game object
-                    var chunkObject = new GameObject(TerrainLoaderComponent.GetChunkLabel(chunkIndex));
-                    chunkObject.transform.parent = this.transform;
-                    ChunkComponent chunkComponent = chunkObject.AddComponent<ChunkComponent>();
-                    chunkComponent.Chunk = chunk;
-                    chunkComponent.ChunkIndex = chunkIndex;
-
-                    // Add the chunk to a list indicating that it's mesh needs to be generated
-                    toGenerateMesh.Add(chunkIndex);
-                }
-            }
-
-            // Generate the meshes for the newly loaded chunks
-            foreach (Position chunkIndex in toGenerateMesh)
-            {
-                this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
             }
 
             // Unload chunks that are no longer used
@@ -143,6 +133,58 @@ namespace Dwarves.Component.Terrain
                 // Unload the chunk data
                 this.ChunkLoader.UnloadChunk(this.cTerrain.Terrain, chunkIndex);
             }
+
+            // Load the new chunk data
+            var meshRequired = new List<Position>();
+            var meshBorderRequired = new Dictionary<Position, ChunkNeighbour>();
+            foreach (Position chunkIndex in activeChunks)
+            {
+                if (!this.cTerrain.Terrain.Chunks.ContainsKey(chunkIndex))
+                {
+                    // Load the chunk data
+                    Chunk chunk = this.ChunkLoader.LoadChunk(this.cTerrain.Terrain, chunkIndex);
+
+                    // Create the chunk game object
+                    var chunkObject = new GameObject(TerrainLoaderComponent.GetChunkLabel(chunkIndex));
+                    chunkObject.transform.parent = this.transform;
+                    ChunkComponent chunkComponent = chunkObject.AddComponent<ChunkComponent>();
+                    chunkComponent.Chunk = chunk;
+                    chunkComponent.ChunkIndex = chunkIndex;
+
+                    // Add the chunk to a list indicating that it's mesh needs to be generated
+                    meshRequired.Add(chunkIndex);
+
+                    // Check if any neighbouring chunks are already loaded. In that case, the bordering voxels of the
+                    // neighbours need to be re-generated, as previously this space was empty
+                    this.CheckNeighbour(
+                        new Position(chunkIndex.X, chunkIndex.Y - 1), ChunkNeighbour.Top, meshBorderRequired);
+                    this.CheckNeighbour(
+                        new Position(chunkIndex.X - 1, chunkIndex.Y), ChunkNeighbour.Right, meshBorderRequired);
+                }
+            }
+
+            // Generate the meshes for the newly loaded chunks
+            foreach (Position chunkIndex in meshRequired)
+            {
+                this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
+            }
+
+            // Re-generate the borders of the chunk meshes that have had a neighbour added
+            foreach (KeyValuePair<Position, ChunkNeighbour> kvp in meshBorderRequired)
+            {
+                Position chunkIndex = kvp.Key;
+                ChunkNeighbour borders = kvp.Value;
+
+                if ((borders & ChunkNeighbour.Top) != 0)
+                {
+                    this.cTerrainRender.MeshGenerator.UpdateChunkBorderTop(this.cTerrain.Terrain, chunkIndex);
+                }
+
+                if ((borders & ChunkNeighbour.Right) != 0)
+                {
+                    this.cTerrainRender.MeshGenerator.UpdateChunkBorderRight(this.cTerrain.Terrain, chunkIndex);
+                }
+            }
         }
 
         /// <summary>
@@ -154,6 +196,31 @@ namespace Dwarves.Component.Terrain
         {
             Transform chunkTransform = this.transform.FindChild(TerrainLoaderComponent.GetChunkLabel(chunkIndex));
             return chunkTransform != null ? chunkTransform.GetComponent<ChunkComponent>() : null;
+        }
+
+        /// <summary>
+        /// Check if the chunk at the given index exists and if so update the dictionary to indicate that the chunk's
+        /// border needs to be regenerated.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="neighbour">The border.</param>
+        /// <param name="borders">The chunk borders that need to have their mesh re-generated.</param>
+        private void CheckNeighbour(
+            Position chunkIndex,
+            ChunkNeighbour neighbour,
+            Dictionary<Position, ChunkNeighbour> borders)
+        {
+            if (this.cTerrain.Terrain.Chunks.ContainsKey(chunkIndex))
+            {
+                if (borders.ContainsKey(chunkIndex))
+                {
+                    borders[chunkIndex] |= neighbour;
+                }
+                else
+                {
+                    borders.Add(chunkIndex, neighbour);
+                }
+            }
         }
     }
 }
