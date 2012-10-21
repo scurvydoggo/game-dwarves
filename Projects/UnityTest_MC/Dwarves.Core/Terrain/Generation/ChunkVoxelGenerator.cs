@@ -72,11 +72,11 @@ namespace Dwarves.Core.Terrain.Generation
                 voxels[i] = new Voxel(TerrainMaterial.Dirt, byte.MinValue);
             }
 
-            // Create the surface voxels
-            //int[] surfaceHeights = this.GenerateSurface(voxels, chunkIndex, TerrainMaterial.Dirt);
+            //// Create the surface voxels
+            ////int[] surfaceHeights = this.GenerateSurface(voxels, chunkIndex, TerrainMaterial.Dirt);
 
-            // Now fill the rest of the terrain
-            //this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
+            //// Now fill the rest of the terrain
+            ////this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
         }
 
         /// <summary>
