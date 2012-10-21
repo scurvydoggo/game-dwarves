@@ -28,7 +28,7 @@ namespace Dwarves.Core.Terrain.Generation
         public const int DefaultSurfacePeriod = 100;
 
         /// <summary>
-        /// Initializes a new instance of the ChunkVoxelGenerator class.
+        /// Initialises a new instance of the ChunkVoxelGenerator class.
         /// </summary>
         /// <param name="seed">The seed value.</param>
         public ChunkVoxelGenerator(float seed)

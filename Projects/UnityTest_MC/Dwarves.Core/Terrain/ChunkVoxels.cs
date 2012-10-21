@@ -16,7 +16,7 @@ namespace Dwarves.Core.Terrain
         private Voxel[] voxels;
 
         /// <summary>
-        /// Initializes a new instance of the ChunkVoxels class.
+        /// Initialises a new instance of the ChunkVoxels class.
         /// </summary>
         public ChunkVoxels()
         {

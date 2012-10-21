@@ -16,7 +16,7 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
     public class MarchingCubesGenerator : ChunkMeshGenerator
     {
         /// <summary>
-        /// Initializes a new instance of the MarchingCubesGenerator class.
+        /// Initialises a new instance of the MarchingCubesGenerator class.
         /// </summary>
         /// <param name="isoLevel">The isolevel, which is the density at which the mesh surface lies.</param>
         public MarchingCubesGenerator(byte isoLevel)

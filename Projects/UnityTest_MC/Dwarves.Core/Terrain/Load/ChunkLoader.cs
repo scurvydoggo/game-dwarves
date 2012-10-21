@@ -14,9 +14,9 @@ namespace Dwarves.Core.Terrain.Load
     public class ChunkLoader
     {
         /// <summary>
-        /// Serializes and deserializes terrain chunks.
+        /// Serializes and deserialises terrain chunks.
         /// </summary>
-        private ChunkSerializer serializer;
+        private ChunkSerialiser serializer;
 
         /// <summary>
         /// Dynamically generates chunk voxels.
@@ -24,12 +24,12 @@ namespace Dwarves.Core.Terrain.Load
         private ChunkVoxelGenerator voxelGenerator;
 
         /// <summary>
-        /// Initializes a new instance of the ChunkLoader class.
+        /// Initialises a new instance of the ChunkLoader class.
         /// </summary>
         /// <param name="seed">The seed value for generated chunks.</param>
         public ChunkLoader(float seed)
         {
-            this.serializer = new ChunkSerializer();
+            this.serializer = new ChunkSerialiser();
             this.voxelGenerator = new ChunkVoxelGenerator(seed);
         }
 
@@ -49,19 +49,19 @@ namespace Dwarves.Core.Terrain.Load
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        /// <param name="usage">The chunk usage type.</param>
+        /// <returns>The chunk.</returns>
         public Chunk LoadChunk(VoxelTerrain terrain, Position chunkIndex)
         {
             // Deserialize or generate the chunk
             Chunk chunk;
-            if (!this.serializer.TryDeserializeChunk(chunkIndex, out chunk))
+            if (!this.serializer.TryDeserialiseChunk(chunkIndex, out chunk))
             {
                 // The chunk doesn't yet exist, so generate a new one
                 chunk = new Chunk();
                 this.voxelGenerator.Generate(chunk.Voxels, chunkIndex);
 
                 // Serialize the generated chunk
-                this.serializer.SerializeChunk(chunk, chunkIndex);
+                this.serializer.SerialiseChunk(chunk, chunkIndex);
             }
 
             // Add the chunk to the terrain object
@@ -87,7 +87,7 @@ namespace Dwarves.Core.Terrain.Load
             }
 
             // Serialize the chunk
-            this.serializer.SerializeChunk(chunk, chunkIndex);
+            this.serializer.SerialiseChunk(chunk, chunkIndex);
 
             // Remove the chunk from the Terrain object
             terrain.Chunks.Remove(chunkIndex);

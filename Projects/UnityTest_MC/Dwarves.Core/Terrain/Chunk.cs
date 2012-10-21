@@ -41,7 +41,7 @@ namespace Dwarves.Core.Terrain
         public const int MaskY = Height - 1;
 
         /// <summary>
-        /// Initializes a new instance of the Chunk class.
+        /// Initialises a new instance of the Chunk class.
         /// </summary>
         public Chunk()
         {

@@ -24,7 +24,7 @@ namespace Dwarves.Core.Terrain
         public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, byte.MaxValue, 0);
 
         /// <summary>
-        /// Initializes a new instance of the Voxel struct.
+        /// Initialises a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>
         /// <param name="densityAll">The density at all depths.</param>
@@ -34,25 +34,25 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Initializes a new instance of the Voxel struct.
+        /// Initialises a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>
         /// <param name="densityAll">The density at all depths.</param>
-        /// <param name="color">The color.</param>
+        /// <param name="color">The colour.</param>
         public Voxel(TerrainMaterial material, byte densityAll, short color)
             : this(material, densityAll, densityAll, densityAll, densityAll, color)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the Voxel struct.
+        /// Initialises a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>
         /// <param name="density0">The density at voxel depth 0.</param>
         /// <param name="density1">The density at voxel depth 1.</param>
         /// <param name="density2">The density at voxel depth 2.</param>
         /// <param name="density3">The density at voxel depth 3.</param>
-        /// <param name="color">The color.</param>
+        /// <param name="color">The colour.</param>
         public Voxel(TerrainMaterial material, byte density0, byte density1, byte density2, byte density3, short color)
             : this()
         {
@@ -90,7 +90,7 @@ namespace Dwarves.Core.Terrain
         public byte Density3 { get; set; }
 
         /// <summary>
-        /// Gets or sets the color. 15-bit RGB color with 5 bits per component. The last bit is unused.
+        /// Gets or sets the colour. 15-bit RGB colour with 5 bits per component. The last bit is unused.
         /// </summary>
         public short Color { get; set; }
 

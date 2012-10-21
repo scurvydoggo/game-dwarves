@@ -333,7 +333,7 @@ namespace Dwarves.Core.Noise
         #region Private Methods
 
         /// <summary>
-        /// A fast method for obtaining the floored int value of a float.
+        /// A fast method for obtaining the floored integer value of a float.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The floored value.</returns>

@@ -14,7 +14,7 @@ namespace Dwarves.Core.Terrain
     public class VoxelTerrain
     {
         /// <summary>
-        /// Initializes a new instance of the VoxelTerrain class.
+        /// Initialises a new instance of the VoxelTerrain class.
         /// </summary>
         public VoxelTerrain()
         {

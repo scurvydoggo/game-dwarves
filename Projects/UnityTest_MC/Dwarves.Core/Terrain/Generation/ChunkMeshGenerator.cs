@@ -235,7 +235,7 @@ namespace Dwarves.Core.Terrain.Generation
         protected class VoxelInfo
         {
             /// <summary>
-            /// Initializes a new instance of the VoxelInfo class. This is for a voxel that lies outside the world.
+            /// Initialises a new instance of the VoxelInfo class. This is for a voxel that lies outside the world.
             /// </summary>
             /// <param name="voxel">The voxel.</param>
             public VoxelInfo(Voxel voxel) : this(voxel, null, Position.Zero)
@@ -243,7 +243,7 @@ namespace Dwarves.Core.Terrain.Generation
             }
 
             /// <summary>
-            /// Initializes a new instance of the VoxelInfo class.
+            /// Initialises a new instance of the VoxelInfo class.
             /// </summary>
             /// <param name="voxel">The voxel.</param>
             /// <param name="chunk">The chunk that the voxel belongs to.</param>
@@ -277,7 +277,7 @@ namespace Dwarves.Core.Terrain.Generation
         protected class VoxelSquare : IEnumerable<VoxelInfo>
         {
             /// <summary>
-            /// Initializes a new instance of the VoxelSquare class.
+            /// Initialises a new instance of the VoxelSquare class.
             /// </summary>
             /// <param name="worldOrigin">The world position of the lower-left corner.</param>
             /// <param name="lowerLeft">The voxel at the lower-left corner.</param>

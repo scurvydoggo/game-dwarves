@@ -19,7 +19,7 @@ namespace Dwarves.Core.Bounds
         private Plane planeZ;
 
         /// <summary>
-        /// Initializes a new instance of the MethodGetBoundsCamera class.
+        /// Initialises a new instance of the MethodGetBoundsCamera class.
         /// </summary>
         public MethodGetBoundsCamera()
         {

@@ -20,7 +20,7 @@ namespace Dwarves.Core.Terrain
         private Dictionary<Position, MeshData> voxelMeshes;
 
         /// <summary>
-        /// Initializes a new instance of the ChunkMesh class.
+        /// Initialises a new instance of the ChunkMesh class.
         /// </summary>
         public ChunkMesh()
         {

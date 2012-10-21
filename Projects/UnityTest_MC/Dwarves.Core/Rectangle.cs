@@ -18,10 +18,10 @@ namespace Dwarves.Core
         #region Constructor
 
         /// <summary>
-        /// Initializes a new instance of the Rectangle struct.
+        /// Initialises a new instance of the Rectangle struct.
         /// </summary>
         /// <param name="x">The x position.</param>
-        /// <param name="y">The y posititon.</param>
+        /// <param name="y">The y position.</param>
         /// <param name="width">The width.</param>
         /// <param name="height">The height.</param>
         public Rectangle(int x, int y, int width, int height)

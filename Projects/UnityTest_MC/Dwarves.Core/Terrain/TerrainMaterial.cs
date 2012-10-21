@@ -11,7 +11,7 @@ namespace Dwarves.Core.Terrain
     public enum TerrainMaterial : byte
     {
         /// <summary>
-        /// Air (ie. nothing).
+        /// Air (i.e. nothing).
         /// </summary>
         Air,
 

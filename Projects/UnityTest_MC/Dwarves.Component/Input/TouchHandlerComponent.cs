@@ -88,7 +88,7 @@ namespace Dwarves.Component.Input
         /// <param name="touchPosition">The screen position of the touch.</param>
         /// <param name="touchable">The touchable component.</param>
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
-        /// <returns>The touchable component; Null if touchable object exists at the postion.</returns>
+        /// <returns>The touchable component; Null if touchable object exists at the position.</returns>
         private bool TryGetTouchedComponent(Vector2 touchPosition, out TouchableComponent touchable, out Vector3 hitPoint)
         {
             // Cast a ray into the scene at the touched point
