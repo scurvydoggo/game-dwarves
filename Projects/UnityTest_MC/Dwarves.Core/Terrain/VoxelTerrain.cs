@@ -5,7 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
-    using System.Collections;
     using System.Collections.Generic;
 
     /// <summary>
@@ -25,6 +24,16 @@ namespace Dwarves.Core.Terrain
         /// Gets the currently active chunks.
         /// </summary>
         public Dictionary<Position, Chunk> Chunks { get; private set; }
+
+        /// <summary>
+        /// Get the index of the chunk at the given world coordinates.
+        /// </summary>
+        /// <param name="worldPos">The position in world coordinates.</param>
+        /// <returns>The chunk index.</returns>
+        public static Position GetChunkIndex(Position worldPos)
+        {
+            return VoxelTerrain.GetChunkIndex(worldPos.X, worldPos.Y);
+        }
 
         /// <summary>
         /// Get the index of the chunk at the given world coordinates.

@@ -31,7 +31,7 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Get the origin point of the chunk
             var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
-            
+
             // Update the meshes for each voxel in the chunk
             for (int x = 0; x < Chunk.Width; x++)
             {
@@ -125,7 +125,7 @@ namespace Dwarves.Core.Terrain.Generation
         public virtual void UpdateVoxel(VoxelTerrain terrain, Position position, bool updateNeighbours)
         {
             // Get the chunk
-            Position chunkIndex = VoxelTerrain.GetChunkIndex(position.X, position.Y);
+            Position chunkIndex = VoxelTerrain.GetChunkIndex(position);
             Chunk chunk;
             if (!terrain.Chunks.TryGetValue(chunkIndex, out chunk))
             {
@@ -193,12 +193,12 @@ namespace Dwarves.Core.Terrain.Generation
             // Check if the voxel position is on the border of the chunk
             bool isBorderN = voxel.Position.Y == Chunk.Height - 1;
             bool isBorderE = voxel.Position.X == Chunk.Width - 1;
-            
+
             // Get the positions of the neighbouring voxels
             var positionN = new Position(voxel.Position.X, voxel.Position.Y + 1);
             var positionNE = new Position(voxel.Position.X + 1, voxel.Position.Y + 1);
             var positionE = new Position(voxel.Position.X + 1, voxel.Position.Y);
-            
+
             // Get the neighbouring voxels
             if (!isBorderN && !isBorderE)
             {
@@ -303,7 +303,8 @@ namespace Dwarves.Core.Terrain.Generation
             /// Initialises a new instance of the VoxelInfo class. This is for a voxel that lies outside the world.
             /// </summary>
             /// <param name="voxel">The voxel.</param>
-            public VoxelInfo(Voxel voxel) : this(voxel, null, Position.Zero)
+            public VoxelInfo(Voxel voxel)
+                : this(voxel, null, Position.Zero)
             {
             }
 

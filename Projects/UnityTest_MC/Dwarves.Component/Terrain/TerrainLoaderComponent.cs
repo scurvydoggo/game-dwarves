@@ -56,7 +56,6 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            // Get a reference to the related components
             this.cTerrain = this.GetComponent<TerrainComponent>();
 
             // Create the chunk loader
