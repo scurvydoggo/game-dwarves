@@ -7,6 +7,7 @@ namespace Dwarves.Component.Terrain
 {
     using Dwarves.Component.Input;
     using Dwarves.Core;
+    using System;
     using UnityEngine;
 
     /// <summary>
@@ -34,8 +35,8 @@ namespace Dwarves.Component.Terrain
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
         public override void ProcessTouch(Vector3 hitPoint)
         {
-            var position = new Position((int)hitPoint.x, (int)hitPoint.y);
-            var offset = new Vector2(hitPoint.x - position.X, hitPoint.y - position.Y);
+            var position = new Position((int)Math.Floor(hitPoint.x), (int)Math.Floor(hitPoint.y));
+            var offset = new Vector2(Math.Abs(hitPoint.x - position.X), Math.Abs(hitPoint.y - position.Y));
 
             // Dig at the touched point
             this.cTerrain.Mutator.Dig(position, offset);

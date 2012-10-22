@@ -56,12 +56,13 @@ namespace Dwarves.Core.Terrain.Mutation
                 return;
             }
 
+            // Get the current voxel
+            Position chunkPos = VoxelTerrain.GetChunkCoordinates(position);
+            Voxel oldVoxel = chunk.GetVoxel(chunkPos);
+
             // Update the voxel density
-            Voxel voxel = chunk.GetVoxel(VoxelTerrain.GetChunkCoordinates(position));
-            voxel.Density0 = 0;
-            voxel.Density1 = 0;
-            voxel.Density2 = 0;
-            voxel.Density3 = 0;
+            Voxel newVoxel = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+            chunk.SetVoxel(chunkPos, newVoxel);
 
             // Indicate that a mutation occurred
             this.OnMutationOccurred(new MutationArgs(position));

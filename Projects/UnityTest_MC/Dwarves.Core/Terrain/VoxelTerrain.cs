@@ -53,7 +53,7 @@ namespace Dwarves.Core.Terrain
         /// <returns>The position in chunk coordinates.</returns>
         public static Position GetChunkCoordinates(Position worldPos)
         {
-            return new Position(worldPos.X & Chunk.Width, worldPos.Y & Chunk.Height);
+            return new Position(worldPos.X & Chunk.MaskX, worldPos.Y & Chunk.MaskY);
         }
 
         /// <summary>

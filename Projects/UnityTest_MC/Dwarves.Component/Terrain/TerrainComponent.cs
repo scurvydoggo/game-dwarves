@@ -61,7 +61,7 @@ namespace Dwarves.Component.Terrain
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The event args.</param>
         private void Mutator_MutationOccurred(object sender, MutationArgs e)
-        {
+        {   
             // Update all individual positions that changed
             foreach (Position position in e.ChangedPositions)
             {

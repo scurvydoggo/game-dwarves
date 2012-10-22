@@ -79,5 +79,26 @@ namespace Dwarves.Core.Terrain
         {
             return this.GetVoxel(position.X, position.Y);
         }
+
+        /// <summary>
+        /// Set the voxel at the given chunk coordinates.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="voxel">The voxel.</param>
+        public void SetVoxel(int x, int y, Voxel voxel)
+        {
+            this.Voxels[ChunkVoxels.GetIndex(x, y)] = voxel;
+        }
+
+        /// <summary>
+        /// Set the voxel at the given chunk coordinates.
+        /// </summary>
+        /// <param name="position">The position.</param>
+        /// <param name="voxel">The voxel.</param>
+        public void SetVoxel(Position position, Voxel voxel)
+        {
+            this.SetVoxel(position.X, position.Y, voxel);
+        }
     }
 }
