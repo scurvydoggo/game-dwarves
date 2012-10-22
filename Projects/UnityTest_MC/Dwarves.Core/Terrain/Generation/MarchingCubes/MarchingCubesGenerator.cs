@@ -17,8 +17,10 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
         /// <summary>
         /// Initialises a new instance of the MarchingCubesGenerator class.
         /// </summary>
+        /// <param name="terrain">The terrain.</param>
         /// <param name="isoLevel">The isolevel, which is the density at which the mesh surface lies.</param>
-        public MarchingCubesGenerator(byte isoLevel)
+        public MarchingCubesGenerator(VoxelTerrain terrain, byte isoLevel)
+            : base(terrain)
         {
             this.IsoLevel = isoLevel;
         }

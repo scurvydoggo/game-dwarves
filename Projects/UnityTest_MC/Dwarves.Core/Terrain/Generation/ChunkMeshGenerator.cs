@@ -13,21 +13,42 @@ namespace Dwarves.Core.Terrain.Generation
     /// </summary>
     public abstract class ChunkMeshGenerator
     {
+        #region Private Variables
+
+        /// <summary>
+        /// The terrain.
+        /// </summary>
+        private VoxelTerrain terrain;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initialises a new instance of the ChunkMeshGenerator class.
+        /// </summary>
+        /// <param name="terrain">The terrain.</param>
+        public ChunkMeshGenerator(VoxelTerrain terrain)
+        {
+            this.terrain = terrain;
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
         /// Update the mesh for the given terrain chunk.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public virtual void UpdateChunk(VoxelTerrain terrain, Position chunkIndex)
+        public virtual void UpdateChunk(Position chunkIndex)
         {
             // Get the chunk and the neighbours
-            Chunk chunk = terrain.Chunks[chunkIndex];
+            Chunk chunk = this.terrain.Chunks[chunkIndex];
             Chunk chunkN, chunkNE, chunkE;
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
             // Get the origin point of the chunk
             var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
@@ -53,16 +74,15 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Update the mesh for each voxel along the top border of the given terrain chunk.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void UpdateChunkBorderTop(VoxelTerrain terrain, Position chunkIndex)
+        public void UpdateChunkBorderTop(Position chunkIndex)
         {
             // Get the chunk and the neighbours
-            Chunk chunk = terrain.Chunks[chunkIndex];
+            Chunk chunk = this.terrain.Chunks[chunkIndex];
             Chunk chunkN, chunkNE, chunkE;
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
             // Get the origin point of the chunk
             var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
@@ -86,16 +106,15 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Update the mesh for each voxel along the right border of the given terrain chunk.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void UpdateChunkBorderRight(VoxelTerrain terrain, Position chunkIndex)
+        public void UpdateChunkBorderRight(Position chunkIndex)
         {
             // Get the chunk and the neighbours
-            Chunk chunk = terrain.Chunks[chunkIndex];
+            Chunk chunk = this.terrain.Chunks[chunkIndex];
             Chunk chunkN, chunkNE, chunkE;
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
             // Get the origin point of the chunk
             var chunkOrigin = new Position(chunkIndex.X * Chunk.Width, chunkIndex.Y * Chunk.Height);
@@ -119,15 +138,14 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Update the voxel at the given world coordinates.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="position">The voxel position.</param>
         /// <param name="updateNeighbours">Indicates whether the neighbouring voxels should be updated.</param>
-        public virtual void UpdateVoxel(VoxelTerrain terrain, Position position, bool updateNeighbours)
+        public virtual void UpdateVoxel(Position position, bool updateNeighbours)
         {
             // Get the chunk
             Position chunkIndex = VoxelTerrain.GetChunkIndex(position);
             Chunk chunk;
-            if (!terrain.Chunks.TryGetValue(chunkIndex, out chunk))
+            if (!this.terrain.Chunks.TryGetValue(chunkIndex, out chunk))
             {
                 // The given position is outside the known world, so do nothing
                 return;
@@ -138,9 +156,9 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Get the neighbours of the chunk
             Chunk chunkN, chunkNE, chunkE;
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
-            terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X, chunkIndex.Y + 1), out chunkN);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y + 1), out chunkNE);
+            this.terrain.Chunks.TryGetValue(new Position(chunkIndex.X + 1, chunkIndex.Y), out chunkE);
 
             // Get the voxel 2x2 voxel square with this position in the lower-left corner
             VoxelInfo voxel = new VoxelInfo(chunk.GetVoxel(chunkPos), chunk, chunkPos);
@@ -152,9 +170,9 @@ namespace Dwarves.Core.Terrain.Generation
             // Update the neighbouring voxels that use this voxel as a corner point
             if (updateNeighbours)
             {
-                this.UpdateVoxel(terrain, new Position(position.X - 1, position.Y), false);
-                this.UpdateVoxel(terrain, new Position(position.X - 1, position.Y - 1), false);
-                this.UpdateVoxel(terrain, new Position(position.X, position.Y - 1), false);
+                this.UpdateVoxel(new Position(position.X - 1, position.Y), false);
+                this.UpdateVoxel(new Position(position.X - 1, position.Y - 1), false);
+                this.UpdateVoxel(new Position(position.X, position.Y - 1), false);
             }
         }
 

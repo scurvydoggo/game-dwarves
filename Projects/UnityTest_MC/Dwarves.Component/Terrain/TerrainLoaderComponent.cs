@@ -158,7 +158,7 @@ namespace Dwarves.Component.Terrain
             // Generate the meshes for the newly loaded chunks
             foreach (Position chunkIndex in meshRequired)
             {
-                this.cTerrain.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
+                this.cTerrain.MeshGenerator.UpdateChunk(chunkIndex);
             }
 
             // Re-generate the borders of the chunk meshes that have had a neighbour added
@@ -169,12 +169,12 @@ namespace Dwarves.Component.Terrain
 
                 if ((borders & ChunkNeighbour.Top) != 0)
                 {
-                    this.cTerrain.MeshGenerator.UpdateChunkBorderTop(this.cTerrain.Terrain, chunkIndex);
+                    this.cTerrain.MeshGenerator.UpdateChunkBorderTop(chunkIndex);
                 }
 
                 if ((borders & ChunkNeighbour.Right) != 0)
                 {
-                    this.cTerrain.MeshGenerator.UpdateChunkBorderRight(this.cTerrain.Terrain, chunkIndex);
+                    this.cTerrain.MeshGenerator.UpdateChunkBorderRight(chunkIndex);
                 }
             }
         }

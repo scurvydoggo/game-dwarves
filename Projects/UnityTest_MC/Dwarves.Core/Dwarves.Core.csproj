@@ -56,6 +56,8 @@
     <Compile Include="Terrain\Generation\ChunkMeshGenerator.cs" />
     <Compile Include="Terrain\Load\ChunkLoader.cs" />
     <Compile Include="Terrain\Load\ChunkSerialiser.cs" />
+    <Compile Include="Terrain\Mutation\MutationArgs.cs" />
+    <Compile Include="Terrain\Mutation\TerrainMutator.cs" />
     <Compile Include="Terrain\TerrainMaterial.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

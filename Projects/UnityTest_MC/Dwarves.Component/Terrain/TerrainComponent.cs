@@ -5,9 +5,11 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
+    using Dwarves.Core;
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Generation;
     using Dwarves.Core.Terrain.Generation.MarchingCubes;
+    using Dwarves.Core.Terrain.Mutation;
     using UnityEngine;
 
     /// <summary>
@@ -31,12 +33,19 @@ namespace Dwarves.Component.Terrain
         public ChunkMeshGenerator MeshGenerator { get; private set; }
 
         /// <summary>
+        /// Gets the terrain mutator.
+        /// </summary>
+        public TerrainMutator Mutator { get; private set; }
+
+        /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
         {
             this.Terrain = new VoxelTerrain();
-            this.MeshGenerator = new MarchingCubesGenerator((byte)this.IsoLevel);
+            this.MeshGenerator = new MarchingCubesGenerator(this.Terrain, (byte)this.IsoLevel);
+            this.Mutator = new TerrainMutator(this.Terrain);
+            this.Mutator.MutationOccurred += this.Mutator_MutationOccurred;
         }
 
         /// <summary>
@@ -44,6 +53,20 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
+        }
+
+        /// <summary>
+        /// Handle terrain mutations.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event args.</param>
+        private void Mutator_MutationOccurred(object sender, MutationArgs e)
+        {
+            // Update all individual positions that changed
+            foreach (Position position in e.ChangedPositions)
+            {
+                this.MeshGenerator.UpdateVoxel(position, true);
+            }
         }
     }
 }

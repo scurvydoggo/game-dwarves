@@ -12,20 +12,20 @@ namespace Dwarves.Component.Terrain
     /// <summary>
     /// A component that responds to being touched.
     /// </summary>
-    [RequireComponent(typeof(TerrainMutatorComponent))]
+    [RequireComponent(typeof(TerrainComponent))]
     public class TerrainTouchComponent : TouchableComponent
     {
         /// <summary>
         /// The terrain mutator component.
         /// </summary>
-        private TerrainMutatorComponent cTerrainMutator;
+        private TerrainComponent cTerrain;
 
         /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
         {
-            this.cTerrainMutator = this.GetComponent<TerrainMutatorComponent>();
+            this.cTerrain = this.GetComponent<TerrainComponent>();
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Dwarves.Component.Terrain
             var offset = new Vector2(hitPoint.x - position.X, hitPoint.y - position.Y);
 
             // Dig at the touched point
-            this.cTerrainMutator.Dig(position, offset);
+            this.cTerrain.Mutator.Dig(position, offset);
         }
     }
 }
