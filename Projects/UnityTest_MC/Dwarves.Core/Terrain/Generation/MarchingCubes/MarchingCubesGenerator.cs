@@ -5,7 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Generation.MarchingCubes
 {
-    using System;
     using System.Collections.Generic;
     using Dwarves.Core.Mesh;
     using UnityEngine;
@@ -28,11 +27,11 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
         /// Gets or sets the isolevel, which is the density at which the mesh surface lies.
         /// </summary>
         public byte IsoLevel { get; set; }
-        
+
         /// <summary>
-        /// Update the mesh for the given 2x2 square of voxels.
+        /// Update the mesh for the point surrounded by the given 2x2 square of voxels.
         /// </summary>
-        /// <param name="voxelSquare">The 2x2 square of voxels surrounding the mesh to update.</param>
+        /// <param name="voxelSquare">The 2x2 square of voxels surrounding the point to update.</param>
         protected override void UpdateVoxelMesh(VoxelSquare voxelSquare)
         {
             // Build the list of vertices for each 'cube' of squares along the Z-axis
