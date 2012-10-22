@@ -29,7 +29,7 @@ namespace Dwarves.Core.Terrain
         /// <param name="material">The material.</param>
         /// <param name="densityAll">The density at all depths.</param>
         public Voxel(TerrainMaterial material, byte densityAll)
-            : this(material, densityAll, short.MaxValue)
+            : this(material, densityAll, densityAll, densityAll, densityAll)
         {
         }
 
@@ -41,6 +41,19 @@ namespace Dwarves.Core.Terrain
         /// <param name="color">The colour.</param>
         public Voxel(TerrainMaterial material, byte densityAll, short color)
             : this(material, densityAll, densityAll, densityAll, densityAll, color)
+        {
+        }
+
+        /// <summary>
+        /// Initialises a new instance of the Voxel struct.
+        /// </summary>
+        /// <param name="material">The material.</param>
+        /// <param name="density0">The density at voxel depth 0.</param>
+        /// <param name="density1">The density at voxel depth 1.</param>
+        /// <param name="density2">The density at voxel depth 2.</param>
+        /// <param name="density3">The density at voxel depth 3.</param>
+        public Voxel(TerrainMaterial material, byte density0, byte density1, byte density2, byte density3)
+            : this(material, density0, density1, density2, density3, short.MaxValue)
         {
         }
 

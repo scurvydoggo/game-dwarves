@@ -61,7 +61,7 @@ namespace Dwarves.Core.Terrain.Mutation
             Voxel oldVoxel = chunk.GetVoxel(chunkPos);
 
             // Update the voxel density
-            Voxel newVoxel = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+            Voxel newVoxel = new Voxel(TerrainMaterial.Dirt, byte.MaxValue);
             chunk.SetVoxel(chunkPos, newVoxel);
 
             // Indicate that a mutation occurred

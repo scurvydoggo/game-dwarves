@@ -5,9 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
+    using System;
     using Dwarves.Component.Input;
     using Dwarves.Core;
-    using System;
     using UnityEngine;
 
     /// <summary>
