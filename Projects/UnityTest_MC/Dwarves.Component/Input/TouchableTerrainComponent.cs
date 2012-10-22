@@ -24,7 +24,7 @@ namespace Dwarves.Component.Input
         /// Handles the on-touch behaviour for the component.
         /// </summary>
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
-        public override void OnTouch(Vector3 hitPoint)
+        public override void ProcessTouch(Vector3 hitPoint)
         {
             // Remove the block at the touched point
             // TODO

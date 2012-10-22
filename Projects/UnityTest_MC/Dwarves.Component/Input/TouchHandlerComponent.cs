@@ -47,7 +47,7 @@ namespace Dwarves.Component.Input
                 Vector3 hitPoint;
                 if (this.TryGetTouchedComponent(touchPosition, out touched, out hitPoint))
                 {
-                    touched.OnTouch(hitPoint);
+                    touched.ProcessTouch(hitPoint);
                 }
             }
         }

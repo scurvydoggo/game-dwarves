@@ -16,6 +16,6 @@ namespace Dwarves.Component.Input
         /// Handles the on-touch behaviour for the component.
         /// </summary>
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
-        public abstract void OnTouch(Vector3 hitPoint);
+        public abstract void ProcessTouch(Vector3 hitPoint);
     }
 }
