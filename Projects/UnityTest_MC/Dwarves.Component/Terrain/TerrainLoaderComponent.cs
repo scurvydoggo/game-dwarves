@@ -17,7 +17,6 @@ namespace Dwarves.Component.Terrain
     /// Component for loading the terrain.
     /// </summary>
     [RequireComponent(typeof(TerrainComponent))]
-    [RequireComponent(typeof(TerrainMeshComponent))]
     public class TerrainLoaderComponent : MonoBehaviour
     {
         /// <summary>
@@ -29,11 +28,6 @@ namespace Dwarves.Component.Terrain
         /// The core terrain component.
         /// </summary>
         private TerrainComponent cTerrain;
-
-        /// <summary>
-        /// The terrain render component.
-        /// </summary>
-        private TerrainMeshComponent cTerrainRender;
 
         /// <summary>
         /// Bitwise values indicating chunk border.
@@ -64,7 +58,6 @@ namespace Dwarves.Component.Terrain
         {
             // Get a reference to the related components
             this.cTerrain = this.GetComponent<TerrainComponent>();
-            this.cTerrainRender = this.GetComponent<TerrainMeshComponent>();
 
             // Create the chunk loader
             this.ChunkLoader = new ChunkLoader(this.Seed);
@@ -166,7 +159,7 @@ namespace Dwarves.Component.Terrain
             // Generate the meshes for the newly loaded chunks
             foreach (Position chunkIndex in meshRequired)
             {
-                this.cTerrainRender.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
+                this.cTerrain.MeshGenerator.UpdateChunk(this.cTerrain.Terrain, chunkIndex);
             }
 
             // Re-generate the borders of the chunk meshes that have had a neighbour added
@@ -177,12 +170,12 @@ namespace Dwarves.Component.Terrain
 
                 if ((borders & ChunkNeighbour.Top) != 0)
                 {
-                    this.cTerrainRender.MeshGenerator.UpdateChunkBorderTop(this.cTerrain.Terrain, chunkIndex);
+                    this.cTerrain.MeshGenerator.UpdateChunkBorderTop(this.cTerrain.Terrain, chunkIndex);
                 }
 
                 if ((borders & ChunkNeighbour.Right) != 0)
                 {
-                    this.cTerrainRender.MeshGenerator.UpdateChunkBorderRight(this.cTerrain.Terrain, chunkIndex);
+                    this.cTerrain.MeshGenerator.UpdateChunkBorderRight(this.cTerrain.Terrain, chunkIndex);
                 }
             }
         }

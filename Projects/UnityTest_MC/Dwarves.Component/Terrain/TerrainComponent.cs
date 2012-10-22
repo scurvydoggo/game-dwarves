@@ -6,7 +6,8 @@
 namespace Dwarves.Component.Terrain
 {
     using Dwarves.Core.Terrain;
-    using Dwarves.Core.Terrain.Load;
+    using Dwarves.Core.Terrain.Generation;
+    using Dwarves.Core.Terrain.Generation.MarchingCubes;
     using UnityEngine;
 
     /// <summary>
@@ -15,9 +16,19 @@ namespace Dwarves.Component.Terrain
     public class TerrainComponent : MonoBehaviour
     {
         /// <summary>
+        /// The isolevel for the rendered terrain. This is the density at which the surface is rendered.
+        /// </summary>
+        public int IsoLevel = 127;
+
+        /// <summary>
         /// Gets the terrain.
         /// </summary>
         public VoxelTerrain Terrain { get; private set; }
+
+        /// <summary>
+        /// Gets the mesh generator component.
+        /// </summary>
+        public ChunkMeshGenerator MeshGenerator { get; private set; }
 
         /// <summary>
         /// Initialises the component.
@@ -25,6 +36,7 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             this.Terrain = new VoxelTerrain();
+            this.MeshGenerator = new MarchingCubesGenerator((byte)this.IsoLevel);
         }
 
         /// <summary>
