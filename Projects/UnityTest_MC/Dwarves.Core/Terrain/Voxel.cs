@@ -5,8 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
-    using System;
-
     /// <summary>
     /// A voxel, which represent the density of a point in a plane. Each 'cube' in the terrain is drawn in the space
     /// between voxel points.
@@ -27,9 +25,9 @@ namespace Dwarves.Core.Terrain
         /// Initialises a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>
-        /// <param name="densityAll">The density at all depths.</param>
-        public Voxel(TerrainMaterial material, byte densityAll)
-            : this(material, densityAll, densityAll, densityAll, densityAll)
+        /// <param name="density">The density.</param>
+        public Voxel(TerrainMaterial material, byte density)
+            : this(material, density, short.MaxValue)
         {
         }
 
@@ -37,43 +35,13 @@ namespace Dwarves.Core.Terrain
         /// Initialises a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>
-        /// <param name="densityAll">The density at all depths.</param>
+        /// <param name="density">The density.</param>
         /// <param name="color">The colour.</param>
-        public Voxel(TerrainMaterial material, byte densityAll, short color)
-            : this(material, densityAll, densityAll, densityAll, densityAll, color)
-        {
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the Voxel struct.
-        /// </summary>
-        /// <param name="material">The material.</param>
-        /// <param name="density0">The density at voxel depth 0.</param>
-        /// <param name="density1">The density at voxel depth 1.</param>
-        /// <param name="density2">The density at voxel depth 2.</param>
-        /// <param name="density3">The density at voxel depth 3.</param>
-        public Voxel(TerrainMaterial material, byte density0, byte density1, byte density2, byte density3)
-            : this(material, density0, density1, density2, density3, short.MaxValue)
-        {
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the Voxel struct.
-        /// </summary>
-        /// <param name="material">The material.</param>
-        /// <param name="density0">The density at voxel depth 0.</param>
-        /// <param name="density1">The density at voxel depth 1.</param>
-        /// <param name="density2">The density at voxel depth 2.</param>
-        /// <param name="density3">The density at voxel depth 3.</param>
-        /// <param name="color">The colour.</param>
-        public Voxel(TerrainMaterial material, byte density0, byte density1, byte density2, byte density3, short color)
+        public Voxel(TerrainMaterial material, byte density, short color)
             : this()
         {
             this.Material = material;
-            this.Density0 = density0;
-            this.Density1 = density1;
-            this.Density2 = density2;
-            this.Density3 = density3;
+            this.Density = density;
             this.Color = color;
         }
 
@@ -83,55 +51,13 @@ namespace Dwarves.Core.Terrain
         public TerrainMaterial Material { get; set; }
 
         /// <summary>
-        /// Gets or sets the density at voxel depth 0.
+        /// Gets or sets the density.
         /// </summary>
-        public byte Density0 { get; set; }
-
-        /// <summary>
-        /// Gets or sets the density at voxel depth 1.
-        /// </summary>
-        public byte Density1 { get; set; }
-
-        /// <summary>
-        /// Gets or sets the density at voxel depth 2.
-        /// </summary>
-        public byte Density2 { get; set; }
-
-        /// <summary>
-        /// Gets or sets the density at voxel depth 3.
-        /// </summary>
-        public byte Density3 { get; set; }
+        public byte Density { get; set; }
 
         /// <summary>
         /// Gets or sets the colour. 15-bit RGB colour with 5 bits per component. The last bit is unused.
         /// </summary>
         public short Color { get; set; }
-
-        /// <summary>
-        /// Gets the voxel density at the given Z depth.
-        /// </summary>
-        /// <param name="z">The z depth, which must be between 0 and Voxel.Depth inclusively.</param>
-        /// <returns>The density.</returns>
-        public byte GetDensity(int z)
-        {
-            switch (z)
-            {
-                case 0:
-                    return this.Density0;
-
-                case 1:
-                    return this.Density1;
-
-                case 2:
-                    return this.Density2;
-
-                case 3:
-                    return this.Density3;
-
-                default:
-                    // For depths outside the allowed range, treat it as empty space by returning max density
-                    return byte.MaxValue;
-            }
-        }
     }
 }

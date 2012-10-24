@@ -43,14 +43,47 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
             for (int z = -1; z < Voxel.Depth; z++)
             {
                 // Get the densities of the 8 corners of the cube at this depth
-                byte d0 = voxelSquare.LowerLeft.Voxel.GetDensity(z + 1);
-                byte d1 = voxelSquare.LowerRight.Voxel.GetDensity(z + 1);
-                byte d2 = voxelSquare.LowerRight.Voxel.GetDensity(z);
-                byte d3 = voxelSquare.LowerLeft.Voxel.GetDensity(z);
-                byte d4 = voxelSquare.UpperLeft.Voxel.GetDensity(z + 1);
-                byte d5 = voxelSquare.UpperRight.Voxel.GetDensity(z + 1);
-                byte d6 = voxelSquare.UpperRight.Voxel.GetDensity(z);
-                byte d7 = voxelSquare.UpperLeft.Voxel.GetDensity(z);
+                byte d0, d1, d2, d3, d4, d5, d6, d7;
+                if (z == -1)
+                {
+                    // This cube lies is on the surface, so for the corners facing outwards use max-density to indicate
+                    // air. This creates the 'outer' wall that represents the diggable terrain
+                    d0 = voxelSquare.LowerLeft.Voxel.Density;
+                    d1 = voxelSquare.LowerRight.Voxel.Density;
+                    d2 = byte.MaxValue;
+                    d3 = byte.MaxValue;
+                    d4 = voxelSquare.UpperLeft.Voxel.Density;
+                    d5 = voxelSquare.UpperRight.Voxel.Density;
+                    d6 = byte.MaxValue;
+                    d7 = byte.MaxValue;
+                }
+                else if (z == Voxel.Depth - 1)
+                {
+                    // This cube lies at the deepest depth, so for the corners facing inwards use min-density to
+                    // indicate a back wall. This creates the 'inner' wall which represents 'dug out' terrain
+                    // Note: An exception is if a voxel is of the type 'Air', in which case there is no inner wall
+                    d0 = voxelSquare.LowerLeft.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    d1 = voxelSquare.LowerRight.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    d2 = voxelSquare.LowerRight.Voxel.Density;
+                    d3 = voxelSquare.LowerLeft.Voxel.Density;
+                    d4 = voxelSquare.UpperLeft.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    d5 = voxelSquare.UpperRight.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    d6 = voxelSquare.UpperRight.Voxel.Density;
+                    d7 = voxelSquare.UpperLeft.Voxel.Density;
+                }
+                else
+                {
+                    // This cube lies between the surface and the deepest point, so each pair of inward and outward
+                    // facing corners have the same density. This creates a straight wall going inwards.
+                    d0 = voxelSquare.LowerLeft.Voxel.Density;
+                    d1 = voxelSquare.LowerRight.Voxel.Density;
+                    d2 = voxelSquare.LowerRight.Voxel.Density;
+                    d3 = voxelSquare.LowerLeft.Voxel.Density;
+                    d4 = voxelSquare.UpperLeft.Voxel.Density;
+                    d5 = voxelSquare.UpperRight.Voxel.Density;
+                    d6 = voxelSquare.UpperRight.Voxel.Density;
+                    d7 = voxelSquare.UpperLeft.Voxel.Density;
+                }
 
                 // Get the cube index for the given corner densities.
                 // This is an 8-bit bitmask with bits indicating if a corner is underneath the isolevel surface
