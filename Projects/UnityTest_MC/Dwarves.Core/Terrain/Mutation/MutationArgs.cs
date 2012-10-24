@@ -15,15 +15,15 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <summary>
         /// Initialises a new instance of the MutationArgs class.
         /// </summary>
-        /// <param name="changedPositions">The world positions that changed.</param>
-        public MutationArgs(params Position[] changedPositions)
+        /// <param name="mutations">The world positions that mutated.</param>
+        public MutationArgs(params Position[] mutations)
         {
-            this.ChangedPositions = changedPositions;
+            this.Mutations = mutations;
         }
 
         /// <summary>
-        /// Gets the world positions that changed.
+        /// Gets the world positions that mutated.
         /// </summary>
-        public Position[] ChangedPositions { get; private set; }
+        public Position[] Mutations { get; private set; }
     }
 }
