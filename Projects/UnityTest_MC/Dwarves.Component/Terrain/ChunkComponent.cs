@@ -64,7 +64,8 @@ namespace Dwarves.Component.Terrain
             // Build the arrays for the vertices and triangle indices for each submesh
             Vector3[] vertices = new Vector3[this.Chunk.Mesh.VertexCount];
             int[] indices = new int[this.Chunk.Mesh.TriangleIndicesCount];
-
+            Vector2[] uvs = new Vector2[this.Chunk.Mesh.VertexCount];
+            
             // Populate the vertice and indice arrays
             int vertexArrayIndex = 0;
             int indiceArrayIndex = 0;
@@ -81,6 +82,9 @@ namespace Dwarves.Component.Terrain
                     indices[indiceArrayIndex + i] = meshData.TriangleIndices[i] + vertexArrayIndex;
                 }
 
+                // Copy the UV coordinates
+                Array.Copy(meshData.UVs, 0, uvs, vertexArrayIndex, meshData.UVs.Length);
+
                 // Update array indexers
                 vertexArrayIndex += meshData.Vertices.Length;
                 indiceArrayIndex += meshData.TriangleIndices.Length;
@@ -90,14 +94,6 @@ namespace Dwarves.Component.Terrain
             this.cMeshFilter.mesh.Clear();
             this.cMeshFilter.mesh.vertices = vertices;
             this.cMeshFilter.mesh.triangles = indices;
-
-            // Set the UV coordinates
-            Vector2[] uvs = new Vector2[vertices.Length];
-            for (int i = 0; i < uvs.Length; i++)
-            {
-                uvs[i] = new Vector2(vertices[i].x, vertices[i].y);
-            }
-
             this.cMeshFilter.mesh.uv = uvs;
 
             // Recalculate the mesh normals

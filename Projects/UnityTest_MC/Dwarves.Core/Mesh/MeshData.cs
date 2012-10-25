@@ -20,7 +20,7 @@ namespace Dwarves.Core.Mesh
         /// <param name="uvs">The UV coordinates.</param>
         /// <param name="normals">The normals.</param>
         /// <param name="colors">The colours.</param>
-        public MeshData(Vector3[] vertices, int[] triangles, object[] uvs, object[] normals, object[] colors)
+        public MeshData(Vector3[] vertices, int[] triangles, Vector2[] uvs, object[] normals, object[] colors)
         {
             this.Vertices = vertices;
             this.TriangleIndices = triangles;
@@ -42,7 +42,7 @@ namespace Dwarves.Core.Mesh
         /// <summary>
         /// Gets the UV coordinates.
         /// </summary>
-        public object[] UVs { get; private set; }
+        public Vector2[] UVs { get; private set; }
 
         /// <summary>
         /// Gets the normals.
