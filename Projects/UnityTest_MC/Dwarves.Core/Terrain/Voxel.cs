@@ -14,7 +14,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// The number of cubes drawn in the Z direction for voxels.
         /// </summary>
-        public const int Depth = 4;
+        public const int Depth = 3;
 
         /// <summary>
         /// An empty voxel.

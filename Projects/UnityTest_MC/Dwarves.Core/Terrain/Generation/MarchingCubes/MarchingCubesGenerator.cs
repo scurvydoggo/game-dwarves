@@ -126,11 +126,18 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
             // Create/Clear the mesh in the chunk
             if (indiceList.Count > 0)
             {
+                // Calculate the UV coordinates
+                var uvs = new Vector2[vertexList.Count];
+                for (int i = 0; i < vertexList.Count; i++)
+                {
+                    uvs[i] = new Vector2(vertexList[i].x, vertexList[i].y);
+                }
+
                 // Create the mesh object
                 var mesh = new MeshData(
                     vertexList.ToArray(),
                     indiceList.ToArray(),
-                    null,
+                    uvs,
                     null,
                     null);
 
