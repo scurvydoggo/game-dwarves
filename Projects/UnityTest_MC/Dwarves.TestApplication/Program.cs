@@ -6,6 +6,7 @@
 namespace Dwarves.TestApplication
 {
     using Dwarves.Core;
+    using Dwarves.Core.Noise;
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Generation.MarchingCubes;
     using Dwarves.Core.Terrain.Load;
@@ -21,7 +22,9 @@ namespace Dwarves.TestApplication
         /// <param name="args">The application args.</param>
         public static void Main(string[] args)
         {
-            TestMarchingCubes();
+            //TestMarchingCubes();
+
+            TestNoiseGenerator();
         }
 
         /// <summary>
@@ -40,6 +43,20 @@ namespace Dwarves.TestApplication
             // Generate the mesh
             var meshGenerator = new MarchingCubesGenerator(terrain, 127);
             meshGenerator.UpdateChunk(chunkIndex);
+        }
+
+        /// <summary>
+        /// Run a test for the noise generator.
+        /// </summary>
+        private static void TestNoiseGenerator()
+        {
+            var generator = new NoiseGenerator(1, 0.01f, 8);
+
+            float[] vals = new float[100];
+            for (int x = 0; x < 100; x++)
+            {
+                vals[x] = generator.Generate(x, 123);
+            }
         }
     }
 }

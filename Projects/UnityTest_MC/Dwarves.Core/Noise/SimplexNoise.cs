@@ -8,7 +8,7 @@ namespace Dwarves.Core.Noise
     /// <summary>
     /// Generates Simplex Noise.
     /// </summary>
-    public class SimplexNoise
+    public static class SimplexNoise
     {
         #region Private Variables
 

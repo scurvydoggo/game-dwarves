@@ -45,6 +45,7 @@
     <Compile Include="Bounds\IMethodGetBounds.cs" />
     <Compile Include="Bounds\MethodGetBoundsCamera.cs" />
     <Compile Include="Const.cs" />
+    <Compile Include="Noise\NoiseGenerator.cs" />
     <Compile Include="Noise\SimplexNoise.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Terrain\ChunkMesh.cs" />
