@@ -14,6 +14,11 @@ namespace Dwarves.Core.Noise
     public class NoiseGenerator
     {
         /// <summary>
+        /// The noise function seed value for each octave.
+        /// </summary>
+        private Dictionary<byte, int> seeds;
+
+        /// <summary>
         /// The frequency for each octave.
         /// </summary>
         private Dictionary<byte, float> frequencies;
@@ -29,11 +34,19 @@ namespace Dwarves.Core.Noise
         /// <param name="octaveCount">The number of octaves.</param>
         /// <param name="baseFrequency">The base frequency which is the frequency of the lowest octave.</param>
         /// <param name="persistence">The persistence value, which determines the amplitude for each octave.</param>
-        public NoiseGenerator(byte octaveCount, float baseFrequency, float persistence)
+        public NoiseGenerator(int seed, byte octaveCount, float baseFrequency, float persistence)
         {
             this.OctaveCount = octaveCount;
             this.BaseFrequency = baseFrequency;
             this.Persistence = persistence;
+
+            // Generate the seed for each octave's noise function
+            var random = new Random(seed);
+            this.seeds = new Dictionary<byte, int>(this.OctaveCount);
+            for (byte i = 0; i < this.OctaveCount; i++)
+            {
+                this.seeds[i] = random.Next(100000);
+            }
 
             // Pre-calculate the frequency for each octave
             this.frequencies = new Dictionary<byte, float>(this.OctaveCount);
@@ -76,10 +89,11 @@ namespace Dwarves.Core.Noise
 
             for (byte i = 0; i < this.OctaveCount; i++)
             {
+                int seed = this.seeds[i];
                 float frequency = this.frequencies[i];
                 float amplitude = this.amplitudes[i];
 
-                total += SimplexNoise.Generate(x * frequency) * amplitude;
+                total += SimplexNoise.Generate(seed, x * frequency) * amplitude;
             }
 
             return total;
@@ -97,10 +111,11 @@ namespace Dwarves.Core.Noise
 
             for (byte i = 0; i < this.OctaveCount; i++)
             {
+                int seed = this.seeds[i];
                 float frequency = this.frequencies[i];
                 float amplitude = this.amplitudes[i];
 
-                total += SimplexNoise.Generate(x * frequency, y * frequency) * amplitude;
+                total += SimplexNoise.Generate(seed, x * frequency, y * frequency) * amplitude;
             }
 
             return total;

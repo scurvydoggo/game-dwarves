@@ -50,12 +50,16 @@ namespace Dwarves.TestApplication
         /// </summary>
         private static void TestNoiseGenerator()
         {
-            var generator = new NoiseGenerator(1, 0.01f, 8);
+            int seed = 3;
+            byte octaves = 8;
+            float baseFrequency = 0.01f;
+            float persistence = 1f;
+            var generator = new NoiseGenerator(seed, octaves, baseFrequency, persistence);
 
             float[] vals = new float[100];
             for (int x = 0; x < 100; x++)
             {
-                vals[x] = generator.Generate(x, 123);
+                vals[x] = generator.Generate(x);
             }
         }
     }
