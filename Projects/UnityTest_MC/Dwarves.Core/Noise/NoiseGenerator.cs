@@ -14,6 +14,11 @@ namespace Dwarves.Core.Noise
     public class NoiseGenerator
     {
         /// <summary>
+        /// Noise generation function seems to die at huge int values, so limit the maximum seed value generated.
+        /// </summary>
+        private const int MaxSeed = 100000;
+
+        /// <summary>
         /// The noise function seed value for each octave.
         /// </summary>
         private Dictionary<byte, int> seeds;
@@ -45,7 +50,7 @@ namespace Dwarves.Core.Noise
             this.seeds = new Dictionary<byte, int>(this.OctaveCount);
             for (byte i = 0; i < this.OctaveCount; i++)
             {
-                this.seeds[i] = random.Next(100000);
+                this.seeds[i] = random.Next(NoiseGenerator.MaxSeed);
             }
 
             // Pre-calculate the frequency for each octave
@@ -116,28 +121,6 @@ namespace Dwarves.Core.Noise
                 float amplitude = this.amplitudes[i];
 
                 total += SimplexNoise.Generate(seed, x * frequency, y * frequency) * amplitude;
-            }
-
-            return total;
-        }
-
-        /// <summary>
-        /// Generate 3D simplex noise.
-        /// </summary>
-        /// <param name="x">The x position.</param>
-        /// <param name="y">The y position.</param>
-        /// <param name="z">The z position.</param>
-        /// <returns>The noise value.</returns>
-        public float Generate(float x, float y, float z)
-        {
-            float total = 0;
-
-            for (byte i = 0; i < this.OctaveCount; i++)
-            {
-                float frequency = this.frequencies[i];
-                float amplitude = this.amplitudes[i];
-
-                total += SimplexNoise.Generate(x * frequency, y * frequency, z * frequency) * amplitude;
             }
 
             return total;
