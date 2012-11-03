@@ -20,9 +20,24 @@ namespace Dwarves.Component.Terrain
     public class TerrainLoaderComponent : MonoBehaviour
     {
         /// <summary>
-        /// The seed for generating terrain.
+        /// The seed value used by the terrain generator.
         /// </summary>
-        public float Seed;
+        public int Seed;
+
+        /// <summary>
+        /// The number of octaves of noise used by the terrain generator.
+        /// </summary>
+        public byte Octaves;
+
+        /// <summary>
+        /// The base frequency which is the frequency of the lowest octave used by the terrain generator.
+        /// </summary>
+        public float BaseFrequency;
+
+        /// <summary>
+        /// The persistence value, which determines the amplitude for each octave used by the terrain generator.
+        /// </summary>
+        public float Persistence;
 
         /// <summary>
         /// The core terrain component.

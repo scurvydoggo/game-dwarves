@@ -22,8 +22,6 @@ namespace Dwarves.TestApplication
         /// <param name="args">The application args.</param>
         public static void Main(string[] args)
         {
-            //TestMarchingCubes();
-
             TestNoiseGenerator();
         }
 
