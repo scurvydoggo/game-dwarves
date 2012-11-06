@@ -31,11 +31,11 @@ namespace Dwarves.TestApplication
         private static void TestMarchingCubes()
         {
             var terrain = new VoxelTerrain();
-
             var chunkIndex = new Position(0, 0);
+            var noiseGenerator = new NoiseGenerator(1, 16, 0.001f, 0.25f);
 
             // Load the chunk
-            var chunkLoader = new ChunkLoader(0);
+            var chunkLoader = new ChunkLoader(noiseGenerator);
             chunkLoader.LoadChunk(terrain, chunkIndex);
 
             // Generate the mesh

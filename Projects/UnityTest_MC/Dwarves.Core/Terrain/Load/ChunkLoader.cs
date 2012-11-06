@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Load
 {
+    using Dwarves.Core.Noise;
     using Dwarves.Core.Terrain.Generation;
     using UnityEngine;
 
@@ -26,22 +27,11 @@ namespace Dwarves.Core.Terrain.Load
         /// <summary>
         /// Initialises a new instance of the ChunkLoader class.
         /// </summary>
-        /// <param name="seed">The seed value for generated chunks.</param>
-        public ChunkLoader(float seed)
+        /// <param name="noiseGenerator">The noise generator.</param>
+        public ChunkLoader(NoiseGenerator noiseGenerator)
         {
             this.serializer = new ChunkSerialiser();
-            this.voxelGenerator = new ChunkVoxelGenerator(seed);
-        }
-
-        /// <summary>
-        /// Gets the seed value for generated chunks.
-        /// </summary>
-        public float Seed
-        {
-            get
-            {
-                return this.voxelGenerator.Seed;
-            }
+            this.voxelGenerator = new ChunkVoxelGenerator(noiseGenerator);
         }
 
         /// <summary>
