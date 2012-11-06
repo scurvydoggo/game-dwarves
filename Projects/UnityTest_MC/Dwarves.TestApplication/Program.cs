@@ -8,6 +8,7 @@ namespace Dwarves.TestApplication
     using Dwarves.Core;
     using Dwarves.Core.Noise;
     using Dwarves.Core.Terrain;
+    using Dwarves.Core.Terrain.Generation;
     using Dwarves.Core.Terrain.Generation.MarchingCubes;
     using Dwarves.Core.Terrain.Load;
 
@@ -59,6 +60,9 @@ namespace Dwarves.TestApplication
             {
                 vals[x] = generator.Generate(x);
             }
+
+            var voxelGenerator = new ChunkVoxelGenerator(generator);
+            float[] surfaceValues = voxelGenerator.GenerateSurfaceHeights(0);
         }
     }
 }

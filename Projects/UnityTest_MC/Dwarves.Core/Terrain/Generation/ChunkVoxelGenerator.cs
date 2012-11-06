@@ -7,6 +7,7 @@ namespace Dwarves.Core.Terrain.Generation
 {
     using Dwarves.Core.Noise;
     using System.Collections.Generic;
+    using UnityEngine;
 
     /// <summary>
     /// Generates the voxels for a chunk.
@@ -31,7 +32,7 @@ namespace Dwarves.Core.Terrain.Generation
         {
             this.NoiseGenerator = noiseGenerator;
             this.SurfaceOrigin = DefaultSurfaceOrigin;
-            this.SurfaceMaxHeight = DefaultSurfaceMaxHeight;
+            this.SurfaceAmplitude = DefaultSurfaceMaxHeight;
         }
 
         /// <summary>
@@ -47,7 +48,30 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Gets or sets the maximum Y distance that the surface can fluctuate from the origin (above or below).
         /// </summary>
-        public int SurfaceMaxHeight { get; set; }
+        public int SurfaceAmplitude { get; set; }
+
+        /// <summary>
+        /// Generate the heights for each x-coordinate for the chunk at the given x index.
+        /// </summary>
+        /// <param name="chunkIndexX">The chunk index x component.</param>
+        /// <returns>The surface heights.</returns>
+        public float[] GenerateSurfaceHeights(int chunkIndexX)
+        {
+            // Generate the array of surface heights
+            var heights = new float[Chunk.Width];
+
+            int originX = chunkIndexX * Chunk.Width;
+            for (int x = 0; x < Chunk.Width; x++)
+            {
+                // Generate the noise value at this x position
+                float noise = this.NoiseGenerator.Generate(originX + x);
+
+                // Obtain the height by scaling the noise with the surface amplitude
+                heights[x] = this.SurfaceOrigin + (noise * this.SurfaceAmplitude);
+            }
+
+            return heights;
+        }
 
         /// <summary>
         /// Generate the voxels for the given terrain chunk.
@@ -55,7 +79,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="voxels">The voxels to populate.</param>
         /// <param name="surfaceHeights">The height of the surface at each x position.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void Generate(ChunkVoxels voxels, int[] surfaceHeights, Position chunkIndex)
+        public void Generate(ChunkVoxels voxels, float[] surfaceHeights, Position chunkIndex)
         {
             // TEST: Just fill all with dirt
             for (int i = 0; i < Chunk.Width * Chunk.Height; i++)
@@ -68,16 +92,6 @@ namespace Dwarves.Core.Terrain.Generation
 
             //// Now fill the rest of the terrain
             ////this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
-        }
-
-        /// <summary>
-        /// Generate the heights for each x-coordinate for the chunk at the given x index.
-        /// </summary>
-        /// <param name="chunkIndexX">The chunk index x component.</param>
-        /// <returns>The surface heights.</returns>
-        public int[] GenerateSurfaceHeights(int chunkIndexX)
-        {
-            return new int[Chunk.Width];
         }
 
         /// <summary>

@@ -46,7 +46,8 @@ namespace Dwarves.Core.Terrain.Load
             Chunk chunk;
             if (!this.serializer.TryDeserialiseChunk(chunkIndex, out chunk))
             {
-                int[] surfaceHeights;
+                // Get the surface heights of the chunk
+                float[] surfaceHeights;
                 if (!terrain.SurfaceHeights.TryGetValue(chunkIndex.X, out surfaceHeights))
                 {
                     surfaceHeights = this.voxelGenerator.GenerateSurfaceHeights(chunkIndex.X);
