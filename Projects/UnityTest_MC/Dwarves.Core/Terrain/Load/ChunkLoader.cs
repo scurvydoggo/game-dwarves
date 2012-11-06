@@ -46,9 +46,16 @@ namespace Dwarves.Core.Terrain.Load
             Chunk chunk;
             if (!this.serializer.TryDeserialiseChunk(chunkIndex, out chunk))
             {
+                int[] surfaceHeights;
+                if (!terrain.SurfaceHeights.TryGetValue(chunkIndex.X, out surfaceHeights))
+                {
+                    surfaceHeights = this.voxelGenerator.GenerateSurfaceHeights(chunkIndex.X);
+                    terrain.SurfaceHeights.Add(chunkIndex.X, surfaceHeights);
+                }
+
                 // The chunk doesn't yet exist, so generate a new one
                 chunk = new Chunk();
-                this.voxelGenerator.Generate(chunk.Voxels, chunkIndex);
+                this.voxelGenerator.Generate(chunk.Voxels, surfaceHeights, chunkIndex);
 
                 // Serialize the generated chunk
                 this.serializer.SerialiseChunk(chunk, chunkIndex);

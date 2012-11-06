@@ -18,12 +18,18 @@ namespace Dwarves.Core.Terrain
         public VoxelTerrain()
         {
             this.Chunks = new Dictionary<Position, Chunk>();
+            this.SurfaceHeights = new Dictionary<int, int[]>();
         }
 
         /// <summary>
         /// Gets the currently active chunks.
         /// </summary>
         public Dictionary<Position, Chunk> Chunks { get; private set; }
+
+        /// <summary>
+        /// Gets the surface heights for each chunk x-position.
+        /// </summary>
+        public Dictionary<int, int[]> SurfaceHeights { get; private set; }
 
         /// <summary>
         /// Get the index of the chunk at the given world coordinates.

@@ -6,6 +6,7 @@
 namespace Dwarves.Core.Terrain.Generation
 {
     using Dwarves.Core.Noise;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Generates the voxels for a chunk.
@@ -52,8 +53,9 @@ namespace Dwarves.Core.Terrain.Generation
         /// Generate the voxels for the given terrain chunk.
         /// </summary>
         /// <param name="voxels">The voxels to populate.</param>
+        /// <param name="surfaceHeights">The height of the surface at each x position.</param>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void Generate(ChunkVoxels voxels, Position chunkIndex)
+        public void Generate(ChunkVoxels voxels, int[] surfaceHeights, Position chunkIndex)
         {
             // TEST: Just fill all with dirt
             for (int i = 0; i < Chunk.Width * Chunk.Height; i++)
@@ -66,6 +68,16 @@ namespace Dwarves.Core.Terrain.Generation
 
             //// Now fill the rest of the terrain
             ////this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
+        }
+
+        /// <summary>
+        /// Generate the heights for each x-coordinate for the chunk at the given x index.
+        /// </summary>
+        /// <param name="chunkIndexX">The chunk index x component.</param>
+        /// <returns>The surface heights.</returns>
+        public int[] GenerateSurfaceHeights(int chunkIndexX)
+        {
+            return new int[Chunk.Width];
         }
 
         /// <summary>
