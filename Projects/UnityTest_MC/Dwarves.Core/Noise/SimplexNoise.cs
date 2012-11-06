@@ -3,6 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
+using System;
 namespace Dwarves.Core.Noise
 {
     /// <summary>
@@ -108,8 +109,8 @@ namespace Dwarves.Core.Noise
             float y2 = y0 - 1 + (2 * G2);
 
             // Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
-            int ii = i % 256;
-            int jj = j % 256;
+            int ii = Math.Abs(i % 256);
+            int jj = Math.Abs(j % 256);
 
             // Calculate the contribution from the three corners
             float t0 = 0.5f - (x0 * x0) - (y0 * y0);

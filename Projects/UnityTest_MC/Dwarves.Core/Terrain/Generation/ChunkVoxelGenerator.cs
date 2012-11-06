@@ -22,7 +22,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Default value.
         /// </summary>
-        public const int DefaultSurfaceMaxHeight = 50;
+        public const int DefaultSurfaceAmplitude = 50;
 
         /// <summary>
         /// Initialises a new instance of the ChunkVoxelGenerator class.
@@ -32,7 +32,7 @@ namespace Dwarves.Core.Terrain.Generation
         {
             this.NoiseGenerator = noiseGenerator;
             this.SurfaceOrigin = DefaultSurfaceOrigin;
-            this.SurfaceAmplitude = DefaultSurfaceMaxHeight;
+            this.SurfaceAmplitude = DefaultSurfaceAmplitude;
         }
 
         /// <summary>
@@ -81,97 +81,40 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="chunkIndex">The chunk index.</param>
         public void Generate(ChunkVoxels voxels, float[] surfaceHeights, Position chunkIndex)
         {
-            // TEST: Just fill all with dirt
-            for (int i = 0; i < Chunk.Width * Chunk.Height; i++)
+            int originY = chunkIndex.Y * Chunk.Height;
+
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                voxels[i] = new Voxel(TerrainMaterial.Dirt, byte.MinValue);
+                float surfaceHeightF = surfaceHeights[x];
+                int surfaceHeightI = (int)surfaceHeightF;
+                float deltaHeight = surfaceHeightF - surfaceHeightI;
+
+                for (int y = 0; y < Chunk.Height; y++)
+                {
+                    int height = originY + y;
+
+                    if (height > surfaceHeightI)
+                    {
+                        // This voxel lies above the surface
+                        voxels[x, y] = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+                    }
+                    else
+                    {
+                        // Determine the material
+                        var material = TerrainMaterial.Dirt;
+
+                        if (height == surfaceHeightI)
+                        {
+                            // The voxel cuts through the surface
+                        }
+                        else
+                        {
+                            // The voxel lies under the surface
+                            voxels[x, y] = new Voxel(material, byte.MinValue);
+                        }
+                    }
+                }
             }
-
-            //// Create the surface voxels
-            ////int[] surfaceHeights = this.GenerateSurface(voxels, chunkIndex, TerrainMaterial.Dirt);
-
-            //// Now fill the rest of the terrain
-            ////this.FillAroundSurface(voxels, chunkIndex, surfaceHeights, TerrainMaterial.Dirt);
-        }
-
-        /// <summary>
-        /// Generate the surface voxels and return an array indicating the y value of each surface point.
-        /// </summary>
-        /// <param name="chunk">The chunk.</param>
-        /// <param name="chunkIndex">The chunk index.</param>
-        /// <param name="surfaceMaterial">The surface material.</param>
-        /// <returns>Array indicating the y value of each surface point.</returns>
-        private int[] GenerateSurface(ChunkVoxels chunk, Position chunkIndex, TerrainMaterial surfaceMaterial)
-        {
-            return null;
-            //int[] surfaceBoundary = new int[Chunk.Width];
-
-            //if (chunkIndex.Y >= this.SurfaceOrigin - this.SurfaceMaxHeight)
-            //{
-            //    if (chunkIndex.Y <= this.SurfaceOrigin + this.SurfaceMaxHeight)
-            //    {
-            //        // The surface may cut through this chunk
-            //        for (int chunkX = 0; chunkX < Chunk.Width; chunkX++)
-            //        {
-            //            // Calculate the point of the position to input into the noise function.
-            //            float surfaceX = (chunkIndex.X + chunkX) / this.SurfacePeriod;
-
-            //            // Get the noise for this point
-            //            float noise = SimplexNoise.Generate(surfaceX, this.Seed);
-
-            //            // Calculate the height from the surface origin
-            //            float offsetYFloat = noise * this.SurfaceMaxHeight;
-            //            int offsetY = (int)offsetYFloat;
-
-            //            // Determine the y coordinate of the surface in chunk coordinates
-            //            int chunkY = this.SurfaceOrigin + offsetY - chunkIndex.Y;
-
-            //            // Check the limits
-            //            if (chunkY < 0)
-            //            {
-            //                surfaceBoundary[chunkX] = 0;
-            //            }
-            //            else if (chunkY > Chunk.Height)
-            //            {
-            //                surfaceBoundary[chunkX] = Chunk.Height;
-            //            }
-            //            else
-            //            {
-            //                // The surface cuts inside this chunk
-            //                surfaceBoundary[chunkX] = chunkY;
-
-            //                // Now calculate the density of the voxel at this height
-            //                byte density;
-            //                float densityFloat = (offsetYFloat - offsetY) * byte.MaxValue;
-            //                if (densityFloat >= byte.MaxValue)
-            //                {
-            //                    density = byte.MaxValue;
-            //                }
-            //                else
-            //                {
-            //                    density = (byte)(densityFloat + 0.5f);
-            //                }
-
-            //                // Update the surface voxel
-            //                chunk[chunkX, chunkY] = new Voxel(surfaceMaterial, density);
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // This chunk is above the heighest possible surface point, so keep all heights to 0 (ie. do nothing)
-            //    }
-            //}
-            //else
-            //{
-            //    // This chunk is below the lowest possible surface point, so set all heights to max
-            //    for (int x = 0; x < Chunk.Height; x++)
-            //    {
-            //        surfaceBoundary[x] = Chunk.Height;
-            //    }
-            //}
-
-            //return surfaceBoundary;
         }
 
         /// <summary>

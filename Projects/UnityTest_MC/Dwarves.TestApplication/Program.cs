@@ -55,7 +55,7 @@ namespace Dwarves.TestApplication
             float persistence = 0.25f;
             var generator = new NoiseGenerator(seed, octaves, baseFrequency, persistence);
 
-            float[] vals = new float[1000];
+            float[] vals = new float[2000];
             for (int x = 0; x < vals.Length; x++)
             {
                 vals[x] = generator.Generate(x);

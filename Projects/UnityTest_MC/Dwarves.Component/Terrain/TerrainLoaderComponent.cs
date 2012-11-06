@@ -28,7 +28,7 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// The number of octaves of noise used by the terrain generator.
         /// </summary>
-        public byte Octaves;
+        public int Octaves;
 
         /// <summary>
         /// The base frequency which is the frequency of the lowest octave used by the terrain generator.
@@ -80,7 +80,7 @@ namespace Dwarves.Component.Terrain
             this.cTerrain = this.GetComponent<TerrainComponent>();
 
             // Initialise the noise generator
-            this.NoiseGenerator = new NoiseGenerator(this.Seed, this.Octaves, this.BaseFrequency, this.Persistence);
+            this.NoiseGenerator = new NoiseGenerator(this.Seed, (byte)this.Octaves, this.BaseFrequency, this.Persistence);
 
             // Create the chunk loader
             this.ChunkLoader = new ChunkLoader(this.NoiseGenerator);
