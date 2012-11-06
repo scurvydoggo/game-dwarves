@@ -92,11 +92,13 @@ namespace Dwarves.Core.Terrain.Generation
                 for (int y = 0; y < Chunk.Height; y++)
                 {
                     int height = originY + y;
-
+                    
+                    // Create the voxel at this point
+                    Voxel voxel;
                     if (height > surfaceHeightI)
                     {
                         // This voxel lies above the surface
-                        voxels[x, y] = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+                        voxel = new Voxel(TerrainMaterial.Air, byte.MaxValue);
                     }
                     else
                     {
@@ -105,14 +107,18 @@ namespace Dwarves.Core.Terrain.Generation
 
                         if (height == surfaceHeightI)
                         {
-                            // The voxel cuts through the surface
+                            byte density = (byte)(byte.MaxValue - byte.MaxValue * deltaHeight);
+                            voxel = new Voxel(material, density);
                         }
                         else
                         {
                             // The voxel lies under the surface
-                            voxels[x, y] = new Voxel(material, byte.MinValue);
+                            voxel = new Voxel(material, byte.MinValue);
                         }
                     }
+
+                    // Set the voxel
+                    voxels[x, y] = voxel;
                 }
             }
         }
