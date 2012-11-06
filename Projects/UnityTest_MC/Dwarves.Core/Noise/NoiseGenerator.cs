@@ -14,11 +14,6 @@ namespace Dwarves.Core.Noise
     public class NoiseGenerator
     {
         /// <summary>
-        /// Noise generation function seems to die at huge values, so limit the maximum seed value generated.
-        /// </summary>
-        private const int MaxSeed = 100000;
-
-        /// <summary>
         /// The noise function seed value for each octave.
         /// </summary>
         private Dictionary<byte, int> seeds;
@@ -205,7 +200,7 @@ namespace Dwarves.Core.Noise
             this.seeds = new Dictionary<byte, int>(this.Octaves);
             for (byte i = 0; i < this.Octaves; i++)
             {
-                this.seeds[i] = random.Next(NoiseGenerator.MaxSeed);
+                this.seeds[i] = random.Next();
             }
 
             // Pre-calculate the frequency for each octave
