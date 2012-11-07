@@ -47,7 +47,7 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
                 if (z == -1)
                 {
                     // This cube lies is on the surface, so for the corners facing outwards use max-density to indicate
-                    // air. This creates the 'outer' wall that represents the diggable terrain
+                    // air. This creates the wall of terrain that the user sees
                     d0 = voxelSquare.LowerLeft.Voxel.Density;
                     d1 = voxelSquare.LowerRight.Voxel.Density;
                     d2 = byte.MaxValue;
