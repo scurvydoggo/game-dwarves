@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Generation
 {
+    using System;
     using System.Collections.Generic;
     using Dwarves.Core.Noise;
     using UnityEngine;
@@ -87,7 +88,7 @@ namespace Dwarves.Core.Terrain.Generation
             {
                 float surfaceHeightF = surfaceHeights[x];
                 int surfaceHeightI = (int)surfaceHeightF;
-                float deltaHeight = surfaceHeightF - surfaceHeightI;
+                float deltaHeight = Math.Abs(surfaceHeightF - surfaceHeightI);
 
                 for (int y = 0; y < Chunk.Height; y++)
                 {
@@ -108,14 +109,19 @@ namespace Dwarves.Core.Terrain.Generation
                         if (height == surfaceHeightI)
                         {
                             // This voxel lies on the surface, so scale the density by the noise value
-                            // IsBorder is set to True for this voxel also
-                            byte density = (byte)(byte.MaxValue - (byte.MaxValue * deltaHeight));
-                            voxel = new Voxel(material, density, true);
+                            byte density = (byte)(Voxel.DensityMax - (Voxel.DensityMax * deltaHeight));
+
+                            // The density property stores 2 densities. The 'foreground' density which is that which
+                            // can be dug, and the 'background' density which represents the original density
+                            // Set the foreground and background densities both
+                            density = (byte)((density << 4) | density);
+
+                            voxel = new Voxel(material, density);
                         }
                         else
                         {
                             // The voxel lies under the surface
-                            voxel = new Voxel(material, byte.MinValue);
+                            voxel = new Voxel(material, Voxel.DensityMin);
                         }
                     }
 
@@ -146,11 +152,11 @@ namespace Dwarves.Core.Terrain.Generation
                 {
                     if (chunkY < surfaceHeight)
                     {
-                        chunk[chunkX, chunkY] = new Voxel(material, byte.MinValue);
+                        chunk[chunkX, chunkY] = new Voxel(material, Voxel.DensityMin);
                     }
                     else if (chunkY > surfaceHeight)
                     {
-                        chunk[chunkX, chunkY] = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+                        chunk[chunkX, chunkY] = new Voxel(TerrainMaterial.Air, Voxel.DensityMax);
                     }
                 }
             }

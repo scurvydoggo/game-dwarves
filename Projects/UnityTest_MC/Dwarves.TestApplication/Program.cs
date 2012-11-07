@@ -40,7 +40,7 @@ namespace Dwarves.TestApplication
             chunkLoader.LoadChunk(terrain, chunkIndex);
 
             // Generate the mesh
-            var meshGenerator = new MarchingCubesGenerator(terrain, 127);
+            var meshGenerator = new MarchingCubesGenerator(terrain, 7);
             meshGenerator.UpdateChunk(chunkIndex);
         }
 
