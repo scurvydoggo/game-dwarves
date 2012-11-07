@@ -59,17 +59,49 @@ namespace Dwarves.Core.Terrain.Generation.MarchingCubes
                 }
                 else if (z == Voxel.Depth - 1)
                 {
+                    d2 = voxelSquare.LowerRight.Voxel.Density;
+                    d3 = voxelSquare.LowerLeft.Voxel.Density;
+                    d6 = voxelSquare.UpperRight.Voxel.Density;
+                    d7 = voxelSquare.UpperLeft.Voxel.Density;
+
                     // This cube lies at the deepest depth, so for the corners facing inwards use min-density to
                     // indicate a back wall. This creates the 'inner' wall which represents 'dug out' terrain
                     // Note: An exception is if a voxel is of the type 'Air', in which case there is no inner wall
-                    d0 = voxelSquare.LowerLeft.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
-                    d1 = voxelSquare.LowerRight.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
-                    d2 = voxelSquare.LowerRight.Voxel.Density;
-                    d3 = voxelSquare.LowerLeft.Voxel.Density;
-                    d4 = voxelSquare.UpperLeft.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
-                    d5 = voxelSquare.UpperRight.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
-                    d6 = voxelSquare.UpperRight.Voxel.Density;
-                    d7 = voxelSquare.UpperLeft.Voxel.Density;
+                    if (!voxelSquare.LowerLeft.Voxel.IsBorder)
+                    {
+                        d0 = voxelSquare.LowerLeft.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    }
+                    else
+                    {
+                        d0 = voxelSquare.LowerLeft.Voxel.Density;
+                    }
+
+                    if (!voxelSquare.LowerRight.Voxel.IsBorder)
+                    {
+                        d1 = voxelSquare.LowerRight.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    }
+                    else
+                    {
+                        d1 = voxelSquare.LowerRight.Voxel.Density;
+                    }
+
+                    if (!voxelSquare.UpperLeft.Voxel.IsBorder)
+                    {
+                        d4 = voxelSquare.UpperLeft.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    }
+                    else
+                    {
+                        d4 = voxelSquare.UpperLeft.Voxel.Density;
+                    }
+
+                    if (!voxelSquare.UpperRight.Voxel.IsBorder)
+                    {
+                        d5 = voxelSquare.UpperRight.Voxel.Material != TerrainMaterial.Air ? byte.MinValue : byte.MaxValue;
+                    }
+                    else
+                    {
+                        d5 = voxelSquare.UpperRight.Voxel.Density;
+                    }
                 }
                 else
                 {

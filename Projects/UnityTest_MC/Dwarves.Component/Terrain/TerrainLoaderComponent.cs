@@ -9,10 +9,10 @@ namespace Dwarves.Component.Terrain
     using System.Collections.Generic;
     using Dwarves.Component.Bounds;
     using Dwarves.Core;
+    using Dwarves.Core.Noise;
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Load;
     using UnityEngine;
-    using Dwarves.Core.Noise;
 
     /// <summary>
     /// Component for loading the terrain.

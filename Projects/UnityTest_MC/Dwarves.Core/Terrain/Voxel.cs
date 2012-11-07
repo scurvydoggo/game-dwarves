@@ -19,7 +19,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// An empty voxel.
         /// </summary>
-        public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, byte.MaxValue, 0);
+        public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, byte.MaxValue, false, 0);
 
         /// <summary>
         /// Initialises a new instance of the Voxel struct.
@@ -27,7 +27,7 @@ namespace Dwarves.Core.Terrain
         /// <param name="material">The material.</param>
         /// <param name="density">The density.</param>
         public Voxel(TerrainMaterial material, byte density)
-            : this(material, density, short.MaxValue)
+            : this(material, density, false)
         {
         }
 
@@ -36,12 +36,25 @@ namespace Dwarves.Core.Terrain
         /// </summary>
         /// <param name="material">The material.</param>
         /// <param name="density">The density.</param>
+        /// <param name="isBorder">Indicates whether the voxel lies on the border between the land and air.</param>
+        public Voxel(TerrainMaterial material, byte density, bool isBorder)
+            : this(material, density, isBorder, short.MaxValue)
+        {
+        }
+
+        /// <summary>
+        /// Initialises a new instance of the Voxel struct.
+        /// </summary>
+        /// <param name="material">The material.</param>
+        /// <param name="density">The density.</param>
+        /// <param name="isBorder">Indicates whether the voxel lies on the border between the land and air.</param>
         /// <param name="color">The colour.</param>
-        public Voxel(TerrainMaterial material, byte density, short color)
+        public Voxel(TerrainMaterial material, byte density, bool isBorder, short color)
             : this()
         {
             this.Material = material;
             this.Density = density;
+            this.IsBorder = isBorder;
             this.Color = color;
         }
 
@@ -54,6 +67,11 @@ namespace Dwarves.Core.Terrain
         /// Gets or sets the density.
         /// </summary>
         public byte Density { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the voxel lies on the border between the land and air.
+        /// </summary>
+        public bool IsBorder { get; set; }
 
         /// <summary>
         /// Gets or sets the colour. 15-bit RGB colour with 5 bits per component. The last bit is unused.

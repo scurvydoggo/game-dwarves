@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Generation
 {
-    using Dwarves.Core.Noise;
     using System.Collections.Generic;
+    using Dwarves.Core.Noise;
     using UnityEngine;
 
     /// <summary>
@@ -98,7 +98,7 @@ namespace Dwarves.Core.Terrain.Generation
                     if (height > surfaceHeightI)
                     {
                         // This voxel lies above the surface
-                        voxel = new Voxel(TerrainMaterial.Air, byte.MaxValue);
+                        voxel = Voxel.Air;
                     }
                     else
                     {
@@ -107,8 +107,10 @@ namespace Dwarves.Core.Terrain.Generation
 
                         if (height == surfaceHeightI)
                         {
-                            byte density = (byte)(byte.MaxValue - byte.MaxValue * deltaHeight);
-                            voxel = new Voxel(material, density);
+                            // This voxel lies on the surface, so scale the density by the noise value
+                            // IsBorder is set to True for this voxel also
+                            byte density = (byte)(byte.MaxValue - (byte.MaxValue * deltaHeight));
+                            voxel = new Voxel(material, density, true);
                         }
                         else
                         {

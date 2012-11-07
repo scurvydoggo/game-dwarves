@@ -3,9 +3,10 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-using System;
 namespace Dwarves.Core.Noise
 {
+    using System;
+
     /// <summary>
     /// Generates Simplex Noise.
     /// </summary>
