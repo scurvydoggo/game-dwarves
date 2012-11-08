@@ -16,24 +16,17 @@ namespace Dwarves.Core.Terrain.Generation
     public class ChunkVoxelGenerator
     {
         /// <summary>
-        /// Default value.
-        /// </summary>
-        public const int DefaultSurfaceOrigin = 0;
-
-        /// <summary>
-        /// Default value.
-        /// </summary>
-        public const int DefaultSurfaceAmplitude = 50;
-
-        /// <summary>
         /// Initialises a new instance of the ChunkVoxelGenerator class.
         /// </summary>
         /// <param name="noiseGenerator">The noise generator.</param>
-        public ChunkVoxelGenerator(NoiseGenerator noiseGenerator)
+        /// <param name="surfaceOrigin">The Y position around which the generated surface oscillates.</param>
+        /// <param name="surfaceAmplitude">The maximum Y distance that the surface can fluctuate from the origin (above
+        /// or below).</param>
+        public ChunkVoxelGenerator(NoiseGenerator noiseGenerator, int surfaceOrigin, int surfaceAmplitude)
         {
             this.NoiseGenerator = noiseGenerator;
-            this.SurfaceOrigin = DefaultSurfaceOrigin;
-            this.SurfaceAmplitude = DefaultSurfaceAmplitude;
+            this.SurfaceOrigin = surfaceOrigin;
+            this.SurfaceAmplitude = surfaceAmplitude;
         }
 
         /// <summary>
@@ -42,7 +35,7 @@ namespace Dwarves.Core.Terrain.Generation
         public NoiseGenerator NoiseGenerator { get; private set; }
 
         /// <summary>
-        /// Gets or sets the Y position around which the generated surface oscillates
+        /// Gets or sets the Y position around which the generated surface oscillates.
         /// </summary>
         public int SurfaceOrigin { get; set; }
 

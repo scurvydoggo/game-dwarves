@@ -27,11 +27,11 @@ namespace Dwarves.Core.Terrain.Load
         /// <summary>
         /// Initialises a new instance of the ChunkLoader class.
         /// </summary>
-        /// <param name="noiseGenerator">The noise generator.</param>
-        public ChunkLoader(NoiseGenerator noiseGenerator)
+        /// <param name="voxelGenerator">The voxel generator.</param>
+        public ChunkLoader(ChunkVoxelGenerator voxelGenerator)
         {
             this.serializer = new ChunkSerialiser();
-            this.voxelGenerator = new ChunkVoxelGenerator(noiseGenerator);
+            this.voxelGenerator = voxelGenerator;
         }
 
         /// <summary>

@@ -13,6 +13,7 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Load;
     using UnityEngine;
+    using Dwarves.Core.Terrain.Generation;
 
     /// <summary>
     /// Component for loading the terrain.
@@ -20,6 +21,16 @@ namespace Dwarves.Component.Terrain
     [RequireComponent(typeof(TerrainComponent))]
     public class TerrainLoaderComponent : MonoBehaviour
     {
+        /// <summary>
+        /// The Y position around which the generated surface oscillates.
+        /// </summary>
+        public int SurfaceOrigin;
+
+        /// <summary>
+        /// The maximum Y distance that the surface can fluctuate from the origin (above or below).
+        /// </summary>
+        public int SurfaceAmplitude;
+
         /// <summary>
         /// The seed value used by the terrain generator.
         /// </summary>
@@ -63,11 +74,6 @@ namespace Dwarves.Component.Terrain
         }
 
         /// <summary>
-        /// Gets the noise generator.
-        /// </summary>
-        public NoiseGenerator NoiseGenerator { get; private set; }
-
-        /// <summary>
         /// Gets the terrain chunk loader.
         /// </summary>
         public ChunkLoader ChunkLoader { get; private set; }
@@ -79,11 +85,13 @@ namespace Dwarves.Component.Terrain
         {
             this.cTerrain = this.GetComponent<TerrainComponent>();
 
-            // Initialise the noise generator
-            this.NoiseGenerator = new NoiseGenerator(this.Seed, (byte)this.Octaves, this.BaseFrequency, this.Persistence);
+            // Initialise the noise and voxel generator
+            var noiseGenerator =
+                new NoiseGenerator(this.Seed, (byte)this.Octaves, this.BaseFrequency, this.Persistence);
+            var voxelGenerator = new ChunkVoxelGenerator(noiseGenerator, this.SurfaceOrigin, this.SurfaceAmplitude);
 
             // Create the chunk loader
-            this.ChunkLoader = new ChunkLoader(this.NoiseGenerator);
+            this.ChunkLoader = new ChunkLoader(voxelGenerator);
         }
 
         /// <summary>

@@ -34,9 +34,10 @@ namespace Dwarves.TestApplication
             var terrain = new VoxelTerrain();
             var chunkIndex = new Position(0, 0);
             var noiseGenerator = new NoiseGenerator(1, 16, 0.001f, 0.25f);
+            var voxelGenerator = new ChunkVoxelGenerator(noiseGenerator, 0, 50);
 
             // Load the chunk
-            var chunkLoader = new ChunkLoader(noiseGenerator);
+            var chunkLoader = new ChunkLoader(voxelGenerator);
             chunkLoader.LoadChunk(terrain, chunkIndex);
 
             // Generate the mesh
@@ -61,7 +62,7 @@ namespace Dwarves.TestApplication
                 vals[x] = generator.Generate(x);
             }
 
-            var voxelGenerator = new ChunkVoxelGenerator(generator);
+            var voxelGenerator = new ChunkVoxelGenerator(generator, 0, 50);
             float[] surfaceValues = voxelGenerator.GenerateSurfaceHeights(0);
         }
     }
