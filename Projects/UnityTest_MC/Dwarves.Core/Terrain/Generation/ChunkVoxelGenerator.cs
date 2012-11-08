@@ -87,8 +87,8 @@ namespace Dwarves.Core.Terrain.Generation
             for (int x = 0; x < Chunk.Width; x++)
             {
                 float surfaceHeightF = surfaceHeights[x];
-                int surfaceHeightI = (int)surfaceHeightF;
-                float deltaHeight = Math.Abs(surfaceHeightF - surfaceHeightI);
+                int surfaceHeightI = (int)Math.Floor(surfaceHeightF);
+                float deltaHeight = surfaceHeightF - surfaceHeightI;
 
                 for (int y = 0; y < Chunk.Height; y++)
                 {
