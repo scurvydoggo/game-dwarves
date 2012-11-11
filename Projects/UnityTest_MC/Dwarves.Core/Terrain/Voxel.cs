@@ -14,12 +14,12 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// The number of cubes dug in the Z direction for voxels.
         /// </summary>
-        public const byte DigDepth = 3;
+        public const byte DigDepth = 8;
 
         /// <summary>
         /// The number of cubes drawn in the Z direction for voxels.
         /// </summary>
-        public const byte DrawDepth = 6;
+        public const byte DrawDepth = 16;
 
         /// <summary>
         /// The minimum density value, indicating fully inside the surface.
