@@ -11,14 +11,34 @@ namespace Dwarves.Core.Terrain
     public static class TerrainConst
     {
         /// <summary>
-        /// The maximum density value. This lies outside the surface.
+        /// The power-of-2 width of the chunk for quickly determining chunk index.
         /// </summary>
-        public const byte DensityMax = 0x0E;
+        public const byte ChunkWidthLog = 4;
+
+        /// <summary>
+        /// The power-of-2 height of the chunk for quickly determining chunk index.
+        /// </summary>
+        public const byte ChunkHeightLog = 4;
+
+        /// <summary>
+        /// The width of a chunk.
+        /// </summary>
+        public const int ChunkWidth = 1 << TerrainConst.ChunkWidthLog;
+
+        /// <summary>
+        /// The height of a chunk.
+        /// </summary>
+        public const int ChunkHeight = 1 << TerrainConst.ChunkHeightLog;
 
         /// <summary>
         /// The minimum density value. This lies inside the surface.
         /// </summary>
         public const byte DensityMin = 0x00;
+
+        /// <summary>
+        /// The maximum density value. This lies outside the surface.
+        /// </summary>
+        public const byte DensityMax = 0x0E;
 
         /// <summary>
         /// The density at which the surface lies (aka the isolevel).
