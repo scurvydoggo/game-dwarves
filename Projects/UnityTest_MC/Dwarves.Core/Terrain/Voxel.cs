@@ -12,6 +12,22 @@ namespace Dwarves.Core.Terrain
     public struct Voxel
     {
         /// <summary>
+        /// The mask for the secondary density value which is used for terrain behind the dug area (i.e. the original
+        /// density prior to the digging).
+        /// </summary>
+        public const byte DensityMaskSecondary = 0xF0;
+
+        /// <summary>
+        /// The maximum density value, indicating fully outside the surface.
+        /// </summary>
+        public const byte DensityMax = 0x0F;
+
+        /// <summary>
+        /// The minimum density value, indicating fully inside the surface.
+        /// </summary>
+        public const byte DensityMin = 0x00;
+
+        /// <summary>
         /// The number of cubes dug in the Z direction for voxels.
         /// </summary>
         public const byte DigDepth = 8;
@@ -20,22 +36,6 @@ namespace Dwarves.Core.Terrain
         /// The number of cubes drawn in the Z direction for voxels.
         /// </summary>
         public const byte DrawDepth = 16;
-
-        /// <summary>
-        /// The minimum density value, indicating fully inside the surface.
-        /// </summary>
-        public const byte DensityMin = 0x00;
-
-        /// <summary>
-        /// The maximum density value, indicating fully outside the surface.
-        /// </summary>
-        public const byte DensityMax = 0x0F;
-
-        /// <summary>
-        /// The mask for the secondary density value which is used for terrain behind the dug area (i.e. the original
-        /// density prior to the digging).
-        /// </summary>
-        public const byte DensityMaskSecondary = 0xF0;
 
         /// <summary>
         /// An empty voxel.
@@ -68,9 +68,9 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Gets or sets the material.
+        /// Gets or sets the colour. 15-bit RGB colour with 5 bits per component. The last bit is unused.
         /// </summary>
-        public TerrainMaterial Material { get; set; }
+        public short Color { get; set; }
 
         /// <summary>
         /// Gets or sets the density.
@@ -78,8 +78,8 @@ namespace Dwarves.Core.Terrain
         public byte Density { get; set; }
 
         /// <summary>
-        /// Gets or sets the colour. 15-bit RGB colour with 5 bits per component. The last bit is unused.
+        /// Gets or sets the material.
         /// </summary>
-        public short Color { get; set; }
+        public TerrainMaterial Material { get; set; }
     }
 }
