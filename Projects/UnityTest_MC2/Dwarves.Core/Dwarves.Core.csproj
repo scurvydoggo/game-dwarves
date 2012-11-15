@@ -42,6 +42,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Geometry\Mesh.cs" />
     <Compile Include="Math\RectangleI.cs" />
     <Compile Include="Math\Vector2I.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
