@@ -17,11 +17,6 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Mask for converting from world coordinates to chunk coordinates.
         /// </summary>
-        private const int ChunkWidthMask = TerrainConst.ChunkWidth - 1;
-
-        /// <summary>
-        /// Mask for converting from world coordinates to chunk coordinates.
-        /// </summary>
         private const int ChunkHeightMask = TerrainConst.ChunkHeight - 1;
 
         /// <summary>
@@ -68,7 +63,9 @@ namespace Dwarves.Core.Terrain
         /// <returns>The position in chunk coordinates.</returns>
         public static Vector2I GetChunkCoordinates(int worldX, int worldY)
         {
-            return new Vector2I(worldX & VoxelTerrain.ChunkWidthMask, worldY & VoxelTerrain.ChunkHeightMask);
+            const int MaskX = TerrainConst.ChunkWidth - 1;
+            const int MaskY = TerrainConst.ChunkHeight - 1;
+            return new Vector2I(worldX & MaskX, worldY & MaskY);
         }
 
         /// <summary>
