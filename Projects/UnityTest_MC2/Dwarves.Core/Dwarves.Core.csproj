@@ -43,9 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Geometry\Mesh.cs" />
+    <Compile Include="Math\Noise\CompoundNoiseGenerator.cs" />
+    <Compile Include="Math\Noise\INoiseGenerator.cs" />
     <Compile Include="Math\RectangleI.cs" />
     <Compile Include="Math\Vector2I.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Terrain\Generation\TerrainGenerator.cs" />
     <Compile Include="Terrain\TerrainMaterial.cs" />
     <Compile Include="Terrain\Voxel.cs" />
     <Compile Include="Terrain\TerrainConst.cs" />
