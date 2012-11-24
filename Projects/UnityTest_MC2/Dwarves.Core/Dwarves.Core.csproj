@@ -45,6 +45,7 @@
     <Compile Include="Geometry\Mesh.cs" />
     <Compile Include="Math\Noise\CompoundNoiseGenerator.cs" />
     <Compile Include="Math\Noise\INoiseGenerator.cs" />
+    <Compile Include="Math\Noise\SimplexNoiseGenerator.cs" />
     <Compile Include="Math\RectangleI.cs" />
     <Compile Include="Math\Vector2I.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
