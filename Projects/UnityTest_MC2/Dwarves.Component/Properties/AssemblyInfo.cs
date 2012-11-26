@@ -9,11 +9,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Dwarves.Core")]
+[assembly: AssemblyTitle("Dwarves.Component")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Dwarves.Core")]
+[assembly: AssemblyProduct("Dwarves.Component")]
 [assembly: AssemblyCopyright("Copyright © 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("7f8adee4-1613-40a9-bef0-c8c27351cbc3")]
+[assembly: Guid("7247ebc3-5901-4ef1-b394-0cb47c191a49")]
 
 // Version information for an assembly consists of the following four values:
 //
