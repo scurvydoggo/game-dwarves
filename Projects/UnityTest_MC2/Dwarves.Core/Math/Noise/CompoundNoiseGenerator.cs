@@ -207,7 +207,31 @@ namespace Dwarves.Core.Math.Noise
         /// <returns>The noise value.</returns>
         public float Generate(float x, float y, float z)
         {
-            throw new InvalidOperationException("3D noise generation not supported.");
+            float total = 0;
+
+            for (byte i = 0; i < this.Octaves; i++)
+            {
+                int seed = this.seeds[i];
+                float frequency = this.frequencies[i];
+                float amplitude = this.amplitudes[i];
+
+                total += this.BaseGenerator.Generate(seed, x * frequency, y * frequency, z * frequency) * amplitude;
+            }
+
+            return total;
+        }
+
+        /// <summary>
+        /// Generate 4D noise.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="z">The z position.</param>
+        /// <param name="z">The w position.</param>
+        /// <returns>The noise value.</returns>
+        public float Generate(float x, float y, float z, float w)
+        {
+            throw new NotSupportedException();
         }
 
         /// <summary>
