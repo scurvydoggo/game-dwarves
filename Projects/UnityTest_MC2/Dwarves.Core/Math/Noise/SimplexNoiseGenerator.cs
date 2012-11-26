@@ -6,94 +6,16 @@
 namespace Dwarves.Core.Math.Noise
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// Simplex noise generator.
     /// </summary>
     public class SimplexNoiseGenerator : INoiseGenerator
     {
+        #region Pre-calculated Values
+
         private static readonly double Sqrt5 = Math.Sqrt(5.0);
         private static readonly double Sqrt3 = Math.Sqrt(3.0);
-
-        /// <summary>
-        /// Gradient vectors for 3D (pointing to mid points of all edges of a unit cube).
-        /// </summary>
-        private static readonly int[][] Gradient3 =
-		{
-			new int[]{ 1, 1, 0 },
-            new int[]{ -1, 1, 0 },
-			new int[]{ 1, -1, 0 },
-            new int[]{ -1, -1, 0 }, new int[]{ 1, 0, 1 }, new int[]{ -1, 0, 1 },
-			new int[]{ 1, 0, -1 }, new int[]{ -1, 0, -1 }, new int[]{ 0, 1, 1 }, new int[]{ 0, -1, 1 },
-			new int[]{ 0, 1, -1 }, new int[]{ 0, -1, -1 }
-		};
-
-        /// <summary>
-        /// Gradient vectors for 4D (pointing to mid points of all edges of a unit 4D hypercube).
-        /// </summary>
-        private static readonly int[][] Gradient4 = new int[][]
-		{
-			new int[]{ 0, 1, 1, 1 }, new int[]{ 0, 1, 1, -1 },
-			new int[]{ 0, 1, -1, 1 }, new int[]{ 0, 1, -1, -1 }, new int[]{ 0, -1, 1, 1 },
-			new int[]{ 0, -1, 1, -1 }, new int[]{ 0, -1, -1, 1 }, new int[]{ 0, -1, -1, -1 },
-			new int[]{ 1, 0, 1, 1 }, new int[]{ 1, 0, 1, -1 }, new int[]{ 1, 0, -1, 1 }, new int[]{ 1, 0, -1, -1 },
-			new int[]{ -1, 0, 1, 1 }, new int[]{ -1, 0, 1, -1 }, new int[]{ -1, 0, -1, 1 },
-			new int[]{ -1, 0, -1, -1 }, new int[]{ 1, 1, 0, 1 }, new int[]{ 1, 1, 0, -1 },
-			new int[]{ 1, -1, 0, 1 }, new int[]{ 1, -1, 0, -1 }, new int[]{ -1, 1, 0, 1 },
-			new int[]{ -1, 1, 0, -1 }, new int[]{ -1, -1, 0, 1 }, new int[]{ -1, -1, 0, -1 },
-			new int[]{ 1, 1, 1, 0 }, new int[]{ 1, 1, -1, 0 }, new int[]{ 1, -1, 1, 0 }, new int[]{ 1, -1, -1, 0 },
-			new int[]{ -1, 1, 1, 0 }, new int[]{ -1, 1, -1, 0 }, new int[]{ -1, -1, 1, 0 },
-			new int[]{ -1, -1, -1, 0 }
-		};
-
-        /// <summary>
-        /// Permutation table.
-        /// </summary>
-        private static readonly int[] P = { 151, 160, 137, 91, 90, 15, 131, 13, 201,
-			95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37,
-			240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62,
-			94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33, 88, 237, 149, 56,
-			87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139,
-			48, 27, 166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133,
-			230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102, 143, 54, 65, 25,
-			63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200,
-			196, 135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3,
-			64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126, 255,
-			82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42,
-			223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153,
-			101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79,
-			113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228, 251, 34, 242,
-			193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249,
-			14, 239, 107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204,
-			176, 115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 222,
-			114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180 };
-
-        /// <summary>
-        /// To remove the need for index wrapping, double the permutation table length.
-        /// </summary>
-        private static readonly int[][] Simplex = new int[][]
-		{
-			new int[]{ 0, 1, 2, 3 }, new int[]{ 0, 1, 3, 2 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 2, 3, 1 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 1, 2, 3, 0 }, new int[]{ 0, 2, 1, 3 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 3, 1, 2 }, new int[]{ 0, 3, 2, 1 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 1, 3, 2, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 1, 2, 0, 3 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 1, 3, 0, 2 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 2, 3, 0, 1 }, new int[]{ 2, 3, 1, 0 }, new int[]{ 1, 0, 2, 3 }, new int[]{ 1, 0, 3, 2 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 2, 0, 3, 1 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 2, 1, 3, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 2, 0, 1, 3 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 3, 0, 1, 2 }, new int[]{ 3, 0, 2, 1 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 3, 1, 2, 0 }, new int[]{ 2, 1, 0, 3 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 3, 1, 0, 2 }, new int[]{ 0, 0, 0, 0 },
-			new int[]{ 3, 2, 0, 1 }, new int[]{ 3, 2, 1, 0 }
-		};
 
         #region Skewing Factors
 
@@ -110,19 +32,87 @@ namespace Dwarves.Core.Math.Noise
 
         #endregion Skewing Factors
 
-        /// <summary>
-        /// The permutations array.
-        /// </summary>
-        private int[] perm = new int[0x200];
+        #endregion Pre-calculated Values
 
         /// <summary>
-        /// Initialises a new instance of the SimplexNoiseGenerator class.
+        /// Gradient vectors for 3D (pointing to mid points of all edges of a unit cube).
         /// </summary>
-        public SimplexNoiseGenerator()
+        private static readonly int[][] Gradient3 =
+		{
+			new int[]{ 1, 1, 0 }, new int[]{ -1, 1, 0 }, new int[]{ 1, -1, 0 }, new int[]{ -1, -1, 0 },
+            new int[]{ 1, 0, 1 }, new int[]{ -1, 0, 1 }, new int[]{ 1, 0, -1 }, new int[]{ -1, 0, -1 },
+            new int[]{ 0, 1, 1 }, new int[]{ 0, -1, 1 }, new int[]{ 0, 1, -1 }, new int[]{ 0, -1, -1 }
+		};
+
+        /// <summary>
+        /// Gradient vectors for 4D (pointing to mid points of all edges of a unit 4D hypercube).
+        /// </summary>
+        private static readonly int[][] Gradient4 = new int[][]
+		{
+			new int[]{ 0, 1, 1, 1 }, new int[]{ 0, 1, 1, -1 }, new int[]{ 0, 1, -1, 1 }, new int[]{ 0, 1, -1, -1 },
+            new int[]{ 0, -1, 1, 1 }, new int[]{ 0, -1, 1, -1 }, new int[]{ 0, -1, -1, 1 }, new int[]{ 0, -1, -1, -1 },
+			new int[]{ 1, 0, 1, 1 }, new int[]{ 1, 0, 1, -1 }, new int[]{ 1, 0, -1, 1 }, new int[]{ 1, 0, -1, -1 },
+			new int[]{ -1, 0, 1, 1 }, new int[]{ -1, 0, 1, -1 }, new int[]{ -1, 0, -1, 1 }, new int[]{ -1, 0, -1, -1 },
+            new int[]{ 1, 1, 0, 1 }, new int[]{ 1, 1, 0, -1 }, new int[]{ 1, -1, 0, 1 }, new int[]{ 1, -1, 0, -1 },
+            new int[]{ -1, 1, 0, 1 }, new int[]{ -1, 1, 0, -1 }, new int[]{ -1, -1, 0, 1 }, new int[]{ -1, -1, 0, -1 },
+			new int[]{ 1, 1, 1, 0 }, new int[]{ 1, 1, -1, 0 }, new int[]{ 1, -1, 1, 0 }, new int[]{ 1, -1, -1, 0 },
+			new int[]{ -1, 1, 1, 0 }, new int[]{ -1, 1, -1, 0 }, new int[]{ -1, -1, 1, 0 }, new int[]{ -1, -1, -1, 0 }
+		};
+
+        /// <summary>
+        /// Simplex vectors for 4D noise.
+        /// </summary>
+        private static readonly int[][] Simplex4 = new int[][]
+		{
+			new int[]{ 0, 1, 2, 3 }, new int[]{ 0, 1, 3, 2 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 2, 3, 1 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 1, 2, 3, 0 },
+            new int[]{ 0, 2, 1, 3 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 3, 1, 2 }, new int[]{ 0, 3, 2, 1 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 1, 3, 2, 0 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 1, 2, 0, 3 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 1, 3, 0, 2 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 2, 3, 0, 1 }, new int[]{ 2, 3, 1, 0 },
+            new int[]{ 1, 0, 2, 3 }, new int[]{ 1, 0, 3, 2 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 2, 0, 3, 1 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 2, 1, 3, 0 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 2, 0, 1, 3 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 3, 0, 1, 2 }, new int[]{ 3, 0, 2, 1 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 3, 1, 2, 0 },
+            new int[]{ 2, 1, 0, 3 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 0, 0, 0, 0 },
+            new int[]{ 3, 1, 0, 2 }, new int[]{ 0, 0, 0, 0 }, new int[]{ 3, 2, 0, 1 }, new int[]{ 3, 2, 1, 0 }
+		};
+
+        /// <summary>
+        /// Permutation table.
+        /// </summary>
+        private static readonly int[] PermBase =
+        {
+            151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99,
+            37, 240, 21, 10, 23, 190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32,
+            57, 177, 33, 88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27,
+            166, 77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244, 102,
+            143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200, 196, 135, 130, 116,
+            188, 159, 86, 164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123, 5, 202, 38, 147, 118, 126,
+            255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42, 223, 183, 170, 213, 119, 248, 152,
+            2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9, 129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224,
+            232, 178, 185, 112, 104, 218, 246, 97, 228, 251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162, 241, 81,
+            51, 145, 235, 249, 14, 239, 107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45,
+            127, 4, 150, 254, 138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
+        };
+
+        /// <summary>
+        /// Permutation table. This is the base table doubled, to remove the need for index wrapping.
+        /// </summary>
+        private static readonly int[] Perm = new int[0x200];
+
+        /// <summary>
+        /// Initialises static members of the SimplexNoiseGenerator class.
+        /// </summary>
+        static SimplexNoiseGenerator()
         {
             for (int i = 0; i < 0x200; i++)
             {
-                perm[i] = P[i & 0xff];
+                Perm[i] = PermBase[i & 0xff];
             }
         }
 
@@ -186,7 +176,7 @@ namespace Dwarves.Core.Math.Noise
             if (t0 > 0)
             {
                 t0 *= t0;
-                int gi0 = perm[ii + perm[jj]] % 12;
+                int gi0 = Perm[ii + Perm[jj]] % 12;
                 n0 = t0 * t0 * Dot(Gradient3[gi0], x0, y0); // (x,y) of grad3 used for
 
                 // 2D gradient
@@ -195,14 +185,14 @@ namespace Dwarves.Core.Math.Noise
             if (t1 > 0)
             {
                 t1 *= t1;
-                int gi1 = perm[ii + i1 + perm[jj + j1]] % 12;
+                int gi1 = Perm[ii + i1 + Perm[jj + j1]] % 12;
                 n1 = t1 * t1 * Dot(Gradient3[gi1], x1, y1);
             }
             double t2 = 0.5 - x2 * x2 - y2 * y2;
             if (t2 > 0)
             {
                 t2 *= t2;
-                int gi2 = perm[ii + 1 + perm[jj + 1]] % 12;
+                int gi2 = Perm[ii + 1 + Perm[jj + 1]] % 12;
                 n2 = t2 * t2 * Dot(Gradient3[gi2], x2, y2);
             }
 
@@ -336,28 +326,28 @@ namespace Dwarves.Core.Math.Noise
             if (t0 > 0)
             {
                 t0 *= t0;
-                int gi0 = perm[ii + perm[jj + perm[kk]]] % 12;
+                int gi0 = Perm[ii + Perm[jj + Perm[kk]]] % 12;
                 n0 = t0 * t0 * Dot(Gradient3[gi0], x0, y0, z0);
             }
             double t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
             if (t1 > 0)
             {
                 t1 *= t1;
-                int gi1 = perm[ii + i1 + perm[jj + j1 + perm[kk + k1]]] % 12;
+                int gi1 = Perm[ii + i1 + Perm[jj + j1 + Perm[kk + k1]]] % 12;
                 n1 = t1 * t1 * Dot(Gradient3[gi1], x1, y1, z1);
             }
             double t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
             if (t2 > 0)
             {
                 t2 *= t2;
-                int gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
+                int gi2 = Perm[ii + i2 + Perm[jj + j2 + Perm[kk + k2]]] % 12;
                 n2 = t2 * t2 * Dot(Gradient3[gi2], x2, y2, z2);
             }
             double t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
             if (t3 > 0)
             {
                 t3 *= t3;
-                int gi3 = perm[ii + 1 + perm[jj + 1 + perm[kk + 1]]] % 12;
+                int gi3 = Perm[ii + 1 + Perm[jj + 1 + Perm[kk + 1]]] % 12;
                 n3 = t3 * t3 * Dot(Gradient3[gi3], x3, y3, z3);
             }
 
@@ -436,7 +426,7 @@ namespace Dwarves.Core.Math.Noise
             // entries make any sense. We use a thresholding to set the coordinates
             // in turn from the largest magnitude. The number 3 in the "simplex"
             // array is at the position of the largest coordinate.
-            int[] sc = Simplex[c];
+            int[] sc = Simplex4[c];
             i1 = sc[0] >= 3 ? 1 : 0;
             j1 = sc[1] >= 3 ? 1 : 0;
             k1 = sc[2] >= 3 ? 1 : 0;
@@ -489,38 +479,38 @@ namespace Dwarves.Core.Math.Noise
             if (t0 > 0)
             {
                 t0 *= t0;
-                int gi0 = perm[ii + perm[jj + perm[kk + perm[ll]]]] % 32;
+                int gi0 = Perm[ii + Perm[jj + Perm[kk + Perm[ll]]]] % 32;
                 n0 = t0 * t0 * Dot(Gradient4[gi0], x0, y0, z0, w0);
             }
             double t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
             if (t1 > 0)
             {
                 t1 *= t1;
-                int gi1 = perm[ii + i1
-                    + perm[jj + j1 + perm[kk + k1 + perm[ll + l1]]]] % 32;
+                int gi1 = Perm[ii + i1
+                    + Perm[jj + j1 + Perm[kk + k1 + Perm[ll + l1]]]] % 32;
                 n1 = t1 * t1 * Dot(Gradient4[gi1], x1, y1, z1, w1);
             }
             double t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
             if (t2 > 0)
             {
                 t2 *= t2;
-                int gi2 = perm[ii + i2
-                    + perm[jj + j2 + perm[kk + k2 + perm[ll + l2]]]] % 32;
+                int gi2 = Perm[ii + i2
+                    + Perm[jj + j2 + Perm[kk + k2 + Perm[ll + l2]]]] % 32;
                 n2 = t2 * t2 * Dot(Gradient4[gi2], x2, y2, z2, w2);
             }
             double t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
             if (t3 > 0)
             {
                 t3 *= t3;
-                int gi3 = perm[ii + i3
-                    + perm[jj + j3 + perm[kk + k3 + perm[ll + l3]]]] % 32;
+                int gi3 = Perm[ii + i3
+                    + Perm[jj + j3 + Perm[kk + k3 + Perm[ll + l3]]]] % 32;
                 n3 = t3 * t3 * Dot(Gradient4[gi3], x3, y3, z3, w3);
             }
             double t4 = 0.6 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
             if (t4 > 0)
             {
                 t4 *= t4;
-                int gi4 = perm[ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]]] % 32;
+                int gi4 = Perm[ii + 1 + Perm[jj + 1 + Perm[kk + 1 + Perm[ll + 1]]]] % 32;
                 n4 = t4 * t4 * Dot(Gradient4[gi4], x4, y4, z4, w4);
             }
 
