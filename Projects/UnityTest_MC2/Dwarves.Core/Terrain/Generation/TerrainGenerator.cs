@@ -17,13 +17,11 @@ namespace Dwarves.Core.Terrain.Generation
         /// Initialises a new instance of the TerrainGenerator class.
         /// </summary>
         /// <param name="noiseGenerator">The noise generator.</param>
-        /// <param name="meanSurfaceHeight">The mean value of the surface height.</param>
         /// <param name="surfaceAmplitude">The distance from the mean surface height that the terrain oscillates.
         /// </param>
-        public TerrainGenerator(INoiseGenerator noiseGenerator, int meanSurfaceHeight, int surfaceAmplitude)
+        public TerrainGenerator(INoiseGenerator noiseGenerator, int surfaceAmplitude)
         {
             this.NoiseGenerator = noiseGenerator;
-            this.MeanSurfaceHeight = meanSurfaceHeight;
             this.SurfaceAmplitude = surfaceAmplitude;
         }
 
@@ -31,11 +29,6 @@ namespace Dwarves.Core.Terrain.Generation
         /// Gets or sets the noise generator.
         /// </summary>
         public INoiseGenerator NoiseGenerator { get; set; }
-
-        /// <summary>
-        /// Gets or sets the mean value of the surface height.
-        /// </summary>
-        public int MeanSurfaceHeight { get; set; }
 
         /// <summary>
         /// Gets or sets the distance from the mean surface height that the terrain oscillates.
@@ -81,7 +74,7 @@ namespace Dwarves.Core.Terrain.Generation
                 float noise = this.NoiseGenerator.Generate(originX + x);
 
                 // Obtain the height by scaling the noise with the surface amplitude
-                heights[x] = this.MeanSurfaceHeight + (noise * this.SurfaceAmplitude);
+                heights[x] = noise * this.SurfaceAmplitude;
             }
 
             return heights;
