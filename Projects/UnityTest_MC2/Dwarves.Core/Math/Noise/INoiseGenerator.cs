@@ -40,7 +40,7 @@ namespace Dwarves.Core.Math.Noise
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
         /// <param name="z">The z position.</param>
-        /// <param name="z">The w position.</param>
+        /// <param name="w">The w position.</param>
         /// <returns>The noise value.</returns>
         float Generate(float x, float y, float z, float w);
     }

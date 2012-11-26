@@ -35,13 +35,23 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Gets the primary density.
+        /// Gets or sets the material.
+        /// </summary>
+        public TerrainMaterial Material { get; set; }
+
+        /// <summary>
+        /// Gets or sets the primary density.
         /// </summary>
         public byte Density
         {
             get
             {
                 return (byte)(this.densityField & 0x0F);
+            }
+
+            set
+            {
+                this.densityField = (byte)((this.densityField & 0xF0) | (value & 0x0F));
             }
         }
 
@@ -55,20 +65,6 @@ namespace Dwarves.Core.Terrain
             {
                 return (byte)(this.densityField >> 4);
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the material.
-        /// </summary>
-        public TerrainMaterial Material { get; set; }
-
-        /// <summary>
-        /// Set the primary density value.
-        /// </summary>
-        /// <param name="density">The density.</param>
-        public void SetDensity(byte density)
-        {
-            this.densityField = (byte)((this.densityField & 0xF0) | (density & 0x0F));
         }
     }
 }
