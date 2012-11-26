@@ -43,40 +43,5 @@ namespace Dwarves.Core.Terrain
         /// Gets the surface heights for each chunk x-position.
         /// </summary>
         public Dictionary<int, float[]> SurfaceHeights { get; private set; }
-
-        /// <summary>
-        /// Get the index of the chunk at the given world coordinates.
-        /// </summary>
-        /// <param name="worldX">The x position.</param>
-        /// <param name="worldY">The y position.</param>
-        /// <returns>The chunk index.</returns>
-        public static Vector2I GetChunkIndex(int worldX, int worldY)
-        {
-            return new Vector2I(worldX >> TerrainConst.ChunkWidthLog, worldY >> TerrainConst.ChunkHeightLog);
-        }
-
-        /// <summary>
-        /// Convert the world coordinates into chunk coordinates.
-        /// </summary>
-        /// <param name="worldX">The x position.</param>
-        /// <param name="worldY">The y position.</param>
-        /// <returns>The position in chunk coordinates.</returns>
-        public static Vector2I GetChunkCoordinates(int worldX, int worldY)
-        {
-            const int MaskX = TerrainConst.ChunkWidth - 1;
-            const int MaskY = TerrainConst.ChunkHeight - 1;
-            return new Vector2I(worldX & MaskX, worldY & MaskY);
-        }
-
-        /// <summary>
-        /// Gets the index for the voxel at the given chunk coordinates.
-        /// </summary>
-        /// <param name="chunkX">The x position.</param>
-        /// <param name="chunkY">The y position.</param>
-        /// <returns>The index.</returns>
-        public static int GetVoxelIndex(int chunkX, int chunkY)
-        {
-            return chunkX + (chunkY * TerrainConst.ChunkWidth);
-        }
     }
 }

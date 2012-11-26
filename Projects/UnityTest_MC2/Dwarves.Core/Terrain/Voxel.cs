@@ -11,6 +11,11 @@ namespace Dwarves.Core.Terrain
     public struct Voxel
     {
         /// <summary>
+        /// An air voxel that lies outside the terrain.
+        /// </summary>
+        public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, TerrainConst.DensityMax);
+
+        /// <summary>
         /// The byte containing the concatenation of the primary and secondary densities.
         /// </summary>
         private byte densityField;
