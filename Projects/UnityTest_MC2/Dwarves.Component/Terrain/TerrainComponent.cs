@@ -43,24 +43,24 @@ namespace Dwarves.Component.Terrain
         public float Persistence;
 
         /// <summary>
-        /// The terrain serialiser.
-        /// </summary>
-        private TerrainSerialiser serialiser;
-
-        /// <summary>
-        /// The terrain generator.
-        /// </summary>
-        private TerrainGenerator generator;
-
-        /// <summary>
-        /// The terrain mutator.
-        /// </summary>
-        private TerrainMutator mutator;
-
-        /// <summary>
         /// Gets the terrain instance.
         /// </summary>
         public VoxelTerrain Terrain { get; private set; }
+
+        /// <summary>
+        /// Gets the terrain serialiser.
+        /// </summary>
+        public TerrainSerialiser TerrainSerialiser { get; private set; }
+
+        /// <summary>
+        /// Gets the terrain generator.
+        /// </summary>
+        public TerrainGenerator TerrainGenerator { get; private set; }
+
+        /// <summary>
+        /// Gets the terrain mutator.
+        /// </summary>
+        public TerrainMutator TerrainMutator { get; private set; }
 
         /// <summary>
         /// Initialises the component.
@@ -70,16 +70,16 @@ namespace Dwarves.Component.Terrain
             this.Terrain = new VoxelTerrain();
 
             // Initialise the serialiser
-            this.serialiser = new TerrainSerialiser();
+            this.TerrainSerialiser = new TerrainSerialiser();
 
             // Initialise the terrain generator
             var simplexGenerator = new SimplexNoiseGenerator();
             var noiseGenerator = new CompoundNoiseGenerator(
                 simplexGenerator, this.Seed, (byte)this.Octaves, this.BaseFrequency, this.Persistence);
-            this.generator = new TerrainGenerator(noiseGenerator, this.SurfaceAmplitude);
+            this.TerrainGenerator = new TerrainGenerator(noiseGenerator, this.SurfaceAmplitude);
 
             // Initialise the mutator
-            this.mutator = new TerrainMutator();
+            this.TerrainMutator = new TerrainMutator();
         }
     }
 }

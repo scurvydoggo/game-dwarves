@@ -48,6 +48,7 @@
     <Compile Include="Input\TouchHandlerComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Terrain\TerrainComponent.cs" />
+    <Compile Include="Terrain\TerrainTouchComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dwarves.Core\Dwarves.Core.csproj">
