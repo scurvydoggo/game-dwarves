@@ -43,5 +43,15 @@ namespace Dwarves.Core.Terrain
         /// Gets the surface heights for each chunk x-position.
         /// </summary>
         public Dictionary<int, float[]> SurfaceHeights { get; private set; }
+
+        /// <summary>
+        /// Remove the data for the given chunk.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void RemoveChunkData(Vector2I chunkIndex)
+        {
+            this.Voxels.Remove(chunkIndex);
+            this.Meshes.Remove(chunkIndex);
+        }
     }
 }
