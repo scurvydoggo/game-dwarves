@@ -109,6 +109,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
+            // Check if any chunks need to be loaded or unloaded
             this.LoadUnloadChunks();
         }
 
@@ -183,21 +184,6 @@ namespace Dwarves.Component.Terrain
                 {
                     chunkTransform.GetComponent<TerrainChunkComponent>().RebuildMesh();
                 }
-            }
-        }
-
-        /// <summary>
-        /// Rebuild the mesh for the given chunk.
-        /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        private void RebuildChunkMesh(Vector2I chunk)
-        {
-            // Remove the mesh data
-            if (this.Terrain.Meshes.Remove(chunk))
-            {
-                // Rebuild the mesh
-                Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
-                chunkTransform.GetComponent<TerrainChunkComponent>().RebuildMesh();
             }
         }
     }
