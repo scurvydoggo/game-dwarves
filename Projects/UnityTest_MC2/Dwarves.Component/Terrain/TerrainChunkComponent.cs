@@ -32,7 +32,7 @@ namespace Dwarves.Component.Terrain
         /// <returns>The chunk label.</returns>
         public static string GetLabel(Vector2I chunk)
         {
-            return string.Format("Chunk[{0},{1}]", chunk.X, chunk.Y);
+            return "Chunk[" + chunk.X + "," + chunk.Y + "]";
         }
 
         /// <summary>
@@ -47,7 +47,22 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            // TODO: Check if the mesh for this chunk needs to be rebuilt
+            // Rebuild the mesh for this chunk if required
+            if (!this.Terrain.Meshes.ContainsKey(this.Chunk))
+            {
+                this.RebuildMesh();
+            }
+        }
+
+        /// <summary>
+        /// Build the mesh for this chunk.
+        /// </summary>
+        public void RebuildMesh()
+        {
+            // Remove any existing mesh data for this chunk
+            this.Terrain.Meshes.Remove(this.Chunk);
+
+            // TODO: Run the marching cubes algorithm on this chunk
         }
     }
 }

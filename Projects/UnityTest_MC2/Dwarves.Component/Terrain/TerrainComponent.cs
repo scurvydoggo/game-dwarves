@@ -149,6 +149,7 @@ namespace Dwarves.Component.Terrain
             }
 
             // Load the new chunk data
+            var toRebuild = new HashSet<Vector2I>();
             foreach (Vector2I chunk in activeChunks)
             {
                 if (!this.Terrain.Voxels.ContainsKey(chunk))
@@ -160,17 +161,43 @@ namespace Dwarves.Component.Terrain
                         this.TerrainGenerator.Generate(this.Terrain, chunk);
                     }
 
-                    // Remove any neighbouring meshes that depend on this so that they can be rebuilt
-                    this.Terrain.Meshes.Remove(new Vector2I(chunk.X, chunk.Y - 1));
-                    this.Terrain.Meshes.Remove(new Vector2I(chunk.X - 1, chunk.Y));
-
                     // Create the chunk game object
                     var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunk));
                     chunkObject.transform.parent = this.transform;
                     TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
                     chunkComponent.Terrain = this.Terrain;
                     chunkComponent.Chunk = chunk;
+
+                    // Add this chunk and its dependent neighbours to the set of chunks requiring a mesh rebuild
+                    toRebuild.Add(chunk);
+                    toRebuild.Add(new Vector2I(chunk.X, chunk.Y - 1));
+                    toRebuild.Add(new Vector2I(chunk.X - 1, chunk.Y));
                 }
+            }
+
+            // Rebuild the meshes as required
+            foreach (Vector2I chunk in toRebuild)
+            {
+                Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
+                if (chunkTransform != null)
+                {
+                    chunkTransform.GetComponent<TerrainChunkComponent>().RebuildMesh();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Rebuild the mesh for the given chunk.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        private void RebuildChunkMesh(Vector2I chunk)
+        {
+            // Remove the mesh data
+            if (this.Terrain.Meshes.Remove(chunk))
+            {
+                // Rebuild the mesh
+                Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
+                chunkTransform.GetComponent<TerrainChunkComponent>().RebuildMesh();
             }
         }
     }
