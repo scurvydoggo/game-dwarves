@@ -21,7 +21,27 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The mesh.</returns>
         public MeshData CreateMesh(VoxelTerrain terrain, Vector2I chunk)
         {
+            var chunkPos = new Vector2I(chunk.X * TerrainConst.ChunkWidth, chunk.Y * TerrainConst.ChunkHeight);
+            for (int x = 0; x < TerrainConst.ChunkWidth; x++)
+            {
+                for (int y = 0; y < TerrainConst.ChunkHeight; y++)
+                {
+                    this.CreateMeshCell(chunk, new Vector2I(x, y), null /* ?? */);
+                }
+            }
+
             return null;
+        }
+
+        /// <summary>
+        /// Create the cell at the given position.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <param name="position">The position within the chunk.</param>
+        /// <param name="p">The mesh data.</param>
+        private void CreateMeshCell(Vector2I chunk, Vector2I position, object p)
+        {
+            // TODO
         }
     }
 }
