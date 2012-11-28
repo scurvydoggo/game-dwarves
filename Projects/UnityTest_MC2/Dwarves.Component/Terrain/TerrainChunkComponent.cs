@@ -13,8 +13,15 @@ namespace Dwarves.Component.Terrain
     /// <summary>
     /// Represents a terrain mesh.
     /// </summary>
+    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
     public class TerrainChunkComponent : MonoBehaviour
     {
+        /// <summary>
+        /// The mesh filter component.
+        /// </summary>
+        private MeshFilter cMeshFilter;
+
         /// <summary>
         /// Gets or sets the terrain instance.
         /// </summary>
@@ -40,6 +47,8 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
+            // Get a reference to the related components
+            this.cMeshFilter = this.GetComponent<MeshFilter>();
         }
 
         /// <summary>
