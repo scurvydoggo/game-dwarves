@@ -25,7 +25,7 @@ namespace Dwarves.Core.Terrain
         public VoxelTerrain()
         {
             this.Voxels = new Dictionary<Vector2I, Voxel[]>();
-            this.Meshes = new Dictionary<Vector2I, Mesh>();
+            this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
         }
 
@@ -37,7 +37,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets the mesh data organised by chunk.
         /// </summary>
-        public Dictionary<Vector2I, Mesh> Meshes { get; private set; }
+        public Dictionary<Vector2I, MeshData> Meshes { get; private set; }
 
         /// <summary>
         /// Gets the surface heights for each chunk x-position.

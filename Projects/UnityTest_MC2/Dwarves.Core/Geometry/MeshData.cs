@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="Mesh.cs" company="Acidwashed Games">
+// <copyright file="MeshData.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -10,14 +10,14 @@ namespace Dwarves.Core.Geometry
     /// <summary>
     /// A mesh.
     /// </summary>
-    public class Mesh
+    public class MeshData
     {
         /// <summary>
-        /// Initialises a new instance of the Mesh class.
+        /// Initialises a new instance of the MeshData class.
         /// </summary>
         /// <param name="vertices">The vertices.</param>
         /// <param name="indices">The triangle indices.</param>
-        public Mesh(Vector3[] vertices, ushort[] indices)
+        public MeshData(Vector3[] vertices, ushort[] indices)
         {
             this.Vertices = vertices;
             this.Indices = indices;

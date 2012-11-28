@@ -6,8 +6,10 @@
 namespace Dwarves.Component.Terrain
 {
     using System.Collections.Generic;
+    using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
+    using Dwarves.Core.Terrain.Geometry;
     using UnityEngine;
 
     /// <summary>
@@ -21,6 +23,11 @@ namespace Dwarves.Component.Terrain
         /// The mesh filter component.
         /// </summary>
         private MeshFilter cMeshFilter;
+
+        /// <summary>
+        /// Gets the mesh builder.
+        /// </summary>
+        private TerrainMeshBuilder meshBuilder;
 
         /// <summary>
         /// Gets or sets the terrain instance.
@@ -47,6 +54,8 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
+            this.meshBuilder = new TerrainMeshBuilder();
+
             // Get a reference to the related components
             this.cMeshFilter = this.GetComponent<MeshFilter>();
         }
@@ -72,6 +81,7 @@ namespace Dwarves.Component.Terrain
             this.Terrain.Meshes.Remove(this.Chunk);
 
             // TODO: Run the marching cubes algorithm on this chunk
+            MeshData meshData = this.meshBuilder.CreateMesh(this.Terrain, this.Chunk);
         }
     }
 }
