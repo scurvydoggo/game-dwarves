@@ -7,6 +7,7 @@ namespace Dwarves.Component.Terrain
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Dwarves.Component.Bounds;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
@@ -108,13 +109,13 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            this.LoadUnloadActorChunks();
+            this.LoadUnloadChunks();
         }
 
         /// <summary>
-        /// Check the bounds of each actor in the game world and load/unload the chunks that are new/no longer required.
+        /// Load and unload the chunks that are new or are no longer required.
         /// </summary>
-        private void LoadUnloadActorChunks()
+        private void LoadUnloadChunks()
         {
             // Determine which chunks are currently active
             var activeChunks = new HashSet<Vector2I>();
@@ -134,17 +135,7 @@ namespace Dwarves.Component.Terrain
             }
 
             // Check if any chunks are now off screen with no actors within and will need to be removed
-            var toRemove = new HashSet<Vector2I>();
-            foreach (Vector2I chunk in this.Terrain.Voxels.Keys)
-            {
-                if (!activeChunks.Contains(chunk))
-                {
-                    toRemove.Add(chunk);
-                }
-            }
-
-            // Remove data for chunks that are no longer in active
-            foreach (Vector2I chunk in toRemove)
+            foreach (Vector2I chunk in this.Terrain.Voxels.Keys.Where((c) => !activeChunks.Contains(c)).ToArray())
             {
                 // Remove the data
                 this.Terrain.RemoveChunkData(chunk);
