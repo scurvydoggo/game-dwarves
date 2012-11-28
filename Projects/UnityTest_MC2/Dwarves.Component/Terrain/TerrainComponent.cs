@@ -13,6 +13,7 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Generation;
+    using Dwarves.Core.Terrain.Geometry;
     using Dwarves.Core.Terrain.Mutation;
     using Dwarves.Core.Terrain.Serialization;
     using UnityEngine;
@@ -85,6 +86,11 @@ namespace Dwarves.Component.Terrain
         public TerrainMutator TerrainMutator { get; private set; }
 
         /// <summary>
+        /// Gets the terrain mesh builder.
+        /// </summary>
+        public TerrainMeshBuilder TerrainMeshBuilder { get; private set; }
+
+        /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
@@ -102,6 +108,9 @@ namespace Dwarves.Component.Terrain
 
             // Initialise the mutator
             this.TerrainMutator = new TerrainMutator();
+
+            // Initialise the mesh builder
+            this.TerrainMeshBuilder = new TerrainMeshBuilder();
         }
 
         /// <summary>
@@ -166,7 +175,6 @@ namespace Dwarves.Component.Terrain
                     var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunk));
                     chunkObject.transform.parent = this.transform;
                     TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
-                    chunkComponent.Terrain = this.Terrain;
                     chunkComponent.Chunk = chunk;
 
                     // Add this chunk and its dependent neighbours to the set of chunks requiring a mesh rebuild

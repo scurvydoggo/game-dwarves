@@ -20,19 +20,14 @@ namespace Dwarves.Component.Terrain
     public class TerrainChunkComponent : MonoBehaviour
     {
         /// <summary>
+        /// The terrain component.
+        /// </summary>
+        private TerrainComponent cTerrain;
+
+        /// <summary>
         /// The mesh filter component.
         /// </summary>
         private MeshFilter cMeshFilter;
-
-        /// <summary>
-        /// Gets the mesh builder.
-        /// </summary>
-        private TerrainMeshBuilder meshBuilder;
-
-        /// <summary>
-        /// Gets or sets the terrain instance.
-        /// </summary>
-        public VoxelTerrain Terrain { get; set; }
 
         /// <summary>
         /// Gets or sets the chunk index.
@@ -54,9 +49,8 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.meshBuilder = new TerrainMeshBuilder();
-
             // Get a reference to the related components
+            this.cTerrain = this.transform.parent.GetComponent<TerrainComponent>();
             this.cMeshFilter = this.GetComponent<MeshFilter>();
         }
 
@@ -66,7 +60,7 @@ namespace Dwarves.Component.Terrain
         public void Update()
         {
             // Rebuild the mesh for this chunk if required
-            if (!this.Terrain.Meshes.ContainsKey(this.Chunk))
+            if (!this.cTerrain.Terrain.Meshes.ContainsKey(this.Chunk))
             {
                 this.RebuildMesh();
             }
@@ -78,10 +72,12 @@ namespace Dwarves.Component.Terrain
         public void RebuildMesh()
         {
             // Remove any existing mesh data for this chunk
-            this.Terrain.Meshes.Remove(this.Chunk);
+            this.cTerrain.Terrain.Meshes.Remove(this.Chunk);
 
-            // TODO: Run the marching cubes algorithm on this chunk
-            MeshData meshData = this.meshBuilder.CreateMesh(this.Terrain, this.Chunk);
+            // Build the mesh for this chunk
+            MeshData meshData = this.cTerrain.TerrainMeshBuilder.CreateMesh(this.cTerrain.Terrain, this.Chunk);
+
+            // TODO: Load the mesh data
         }
     }
 }

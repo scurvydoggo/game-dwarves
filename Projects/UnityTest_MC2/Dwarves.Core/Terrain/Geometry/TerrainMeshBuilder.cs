@@ -9,7 +9,7 @@ namespace Dwarves.Core.Terrain.Geometry
     using Dwarves.Core.Math;
 
     /// <summary>
-    /// Builds meshes for terrain chunks.
+    /// Builds meshes for the terrain.
     /// </summary>
     public class TerrainMeshBuilder
     {
@@ -18,6 +18,7 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
+        /// <returns>The mesh.</returns>
         public MeshData CreateMesh(VoxelTerrain terrain, Vector2I chunk)
         {
             return null;
