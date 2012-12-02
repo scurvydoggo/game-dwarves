@@ -24,11 +24,11 @@ namespace Dwarves.Core.Terrain.Mutation
         {
             // Get the voxel array
             Voxel[] voxels;
-            if (terrain.Voxels.TryGetValue(TerrainConst.GetChunkIndex(position.X, position.Y), out voxels))
+            if (terrain.Voxels.TryGetValue(TerrainConst.ChunkIndex(position.X, position.Y), out voxels))
             {
                 // Get the voxel
-                Vector2I positionChunk = TerrainConst.GetChunkCoordinates(position.X, position.Y);
-                int voxelIndex = TerrainConst.GetVoxelIndex(positionChunk.X, positionChunk.Y);
+                Vector2I positionChunk = TerrainConst.WorldToChunk(position.X, position.Y);
+                int voxelIndex = TerrainConst.VoxelIndex(positionChunk.X, positionChunk.Y);
                 Voxel voxel = voxels[voxelIndex];
 
                 // Update the voxel density

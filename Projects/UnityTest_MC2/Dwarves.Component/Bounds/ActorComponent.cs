@@ -79,8 +79,8 @@ namespace Dwarves.Component.Bounds
             RectangleI worldBounds = this.getBounds.GetChunkBounds(this.gameObject);
 
             // Get the chunk coordinates for the world bounds
-            Vector2I topCoords = TerrainConst.GetChunkIndex(worldBounds.X, worldBounds.Y);
-            Vector2I bottomCoords = TerrainConst.GetChunkIndex(worldBounds.Right - 1, worldBounds.Bottom - 1);
+            Vector2I topCoords = TerrainConst.ChunkIndex(worldBounds.X, worldBounds.Y);
+            Vector2I bottomCoords = TerrainConst.ChunkIndex(worldBounds.Right - 1, worldBounds.Bottom - 1);
 
             // Return the bounds in chunk coordinates
             return new RectangleI(

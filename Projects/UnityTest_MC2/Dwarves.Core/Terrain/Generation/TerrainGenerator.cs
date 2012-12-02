@@ -136,7 +136,7 @@ namespace Dwarves.Core.Terrain.Generation
                     }
 
                     // Set the voxel
-                    voxels[TerrainConst.GetVoxelIndex(x, y)] = voxel;
+                    voxels[TerrainConst.VoxelIndex(x, y)] = voxel;
                 }
             }
         }

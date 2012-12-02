@@ -63,22 +63,9 @@ namespace Dwarves.Core.Terrain
         /// <param name="worldX">The x position.</param>
         /// <param name="worldY">The y position.</param>
         /// <returns>The chunk index.</returns>
-        public static Vector2I GetChunkIndex(int worldX, int worldY)
+        public static Vector2I ChunkIndex(int worldX, int worldY)
         {
             return new Vector2I(worldX >> TerrainConst.ChunkWidthLog, worldY >> TerrainConst.ChunkHeightLog);
-        }
-
-        /// <summary>
-        /// Convert the world coordinates into chunk coordinates.
-        /// </summary>
-        /// <param name="worldX">The x position.</param>
-        /// <param name="worldY">The y position.</param>
-        /// <returns>The position in chunk coordinates.</returns>
-        public static Vector2I GetChunkCoordinates(int worldX, int worldY)
-        {
-            const int MaskX = TerrainConst.ChunkWidth - 1;
-            const int MaskY = TerrainConst.ChunkHeight - 1;
-            return new Vector2I(worldX & MaskX, worldY & MaskY);
         }
 
         /// <summary>
@@ -87,9 +74,32 @@ namespace Dwarves.Core.Terrain
         /// <param name="chunkX">The x position.</param>
         /// <param name="chunkY">The y position.</param>
         /// <returns>The index.</returns>
-        public static int GetVoxelIndex(int chunkX, int chunkY)
+        public static int VoxelIndex(int chunkX, int chunkY)
         {
             return chunkX + (chunkY * TerrainConst.ChunkWidth);
+        }
+
+        /// <summary>
+        /// Convert the world coordinates into chunk coordinates.
+        /// </summary>
+        /// <param name="worldX">The x position.</param>
+        /// <param name="worldY">The y position.</param>
+        /// <returns>The position in chunk coordinates.</returns>
+        public static Vector2I WorldToChunk(int worldX, int worldY)
+        {
+            const int MaskX = TerrainConst.ChunkWidth - 1;
+            const int MaskY = TerrainConst.ChunkHeight - 1;
+            return new Vector2I(worldX & MaskX, worldY & MaskY);
+        }
+
+        /// <summary>
+        /// Get the origin of the given chunk.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <returns>The origin of the chunk in world coordinates.</returns>
+        public static Vector2I GetChunkOrigin(Vector2I chunk)
+        {
+            return new Vector2I(chunk.X * TerrainConst.ChunkWidth, chunk.Y * TerrainConst.ChunkHeight);
         }
     }
 }

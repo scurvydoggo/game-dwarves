@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Geometry
 {
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -15,22 +16,20 @@ namespace Dwarves.Core.Geometry
         /// <summary>
         /// Initialises a new instance of the MeshData class.
         /// </summary>
-        /// <param name="vertices">The vertices.</param>
-        /// <param name="indices">The triangle indices.</param>
-        public MeshData(Vector3[] vertices, ushort[] indices)
+        public MeshData()
         {
-            this.Vertices = vertices;
-            this.Indices = indices;
+            this.Vertices = new List<Vector3>();
+            this.Indices = new List<ushort>();
         }
 
         /// <summary>
         /// Gets the vertices.
         /// </summary>
-        public Vector3[] Vertices { get; private set; }
+        public List<Vector3> Vertices { get; private set; }
 
         /// <summary>
         /// Gets the triangle indices.
         /// </summary>
-        public ushort[] Indices { get; private set; }
+        public List<ushort> Indices { get; private set; }
     }
 }
