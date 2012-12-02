@@ -21,27 +21,28 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The mesh.</returns>
         public MeshData CreateMesh(VoxelTerrain terrain, Vector2I chunk)
         {
-            var meshData = new MeshData();
+            var mesh = new MeshData();
 
             var chunkOrigin = TerrainConst.GetChunkOrigin(chunk);
             for (int x = chunkOrigin.X; x < chunkOrigin.X + TerrainConst.ChunkWidth; x++)
             {
                 for (int y = chunkOrigin.Y; y < chunkOrigin.Y + TerrainConst.ChunkHeight; y++)
                 {
-                    this.CreateMeshCell(chunk, new Vector2I(x, y), meshData);
+                    this.CreateMeshCell(terrain, chunk, new Vector2I(x, y), mesh);
                 }
             }
 
-            return meshData;
+            return mesh;
         }
 
         /// <summary>
         /// Create the cell at the given position.
         /// </summary>
+        /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
         /// <param name="position">The position.</param>
         /// <param name="mesh">The mesh data.</param>
-        private void CreateMeshCell(Vector2I chunk, Vector2I position, MeshData mesh)
+        private void CreateMeshCell(VoxelTerrain terrain, Vector2I chunk, Vector2I position, MeshData mesh)
         {
             // Get the corner points in chunk coordinates
             var corner = TerrainConst.WorldToChunk(position.X, position.Y);
@@ -63,6 +64,14 @@ namespace Dwarves.Core.Terrain.Geometry
                 chunkRight.X++;
                 chunkUpRight.X++;
             }
+
+            // Get the voxels for the corner points
+            Voxel voxel = terrain.Voxels[chunk][TerrainConst.VoxelIndex(corner)];
+            Voxel voxelUp = terrain.Voxels[chunkUp][TerrainConst.VoxelIndex(cornerUp)];
+            Voxel voxelRight = terrain.Voxels[chunkRight][TerrainConst.VoxelIndex(cornerRight)];
+            Voxel voxelUpRight = terrain.Voxels[chunkUpRight][TerrainConst.VoxelIndex(cornerUpRight)];
+
+            // TODO
         }
     }
 }

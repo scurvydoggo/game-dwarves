@@ -71,6 +71,16 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets the index for the voxel at the given chunk coordinates.
         /// </summary>
+        /// <param name="chunkPos">The position.</param>
+        /// <returns>The index.</returns>
+        public static int VoxelIndex(Vector2I chunkPos)
+        {
+            return TerrainConst.VoxelIndex(chunkPos.X, chunkPos.Y);
+        }
+
+        /// <summary>
+        /// Gets the index for the voxel at the given chunk coordinates.
+        /// </summary>
         /// <param name="chunkX">The x position.</param>
         /// <param name="chunkY">The y position.</param>
         /// <returns>The index.</returns>
