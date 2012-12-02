@@ -29,6 +29,23 @@ namespace Dwarves.Core.Terrain.Geometry
         public CachedCell[][] Cells { get; private set; }
 
         /// <summary>
+        /// Gets the position of the cell in the direction from the given position.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="direction">The bitmask indicating the direction.</param>
+        /// <returns>The neighbouring position.</returns>
+        public static Vector2I GetNeighbourPosition(int x, int y, byte direction)
+        {
+            // Get the directional offset
+            int dx = direction & 0x01;
+            int dy = (direction >> 1) & 0x01;
+
+            // Offset the reused cell from the given position
+            return new Vector2I(x - dx, y - dy);
+        }
+
+        /// <summary>
         /// Gets the cached cell at the position in the direction relative to the given position.
         /// </summary>
         /// <param name="x">The current x position.</param>
@@ -37,15 +54,8 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The cached cell.</returns>
         public CachedCell GetCachedCell(int x, int y, byte direction)
         {
-            // Get the directional offset
-            int rx = direction & 0x01;
-            int ry = (direction >> 1) & 0x01;
-
-            // Offset the reused cell from the given position
-            int dx = x - rx;
-            int dy = y - ry;
-
-            return this.Cells[dy & 1][dx];
+            Vector2I position = CachedRows.GetNeighbourPosition(x, y, direction);
+            return this.Cells[position.Y & 1][position.X];
         }
 
         /// <summary>
