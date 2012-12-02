@@ -11,7 +11,7 @@ namespace Dwarves.Core.Math
     public struct Vector2I
     {
         /// <summary>
-        /// A vector at with zero values.
+        /// A vector with zero values.
         /// </summary>
         public static readonly Vector2I Zero = new Vector2I(0, 0);
 

@@ -23,8 +23,8 @@ namespace Dwarves.Core.Terrain.Geometry
         }
 
         /// <summary>
-        /// Gets the cached indices. 1st dimension indicates the z-depth; 2nd dimension indicates which of the four
-        /// corners.
+        /// Gets the cached indices. 1st dimension indicates the z-depth; 2nd dimension indicates the vertex index of
+        /// each of the sharable vertices.
         /// </summary>
         public int[,] Indices { get; private set; }
     }
