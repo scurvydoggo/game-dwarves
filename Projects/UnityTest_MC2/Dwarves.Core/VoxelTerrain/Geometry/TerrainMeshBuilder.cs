@@ -59,6 +59,7 @@ namespace Dwarves.Core.VoxelTerrain.Geometry
                 chunkUp.Y++;
                 chunkUpRight.Y++;
             }
+
             if (cornerRight.X == 0)
             {
                 chunkRight.X++;
