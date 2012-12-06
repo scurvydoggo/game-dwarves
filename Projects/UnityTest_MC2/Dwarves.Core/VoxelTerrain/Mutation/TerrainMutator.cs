@@ -3,10 +3,12 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Terrain.Mutation
+namespace Dwarves.Core.VoxelTerrain.Mutation
 {
     using Dwarves.Core.Math;
     using UnityEngine;
+
+    using Terrain = Dwarves.Core.VoxelTerrain.Terrain;
 
     /// <summary>
     /// Mutates voxel terrain.
@@ -20,7 +22,7 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="position">The position.</param>
         /// <param name="offset">The offset indicating the position inside the voxel with values between 0.0 and 1.0.
         /// </param>
-        public void Dig(VoxelTerrain terrain, Vector2I position, Vector2 offset)
+        public void Dig(Terrain terrain, Vector2I position, Vector2 offset)
         {
             // Get the voxel array
             Voxel[] voxels;

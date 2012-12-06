@@ -9,7 +9,7 @@ namespace Dwarves.Component.Bounds
     using Dwarves.Core;
     using Dwarves.Core.Bounds;
     using Dwarves.Core.Math;
-    using Dwarves.Core.Terrain;
+    using Dwarves.Core.VoxelTerrain;
     using UnityEngine;
 
     /// <summary>

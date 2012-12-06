@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Terrain.Generation
+namespace Dwarves.Core.VoxelTerrain.Generation
 {
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;

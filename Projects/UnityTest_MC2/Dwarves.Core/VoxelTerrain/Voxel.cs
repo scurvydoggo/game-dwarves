@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Terrain
+namespace Dwarves.Core.VoxelTerrain
 {
     /// <summary>
     /// A voxel which represent the density of a point in a plane.

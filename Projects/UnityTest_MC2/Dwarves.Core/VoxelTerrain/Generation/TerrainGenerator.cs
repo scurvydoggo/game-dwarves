@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Terrain.Generation
+namespace Dwarves.Core.VoxelTerrain.Generation
 {
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
@@ -40,7 +40,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        public void Generate(VoxelTerrain terrain, Vector2I chunk)
+        public void Generate(Terrain terrain, Vector2I chunk)
         {
             // Create the voxel array if it doesn't yet exist
             if (!terrain.Voxels.ContainsKey(chunk))
@@ -85,7 +85,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        private void FillTerrain(VoxelTerrain terrain, Vector2I chunk)
+        private void FillTerrain(Terrain terrain, Vector2I chunk)
         {
             // Get the voxel array and surface heights
             Voxel[] voxels = terrain.Voxels[chunk];

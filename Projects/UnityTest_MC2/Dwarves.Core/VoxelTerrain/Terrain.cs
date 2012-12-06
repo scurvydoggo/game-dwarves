@@ -1,9 +1,9 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="VoxelTerrain.cs" company="Acidwashed Games">
+// <copyright file="Terrain.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Terrain
+namespace Dwarves.Core.VoxelTerrain
 {
     using System.Collections.Generic;
     using Dwarves.Core.Geometry;
@@ -12,7 +12,7 @@ namespace Dwarves.Core.Terrain
     /// <summary>
     /// Represents the terrain.
     /// </summary>
-    public class VoxelTerrain
+    public class Terrain
     {
         /// <summary>
         /// Mask for converting from world coordinates to chunk coordinates.
@@ -20,9 +20,9 @@ namespace Dwarves.Core.Terrain
         private const int ChunkHeightMask = TerrainConst.ChunkHeight - 1;
 
         /// <summary>
-        /// Initialises a new instance of the VoxelTerrain class.
+        /// Initialises a new instance of the Terrain class.
         /// </summary>
-        public VoxelTerrain()
+        public Terrain()
         {
             this.Voxels = new Dictionary<Vector2I, Voxel[]>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
