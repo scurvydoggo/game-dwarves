@@ -55,6 +55,7 @@
     <Compile Include="VoxelTerrain\Generation\CachedRows.cs" />
     <Compile Include="VoxelTerrain\Generation\TerrainGenerator.cs" />
     <Compile Include="VoxelTerrain\Geometry\TerrainMeshBuilder.cs" />
+    <Compile Include="VoxelTerrain\IVoxels.cs" />
     <Compile Include="VoxelTerrain\Mutation\TerrainMutator.cs" />
     <Compile Include="VoxelTerrain\Serialisation\TerrainSerialiser.cs" />
     <Compile Include="VoxelTerrain\Terrain.cs" />
