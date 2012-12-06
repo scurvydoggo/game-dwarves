@@ -62,7 +62,7 @@
     <Compile Include="VoxelTerrain\TerrainConst.cs" />
     <Compile Include="VoxelTerrain\TerrainMaterial.cs" />
     <Compile Include="VoxelTerrain\Voxel.cs" />
-    <Compile Include="VoxelTerrain\Structure\StandardVoxels.cs" />
+    <Compile Include="VoxelTerrain\Engine\StandardVoxels.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

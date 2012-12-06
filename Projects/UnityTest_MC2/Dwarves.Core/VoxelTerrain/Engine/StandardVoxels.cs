@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Structure
+namespace Dwarves.Core.VoxelTerrain.Engine
 {
     /// <summary>
     /// The standard structure for the voxel collection.
