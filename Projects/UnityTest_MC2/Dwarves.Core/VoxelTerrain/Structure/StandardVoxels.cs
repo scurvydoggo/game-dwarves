@@ -13,21 +13,17 @@ namespace Dwarves.Core.VoxelTerrain.Structure
         /// <summary>
         /// The array of voxels.
         /// </summary>
-        private Voxel[,,] voxels;
+        private Voxel[, ,] voxels;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="StandardVoxels"/> class.
+        /// Initialises a new instance of the StandardVoxels class.
         /// </summary>
         /// <param name="width">The width.</param>
-        /// <param name="height">
-        /// The height.
-        /// </param>
-        /// <param name="depth">
-        /// The depth.
-        /// </param>
+        /// <param name="height">The height.</param>
+        /// <param name="depth">The depth.</param>
         public StandardVoxels(int width, int height, int depth)
         {
-            this.voxels = new Voxel[width,height,depth];
+            this.voxels = new Voxel[width, height, depth];
         }
 
         /// <summary>
