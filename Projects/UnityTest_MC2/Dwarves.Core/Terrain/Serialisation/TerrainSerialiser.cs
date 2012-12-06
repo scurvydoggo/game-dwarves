@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Terrain.Serialization
+namespace Dwarves.Core.Terrain.Serialisation
 {
     using System;
     using Dwarves.Core.Math;

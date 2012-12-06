@@ -15,7 +15,7 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Core.Terrain.Generation;
     using Dwarves.Core.Terrain.Geometry;
     using Dwarves.Core.Terrain.Mutation;
-    using Dwarves.Core.Terrain.Serialization;
+    using Dwarves.Core.Terrain.Serialisation;
     using UnityEngine;
 
     /// <summary>
@@ -40,7 +40,7 @@ namespace Dwarves.Component.Terrain
 
         /// <summary>
         /// The base frequency which is the frequency of the lowest octave used by the terrain generator.
-        /// </summary>
+        /// </summary>g
         public float BaseFrequency;
 
         /// <summary>
