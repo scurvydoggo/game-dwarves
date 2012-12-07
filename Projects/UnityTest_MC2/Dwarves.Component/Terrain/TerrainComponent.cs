@@ -51,7 +51,7 @@ namespace Dwarves.Component.Terrain
         public int WorldDepth;
 
         /// <summary>
-        /// The depth level to which digging should take place.
+        /// The depth to which digging occurs.
         /// </summary>
         public int DigDepth;
 

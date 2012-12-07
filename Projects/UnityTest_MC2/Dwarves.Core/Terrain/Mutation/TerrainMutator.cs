@@ -18,14 +18,14 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <summary>
         /// Initialises a new instance of the TerrainMutator class.
         /// </summary>
-        /// <param name="digDepth">The dig depth.</param>
+        /// <param name="digDepth">The depth to which digging occurs.</param>
         public TerrainMutator(int digDepth)
         {
             this.DigDepth = digDepth;
         }
 
         /// <summary>
-        /// Gets the dig depth.
+        /// Gets the depth to which digging occurs.
         /// </summary>
         public int DigDepth { get; private set; }
 
