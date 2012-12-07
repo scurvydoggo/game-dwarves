@@ -6,18 +6,17 @@
 namespace Dwarves.Core.Terrain
 {
     /// <summary>
-    /// Represents a chunk of voxels.
+    /// The terrain voxels.
     /// </summary>
     public interface IVoxels
     {
         /// <summary>
-        /// Gets or sets the voxel at the given coordinate. Voxel.Air is returned for coordinates outside of the bounds
-        /// of the chunk.
+        /// Gets or sets the voxel at the given position.
         /// </summary>
-        /// <param name="x">The x coordinate.</param>
-        /// <param name="y">The y coordinate.</param>
-        /// <param name="z">The z coordinate.</param>
-        /// <returns>The voxel</returns>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="z">The z position.</param>
+        /// <returns>The voxel.</returns>
         Voxel this[int x, int y, int z] { get; set; }
     }
 }

@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Geometry
+namespace Dwarves.Core.Terrain.Geometry
 {
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
@@ -19,7 +19,7 @@ namespace Dwarves.Core.VoxelTerrain.Geometry
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
         /// <returns>The mesh.</returns>
-        public MeshData CreateMesh(Terrain terrain, Vector2I chunk)
+        public MeshData CreateMesh(VoxelTerrain terrain, Vector2I chunk)
         {
             var mesh = new MeshData();
 
@@ -42,7 +42,7 @@ namespace Dwarves.Core.VoxelTerrain.Geometry
         /// <param name="chunk">The chunk index.</param>
         /// <param name="position">The position.</param>
         /// <param name="mesh">The mesh data.</param>
-        private void CreateMeshCell(Terrain terrain, Vector2I chunk, Vector2I position, MeshData mesh)
+        private void CreateMeshCell(VoxelTerrain terrain, Vector2I chunk, Vector2I position, MeshData mesh)
         {
             // Get the corner points in chunk coordinates
             var corner = TerrainConst.WorldToChunk(position.X, position.Y);
@@ -67,10 +67,10 @@ namespace Dwarves.Core.VoxelTerrain.Geometry
             }
 
             // Get the voxels for the corner points
-            Voxel voxel = terrain.Voxels[chunk][TerrainConst.VoxelIndex(corner)];
-            Voxel voxelUp = terrain.Voxels[chunkUp][TerrainConst.VoxelIndex(cornerUp)];
-            Voxel voxelRight = terrain.Voxels[chunkRight][TerrainConst.VoxelIndex(cornerRight)];
-            Voxel voxelUpRight = terrain.Voxels[chunkUpRight][TerrainConst.VoxelIndex(cornerUpRight)];
+            //Voxel voxel = terrain.Voxels[chunk][TerrainConst.VoxelIndex(corner)];
+            //Voxel voxelUp = terrain.Voxels[chunkUp][TerrainConst.VoxelIndex(cornerUp)];
+            //Voxel voxelRight = terrain.Voxels[chunkRight][TerrainConst.VoxelIndex(cornerRight)];
+            //Voxel voxelUpRight = terrain.Voxels[chunkUpRight][TerrainConst.VoxelIndex(cornerUpRight)];
 
             // TODO
         }

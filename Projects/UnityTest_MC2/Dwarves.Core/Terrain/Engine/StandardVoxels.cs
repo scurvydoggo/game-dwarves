@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Engine
+namespace Dwarves.Core.Terrain.Engine
 {
     /// <summary>
     /// The standard structure for the voxel data.
@@ -13,7 +13,7 @@ namespace Dwarves.Core.VoxelTerrain.Engine
         /// <summary>
         /// The array of voxels.
         /// </summary>
-        private Voxel[, ,] voxels;
+        private Voxel[,,] voxels;
 
         /// <summary>
         /// Initialises a new instance of the StandardVoxels class.

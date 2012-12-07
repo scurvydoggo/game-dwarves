@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain
+namespace Dwarves.Core.Terrain
 {
     using Dwarves.Core.Math;
 
@@ -66,27 +66,6 @@ namespace Dwarves.Core.VoxelTerrain
         public static Vector2I ChunkIndex(int worldX, int worldY)
         {
             return new Vector2I(worldX >> TerrainConst.ChunkWidthLog, worldY >> TerrainConst.ChunkHeightLog);
-        }
-
-        /// <summary>
-        /// Gets the index for the voxel at the given chunk coordinates.
-        /// </summary>
-        /// <param name="chunkPos">The position.</param>
-        /// <returns>The index.</returns>
-        public static int VoxelIndex(Vector2I chunkPos)
-        {
-            return TerrainConst.VoxelIndex(chunkPos.X, chunkPos.Y);
-        }
-
-        /// <summary>
-        /// Gets the index for the voxel at the given chunk coordinates.
-        /// </summary>
-        /// <param name="chunkX">The x position.</param>
-        /// <param name="chunkY">The y position.</param>
-        /// <returns>The index.</returns>
-        public static int VoxelIndex(int chunkX, int chunkY)
-        {
-            return chunkX + (chunkY * TerrainConst.ChunkWidth);
         }
 
         /// <summary>

@@ -11,14 +11,14 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Component.Bounds;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
-    using Dwarves.Core.VoxelTerrain;
-    using Dwarves.Core.VoxelTerrain.Engine;
-    using Dwarves.Core.VoxelTerrain.Generation;
-    using Dwarves.Core.VoxelTerrain.Geometry;
-    using Dwarves.Core.VoxelTerrain.Mutation;
-    using Dwarves.Core.VoxelTerrain.Serialisation;
+    using Dwarves.Core.Terrain;
+    using Dwarves.Core.Terrain.Engine;
+    using Dwarves.Core.Terrain.Generation;
+    using Dwarves.Core.Terrain.Geometry;
+    using Dwarves.Core.Terrain.Mutation;
+    using Dwarves.Core.Terrain.Serialisation;
     using UnityEngine;
-    using Terrain = Dwarves.Core.VoxelTerrain.Terrain;
+    using Terrain = Dwarves.Core.Terrain.VoxelTerrain;
 
     /// <summary>
     /// Terrain component.
@@ -46,14 +46,24 @@ namespace Dwarves.Component.Terrain
         public int ChunkDepth;
 
         /// <summary>
-        /// The distance from the mean surface height that the terrain oscillates.
+        /// The depth level at which the game simulation takes place.
         /// </summary>
-        public int SurfaceAmplitude;
+        public int WorldDepth;
+
+        /// <summary>
+        /// The depth level to which digging should take place.
+        /// </summary>
+        public int DigDepth;
 
         /// <summary>
         /// The scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).
         /// </summary>
         public int Scale;
+
+        /// <summary>
+        /// The distance from the mean surface height that the terrain oscillates.
+        /// </summary>
+        public int SurfaceAmplitude;
 
         /// <summary>
         /// The seed value used by the terrain generator.
@@ -122,7 +132,8 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.Terrain = new Terrain(this.Engine, this.ChunkWidth, this.ChunkHeight, this.ChunkDepth, this.Scale);
+            this.Terrain = new Terrain(
+                this.Engine, this.ChunkWidth, this.ChunkHeight, this.ChunkDepth, this.WorldDepth, this.Scale);
 
             // Initialise the serialiser
             this.TerrainSerialiser = new TerrainSerialiser();
@@ -134,7 +145,7 @@ namespace Dwarves.Component.Terrain
             this.TerrainGenerator = new TerrainGenerator(noiseGenerator, this.SurfaceAmplitude);
 
             // Initialise the mutator
-            this.TerrainMutator = new TerrainMutator();
+            this.TerrainMutator = new TerrainMutator(this.DigDepth);
 
             // Initialise the mesh builder
             this.TerrainMeshBuilder = new TerrainMeshBuilder();

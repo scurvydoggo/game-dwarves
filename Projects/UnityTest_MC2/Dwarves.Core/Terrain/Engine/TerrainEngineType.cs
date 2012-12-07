@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Engine
+namespace Dwarves.Core.Terrain.Engine
 {
     /// <summary>
     /// Indicates the type of terrain engine.

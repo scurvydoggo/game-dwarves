@@ -1,19 +1,19 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="Terrain.cs" company="Acidwashed Games">
+// <copyright file="VoxelTerrain.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain
+namespace Dwarves.Core.Terrain
 {
     using System.Collections.Generic;
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
-    using Dwarves.Core.VoxelTerrain.Engine;
+    using Dwarves.Core.Terrain.Engine;
 
     /// <summary>
     /// Represents the terrain.
     /// </summary>
-    public class Terrain
+    public class VoxelTerrain
     {
         /// <summary>
         /// Mask for converting from world coordinates to chunk coordinates.
@@ -21,23 +21,37 @@ namespace Dwarves.Core.VoxelTerrain
         private const int ChunkHeightMask = TerrainConst.ChunkHeight - 1;
 
         /// <summary>
-        /// Initialises a new instance of the Terrain class.
+        /// Initialises a new instance of the VoxelTerrain class.
         /// </summary>
-        /// <param name="engine">The type of terrain engine to use.</param>
+        /// <param name="engine">The type of terrain engine.</param>
         /// <param name="chunkWidth">The chunk width.</param>
         /// <param name="chunkHeight">The chunk height.</param>
         /// <param name="chunkDepth">The chunk depth.</param>
+        /// <param name="worldDepth">The depth level at which the game simulation takes place.</param>
         /// <param name="scale">The scaling ratio.</param>
-        public Terrain(TerrainEngineType engine, int chunkWidth, int chunkHeight, int chunkDepth, int scale)
+        public VoxelTerrain(
+            TerrainEngineType engine,
+            int chunkWidth,
+            int chunkHeight,
+            int chunkDepth,
+            int worldDepth,
+            int scale)
         {
+            this.Engine = engine;
             this.ChunkWidth = chunkWidth;
             this.ChunkHeight = chunkHeight;
             this.ChunkDepth = chunkDepth;
+            this.WorldDepth = worldDepth;
             this.Scale = scale;
             this.Voxels = new Dictionary<Vector2I, IVoxels>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
         }
+
+        /// <summary>
+        /// Gets the type of terrain engine.
+        /// </summary>
+        public TerrainEngineType Engine { get; private set; }
 
         /// <summary>
         /// Gets the chunk width.
@@ -53,6 +67,11 @@ namespace Dwarves.Core.VoxelTerrain
         /// Gets the chunk depth.
         /// </summary>
         public int ChunkDepth { get; private set; }
+
+        /// <summary>
+        /// Gets the depth level at which the game simulation takes place.
+        /// </summary>
+        public int WorldDepth { get; private set; }
 
         /// <summary>
         /// Gets the scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).

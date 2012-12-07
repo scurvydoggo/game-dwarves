@@ -3,18 +3,32 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Mutation
+namespace Dwarves.Core.Terrain.Mutation
 {
     using Dwarves.Core.Math;
     using UnityEngine;
 
-    using Terrain = Dwarves.Core.VoxelTerrain.Terrain;
+    using Terrain = Dwarves.Core.Terrain.VoxelTerrain;
 
     /// <summary>
     /// Mutates voxel terrain.
     /// </summary>
     public class TerrainMutator
     {
+        /// <summary>
+        /// Initialises a new instance of the TerrainMutator class.
+        /// </summary>
+        /// <param name="digDepth">The dig depth.</param>
+        public TerrainMutator(int digDepth)
+        {
+            this.DigDepth = digDepth;
+        }
+
+        /// <summary>
+        /// Gets the dig depth.
+        /// </summary>
+        public int DigDepth { get; private set; }
+
         /// <summary>
         /// Dig at the given position.
         /// </summary>
@@ -25,17 +39,20 @@ namespace Dwarves.Core.VoxelTerrain.Mutation
         public void Dig(Terrain terrain, Vector2I position, Vector2 offset)
         {
             // Get the voxel array
-            Voxel[] voxels;
+            IVoxels voxels;
             if (terrain.Voxels.TryGetValue(TerrainConst.ChunkIndex(position.X, position.Y), out voxels))
             {
-                // Get the voxel
-                Vector2I positionChunk = TerrainConst.WorldToChunk(position.X, position.Y);
-                int voxelIndex = TerrainConst.VoxelIndex(positionChunk.X, positionChunk.Y);
-                Voxel voxel = voxels[voxelIndex];
+                for (int z = terrain.WorldDepth; z < terrain.WorldDepth + this.DigDepth; z++)
+                {
+                    Vector2I pos = TerrainConst.WorldToChunk(position.X, position.Y);
 
-                // Update the voxel density
-                voxel.Density = TerrainConst.DensityMax;
-                voxels[voxelIndex] = voxel;
+                    // Get the voxel
+                    Voxel voxel = voxels[pos.X, pos.Y, z];
+
+                    // Update the voxel density
+                    voxel.Density = TerrainConst.DensityMax;
+                    voxels[pos.X, pos.Y, z] = voxel;
+                }
             }
         }
     }

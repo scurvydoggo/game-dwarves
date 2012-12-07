@@ -8,8 +8,8 @@ namespace Dwarves.Component.Terrain
     using System.Collections.Generic;
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
-    using Dwarves.Core.VoxelTerrain;
-    using Dwarves.Core.VoxelTerrain.Geometry;
+    using Dwarves.Core.Terrain;
+    using Dwarves.Core.Terrain.Geometry;
     using UnityEngine;
 
     /// <summary>

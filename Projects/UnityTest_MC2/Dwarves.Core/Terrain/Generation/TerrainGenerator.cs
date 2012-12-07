@@ -3,16 +3,22 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Generation
+namespace Dwarves.Core.Terrain.Generation
 {
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
+    using Dwarves.Core.Terrain.Engine;
 
     /// <summary>
     /// Generates voxel terrain.
     /// </summary>
     public class TerrainGenerator
     {
+        /// <summary>
+        /// The terrain factory.
+        /// </summary>
+        private TerrainEngineFactory factory;
+
         /// <summary>
         /// Initialises a new instance of the TerrainGenerator class.
         /// </summary>
@@ -40,12 +46,14 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        public void Generate(Terrain terrain, Vector2I chunk)
+        public void Generate(VoxelTerrain terrain, Vector2I chunk)
         {
             // Create the voxel array if it doesn't yet exist
             if (!terrain.Voxels.ContainsKey(chunk))
             {
-                terrain.Voxels.Add(chunk, new Voxel[TerrainConst.ChunkWidth * TerrainConst.ChunkHeight]);
+                var voxels = this.factory.CreateVoxels(
+                    terrain.Engine, terrain.ChunkWidth, terrain.ChunkHeight, terrain.ChunkDepth);
+                terrain.Voxels.Add(chunk, voxels);
             }
 
             // Generate the surface heights for this chunk if they don't exist
@@ -85,10 +93,10 @@ namespace Dwarves.Core.VoxelTerrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        private void FillTerrain(Terrain terrain, Vector2I chunk)
+        private void FillTerrain(VoxelTerrain terrain, Vector2I chunk)
         {
-            // Get the voxel array and surface heights
-            Voxel[] voxels = terrain.Voxels[chunk];
+            // Get the voxels and surface heights
+            IVoxels voxels = terrain.Voxels[chunk];
             float[] surfaceHeights = terrain.SurfaceHeights[chunk.X];
 
             // Fill the voxel array
@@ -135,8 +143,11 @@ namespace Dwarves.Core.VoxelTerrain.Generation
                         }
                     }
 
-                    // Set the voxel
-                    voxels[TerrainConst.VoxelIndex(x, y)] = voxel;
+                    // Set the voxel at each depth point
+                    for (int z = terrain.WorldDepth; z < terrain.ChunkDepth; z++)
+                    {
+                        voxels[x, y, z] = voxel;
+                    }
                 }
             }
         }

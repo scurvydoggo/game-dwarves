@@ -3,7 +3,7 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain.Serialisation
+namespace Dwarves.Core.Terrain.Serialisation
 {
     using System;
     using Dwarves.Core.Math;
@@ -18,7 +18,7 @@ namespace Dwarves.Core.VoxelTerrain.Serialisation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        public void Serialise(Terrain terrain, Vector2I chunk)
+        public void Serialise(VoxelTerrain terrain, Vector2I chunk)
         {
             // TODO
             throw new NotImplementedException();
@@ -30,7 +30,7 @@ namespace Dwarves.Core.VoxelTerrain.Serialisation
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
         /// <returns>True if the terrain chunk was deserialised.</returns>
-        public bool TryDeserialise(Terrain terrain, Vector2I chunk)
+        public bool TryDeserialise(VoxelTerrain terrain, Vector2I chunk)
         {
             // TODO: This is not yet implemented
             return false;
