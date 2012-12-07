@@ -18,7 +18,6 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Core.Terrain.Mutation;
     using Dwarves.Core.Terrain.Serialisation;
     using UnityEngine;
-    using Terrain = Dwarves.Core.Terrain.VoxelTerrain;
 
     /// <summary>
     /// Terrain component.
@@ -105,7 +104,7 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// Gets the terrain instance.
         /// </summary>
-        public Terrain Terrain { get; private set; }
+        public VoxelTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Gets the terrain serialiser.
@@ -132,7 +131,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.Terrain = new Terrain(
+            this.Terrain = new VoxelTerrain(
                 this.Engine, this.ChunkWidth, this.ChunkHeight, this.ChunkDepth, this.WorldDepth, this.Scale);
 
             // Initialise the serialiser
