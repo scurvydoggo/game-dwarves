@@ -16,11 +16,6 @@ namespace Dwarves.Core.Terrain
         public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, TerrainConst.DensityMax);
 
         /// <summary>
-        /// The byte containing the concatenation of the primary and secondary densities.
-        /// </summary>
-        private byte densityField;
-
-        /// <summary>
         /// Initialises a new instance of the Voxel struct.
         /// </summary>
         /// <param name="material">The material.</param>
@@ -29,9 +24,7 @@ namespace Dwarves.Core.Terrain
             : this()
         {
             this.Material = material;
-
-            // Set both the primary and secondary densities
-            this.densityField = (byte)((density << 4) | (density & 0x0F));
+            this.Density = density;
         }
 
         /// <summary>
@@ -40,31 +33,8 @@ namespace Dwarves.Core.Terrain
         public TerrainMaterial Material { get; set; }
 
         /// <summary>
-        /// Gets or sets the primary density.
+        /// Gets or sets the density.
         /// </summary>
-        public byte Density
-        {
-            get
-            {
-                return (byte)(this.densityField & 0x0F);
-            }
-
-            set
-            {
-                this.densityField = (byte)((this.densityField & 0xF0) | (value & 0x0F));
-            }
-        }
-
-        /// <summary>
-        /// Gets the secondary density. This is the density which lies behind the digging area and should not change
-        /// once set.
-        /// </summary>
-        public byte SecondaryDensity
-        {
-            get
-            {
-                return (byte)(this.densityField >> 4);
-            }
-        }
+        public byte Density { get; set; }
     }
 }
