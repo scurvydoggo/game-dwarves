@@ -1,27 +1,27 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="StandardVoxelChunk.cs" company="Acidwashed Games">
+// <copyright file="StandardVoxels.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.VoxelTerrain.Engine
 {
     /// <summary>
-    /// The standard structure for the voxel chunk.
+    /// The standard structure for the voxel data.
     /// </summary>
-    public class StandardVoxelChunk : IVoxelChunk
+    public class StandardVoxels : IVoxels
     {
         /// <summary>
         /// The array of voxels.
         /// </summary>
-        private Voxel[,,] voxels;
+        private Voxel[, ,] voxels;
 
         /// <summary>
-        /// Initialises a new instance of the StandardVoxelChunk class.
+        /// Initialises a new instance of the StandardVoxels class.
         /// </summary>
         /// <param name="width">The width.</param>
         /// <param name="height">The height.</param>
         /// <param name="depth">The depth.</param>
-        public StandardVoxelChunk(int width, int height, int depth)
+        public StandardVoxels(int width, int height, int depth)
         {
             this.voxels = new Voxel[width, height, depth];
         }

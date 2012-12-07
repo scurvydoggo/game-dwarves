@@ -3,23 +3,21 @@
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.VoxelTerrain
+namespace Dwarves.Core.Terrain
 {
-    using System.Collections.Generic;
-    using Dwarves.Core.Math;
-
     /// <summary>
-    /// The terrain voxels.
+    /// Represents a chunk of voxels.
     /// </summary>
     public interface IVoxels
     {
         /// <summary>
-        /// Gets or sets the voxel at the given position.
+        /// Gets or sets the voxel at the given coordinate. Voxel.Air is returned for coordinates outside of the bounds
+        /// of the chunk.
         /// </summary>
-        /// <param name="x">The x position.</param>
-        /// <param name="y">The y position.</param>
-        /// <param name="z">The z position.</param>
-        /// <returns>The voxel.</returns>
+        /// <param name="x">The x coordinate.</param>
+        /// <param name="y">The y coordinate.</param>
+        /// <param name="z">The z coordinate.</param>
+        /// <returns>The voxel</returns>
         Voxel this[int x, int y, int z] { get; set; }
     }
 }

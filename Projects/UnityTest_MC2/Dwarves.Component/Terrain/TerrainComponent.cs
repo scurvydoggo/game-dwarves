@@ -12,12 +12,12 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.VoxelTerrain;
+    using Dwarves.Core.VoxelTerrain.Engine;
     using Dwarves.Core.VoxelTerrain.Generation;
     using Dwarves.Core.VoxelTerrain.Geometry;
     using Dwarves.Core.VoxelTerrain.Mutation;
     using Dwarves.Core.VoxelTerrain.Serialisation;
     using UnityEngine;
-
     using Terrain = Dwarves.Core.VoxelTerrain.Terrain;
 
     /// <summary>
@@ -26,9 +26,34 @@ namespace Dwarves.Component.Terrain
     public class TerrainComponent : MonoBehaviour
     {
         /// <summary>
+        /// The terrain engine type.
+        /// </summary>
+        public TerrainEngineType Engine;
+
+        /// <summary>
+        /// The chunk width.
+        /// </summary>
+        public int ChunkWidth;
+
+        /// <summary>
+        /// The chunk height.
+        /// </summary>
+        public int ChunkHeight;
+
+        /// <summary>
+        /// The chunk depth.
+        /// </summary>
+        public int ChunkDepth;
+
+        /// <summary>
         /// The distance from the mean surface height that the terrain oscillates.
         /// </summary>
         public int SurfaceAmplitude;
+
+        /// <summary>
+        /// The scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).
+        /// </summary>
+        public int Scale;
 
         /// <summary>
         /// The seed value used by the terrain generator.
@@ -97,7 +122,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            this.Terrain = new Terrain();
+            this.Terrain = new Terrain(this.Engine, this.ChunkWidth, this.ChunkHeight, this.ChunkDepth, this.Scale);
 
             // Initialise the serialiser
             this.TerrainSerialiser = new TerrainSerialiser();

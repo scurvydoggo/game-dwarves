@@ -13,23 +13,35 @@ namespace Dwarves.Core.VoxelTerrain.Engine
     public class TerrainEngineFactory
     {
         /// <summary>
-        /// Creates a IVoxels instance for the given engine type.
+        /// Initialises a new instance of the Terrain class.
         /// </summary>
-        /// <param name="type">The terrain engine type.</param>
-        /// <param name="chunkWidth">The chunk width.</param>
-        /// <param name="chunkHeight">The chunk height.</param>
-        /// <param name="chunkDepth">The chunk depth.</param>
-        /// <param name="scale">The scaling ratio.</param>
-        /// <returns>The IVoxels instance.</returns>
-        public IVoxels CreateVoxels(TerrainEngineType type, int chunkWidth, int chunkHeight, int chunkDepth, int scale)
+        /// <param name="engine">The type of terrain engine to use.</param>
+        public TerrainEngineFactory(TerrainEngineType engine)
         {
-            switch (type)
+            this.Engine = engine;
+        }
+
+        /// <summary>
+        /// Gets the terrain engine type.
+        /// </summary>
+        public TerrainEngineType Engine { get; private set; }
+
+        /// <summary>
+        /// Creates the voxel data of the given size.
+        /// </summary>
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
+        /// <param name="depth">The depth.</param>
+        /// <returns>The IVoxels instance.</returns>
+        public IVoxels CreateVoxels(int width, int height, int depth)
+        {
+            switch (this.Engine)
             {
                 case TerrainEngineType.Standard:
-                    return new StandardVoxels(chunkWidth, chunkHeight, chunkDepth, scale);
+                    return new StandardVoxels(width, height, depth);
 
                 default:
-                    throw new InvalidOperationException("Unexpected terrain engine type: " + type);
+                    throw new InvalidOperationException("Unexpected terrain engine type: " + this.Engine);
             }
         }
     }
