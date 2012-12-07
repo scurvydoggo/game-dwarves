@@ -48,12 +48,27 @@ namespace Dwarves.Core.Terrain
             this.ChunkDepth = chunkDepth;
             this.WorldDepth = worldDepth;
             this.Scale = scale;
+
             this.Voxels = new Dictionary<Vector2I, IVoxels>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
-
             this.factory = new TerrainEngineFactory(this.Engine);
         }
+
+        /// <summary>
+        /// Gets the voxel data organised by chunk.
+        /// </summary>
+        public Dictionary<Vector2I, IVoxels> Voxels { get; private set; }
+
+        /// <summary>
+        /// Gets the mesh data organised by chunk.
+        /// </summary>
+        public Dictionary<Vector2I, MeshData> Meshes { get; private set; }
+
+        /// <summary>
+        /// Gets the surface heights for each chunk x-position.
+        /// </summary>
+        public Dictionary<int, float[]> SurfaceHeights { get; private set; }
 
         /// <summary>
         /// Gets the type of terrain engine.
@@ -84,21 +99,6 @@ namespace Dwarves.Core.Terrain
         /// Gets the scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).
         /// </summary>
         public int Scale { get; private set; }
-
-        /// <summary>
-        /// Gets the voxel data organised by chunk.
-        /// </summary>
-        public Dictionary<Vector2I, IVoxels> Voxels { get; private set; }
-
-        /// <summary>
-        /// Gets the mesh data organised by chunk.
-        /// </summary>
-        public Dictionary<Vector2I, MeshData> Meshes { get; private set; }
-
-        /// <summary>
-        /// Gets the surface heights for each chunk x-position.
-        /// </summary>
-        public Dictionary<int, float[]> SurfaceHeights { get; private set; }
 
         /// <summary>
         /// Creates a new chunk at the given chunk index.
