@@ -19,8 +19,8 @@ namespace Dwarves.Core.Terrain.Generation
         public CachedRows()
         {
             this.Cells = new CachedCell[2][];
-            this.Cells[0] = new CachedCell[TerrainConst.ChunkWidth];
-            this.Cells[1] = new CachedCell[TerrainConst.ChunkWidth];
+            this.Cells[0] = new CachedCell[VoxelTerrain.Instance.ChunkWidth];
+            this.Cells[1] = new CachedCell[VoxelTerrain.Instance.ChunkWidth];
         }
 
         /// <summary>

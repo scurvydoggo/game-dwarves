@@ -11,9 +11,24 @@ namespace Dwarves.Core.Terrain
     public struct Voxel
     {
         /// <summary>
+        /// The minimum density value. This lies inside the surface.
+        /// </summary>
+        public const byte DensityMin = 0x00;
+
+        /// <summary>
+        /// The maximum density value. This lies outside the surface.
+        /// </summary>
+        public const byte DensityMax = 0x0E;
+
+        /// <summary>
+        /// The density at which the surface lies (aka the isolevel).
+        /// </summary>
+        public const byte DensitySurface = 0x07;
+
+        /// <summary>
         /// An air voxel that lies outside the terrain.
         /// </summary>
-        public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, TerrainConst.DensityMax);
+        public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, Voxel.DensityMax);
 
         /// <summary>
         /// Initialises a new instance of the Voxel struct.

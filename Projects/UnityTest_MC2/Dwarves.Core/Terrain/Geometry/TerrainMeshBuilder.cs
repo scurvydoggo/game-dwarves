@@ -23,10 +23,10 @@ namespace Dwarves.Core.Terrain.Geometry
         {
             var mesh = new MeshData();
 
-            var chunkOrigin = TerrainConst.GetChunkOrigin(chunk);
-            for (int x = chunkOrigin.X; x < chunkOrigin.X + TerrainConst.ChunkWidth; x++)
+            var chunkOrigin = terrain.GetChunkOrigin(chunk);
+            for (int x = chunkOrigin.X; x < chunkOrigin.X + terrain.ChunkWidth; x++)
             {
-                for (int y = chunkOrigin.Y; y < chunkOrigin.Y + TerrainConst.ChunkHeight; y++)
+                for (int y = chunkOrigin.Y; y < chunkOrigin.Y + terrain.ChunkHeight; y++)
                 {
                     this.CreateMeshCell(terrain, chunk, new Vector2I(x, y), mesh);
                 }
@@ -45,16 +45,16 @@ namespace Dwarves.Core.Terrain.Geometry
         private void CreateMeshCell(VoxelTerrain terrain, Vector2I chunk, Vector2I position, MeshData mesh)
         {
             // Get the corner points in chunk coordinates
-            var corner = TerrainConst.WorldToChunk(position.X, position.Y);
-            var cornerUp = TerrainConst.WorldToChunk(position.X, position.Y + 1);
-            var cornerRight = TerrainConst.WorldToChunk(position.X + 1, position.Y);
-            var cornerUpRight = TerrainConst.WorldToChunk(position.X + 1, position.Y + 1);
+            var corner = terrain.WorldToChunk(position.X, position.Y);
+            var cornerUp = terrain.WorldToChunk(position.X, position.Y + 1);
+            var cornerRight = terrain.WorldToChunk(position.X + 1, position.Y);
+            var cornerUpRight = terrain.WorldToChunk(position.X + 1, position.Y + 1);
 
             // Get the chunk indices for the corner points
             Vector2I chunkUp = chunk;
             Vector2I chunkRight = chunk;
             Vector2I chunkUpRight = chunk;
-            if (cornerUp.Y == TerrainConst.ChunkHeight - 1)
+            if (cornerUp.Y == terrain.ChunkHeight - 1)
             {
                 chunkUp.Y++;
                 chunkUpRight.Y++;

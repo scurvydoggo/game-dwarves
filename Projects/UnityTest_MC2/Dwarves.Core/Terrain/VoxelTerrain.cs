@@ -16,9 +16,14 @@ namespace Dwarves.Core.Terrain
     public class VoxelTerrain
     {
         /// <summary>
-        /// Mask for converting from world coordinates to chunk coordinates.
+        /// The power-of-2 height of the chunk for quickly determining chunk index.
         /// </summary>
-        private const int ChunkHeightMask = TerrainConst.ChunkHeight - 1;
+        private int chunkWidthLog;
+
+        /// <summary>
+        /// The power-of-2 width of the chunk for quickly determining chunk index.
+        /// </summary>
+        private int chunkHeightLog;
 
         /// <summary>
         /// The terrain factory.
@@ -29,31 +34,37 @@ namespace Dwarves.Core.Terrain
         /// Initialises a new instance of the VoxelTerrain class.
         /// </summary>
         /// <param name="engine">The type of terrain engine.</param>
-        /// <param name="chunkWidth">The chunk width.</param>
-        /// <param name="chunkHeight">The chunk height.</param>
-        /// <param name="chunkDepth">The chunk depth.</param>
+        /// <param name="chunkWidthLog">The power-of-2 width of the chunk.</param>
+        /// <param name="chunkHeightLog">The power-of-2 height of the chunk.</param>
+        /// <param name="chunkDepthLog">The power-of-2 depth of the chunk.</param>
         /// <param name="worldDepth">The depth level at which the game simulation takes place.</param>
         /// <param name="scale">The scaling ratio.</param>
         public VoxelTerrain(
             TerrainEngineType engine,
-            int chunkWidth,
-            int chunkHeight,
-            int chunkDepth,
+            int chunkWidthLog,
+            int chunkHeightLog,
+            int chunkDepthLog,
             int worldDepth,
             int scale)
         {
             this.Engine = engine;
-            this.ChunkWidth = chunkWidth;
-            this.ChunkHeight = chunkHeight;
-            this.ChunkDepth = chunkDepth;
+            this.chunkWidthLog = chunkWidthLog;
+            this.chunkHeightLog = chunkHeightLog;
             this.WorldDepth = worldDepth;
             this.Scale = scale;
-
+            this.ChunkWidth = 1 << chunkWidthLog;
+            this.ChunkHeight = 1 << chunkHeightLog;
+            this.ChunkDepth = 1 << chunkDepthLog;
             this.Voxels = new Dictionary<Vector2I, IVoxels>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
             this.factory = new TerrainEngineFactory(this.Engine);
         }
+
+        /// <summary>
+        /// Gets or sets the current terrain instance for the application.
+        /// </summary>
+        public static VoxelTerrain Instance { get; set; }
 
         /// <summary>
         /// Gets the voxel data organised by chunk.
@@ -99,6 +110,38 @@ namespace Dwarves.Core.Terrain
         /// Gets the scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).
         /// </summary>
         public int Scale { get; private set; }
+
+        /// <summary>
+        /// Get the index of the chunk at the given world coordinates.
+        /// </summary>
+        /// <param name="worldX">The x position.</param>
+        /// <param name="worldY">The y position.</param>
+        /// <returns>The chunk index.</returns>
+        public Vector2I ChunkIndex(int worldX, int worldY)
+        {
+            return new Vector2I(worldX >> this.chunkWidthLog, worldY >> this.chunkHeightLog);
+        }
+
+        /// <summary>
+        /// Convert the world coordinates into chunk coordinates.
+        /// </summary>
+        /// <param name="worldX">The x position.</param>
+        /// <param name="worldY">The y position.</param>
+        /// <returns>The position in chunk coordinates.</returns>
+        public Vector2I WorldToChunk(int worldX, int worldY)
+        {
+            return new Vector2I(worldX & (this.ChunkWidth - 1), worldY & (this.ChunkHeight - 1));
+        }
+
+        /// <summary>
+        /// Get the origin of the given chunk.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <returns>The origin of the chunk in world coordinates.</returns>
+        public Vector2I GetChunkOrigin(Vector2I chunk)
+        {
+            return new Vector2I(chunk.X * this.ChunkWidth, chunk.Y * this.ChunkHeight);
+        }
 
         /// <summary>
         /// Creates a new chunk at the given chunk index.

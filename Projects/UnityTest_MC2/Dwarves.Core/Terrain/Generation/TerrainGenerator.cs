@@ -52,7 +52,7 @@ namespace Dwarves.Core.Terrain.Generation
             // Generate the surface heights for this chunk if they don't exist
             if (!terrain.SurfaceHeights.ContainsKey(chunk.X))
             {
-                terrain.SurfaceHeights.Add(chunk.X, this.GenerateSurfaceHeights(chunk.X));
+                terrain.SurfaceHeights.Add(chunk.X, this.GenerateSurfaceHeights(terrain, chunk.X));
             }
 
             // Fill the terrain
@@ -62,14 +62,15 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Generate the heights for each x-coordinate for the given chunk.
         /// </summary>
+        /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndexX">The chunk index's x component.</param>
         /// <returns>The surface heights.</returns>
-        private float[] GenerateSurfaceHeights(int chunkIndexX)
+        private float[] GenerateSurfaceHeights(VoxelTerrain terrain, int chunkIndexX)
         {
-            var heights = new float[TerrainConst.ChunkWidth];
+            var heights = new float[terrain.ChunkWidth];
 
-            int originX = chunkIndexX * TerrainConst.ChunkWidth;
-            for (int x = 0; x < TerrainConst.ChunkWidth; x++)
+            int originX = chunkIndexX * terrain.ChunkWidth;
+            for (int x = 0; x < terrain.ChunkWidth; x++)
             {
                 // Generate the noise value at this x position
                 float noise = this.NoiseGenerator.Generate(originX + x);
@@ -93,15 +94,15 @@ namespace Dwarves.Core.Terrain.Generation
             float[] surfaceHeights = terrain.SurfaceHeights[chunk.X];
 
             // Fill the voxel array
-            int originY = chunk.Y * TerrainConst.ChunkHeight;
-            for (int x = 0; x < TerrainConst.ChunkWidth; x++)
+            int originY = chunk.Y * terrain.ChunkHeight;
+            for (int x = 0; x < terrain.ChunkWidth; x++)
             {
                 // Determine where the surface lies for this x-value
                 float surfaceHeightF = surfaceHeights[x];
                 int surfaceHeightI = (int)System.Math.Floor(surfaceHeightF);
                 float deltaHeight = surfaceHeightF - surfaceHeightI;
 
-                for (int y = 0; y < TerrainConst.ChunkHeight; y++)
+                for (int y = 0; y < terrain.ChunkHeight; y++)
                 {
                     int height = originY + y;
 
@@ -120,7 +121,7 @@ namespace Dwarves.Core.Terrain.Generation
                         if (height == surfaceHeightI)
                         {
                             // This voxel lies on the surface, so scale the density by the noise value
-                            byte density = (byte)(TerrainConst.DensityMax - (TerrainConst.DensityMax * deltaHeight));
+                            byte density = (byte)(Voxel.DensityMax - (Voxel.DensityMax * deltaHeight));
 
                             // The density property stores 2 densities. The 'foreground' density which is that which
                             // can be dug, and the 'background' density which represents the original density
@@ -132,7 +133,7 @@ namespace Dwarves.Core.Terrain.Generation
                         else
                         {
                             // The voxel lies under the surface
-                            voxel = new Voxel(material, TerrainConst.DensityMin);
+                            voxel = new Voxel(material, Voxel.DensityMin);
                         }
                     }
 
