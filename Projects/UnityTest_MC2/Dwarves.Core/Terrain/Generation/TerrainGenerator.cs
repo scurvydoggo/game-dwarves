@@ -15,11 +15,6 @@ namespace Dwarves.Core.Terrain.Generation
     public class TerrainGenerator
     {
         /// <summary>
-        /// The terrain factory.
-        /// </summary>
-        private TerrainEngineFactory factory;
-
-        /// <summary>
         /// Initialises a new instance of the TerrainGenerator class.
         /// </summary>
         /// <param name="noiseGenerator">The noise generator.</param>
@@ -51,9 +46,7 @@ namespace Dwarves.Core.Terrain.Generation
             // Create the voxel array if it doesn't yet exist
             if (!terrain.Voxels.ContainsKey(chunk))
             {
-                var voxels = this.factory.CreateVoxels(
-                    terrain.Engine, terrain.ChunkWidth, terrain.ChunkHeight, terrain.ChunkDepth);
-                terrain.Voxels.Add(chunk, voxels);
+                terrain.NewChunk(chunk);
             }
 
             // Generate the surface heights for this chunk if they don't exist

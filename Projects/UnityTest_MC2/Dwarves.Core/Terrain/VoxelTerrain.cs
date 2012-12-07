@@ -21,6 +21,11 @@ namespace Dwarves.Core.Terrain
         private const int ChunkHeightMask = TerrainConst.ChunkHeight - 1;
 
         /// <summary>
+        /// The terrain factory.
+        /// </summary>
+        private TerrainEngineFactory factory;
+
+        /// <summary>
         /// Initialises a new instance of the VoxelTerrain class.
         /// </summary>
         /// <param name="engine">The type of terrain engine.</param>
@@ -46,6 +51,8 @@ namespace Dwarves.Core.Terrain
             this.Voxels = new Dictionary<Vector2I, IVoxels>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
+
+            this.factory = new TerrainEngineFactory(this.Engine);
         }
 
         /// <summary>
@@ -92,6 +99,15 @@ namespace Dwarves.Core.Terrain
         /// Gets the surface heights for each chunk x-position.
         /// </summary>
         public Dictionary<int, float[]> SurfaceHeights { get; private set; }
+
+        /// <summary>
+        /// Creates a new chunk at the given chunk index.
+        /// </summary>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void NewChunk(Vector2I chunkIndex)
+        {
+            this.Voxels.Add(chunkIndex, this.factory.CreateVoxels(this.ChunkWidth, this.ChunkHeight, this.ChunkDepth));
+        }
 
         /// <summary>
         /// Remove the data for the given chunk.
