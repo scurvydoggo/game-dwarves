@@ -45,6 +45,7 @@
     <Compile Include="Bounds\IMethodGetBounds.cs" />
     <Compile Include="Bounds\MethodGetBoundsCamera.cs" />
     <Compile Include="Geometry\MeshData.cs" />
+    <Compile Include="Math\Vector3I.cs" />
     <Compile Include="Math\MathExtension.cs" />
     <Compile Include="Math\Noise\CompoundNoiseGenerator.cs" />
     <Compile Include="Math\Noise\INoiseGenerator.cs" />
@@ -55,7 +56,7 @@
     <Compile Include="Terrain\Engine\TerrainEngineType.cs" />
     <Compile Include="Terrain\Engine\TerrainEngineFactory.cs" />
     <Compile Include="Terrain\Geometry\CachedCell.cs" />
-    <Compile Include="Terrain\Geometry\CachedRows.cs" />
+    <Compile Include="Terrain\Geometry\CachedCells.cs" />
     <Compile Include="Terrain\Generation\TerrainGenerator.cs" />
     <Compile Include="Terrain\Geometry\TerrainMeshBuilder.cs" />
     <Compile Include="Terrain\IVoxels.cs" />

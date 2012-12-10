@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="CachedRows.cs" company="Acidwashed Games">
+// <copyright file="CachedCells.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -9,40 +9,44 @@ namespace Dwarves.Core.Terrain.Geometry
     using Dwarves.Core.Math;
 
     /// <summary>
-    /// Reference to the vertices of the cells in the current and previous rows.
+    /// Reference to the vertices of the cells in the current and previous z planes.
     /// </summary>
-    public class CachedRows
+    public class CachedCells
     {
         /// <summary>
-        /// Initialises a new instance of the CachedRows class.
+        /// Initialises a new instance of the CachedCells class.
         /// </summary>
-        public CachedRows()
+        /// <param name="chunkWidth">The chunk width.</param>
+        /// <param name="chunkHeight">The chunk height.</param>
+        public CachedCells(int chunkWidth, int chunkHeight)
         {
-            this.Cells = new CachedCell[2][];
-            this.Cells[0] = new CachedCell[VoxelTerrain.Instance.ChunkWidth];
-            this.Cells[1] = new CachedCell[VoxelTerrain.Instance.ChunkWidth];
+            this.Cells = new CachedCell[2][,];
+            this.Cells[0] = new CachedCell[chunkWidth, chunkHeight];
+            this.Cells[1] = new CachedCell[chunkWidth, chunkHeight];
         }
 
         /// <summary>
-        /// Gets the cached cells. 1st dimension indicates row index; 2nd indicates x position of cell.
+        /// Gets the cached cells. 1st dimension indicates z index; 2nd indicates x,y position of cell.
         /// </summary>
-        public CachedCell[][] Cells { get; private set; }
+        public CachedCell[][,] Cells { get; private set; }
 
         /// <summary>
         /// Gets the position of the cell in the direction from the given position.
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
+        /// <param name="y">The z position.</param>
         /// <param name="direction">The bitmask indicating the direction.</param>
         /// <returns>The neighbouring position.</returns>
-        public static Vector2I GetNeighbourPosition(int x, int y, byte direction)
+        public static Vector3I GetNeighbourPosition(int x, int y, int z, byte direction)
         {
             // Get the directional offset
             int dx = direction & 0x01;
             int dy = (direction >> 1) & 0x01;
+            int dz = (direction >> 2) & 0x01;
 
             // Offset the reused cell from the given position
-            return new Vector2I(x - dx, y - dy);
+            return new Vector3I(x - dx, y - dy, z - dz);
         }
 
         /// <summary>
@@ -50,12 +54,13 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="x">The current x position.</param>
         /// <param name="y">The current y position.</param>
+        /// <param name="y">The current z position.</param>
         /// <param name="direction">The bitmask indicating the directional of the cached cell.</param>
         /// <returns>The cached cell.</returns>
-        public CachedCell GetCachedCell(int x, int y, byte direction)
+        public CachedCell GetCachedCell(int x, int y, int z, byte direction)
         {
-            Vector2I position = CachedRows.GetNeighbourPosition(x, y, direction);
-            return this.Cells[position.Y & 1][position.X];
+            Vector3I position = CachedCells.GetNeighbourPosition(x, y, z, direction);
+            return this.Cells[position.Z & 1][position.X, position.Y];
         }
 
         /// <summary>
@@ -63,10 +68,11 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
+        /// <param name="z">The z position.</param>
         /// <param name="cell">The cached cell.</param>
-        public void SetCachedCell(int x, int y, CachedCell cell)
+        public void SetCachedCell(int x, int y, int z, CachedCell cell)
         {
-            this.Cells[y & 1][x] = cell;
+            this.Cells[z & 1][x, y] = cell;
         }
     }
 }
