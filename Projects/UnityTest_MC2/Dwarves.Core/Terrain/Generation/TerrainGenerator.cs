@@ -43,7 +43,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="chunk">The chunk index.</param>
         public void Generate(VoxelTerrain terrain, Vector2I chunk)
         {
-            // Create the voxel array if it doesn't yet exist
+            // Create the voxel chunk if it doesn't yet exist
             if (!terrain.Voxels.ContainsKey(chunk))
             {
                 terrain.NewChunk(chunk);
