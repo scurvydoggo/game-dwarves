@@ -54,8 +54,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Terrain\Engine\TerrainEngineType.cs" />
     <Compile Include="Terrain\Engine\TerrainEngineFactory.cs" />
-    <Compile Include="Terrain\Generation\CachedCell.cs" />
-    <Compile Include="Terrain\Generation\CachedRows.cs" />
+    <Compile Include="Terrain\Geometry\CachedCell.cs" />
+    <Compile Include="Terrain\Geometry\CachedRows.cs" />
     <Compile Include="Terrain\Generation\TerrainGenerator.cs" />
     <Compile Include="Terrain\Geometry\TerrainMeshBuilder.cs" />
     <Compile Include="Terrain\IVoxels.cs" />
