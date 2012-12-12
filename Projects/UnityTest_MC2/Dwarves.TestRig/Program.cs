@@ -5,11 +5,10 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestRig
 {
-    using Dwarves.Component.Terrain;
+    using System.Collections.Generic;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Engine;
-    using System.Collections.Generic;
 
     /// <summary>
     /// The main class.
