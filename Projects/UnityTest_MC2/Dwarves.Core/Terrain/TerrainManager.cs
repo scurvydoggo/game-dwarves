@@ -108,9 +108,6 @@ namespace Dwarves.Core.Terrain
             {
                 // Remove the chunk
                 this.Terrain.RemoveChunk(chunk);
-
-                // Clear the mesh
-                this.Terrain.Meshes.Remove(chunk);
             }
 
             // Load the new chunk data
