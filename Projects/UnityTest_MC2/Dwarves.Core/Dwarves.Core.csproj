@@ -63,6 +63,7 @@
     <Compile Include="Terrain\IVoxels.cs" />
     <Compile Include="Terrain\Mutation\TerrainMutator.cs" />
     <Compile Include="Terrain\Serialisation\TerrainSerialiser.cs" />
+    <Compile Include="Terrain\TerrainManager.cs" />
     <Compile Include="Terrain\VoxelTerrain.cs" />
     <Compile Include="Terrain\TerrainMaterial.cs" />
     <Compile Include="Terrain\Voxel.cs" />

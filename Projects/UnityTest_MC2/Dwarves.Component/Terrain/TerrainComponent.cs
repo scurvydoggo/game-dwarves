@@ -85,84 +85,38 @@ namespace Dwarves.Component.Terrain
         public float Persistence;
 
         /// <summary>
-        /// Bitwise values indicating chunk border.
+        /// Gets the terrain manager.
         /// </summary>
-        [Flags]
-        private enum ChunkNeighbour
-        {
-            /// <summary>
-            /// The neighbour to the top.
-            /// </summary>
-            Top = 1,
-
-            /// <summary>
-            /// The neighbour to the right.
-            /// </summary>
-            Right = 2
-        }
-
-        /// <summary>
-        /// Gets the terrain instance.
-        /// </summary>
-        public VoxelTerrain Terrain { get; private set; }
-
-        /// <summary>
-        /// Gets the terrain serialiser.
-        /// </summary>
-        public TerrainSerialiser TerrainSerialiser { get; private set; }
-
-        /// <summary>
-        /// Gets the terrain generator.
-        /// </summary>
-        public TerrainGenerator TerrainGenerator { get; private set; }
-
-        /// <summary>
-        /// Gets the terrain mutator.
-        /// </summary>
-        public TerrainMutator TerrainMutator { get; private set; }
-
-        /// <summary>
-        /// Gets the terrain mesh builder.
-        /// </summary>
-        public TerrainMeshBuilder TerrainMeshBuilder { get; private set; }
+        public TerrainManager TerrainManager { get; private set; }
 
         /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
         {
-            this.Terrain = new VoxelTerrain(
-                this.Engine, this.ChunkWidthLog, this.ChunkHeightLog, this.ChunkDepth, this.WorldDepth, this.Scale);
+            this.TerrainManager = new TerrainManager(
+                this.Engine,
+                this.ChunkWidthLog,
+                this.ChunkHeightLog,
+                this.ChunkDepth,
+                this.WorldDepth,
+                this.DigDepth,
+                this.Scale,
+                this.SurfaceAmplitude,
+                this.Seed,
+                this.Octaves,
+                this.BaseFrequency,
+                this.Persistence);
 
-            // Initialise the serialiser
-            this.TerrainSerialiser = new TerrainSerialiser(this.Terrain);
-
-            // Initialise the terrain generator
-            var simplexGenerator = new SimplexNoiseGenerator();
-            var noiseGenerator = new CompoundNoiseGenerator(
-                simplexGenerator, this.Seed, (byte)this.Octaves, this.BaseFrequency, this.Persistence);
-            this.TerrainGenerator = new TerrainGenerator(this.Terrain, noiseGenerator, this.SurfaceAmplitude);
-
-            // Initialise the mutator
-            this.TerrainMutator = new TerrainMutator(this.Terrain, this.DigDepth);
-
-            // Initialise the mesh builder
-            this.TerrainMeshBuilder = new TerrainMeshBuilder(this.Terrain);
+            // Register event handlers
+            this.TerrainManager.ChunkAdded += this.TerrainManager_ChunkAdded;
+            this.TerrainManager.ChunkRemoved += this.TerrainManager_ChunkRemoved;
         }
 
         /// <summary>
         /// Called once per frame.
         /// </summary>
         public void Update()
-        {
-            // Check if any chunks need to be loaded or unloaded
-            this.LoadUnloadChunks();
-        }
-
-        /// <summary>
-        /// Load and unload the chunks that are new or are no longer required.
-        /// </summary>
-        private void LoadUnloadChunks()
         {
             // Determine which chunks are currently active
             var activeChunks = new HashSet<Vector2I>();
@@ -181,54 +135,37 @@ namespace Dwarves.Component.Terrain
                 }
             }
 
-            // Check if any chunks are now off screen with no actors within and will need to be removed
-            foreach (Vector2I chunk in this.Terrain.Voxels.Keys.Where((c) => !activeChunks.Contains(c)).ToArray())
+            // Load and unload chunks
+            this.TerrainManager.LoadUnloadChunks(activeChunks);
+        }
+
+        /// <summary>
+        /// Handle a chunk add event.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="chunk">The chunk index.</param>
+        private void TerrainManager_ChunkAdded(object sender, Vector2I chunk)
+        {
+            // Create the chunk game object
+            var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunk));
+            chunkObject.transform.parent = this.transform;
+            TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
+            chunkComponent.Chunk = chunk;
+        }
+
+        /// <summary>
+        /// Handle a chunk removal event.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="chunk">The chunk index.</param>
+        private void TerrainManager_ChunkRemoved(object sender, Vector2I chunk)
+        {
+            // Find the chunk's component
+            Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
+            if (chunkTransform != null)
             {
-                // Remove the data
-                this.Terrain.RemoveChunkData(chunk);
-
-                // Remove the chunk game object
-                Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
-                if (chunkTransform != null)
-                {
-                    GameObject.Destroy(chunkTransform.gameObject);
-                }
-            }
-
-            // Load the new chunk data
-            var toRebuild = new HashSet<Vector2I>();
-            foreach (Vector2I chunk in activeChunks)
-            {
-                if (!this.Terrain.Voxels.ContainsKey(chunk))
-                {
-                    // Attempt to deserialise the chunk
-                    if (!this.TerrainSerialiser.TryDeserialise(chunk))
-                    {
-                        // The chunk doesn't exist to be serialised, so generate it from scratch
-                        this.TerrainGenerator.Generate(chunk);
-                    }
-
-                    // Create the chunk game object
-                    var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunk));
-                    chunkObject.transform.parent = this.transform;
-                    TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
-                    chunkComponent.Chunk = chunk;
-
-                    // Add this chunk and its dependent neighbours to the set of chunks requiring a mesh rebuild
-                    toRebuild.Add(chunk);
-                    toRebuild.Add(new Vector2I(chunk.X, chunk.Y - 1));
-                    toRebuild.Add(new Vector2I(chunk.X - 1, chunk.Y));
-                }
-            }
-
-            // Rebuild the meshes as required
-            foreach (Vector2I chunk in toRebuild)
-            {
-                Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
-                if (chunkTransform != null)
-                {
-                    chunkTransform.GetComponent<TerrainChunkComponent>().RebuildMesh();
-                }
+                // Destroy it!
+                GameObject.Destroy(chunkTransform.gameObject);
             }
         }
     }

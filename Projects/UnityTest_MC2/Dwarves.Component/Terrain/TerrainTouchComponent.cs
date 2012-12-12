@@ -9,6 +9,7 @@ namespace Dwarves.Component.Terrain
     using Dwarves.Component.Input;
     using Dwarves.Core;
     using Dwarves.Core.Math;
+    using Dwarves.Core.Terrain;
     using UnityEngine;
 
     /// <summary>
@@ -18,16 +19,16 @@ namespace Dwarves.Component.Terrain
     public class TerrainTouchComponent : TouchableComponent
     {
         /// <summary>
-        /// The terrain component.
+        /// The terrain manager.
         /// </summary>
-        private TerrainComponent cTerrain;
+        private TerrainManager terrainManager;
 
         /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
         {
-            this.cTerrain = this.GetComponent<TerrainComponent>();
+            this.terrainManager = this.GetComponent<TerrainComponent>().TerrainManager;
         }
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace Dwarves.Component.Terrain
             var offset = new Vector2(Math.Abs(hitPoint.x - position.X), Math.Abs(hitPoint.y - position.Y));
 
             // Dig at the touched point
-            this.cTerrain.TerrainMutator.Dig(position, offset);
+            this.terrainManager.TerrainMutator.Dig(position, offset);
         }
     }
 }

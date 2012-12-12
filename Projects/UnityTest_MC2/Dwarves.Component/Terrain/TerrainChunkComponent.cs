@@ -20,9 +20,9 @@ namespace Dwarves.Component.Terrain
     public class TerrainChunkComponent : MonoBehaviour
     {
         /// <summary>
-        /// The terrain component.
+        /// The terrain manager.
         /// </summary>
-        private TerrainComponent cTerrain;
+        private TerrainManager terrainManager;
 
         /// <summary>
         /// The mesh filter component.
@@ -50,7 +50,7 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             // Get a reference to the related components
-            this.cTerrain = this.transform.parent.GetComponent<TerrainComponent>();
+            this.terrainManager = this.transform.parent.GetComponent<TerrainComponent>().TerrainManager;
             this.cMeshFilter = this.GetComponent<MeshFilter>();
         }
 
@@ -60,7 +60,7 @@ namespace Dwarves.Component.Terrain
         public void Update()
         {
             // Rebuild the mesh for this chunk if required
-            if (!this.cTerrain.Terrain.Meshes.ContainsKey(this.Chunk))
+            if (!this.terrainManager.Terrain.Meshes.ContainsKey(this.Chunk))
             {
                 this.RebuildMesh();
             }
@@ -72,10 +72,10 @@ namespace Dwarves.Component.Terrain
         public void RebuildMesh()
         {
             // Remove any existing mesh data for this chunk
-            this.cTerrain.Terrain.Meshes.Remove(this.Chunk);
+            this.terrainManager.Terrain.Meshes.Remove(this.Chunk);
 
             // Build the mesh for this chunk
-            MeshData meshData = this.cTerrain.TerrainMeshBuilder.CreateMesh(this.Chunk);
+            MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(this.Chunk);
 
             // TODO: Load the mesh data
         }
