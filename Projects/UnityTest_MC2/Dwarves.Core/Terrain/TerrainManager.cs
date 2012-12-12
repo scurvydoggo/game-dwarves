@@ -28,6 +28,25 @@ namespace Dwarves.Core.Terrain
     /// </summary>
     public class TerrainManager
     {
+        /// <summary>
+        /// Initialises a new instance of the TerrainManager class.
+        /// </summary>
+        /// <param name="engine">The terrain engine type.</param>
+        /// <param name="chunkWidthLog">The power-of-2 chunk width.</param>
+        /// <param name="chunkHeightLog">The power-of-2 chunk height.</param>
+        /// <param name="chunkDepth">The chunk depth.</param>
+        /// <param name="worldDepth">The depth level at which the game simulation takes place.</param>
+        /// <param name="digDepth">The depth to which digging occurs.</param>
+        /// <param name="scale">The scaling ratio for voxel coordinates to world coordinates (essentially the Level of
+        /// Detail).</param>
+        /// <param name="surfaceAmplitude">The distance from the mean surface height that the terrain oscillates.
+        /// </param>
+        /// <param name="seed">The seed value used by the terrain generator.</param>
+        /// <param name="octaves">The number of octaves of noise used by the terrain generator.</param>
+        /// <param name="baseFrequency">The base frequency which is the frequency of the lowest octave used by the
+        /// terrain generator.</param>
+        /// <param name="persistence">The persistence value, which determines the amplitude for each octave used by the
+        /// terrain generator.</param>
         public TerrainManager(
             TerrainEngineType engine,
             int chunkWidthLog,
@@ -98,7 +117,8 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Load and unload the chunks that are new or are no longer required.
         /// </summary>
-        public void LoadUnloadChunks(HashSet<Vector2I> activeChunks)
+        /// <param name="activeChunks">The currently active chunks</param>
+        public void LoadUnloadChunks(ICollection<Vector2I> activeChunks)
         {
             // Check if any chunks are now off screen with no actors within and will need to be removed
             foreach (Vector2I chunk in this.Terrain.Voxels.Keys.Where((c) => !activeChunks.Contains(c)).ToArray())

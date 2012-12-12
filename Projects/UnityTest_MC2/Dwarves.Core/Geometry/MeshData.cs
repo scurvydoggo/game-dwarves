@@ -38,7 +38,7 @@ namespace Dwarves.Core.Geometry
         /// <returns>The index.</returns>
         public ushort LatestVertexIndex()
         {
-            return (ushort)(Vertices.Count - 1);
+            return (ushort)(this.Vertices.Count - 1);
         }
     }
 }
