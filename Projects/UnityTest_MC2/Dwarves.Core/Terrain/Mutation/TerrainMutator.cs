@@ -18,11 +18,18 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <summary>
         /// Initialises a new instance of the TerrainMutator class.
         /// </summary>
+        /// <param name="terrain">The terrain.</param>
         /// <param name="digDepth">The depth to which digging occurs.</param>
-        public TerrainMutator(int digDepth)
+        public TerrainMutator(Terrain terrain, int digDepth)
         {
+            this.Terrain = terrain;
             this.DigDepth = digDepth;
         }
+
+        /// <summary>
+        /// Gets the terrain.
+        /// </summary>
+        public VoxelTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Gets the depth to which digging occurs.
@@ -32,19 +39,18 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <summary>
         /// Dig at the given position.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="position">The position.</param>
         /// <param name="offset">The offset indicating the position inside the voxel with values between 0.0 and 1.0.
         /// </param>
-        public void Dig(Terrain terrain, Vector2I position, Vector2 offset)
+        public void Dig(Vector2I position, Vector2 offset)
         {
             // Get the voxel array
             IVoxels voxels;
-            if (terrain.Voxels.TryGetValue(terrain.ChunkIndex(position.X, position.Y), out voxels))
+            if (this.Terrain.Voxels.TryGetValue(this.Terrain.ChunkIndex(position.X, position.Y), out voxels))
             {
-                for (int z = terrain.WorldDepth; z < terrain.WorldDepth + this.DigDepth; z++)
+                for (int z = this.Terrain.WorldDepth; z < this.Terrain.WorldDepth + this.DigDepth; z++)
                 {
-                    Vector2I pos = terrain.WorldToChunk(position.X, position.Y);
+                    Vector2I pos = this.Terrain.WorldToChunk(position.X, position.Y);
 
                     // Get the voxel
                     Voxel voxel = voxels[pos.X, pos.Y, z];

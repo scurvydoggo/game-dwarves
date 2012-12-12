@@ -135,19 +135,19 @@ namespace Dwarves.Component.Terrain
                 this.Engine, this.ChunkWidth, this.ChunkHeight, this.ChunkDepth, this.WorldDepth, this.Scale);
 
             // Initialise the serialiser
-            this.TerrainSerialiser = new TerrainSerialiser();
+            this.TerrainSerialiser = new TerrainSerialiser(this.Terrain);
 
             // Initialise the terrain generator
             var simplexGenerator = new SimplexNoiseGenerator();
             var noiseGenerator = new CompoundNoiseGenerator(
                 simplexGenerator, this.Seed, (byte)this.Octaves, this.BaseFrequency, this.Persistence);
-            this.TerrainGenerator = new TerrainGenerator(noiseGenerator, this.SurfaceAmplitude);
+            this.TerrainGenerator = new TerrainGenerator(this.Terrain, noiseGenerator, this.SurfaceAmplitude);
 
             // Initialise the mutator
-            this.TerrainMutator = new TerrainMutator(this.DigDepth);
+            this.TerrainMutator = new TerrainMutator(this.Terrain, this.DigDepth);
 
             // Initialise the mesh builder
-            this.TerrainMeshBuilder = new TerrainMeshBuilder();
+            this.TerrainMeshBuilder = new TerrainMeshBuilder(this.Terrain);
         }
 
         /// <summary>
@@ -202,10 +202,10 @@ namespace Dwarves.Component.Terrain
                 if (!this.Terrain.Voxels.ContainsKey(chunk))
                 {
                     // Attempt to deserialise the chunk
-                    if (!this.TerrainSerialiser.TryDeserialise(this.Terrain, chunk))
+                    if (!this.TerrainSerialiser.TryDeserialise(chunk))
                     {
                         // The chunk doesn't exist to be serialised, so generate it from scratch
-                        this.TerrainGenerator.Generate(this.Terrain, chunk);
+                        this.TerrainGenerator.Generate(chunk);
                     }
 
                     // Create the chunk game object

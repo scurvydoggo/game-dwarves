@@ -17,14 +17,21 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Initialises a new instance of the TerrainGenerator class.
         /// </summary>
+        /// <param name="terrain">The terrain.</param>
         /// <param name="noiseGenerator">The noise generator.</param>
         /// <param name="surfaceAmplitude">The distance from the mean surface height that the terrain oscillates.
         /// </param>
-        public TerrainGenerator(INoiseGenerator noiseGenerator, int surfaceAmplitude)
+        public TerrainGenerator(VoxelTerrain terrain, INoiseGenerator noiseGenerator, int surfaceAmplitude)
         {
+            this.Terrain = terrain;
             this.NoiseGenerator = noiseGenerator;
             this.SurfaceAmplitude = surfaceAmplitude;
         }
+
+        /// <summary>
+        /// Gets the terrain.
+        /// </summary>
+        public VoxelTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Gets or sets the noise generator.
@@ -39,24 +46,23 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Generates the voxel terrain for the given chunk.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        public void Generate(VoxelTerrain terrain, Vector2I chunk)
+        public void Generate(Vector2I chunk)
         {
             // Create the voxel chunk if it doesn't yet exist
-            if (!terrain.Voxels.ContainsKey(chunk))
+            if (!this.Terrain.Voxels.ContainsKey(chunk))
             {
-                terrain.NewChunk(chunk);
+                this.Terrain.NewChunk(chunk);
             }
 
             // Generate the surface heights for this chunk if they don't exist
-            if (!terrain.SurfaceHeights.ContainsKey(chunk.X))
+            if (!this.Terrain.SurfaceHeights.ContainsKey(chunk.X))
             {
-                terrain.SurfaceHeights.Add(chunk.X, this.GenerateSurfaceHeights(terrain, chunk.X));
+                this.Terrain.SurfaceHeights.Add(chunk.X, this.GenerateSurfaceHeights(chunk.X));
             }
 
             // Fill the terrain
-            this.FillTerrain(terrain, chunk);
+            this.FillTerrain(chunk);
         }
 
         /// <summary>
@@ -65,12 +71,12 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndexX">The chunk index's x component.</param>
         /// <returns>The surface heights.</returns>
-        private float[] GenerateSurfaceHeights(VoxelTerrain terrain, int chunkIndexX)
+        private float[] GenerateSurfaceHeights(int chunkIndexX)
         {
-            var heights = new float[terrain.ChunkWidth];
+            var heights = new float[this.Terrain.ChunkWidth];
 
-            int originX = chunkIndexX * terrain.ChunkWidth;
-            for (int x = 0; x < terrain.ChunkWidth; x++)
+            int originX = chunkIndexX * this.Terrain.ChunkWidth;
+            for (int x = 0; x < this.Terrain.ChunkWidth; x++)
             {
                 // Generate the noise value at this x position
                 float noise = this.NoiseGenerator.Generate(originX + x);
@@ -87,22 +93,22 @@ namespace Dwarves.Core.Terrain.Generation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
-        private void FillTerrain(VoxelTerrain terrain, Vector2I chunk)
+        private void FillTerrain(Vector2I chunk)
         {
             // Get the voxels and surface heights
-            IVoxels voxels = terrain.Voxels[chunk];
-            float[] surfaceHeights = terrain.SurfaceHeights[chunk.X];
+            IVoxels voxels = this.Terrain.Voxels[chunk];
+            float[] surfaceHeights = this.Terrain.SurfaceHeights[chunk.X];
 
             // Fill the voxel array
-            int originY = chunk.Y * terrain.ChunkHeight;
-            for (int x = 0; x < terrain.ChunkWidth; x++)
+            int originY = chunk.Y * this.Terrain.ChunkHeight;
+            for (int x = 0; x < this.Terrain.ChunkWidth; x++)
             {
                 // Determine where the surface lies for this x-value
                 float surfaceHeightF = surfaceHeights[x];
                 int surfaceHeightI = (int)System.Math.Floor(surfaceHeightF);
                 float deltaHeight = surfaceHeightF - surfaceHeightI;
 
-                for (int y = 0; y < terrain.ChunkHeight; y++)
+                for (int y = 0; y < this.Terrain.ChunkHeight; y++)
                 {
                     int height = originY + y;
 
@@ -138,7 +144,7 @@ namespace Dwarves.Core.Terrain.Generation
                     }
 
                     // Set the voxel at each depth point
-                    for (int z = terrain.WorldDepth; z < terrain.ChunkDepth; z++)
+                    for (int z = this.Terrain.WorldDepth; z < this.Terrain.ChunkDepth; z++)
                     {
                         voxels[x, y, z] = voxel;
                     }

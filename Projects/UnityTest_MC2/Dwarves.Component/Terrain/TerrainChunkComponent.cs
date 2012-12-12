@@ -75,7 +75,7 @@ namespace Dwarves.Component.Terrain
             this.cTerrain.Terrain.Meshes.Remove(this.Chunk);
 
             // Build the mesh for this chunk
-            MeshData meshData = this.cTerrain.TerrainMeshBuilder.CreateMesh(this.cTerrain.Terrain, this.Chunk);
+            MeshData meshData = this.cTerrain.TerrainMeshBuilder.CreateMesh(this.Chunk);
 
             // TODO: Load the mesh data
         }
