@@ -55,9 +55,9 @@ namespace Dwarves.Component.Terrain
         }
 
         /// <summary>
-        /// Called once per frame.
+        /// Called once per frame after the Update method has been called for all components.
         /// </summary>
-        public void Update()
+        public void LateUpdate()
         {
             // Rebuild the mesh for this chunk if required
             if (!this.terrainManager.Terrain.Meshes.ContainsKey(this.Chunk))
