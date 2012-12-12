@@ -68,6 +68,7 @@ namespace Dwarves.Core.Math.Noise
             this.octaves = octaves;
             this.baseFrequency = baseFrequency;
             this.persistence = persistence;
+            this.UpdateNoiseProperties();
         }
 
         /// <summary>

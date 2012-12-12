@@ -109,8 +109,8 @@ namespace Dwarves.Component.Terrain
                 this.Persistence);
 
             // Register event handlers
-            this.TerrainManager.ChunkAdded += this.TerrainManager_ChunkAdded;
-            this.TerrainManager.ChunkRemoved += this.TerrainManager_ChunkRemoved;
+            this.TerrainManager.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
+            this.TerrainManager.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="chunk">The chunk index.</param>
-        private void TerrainManager_ChunkAdded(object sender, Vector2I chunk)
+        private void Terrain_ChunkAdded(object sender, Vector2I chunk)
         {
             // Create the chunk game object
             var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunk));
@@ -158,7 +158,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="chunk">The chunk index.</param>
-        private void TerrainManager_ChunkRemoved(object sender, Vector2I chunk)
+        private void Terrain_ChunkRemoved(object sender, Vector2I chunk)
         {
             // Find the chunk's component
             Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));

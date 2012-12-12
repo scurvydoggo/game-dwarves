@@ -17,13 +17,6 @@ namespace Dwarves.Core.Terrain
     using UnityEngine;
 
     /// <summary>
-    /// A chunk event.
-    /// </summary>
-    /// <param name="sender">The sender of the event.</param>
-    /// <param name="chunk">The chunk index.</param>
-    public delegate void ChunkEvent(object sender, Vector2I chunk);
-
-    /// <summary>
     /// The top manager of a terrain instance.
     /// </summary>
     public class TerrainManager
@@ -80,16 +73,6 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Indicates that a chunk was added.
-        /// </summary>
-        public event ChunkEvent ChunkAdded;
-
-        /// <summary>
-        /// Indicates that a chunk was removed.
-        /// </summary>
-        public event ChunkEvent ChunkRemoved;
-
-        /// <summary>
         /// Gets the terrain instance.
         /// </summary>
         public VoxelTerrain Terrain { get; private set; }
@@ -125,13 +108,9 @@ namespace Dwarves.Core.Terrain
             {
                 // Remove the data
                 this.Terrain.RemoveChunkData(chunk);
-
-                // Notify listeners of chunk removal
-                this.OnChunkRemoved(chunk);
             }
 
             // Load the new chunk data
-            var toRebuild = new HashSet<Vector2I>();
             foreach (Vector2I chunk in activeChunks)
             {
                 if (!this.Terrain.Voxels.ContainsKey(chunk))
@@ -143,37 +122,10 @@ namespace Dwarves.Core.Terrain
                         this.TerrainGenerator.Generate(chunk);
                     }
 
-                    // Notify listeners of chunk creation
-                    this.OnChunkAdded(chunk);
-
                     // Remove the neighbouring meshes requiring rebuild
                     this.Terrain.Meshes.Remove(new Vector2I(chunk.X, chunk.Y - 1));
                     this.Terrain.Meshes.Remove(new Vector2I(chunk.X - 1, chunk.Y));
                 }
-            }
-        }
-
-        /// <summary>
-        /// Fire the ChunkAdded event.
-        /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        protected void OnChunkAdded(Vector2I chunk)
-        {
-            if (this.ChunkAdded != null)
-            {
-                this.ChunkAdded(this, chunk);
-            }
-        }
-
-        /// <summary>
-        /// Fire the ChunkRemoved event.
-        /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        protected void OnChunkRemoved(Vector2I chunk)
-        {
-            if (this.ChunkRemoved != null)
-            {
-                this.ChunkRemoved(this, chunk);
             }
         }
     }
