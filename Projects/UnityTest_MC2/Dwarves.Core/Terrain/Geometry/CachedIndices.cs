@@ -40,13 +40,13 @@ namespace Dwarves.Core.Terrain.Geometry
         }
 
         /// <summary>
-        /// Gets or sets the cached vertex indice at the given position.
+        /// Gets or sets the cached vertex index at the given position.
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
         /// <param name="z">The z position.</param>
-        /// <param name="index">The index of the vertex indice.</param>
-        /// <returns>The vertex indice.</returns>
+        /// <param name="index">The index of the vertex index.</param>
+        /// <returns>The vertex index.</returns>
         public int this[int x, int y, int z, byte index]
         {
             get { return this.indices[z & 1][x, y][index]; }
@@ -60,8 +60,8 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="y">The y position from which the direction is applied.</param>
         /// <param name="z">The z position from which the direction is applied.</param>
         /// <param name="direction">The bitmask indicating the directional of the cached cell.</param>
-        /// <param name="index">The index of the vertex indice.</param>
-        /// <returns>The vertex indice.</returns>
+        /// <param name="index">The index of the vertex index.</param>
+        /// <returns>The vertex index.</returns>
         public int GetRelativeIndice(int x, int y, int z, byte direction, byte index)
         {
             // Get the directional offset
