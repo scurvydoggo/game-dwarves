@@ -31,5 +31,14 @@ namespace Dwarves.Core.Geometry
         /// Gets the triangle indices.
         /// </summary>
         public List<ushort> Indices { get; private set; }
+
+        /// <summary>
+        /// Gets the index of the latest vertex that was added.
+        /// </summary>
+        /// <returns>The index.</returns>
+        public ushort LatestVertexIndex()
+        {
+            return (ushort)(Vertices.Count - 1);
+        }
     }
 }

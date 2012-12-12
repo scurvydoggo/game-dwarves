@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
+    using System;
     using System.Collections.Generic;
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
@@ -160,6 +161,19 @@ namespace Dwarves.Core.Terrain
         {
             this.Voxels.Remove(chunkIndex);
             this.Meshes.Remove(chunkIndex);
+        }
+
+        /// <summary>
+        /// Gets or sets the voxel at the given position.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="z">The z position.</param>
+        /// <returns>The voxel.</returns>
+        public Voxel GetVoxel(int x, int y, int z)
+        {
+            // TODO
+            throw new Exception();
         }
     }
 }

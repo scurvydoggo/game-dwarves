@@ -68,7 +68,6 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Generate the heights for each x-coordinate for the given chunk.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="chunkIndexX">The chunk index's x component.</param>
         /// <returns>The surface heights.</returns>
         private float[] GenerateSurfaceHeights(int chunkIndexX)
@@ -91,7 +90,6 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Fill the terrain.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
         /// <param name="chunk">The chunk index.</param>
         private void FillTerrain(Vector2I chunk)
         {
