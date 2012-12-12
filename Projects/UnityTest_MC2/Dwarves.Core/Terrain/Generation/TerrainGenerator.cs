@@ -50,7 +50,7 @@ namespace Dwarves.Core.Terrain.Generation
         public void Generate(Vector2I chunk)
         {
             // Create the voxel chunk if it doesn't yet exist
-            if (!this.Terrain.Voxels.ContainsKey(chunk))
+            if (!this.Terrain.ContainsChunk(chunk))
             {
                 this.Terrain.NewChunk(chunk);
             }
@@ -94,7 +94,7 @@ namespace Dwarves.Core.Terrain.Generation
         private void FillTerrain(Vector2I chunk)
         {
             // Get the voxels and surface heights
-            IVoxels voxels = this.Terrain.Voxels[chunk];
+            IVoxels voxels = this.Terrain.GetChunk(chunk);
             float[] surfaceHeights = this.Terrain.SurfaceHeights[chunk.X];
 
             // Fill the voxel array

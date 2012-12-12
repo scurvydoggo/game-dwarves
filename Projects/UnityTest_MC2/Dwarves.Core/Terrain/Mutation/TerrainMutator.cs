@@ -46,7 +46,7 @@ namespace Dwarves.Core.Terrain.Mutation
         {
             // Get the voxel array
             IVoxels voxels;
-            if (this.Terrain.Voxels.TryGetValue(this.Terrain.ChunkIndex(position.X, position.Y), out voxels))
+            if (this.Terrain.TryGetChunk(this.Terrain.ChunkIndex(position.X, position.Y), out voxels))
             {
                 for (int z = this.Terrain.WorldDepth; z < this.Terrain.WorldDepth + this.DigDepth; z++)
                 {

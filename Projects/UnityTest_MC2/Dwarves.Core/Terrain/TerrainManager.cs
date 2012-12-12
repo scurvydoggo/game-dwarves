@@ -104,16 +104,19 @@ namespace Dwarves.Core.Terrain
         public void LoadUnloadChunks(ICollection<Vector2I> activeChunks)
         {
             // Check if any chunks are now off screen with no actors within and will need to be removed
-            foreach (Vector2I chunk in this.Terrain.Voxels.Keys.Where((c) => !activeChunks.Contains(c)).ToArray())
+            foreach (Vector2I chunk in this.Terrain.Chunks.Where((c) => !activeChunks.Contains(c)).ToArray())
             {
-                // Remove the data
-                this.Terrain.RemoveChunkData(chunk);
+                // Remove the chunk
+                this.Terrain.RemoveChunk(chunk);
+
+                // Clear the mesh
+                this.Terrain.Meshes.Remove(chunk);
             }
 
             // Load the new chunk data
             foreach (Vector2I chunk in activeChunks)
             {
-                if (!this.Terrain.Voxels.ContainsKey(chunk))
+                if (!this.Terrain.ContainsChunk(chunk))
                 {
                     // Attempt to deserialise the chunk
                     if (!this.TerrainSerialiser.TryDeserialise(chunk))

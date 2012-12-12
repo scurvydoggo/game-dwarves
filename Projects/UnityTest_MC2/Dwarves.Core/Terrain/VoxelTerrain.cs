@@ -24,6 +24,11 @@ namespace Dwarves.Core.Terrain
     public class VoxelTerrain
     {
         /// <summary>
+        /// The voxel data organised by chunk.
+        /// </summary>
+        private Dictionary<Vector2I, IVoxels> voxels;
+
+        /// <summary>
         /// The power-of-2 height of the chunk for quickly determining chunk index.
         /// </summary>
         private int chunkWidthLog;
@@ -63,7 +68,7 @@ namespace Dwarves.Core.Terrain
             this.Scale = scale;
             this.ChunkWidth = 1 << chunkWidthLog;
             this.ChunkHeight = 1 << chunkHeightLog;
-            this.Voxels = new Dictionary<Vector2I, IVoxels>();
+            this.voxels = new Dictionary<Vector2I, IVoxels>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
             this.factory = new TerrainEngineFactory(this.Engine);
@@ -83,11 +88,6 @@ namespace Dwarves.Core.Terrain
         /// Gets or sets the current terrain instance for the application.
         /// </summary>
         public static VoxelTerrain Instance { get; set; }
-
-        /// <summary>
-        /// Gets the voxel data organised by chunk.
-        /// </summary>
-        public Dictionary<Vector2I, IVoxels> Voxels { get; private set; }
 
         /// <summary>
         /// Gets the mesh data organised by chunk.
@@ -130,6 +130,16 @@ namespace Dwarves.Core.Terrain
         public int Scale { get; private set; }
 
         /// <summary>
+        /// Gets the enumerable set of chunks that currently exist.
+        /// </summary>
+        public IEnumerable<Vector2I> Chunks
+        {
+            get { return this.voxels.Keys; }
+        }
+
+        #region Indexing and coordinate conversion
+
+        /// <summary>
         /// Get the index of the chunk at the given world coordinates.
         /// </summary>
         /// <param name="worldX">The x position.</param>
@@ -161,32 +171,68 @@ namespace Dwarves.Core.Terrain
             return new Vector2I(chunk.X * this.ChunkWidth, chunk.Y * this.ChunkHeight);
         }
 
+        #endregion
+
+        #region Chunk Related
+
         /// <summary>
-        /// Creates a new chunk at the given chunk index.
+        /// Creates a new voxel chunk at the given chunk index.
         /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        public void NewChunk(Vector2I chunkIndex)
+        /// <param name="chunk">The chunk index.</param>
+        public void NewChunk(Vector2I chunk)
         {
-            this.Voxels.Add(chunkIndex, this.factory.CreateVoxels(this.ChunkWidth, this.ChunkHeight, this.ChunkDepth));
+            this.voxels.Add(chunk, this.factory.CreateVoxels(this.ChunkWidth, this.ChunkHeight, this.ChunkDepth));
 
             // Notify listeners of chunk creation
-            this.OnChunkAdded(chunkIndex);
+            this.OnChunkAdded(chunk);
         }
 
         /// <summary>
-        /// Remove the data for the given chunk.
+        /// Remove the voxels for the given chunk.
         /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        public void RemoveChunkData(Vector2I chunkIndex)
+        /// <param name="chunk">The chunk index.</param>
+        public void RemoveChunk(Vector2I chunk)
         {
-            this.Voxels.Remove(chunkIndex);
+            this.voxels.Remove(chunk);
 
             // Notify listeners of chunk removal
-            this.OnChunkRemoved(chunkIndex);
-
-            // Clear the mesh
-            this.Meshes.Remove(chunkIndex);
+            this.OnChunkRemoved(chunk);
         }
+
+        /// <summary>
+        /// Get the chunk of voxels.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <returns>The voxels.</returns>
+        public IVoxels GetChunk(Vector2I chunk)
+        {
+            return this.voxels[chunk];
+        }
+
+        /// <summary>
+        /// Try to get the chunk of voxels.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <param name="voxels">The voxels.</param>
+        /// <returns>True if the chunk exists.</returns>
+        public bool TryGetChunk(Vector2I chunk, out IVoxels voxels)
+        {
+            return this.voxels.TryGetValue(chunk, out voxels);
+        }
+
+        /// <summary>
+        /// Determine if the given chunk exists.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <returns>True if the chunk exists.</returns>
+        public bool ContainsChunk(Vector2I chunk)
+        {
+            return this.voxels.ContainsKey(chunk);
+        }
+
+        #endregion
+
+        #region Voxel Related
 
         /// <summary>
         /// Gets or sets the voxel at the given position.
@@ -200,6 +246,10 @@ namespace Dwarves.Core.Terrain
             // TODO
             throw new Exception();
         }
+
+        #endregion
+
+        #region Protected Methods
 
         /// <summary>
         /// Fire the ChunkAdded event.
@@ -224,5 +274,7 @@ namespace Dwarves.Core.Terrain
                 this.ChunkRemoved(this, chunk);
             }
         }
+
+        #endregion
     }
 }
