@@ -160,6 +160,9 @@ namespace Dwarves.Component.Terrain
         /// <param name="chunk">The chunk index.</param>
         private void Terrain_ChunkRemoved(object sender, Vector2I chunk)
         {
+            // Clear the mesh
+            this.TerrainManager.Terrain.Meshes.Remove(chunk);
+
             // Find the chunk's component
             Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
             if (chunkTransform != null)
