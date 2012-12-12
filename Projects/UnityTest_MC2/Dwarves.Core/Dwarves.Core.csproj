@@ -57,6 +57,7 @@
     <Compile Include="Terrain\Engine\TerrainEngineFactory.cs" />
     <Compile Include="Terrain\Geometry\CachedIndices.cs" />
     <Compile Include="Terrain\Generation\TerrainGenerator.cs" />
+    <Compile Include="Terrain\Geometry\MarchingCubes.cs" />
     <Compile Include="Terrain\Geometry\TerrainMeshBuilder.cs" />
     <Compile Include="Terrain\IVoxels.cs" />
     <Compile Include="Terrain\Mutation\TerrainMutator.cs" />
