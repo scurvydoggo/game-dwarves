@@ -39,6 +39,10 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -46,6 +50,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dwarves.Component\Dwarves.Component.csproj">
+      <Project>{bc6cd165-ac1f-4590-a8b3-23873cee13a1}</Project>
+      <Name>Dwarves.Component</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dwarves.Core\Dwarves.Core.csproj">
+      <Project>{1aa432ce-f74b-4b0f-b3b7-4353bb5f9fb5}</Project>
+      <Name>Dwarves.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -37,25 +37,25 @@ namespace Dwarves.Core.Terrain
         /// <param name="engine">The type of terrain engine.</param>
         /// <param name="chunkWidthLog">The power-of-2 width of the chunk.</param>
         /// <param name="chunkHeightLog">The power-of-2 height of the chunk.</param>
-        /// <param name="chunkDepthLog">The power-of-2 depth of the chunk.</param>
+        /// <param name="chunkDepth">The depth of the chunk.</param>
         /// <param name="worldDepth">The depth level at which the game simulation takes place.</param>
         /// <param name="scale">The scaling ratio.</param>
         public VoxelTerrain(
             TerrainEngineType engine,
             int chunkWidthLog,
             int chunkHeightLog,
-            int chunkDepthLog,
+            int chunkDepth,
             int worldDepth,
             int scale)
         {
             this.Engine = engine;
             this.chunkWidthLog = chunkWidthLog;
             this.chunkHeightLog = chunkHeightLog;
+            this.ChunkDepth = chunkDepth;
             this.WorldDepth = worldDepth;
             this.Scale = scale;
             this.ChunkWidth = 1 << chunkWidthLog;
             this.ChunkHeight = 1 << chunkHeightLog;
-            this.ChunkDepth = 1 << chunkDepthLog;
             this.Voxels = new Dictionary<Vector2I, IVoxels>();
             this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();

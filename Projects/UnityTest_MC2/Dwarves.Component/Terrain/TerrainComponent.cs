@@ -30,14 +30,14 @@ namespace Dwarves.Component.Terrain
         public TerrainEngineType Engine;
 
         /// <summary>
-        /// The chunk width.
+        /// The power-of-2 chunk width.
         /// </summary>
-        public int ChunkWidth;
+        public int ChunkWidthLog;
 
         /// <summary>
-        /// The chunk height.
+        /// The power-of-2 chunk height.
         /// </summary>
-        public int ChunkHeight;
+        public int ChunkHeightLog;
 
         /// <summary>
         /// The chunk depth.
@@ -132,7 +132,7 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             this.Terrain = new VoxelTerrain(
-                this.Engine, this.ChunkWidth, this.ChunkHeight, this.ChunkDepth, this.WorldDepth, this.Scale);
+                this.Engine, this.ChunkWidthLog, this.ChunkHeightLog, this.ChunkDepth, this.WorldDepth, this.Scale);
 
             // Initialise the serialiser
             this.TerrainSerialiser = new TerrainSerialiser(this.Terrain);
