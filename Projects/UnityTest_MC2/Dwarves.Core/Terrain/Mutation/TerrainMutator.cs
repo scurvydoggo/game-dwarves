@@ -48,7 +48,7 @@ namespace Dwarves.Core.Terrain.Mutation
             IVoxels voxels;
             if (this.Terrain.TryGetChunk(this.Terrain.ChunkIndex(pos.X, pos.Y), out voxels))
             {
-                for (int z = this.Terrain.WorldDepth; z < this.Terrain.WorldDepth + this.DigDepth; z++)
+                for (int z = 0; z < this.DigDepth; z++)
                 {
                     Vector2I chunkPos = this.Terrain.WorldToChunk(pos);
 

@@ -28,7 +28,6 @@ namespace Dwarves.Core.Terrain
         /// <param name="chunkWidthLog">The power-of-2 chunk width.</param>
         /// <param name="chunkHeightLog">The power-of-2 chunk height.</param>
         /// <param name="chunkDepth">The chunk depth.</param>
-        /// <param name="worldDepth">The depth level at which the game simulation takes place.</param>
         /// <param name="digDepth">The depth to which digging occurs.</param>
         /// <param name="scale">The scaling ratio for voxel coordinates to world coordinates (essentially the Level of
         /// Detail).</param>
@@ -45,7 +44,6 @@ namespace Dwarves.Core.Terrain
             int chunkWidthLog,
             int chunkHeightLog,
             int chunkDepth,
-            int worldDepth,
             int digDepth,
             int scale,
             int surfaceAmplitude,
@@ -54,7 +52,7 @@ namespace Dwarves.Core.Terrain
             float baseFrequency,
             float persistence)
         {
-            this.Terrain = new VoxelTerrain(engine, chunkWidthLog, chunkHeightLog, chunkDepth, worldDepth, scale);
+            this.Terrain = new VoxelTerrain(engine, chunkWidthLog, chunkHeightLog, chunkDepth, scale);
 
             // Initialise the serialiser
             this.TerrainSerialiser = new TerrainSerialiser(this.Terrain);

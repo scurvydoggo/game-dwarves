@@ -142,7 +142,7 @@ namespace Dwarves.Core.Terrain.Generation
                     }
 
                     // Set the voxel at each depth point
-                    for (int z = this.Terrain.WorldDepth; z < this.Terrain.ChunkDepth; z++)
+                    for (int z = 0; z < this.Terrain.ChunkDepth; z++)
                     {
                         voxels[x, y, z] = voxel;
                     }

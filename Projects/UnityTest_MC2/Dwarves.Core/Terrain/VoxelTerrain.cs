@@ -50,21 +50,18 @@ namespace Dwarves.Core.Terrain
         /// <param name="chunkWidthLog">The power-of-2 width of the chunk.</param>
         /// <param name="chunkHeightLog">The power-of-2 height of the chunk.</param>
         /// <param name="chunkDepth">The depth of the chunk.</param>
-        /// <param name="worldDepth">The depth level at which the game simulation takes place.</param>
         /// <param name="scale">The scaling ratio.</param>
         public VoxelTerrain(
             TerrainEngineType engine,
             int chunkWidthLog,
             int chunkHeightLog,
             int chunkDepth,
-            int worldDepth,
             int scale)
         {
             this.Engine = engine;
             this.chunkWidthLog = chunkWidthLog;
             this.chunkHeightLog = chunkHeightLog;
             this.ChunkDepth = chunkDepth;
-            this.WorldDepth = worldDepth;
             this.Scale = scale;
             this.ChunkWidth = 1 << chunkWidthLog;
             this.ChunkHeight = 1 << chunkHeightLog;
@@ -118,11 +115,6 @@ namespace Dwarves.Core.Terrain
         /// Gets the chunk depth.
         /// </summary>
         public int ChunkDepth { get; private set; }
-
-        /// <summary>
-        /// Gets the depth level at which the game simulation takes place.
-        /// </summary>
-        public int WorldDepth { get; private set; }
 
         /// <summary>
         /// Gets the scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).

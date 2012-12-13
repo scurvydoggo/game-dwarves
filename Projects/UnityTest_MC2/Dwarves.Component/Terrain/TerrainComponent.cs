@@ -45,11 +45,6 @@ namespace Dwarves.Component.Terrain
         public int ChunkDepth;
 
         /// <summary>
-        /// The depth level at which the game simulation takes place.
-        /// </summary>
-        public int WorldDepth;
-
-        /// <summary>
         /// The depth to which digging occurs.
         /// </summary>
         public int DigDepth;
@@ -99,7 +94,6 @@ namespace Dwarves.Component.Terrain
                 this.ChunkWidthLog,
                 this.ChunkHeightLog,
                 this.ChunkDepth,
-                this.WorldDepth,
                 this.DigDepth,
                 this.Scale,
                 this.SurfaceAmplitude,
