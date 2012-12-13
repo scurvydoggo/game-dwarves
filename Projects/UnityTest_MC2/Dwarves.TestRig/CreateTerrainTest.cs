@@ -52,7 +52,17 @@ namespace Dwarves.TestRig
                     new Vector2I(0, 0)
                 };
 
+            // Load and unload chunks
             this.terrainManager.LoadUnloadChunks(activeChunks);
+
+            // Build the mesh for this chunk
+            foreach (Vector2I chunk in this.terrainManager.Terrain.Chunks)
+            {
+                if (!this.terrainManager.Terrain.Meshes.ContainsKey(chunk))
+                {
+                    MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(chunk);
+                }
+            }
         }
 
         /// <summary>
@@ -62,8 +72,7 @@ namespace Dwarves.TestRig
         /// <param name="chunk">The chunk index.</param>
         private void Terrain_ChunkAdded(object sender, Vector2I chunk)
         {
-            // Build the mesh for this chunk
-            MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(chunk);
+            // Create the chunk's game object (not done in this test)
         }
 
         /// <summary>
@@ -73,6 +82,8 @@ namespace Dwarves.TestRig
         /// <param name="chunk">The chunk index.</param>
         private void Terrain_ChunkRemoved(object sender, Vector2I chunk)
         {
+            // Destroy the chunk's game object (not done in this test)
+
             // Clear the mesh
             this.terrainManager.Terrain.Meshes.Remove(chunk);
         }

@@ -41,8 +41,13 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The mesh.</returns>
         public MeshData CreateMesh(Vector2I chunk)
         {
+            // Create a new mesh
             var mesh = new MeshData();
 
+            // Clear the shared indices cache
+            this.sharedIndices.Reset();
+
+            // Create the mesh for each cell in the chunk
             var chunkOrigin = this.Terrain.GetChunkOrigin(chunk);
             for (int z = 0; z < this.Terrain.ChunkDepth; z++)
             {
@@ -172,7 +177,7 @@ namespace Dwarves.Core.Terrain.Geometry
         {
             // Calculate the density ratio
             int t = (densityB << 8) / (densityB - densityA);
-            int u = 256 - t;
+            int u = 0x0100 - t; // 256 - t
 
             Vector3I resultI = (pointA * t) + (pointB * u);
             return new Vector3(resultI.X, resultI.Y, resultI.Z) / 256; // Divide by 256 to normalise the result
