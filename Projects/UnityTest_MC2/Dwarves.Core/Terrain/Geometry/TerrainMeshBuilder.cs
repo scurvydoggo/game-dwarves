@@ -50,7 +50,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 {
                     for (int y = chunkOrigin.Y; y < chunkOrigin.Y + this.Terrain.ChunkHeight; y++)
                     {
-                        this.CreateMeshCell(x, y, z, mesh);
+                        this.CreateMeshCell(new Vector3I(x, y, z), mesh);
                     }
                 }
             }
@@ -61,17 +61,15 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <summary>
         /// Create the cell at the given position.
         /// </summary>
-        /// <param name="x">The x position.</param>
-        /// <param name="y">The y position.</param>
-        /// <param name="z">The z position.</param>
+        /// <param name="pos">The position.</param>
         /// <param name="mesh">The mesh data.</param>
-        private void CreateMeshCell(int x, int y, int z, MeshData mesh)
+        private void CreateMeshCell(Vector3I pos, MeshData mesh)
         {
             // Get the voxels at each corner of the cell
             var corners = new Voxel[8];
             for (int i = 0; i < corners.Length; i++)
             {
-                corners[i] = this.Terrain.GetVoxel(x, y, z);
+                corners[i] = this.Terrain.GetVoxel(pos + MarchingCubes.CornerVector[i]);
             }
 
             // Get the case code
@@ -87,7 +85,7 @@ namespace Dwarves.Core.Terrain.Geometry
             ushort[] vertexData = MarchingCubes.VertexData[caseCode];
 
             // Calculate the mask which indicates whether vertices can be shared for a given direction
-            byte directionMask = (byte)((x > 0 ? 1 : 0) | ((y > 0 ? 1 : 0) << 1) | ((z > 0 ? 1 : 0) << 2));
+            byte directionMask = (byte)((pos.X > 0 ? 1 : 0) | ((pos.Y > 0 ? 1 : 0) << 1) | ((pos.Z > 0 ? 1 : 0) << 2));
 
             // Get the indices for each vertex in this cell, creating the vertices if necessary (otherwise use shared)
             var actualIndices = new ushort[geometry.Indices.Length];
@@ -108,20 +106,20 @@ namespace Dwarves.Core.Terrain.Geometry
                 int actualIndex = -1;
                 if (cornerB != 7 && (sharedDirection & directionMask) == sharedDirection)
                 {
-                    actualIndex = this.sharedIndices.GetIndexInDirection(x, y, z, sharedDirection, sharedIndex);
+                    actualIndex = this.sharedIndices.GetIndexInDirection(pos, sharedDirection, sharedIndex);
                 }
 
                 // Check if a new vertex should be created
                 if (actualIndex == -1)
                 {
-                    this.CreateVertex(x, y, z, mesh, corners, cornerA, cornerB);
+                    this.CreateVertex(pos, mesh, corners, cornerA, cornerB);
                     actualIndex = mesh.LatestVertexIndex();
                 }
 
                 // Cache this vertex index so it can be used by other cells
                 if ((sharedDirection & 8) != 0)
                 {
-                    this.sharedIndices[x, y, z, sharedIndex] = mesh.LatestVertexIndex();
+                    this.sharedIndices[pos, sharedIndex] = mesh.LatestVertexIndex();
                 }
 
                 actualIndices[i] = (ushort)actualIndex;
@@ -142,20 +140,16 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <summary>
         /// Create the vertex for the given point.
         /// </summary>
-        /// <param name="x">The x position.</param>
-        /// <param name="y">The y position.</param>
-        /// <param name="z">The z position.</param>
+        /// <param name="pos">The position.</param>
         /// <param name="mesh">The mesh.</param>
         /// <param name="corners">The voxel data for the cell.</param>
         /// <param name="cornerA">The first corner index of the of the edge on which the vertex lies.</param>
         /// <param name="cornerB">The second corner index of the of the edge on which the vertex lies.</param>
-        private void CreateVertex(int x, int y, int z, MeshData mesh, Voxel[] corners, byte cornerA, byte cornerB)
+        private void CreateVertex(Vector3I pos, MeshData mesh, Voxel[] corners, byte cornerA, byte cornerB)
         {
             // Calculate the position of the two end points between which the vertex lies
-            Vector3I offsetA = MarchingCubes.CornerVector[cornerA];
-            Vector3I offsetB = MarchingCubes.CornerVector[cornerB];
-            var pA = new Vector3(x + offsetA.X, y + offsetA.Y, z + offsetA.Z);
-            var pB = new Vector3(x + offsetB.X, y + offsetB.Y, z + offsetB.Z);
+            Vector3I pA = pos + MarchingCubes.CornerVector[cornerA];
+            Vector3I pB = pos + MarchingCubes.CornerVector[cornerB];
 
             // Interpolate the vertex position between the two end points
             byte densityA = corners[cornerA].Density;
@@ -174,13 +168,14 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="densityA">The first density.</param>
         /// <param name="densityB">The second density.</param>
         /// <returns>The interpolated point.</returns>
-        private Vector3 InterpolatePoint(Vector3 pointA, Vector3 pointB, byte densityA, byte densityB)
+        private Vector3 InterpolatePoint(Vector3I pointA, Vector3I pointB, byte densityA, byte densityB)
         {
             // Calculate the density ratio
             int t = (densityB << 8) / (densityB - densityA);
-            long u = 0x0100 - t;
+            int u = 256 - t;
 
-            return (pointA * t) + (pointB * u);
+            Vector3I resultI = (pointA * t) + (pointB * u);
+            return new Vector3(resultI.X, resultI.Y, resultI.Z) / 256; // Divide by 256 to normalise the result
         }
     }
 }

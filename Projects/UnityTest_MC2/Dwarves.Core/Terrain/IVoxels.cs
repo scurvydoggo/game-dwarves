@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
+    using Dwarves.Core.Math;
+
     /// <summary>
     /// The terrain voxels.
     /// </summary>
@@ -18,5 +20,12 @@ namespace Dwarves.Core.Terrain
         /// <param name="z">The z position.</param>
         /// <returns>The voxel.</returns>
         Voxel this[int x, int y, int z] { get; set; }
+
+        /// <summary>
+        /// Gets or sets the voxel at the given position.
+        /// </summary>
+        /// <param name="pos">The position.</param>
+        /// <returns>The voxel.</returns>
+        Voxel this[Vector3I pos] { get; set; }
     }
 }

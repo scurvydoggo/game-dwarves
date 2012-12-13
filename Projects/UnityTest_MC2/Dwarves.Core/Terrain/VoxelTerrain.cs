@@ -151,17 +151,6 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Convert the world coordinates into chunk coordinates.
-        /// </summary>
-        /// <param name="worldX">The x position.</param>
-        /// <param name="worldY">The y position.</param>
-        /// <returns>The position in chunk coordinates.</returns>
-        public Vector2I WorldToChunk(int worldX, int worldY)
-        {
-            return new Vector2I(worldX & (this.ChunkWidth - 1), worldY & (this.ChunkHeight - 1));
-        }
-
-        /// <summary>
         /// Get the origin of the given chunk.
         /// </summary>
         /// <param name="chunk">The chunk index.</param>
@@ -171,7 +160,27 @@ namespace Dwarves.Core.Terrain
             return new Vector2I(chunk.X * this.ChunkWidth, chunk.Y * this.ChunkHeight);
         }
 
-        #endregion
+        /// <summary>
+        /// Convert the world coordinates into chunk coordinates.
+        /// </summary>
+        /// <param name="worldPos">The position.</param>
+        /// <returns>The position in chunk coordinates.</returns>
+        public Vector2I WorldToChunk(Vector2I worldPos)
+        {
+            return new Vector2I(worldPos.X & (this.ChunkWidth - 1), worldPos.Y & (this.ChunkHeight - 1));
+        }
+
+        /// <summary>
+        /// Convert the world coordinates into chunk coordinates.
+        /// </summary>
+        /// <param name="worldPos">The position.</param>
+        /// <returns>The position in chunk coordinates.</returns>
+        public Vector3I WorldToChunk(Vector3I worldPos)
+        {
+            return new Vector3I(worldPos.X & (this.ChunkWidth - 1), worldPos.Y & (this.ChunkHeight - 1), worldPos.Z);
+        }
+
+        #endregion Indexing and coordinate conversion
 
         #region Chunk Related
 
@@ -230,24 +239,30 @@ namespace Dwarves.Core.Terrain
             return this.voxels.ContainsKey(chunk);
         }
 
-        #endregion
+        #endregion Chunk Related
 
         #region Voxel Related
 
         /// <summary>
         /// Gets or sets the voxel at the given position.
         /// </summary>
-        /// <param name="x">The x position.</param>
-        /// <param name="y">The y position.</param>
-        /// <param name="z">The z position.</param>
+        /// <param name="pos">The position.</param>
         /// <returns>The voxel.</returns>
-        public Voxel GetVoxel(int x, int y, int z)
+        public Voxel GetVoxel(Vector3I pos)
         {
-            // TODO
-            throw new Exception();
+            IVoxels voxels;
+            if (pos.Z < this.ChunkDepth &&
+                this.voxels.TryGetValue(this.ChunkIndex(pos.X, pos.Y), out voxels))
+            {
+                return voxels[this.WorldToChunk(pos)];
+            }
+            else
+            {
+                return Voxel.Air;
+            }
         }
 
-        #endregion
+        #endregion Voxel Related
 
         #region Protected Methods
 
@@ -275,6 +290,6 @@ namespace Dwarves.Core.Terrain
             }
         }
 
-        #endregion
+        #endregion Protected Methods
     }
 }

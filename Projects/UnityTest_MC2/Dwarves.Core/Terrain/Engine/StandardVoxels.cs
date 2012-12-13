@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Engine
 {
+    using Dwarves.Core.Math;
+
     /// <summary>
     /// The standard structure for the voxel data.
     /// </summary>
@@ -13,7 +15,7 @@ namespace Dwarves.Core.Terrain.Engine
         /// <summary>
         /// The array of voxels.
         /// </summary>
-        private Voxel[,,] voxels;
+        private Voxel[, ,] voxels;
 
         /// <summary>
         /// Initialises a new instance of the StandardVoxels class.
@@ -35,15 +37,19 @@ namespace Dwarves.Core.Terrain.Engine
         /// <returns>The voxel.</returns>
         public Voxel this[int x, int y, int z]
         {
-            get
-            {
-                return this.voxels[x, y, z];
-            }
+            get { return this.voxels[x, y, z]; }
+            set { this.voxels[x, y, z] = value; }
+        }
 
-            set
-            {
-                this.voxels[x, y, z] = value;
-            }
+        /// <summary>
+        /// Gets or sets the voxel at the given position.
+        /// </summary>
+        /// <param name="pos">The position.</param>
+        /// <returns>The voxel.</returns>
+        public Voxel this[Vector3I pos]
+        {
+            get { return this[pos.X, pos.Y, pos.Z]; }
+            set { this[pos.X, pos.Y, pos.Z] = value; }
         }
     }
 }

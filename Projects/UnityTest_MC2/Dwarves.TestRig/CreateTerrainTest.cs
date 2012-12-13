@@ -63,9 +63,6 @@ namespace Dwarves.TestRig
         /// <param name="chunk">The chunk index.</param>
         private void Terrain_ChunkAdded(object sender, Vector2I chunk)
         {
-            // Remove any existing mesh data for this chunk
-            this.terrainManager.Terrain.Meshes.Remove(chunk);
-
             // Build the mesh for this chunk
             MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(chunk);
         }

@@ -39,25 +39,25 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <summary>
         /// Dig at the given position.
         /// </summary>
-        /// <param name="position">The position.</param>
+        /// <param name="pos">The position.</param>
         /// <param name="offset">The offset indicating the position inside the voxel with values between 0.0 and 1.0.
         /// </param>
-        public void Dig(Vector2I position, Vector2 offset)
+        public void Dig(Vector2I pos, Vector2 offset)
         {
             // Get the voxel array
             IVoxels voxels;
-            if (this.Terrain.TryGetChunk(this.Terrain.ChunkIndex(position.X, position.Y), out voxels))
+            if (this.Terrain.TryGetChunk(this.Terrain.ChunkIndex(pos.X, pos.Y), out voxels))
             {
                 for (int z = this.Terrain.WorldDepth; z < this.Terrain.WorldDepth + this.DigDepth; z++)
                 {
-                    Vector2I pos = this.Terrain.WorldToChunk(position.X, position.Y);
+                    Vector2I chunkPos = this.Terrain.WorldToChunk(pos);
 
                     // Get the voxel
-                    Voxel voxel = voxels[pos.X, pos.Y, z];
+                    Voxel voxel = voxels[chunkPos.X, chunkPos.Y, z];
 
                     // Update the voxel density
                     voxel.Density = Voxel.DensityMax;
-                    voxels[pos.X, pos.Y, z] = voxel;
+                    voxels[chunkPos.X, chunkPos.Y, z] = voxel;
                 }
             }
         }

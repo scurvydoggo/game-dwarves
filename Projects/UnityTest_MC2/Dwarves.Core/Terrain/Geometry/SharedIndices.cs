@@ -42,34 +42,30 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <summary>
         /// Gets or sets the shared vertex index at the given position.
         /// </summary>
-        /// <param name="x">The x position.</param>
-        /// <param name="y">The y position.</param>
-        /// <param name="z">The z position.</param>
+        /// <param name="pos">The position.</param>
         /// <param name="index">The index of the vertex index.</param>
         /// <returns>The vertex index.</returns>
-        public ushort this[int x, int y, int z, byte index]
+        public ushort this[Vector3I pos, byte index]
         {
-            get { return this.indices[z & 1][x, y][index]; }
-            set { this.indices[z & 1][x, y][index] = value; }
+            get { return this.indices[pos.Z & 1][pos.X, pos.Y][index]; }
+            set { this.indices[pos.Z & 1][pos.X, pos.Y][index] = value; }
         }
 
         /// <summary>
         /// Gets the shared indices at the position in the direction relative to the given position.
         /// </summary>
-        /// <param name="x">The x position from which the direction is applied.</param>
-        /// <param name="y">The y position from which the direction is applied.</param>
-        /// <param name="z">The z position from which the direction is applied.</param>
+        /// <param name="pos">The position from which the direction is applied.</param>
         /// <param name="direction">The bitmask indicating the directional of the shared cell.</param>
         /// <param name="index">The index of the vertex index.</param>
         /// <returns>The vertex index.</returns>
-        public ushort GetIndexInDirection(int x, int y, int z, byte direction, byte index)
+        public ushort GetIndexInDirection(Vector3I pos, byte direction, byte index)
         {
-            // Get the directional offset
-            int dx = direction & 0x01;
-            int dy = (direction >> 1) & 0x01;
-            int dz = (direction >> 2) & 0x01;
+            // Offset the position by the direction mask
+            pos.X -= direction & 0x01;
+            pos.Y -= (direction >> 1) & 0x01;
+            pos.Z -= (direction >> 2) & 0x01;
 
-            return this[x - dx, y - dy, z - dz, index];
+            return this[pos, index];
         }
     }
 }
