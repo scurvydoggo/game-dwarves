@@ -4,9 +4,15 @@ Temp/
 Projects/UnityTest_Voxel1/*.sln
 Projects/UnityTest_Voxel1/*.csproj
 Projects/UnityTest_Voxel1/Library/
+Projects/UnityTest_Voxel1/Temp/
 Projects/UnityTest_MC/Unity/MarchingCubesTest/*.sln
 Projects/UnityTest_MC/Unity/MarchingCubesTest/*.csproj
 Projects/UnityTest_MC/Unity/MarchingCubesTest/Library/
+Projects/UnityTest_MC/Unity/MarchingCubesTest/Temp/
+Projects/UnityTest_MC2/Unity/MCTest2/*.sln
+Projects/UnityTest_MC2/Unity/MCTest2/*.csproj
+Projects/UnityTest_MC2/Unity/MCTest2/Library/
+Projects/UnityTest_MC2/Unity/MCTest2/Temp/
 *Dwarves.Core.dll
 *Dwarves.Component.dll
 *.suo
