@@ -7,6 +7,7 @@ namespace Dwarves.Core.Terrain.Geometry
 {
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
+    using UnityEngine;
 
     /// <summary>
     /// Reference to the vertex indices of the voxels in the current and previous z planes.
@@ -74,8 +75,8 @@ namespace Dwarves.Core.Terrain.Geometry
         {
             // Offset the position by the direction mask
             pos.X -= direction & 0x01;
-            pos.Y -= (direction >> 1) & 0x01;
-            pos.Z -= (direction >> 2) & 0x01;
+            pos.Z -= (direction >> 1) & 0x01;
+            pos.Y -= (direction >> 2) & 0x01;
 
             return this[pos, index];
         }

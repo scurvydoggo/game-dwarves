@@ -90,7 +90,8 @@ namespace Dwarves.Core.Terrain.Geometry
             ushort[] vertexData = MarchingCubes.VertexData[caseCode];
 
             // Calculate the mask which indicates whether vertices can be shared for a given direction
-            byte directionMask = (byte)((pos.X > 0 ? 1 : 0) | ((pos.Y > 0 ? 1 : 0) << 1) | ((pos.Z > 0 ? 1 : 0) << 2));
+            Vector3I chunkPos = this.Terrain.WorldToChunk(pos);
+            byte directionMask = (byte)((chunkPos.X > 0 ? 1 : 0) | ((chunkPos.Z > 0 ? 1 : 0) << 1) | ((chunkPos.Y > 0 ? 1 : 0) << 2));
 
             // Get the indices for each vertex in this cell, creating the vertices if necessary (otherwise use shared)
             var actualIndices = new ushort[geometry.Indices.Length];
@@ -111,7 +112,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 int actualIndex = -1;
                 if (cornerB != 7 && (sharedDirection & directionMask) == sharedDirection)
                 {
-                    actualIndex = this.sharedIndices.GetIndexInDirection(pos, sharedDirection, sharedIndex);
+                    actualIndex = this.sharedIndices.GetIndexInDirection(chunkPos, sharedDirection, sharedIndex);
                 }
 
                 // Check if a new vertex should be created
@@ -124,7 +125,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 // Cache this vertex index so it can be used by other cells
                 if ((sharedDirection & 8) != 0)
                 {
-                    this.sharedIndices[pos, sharedIndex] = mesh.LatestVertexIndex();
+                    this.sharedIndices[chunkPos, sharedIndex] = mesh.LatestVertexIndex();
                 }
 
                 actualIndices[i] = (ushort)actualIndex;
