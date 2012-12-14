@@ -13,6 +13,11 @@ namespace Dwarves.Core.Terrain
     public interface IVoxels
     {
         /// <summary>
+        /// Gets or sets a value indicating whether the mesh requires a rebuild.
+        /// </summary>
+        bool RebuildRequired { get; set; }
+
+        /// <summary>
         /// Gets or sets the voxel at the given position.
         /// </summary>
         /// <param name="x">The x position.</param>

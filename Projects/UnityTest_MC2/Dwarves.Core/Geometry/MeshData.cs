@@ -19,7 +19,7 @@ namespace Dwarves.Core.Geometry
         public MeshData()
         {
             this.Vertices = new List<Vector3>();
-            this.Indices = new List<ushort>();
+            this.Indices = new List<int>();
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Dwarves.Core.Geometry
         /// <summary>
         /// Gets the triangle indices.
         /// </summary>
-        public List<ushort> Indices { get; private set; }
+        public List<int> Indices { get; private set; }
 
         /// <summary>
         /// Gets the index of the latest vertex that was added.

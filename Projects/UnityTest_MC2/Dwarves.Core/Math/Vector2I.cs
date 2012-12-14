@@ -115,7 +115,7 @@ namespace Dwarves.Core.Math
         /// Perform the modulo operator.
         /// </summary>
         /// <param name="v0">The first vector.</param>
-        /// <param name="v1">The second vector.</param>
+        /// <param name="i">The modulo value.</param>
         /// <returns>The resulting vector.</returns>
         public static Vector2I operator %(Vector2I v0, int i)
         {
@@ -172,9 +172,9 @@ namespace Dwarves.Core.Math
         /// <param name="v0">The first vector.</param>
         /// <param name="v1">The second vector.</param>
         /// <returns>True if the first vector is less than the second vector.</returns>
-        public static bool operator <(Vector2I a, Vector2I b)
+        public static bool operator <(Vector2I v0, Vector2I v1)
         {
-            return a.X < b.X && a.Y < b.Y;
+            return v0.X < v1.X && v0.Y < v1.Y;
         }
 
         /// <summary>
@@ -183,9 +183,9 @@ namespace Dwarves.Core.Math
         /// <param name="v0">The first vector.</param>
         /// <param name="v1">The second vector.</param>
         /// <returns>True if the first vector is greater than the second vector.</returns>
-        public static bool operator >(Vector2I a, Vector2I b)
+        public static bool operator >(Vector2I v0, Vector2I v1)
         {
-            return a.X > b.X && a.Y > b.Y;
+            return v0.X > v1.X && v0.Y > v1.Y;
         }
 
         /// <summary>
@@ -194,9 +194,9 @@ namespace Dwarves.Core.Math
         /// <param name="v0">The first vector.</param>
         /// <param name="v1">The second vector.</param>
         /// <returns>True if the first vector is less than or equal the second vector.</returns>
-        public static bool operator <=(Vector2I a, Vector2I b)
+        public static bool operator <=(Vector2I v0, Vector2I v1)
         {
-            return a.X <= b.X && a.Y <= b.Y;
+            return v0.X <= v1.X && v0.Y <= v1.Y;
         }
 
         /// <summary>
@@ -205,9 +205,9 @@ namespace Dwarves.Core.Math
         /// <param name="v0">The first vector.</param>
         /// <param name="v1">The second vector.</param>
         /// <returns>True if the first vector is greater than or equal the second vector.</returns>
-        public static bool operator >=(Vector2I a, Vector2I b)
+        public static bool operator >=(Vector2I v0, Vector2I v1)
         {
-            return a.X >= b.X && a.Y >= b.Y;
+            return v0.X >= v1.X && v0.Y >= v1.Y;
         }
 
         #endregion Operators
@@ -221,14 +221,14 @@ namespace Dwarves.Core.Math
         /// <returns>True if the vectors are equal.</returns>
         public bool Equals(Vector2I other)
         {
-            return other.X == X && other.Y == Y;
+            return other.X == this.X && other.Y == this.Y;
         }
 
         /// <summary>
         /// Determine if the object is equal.
         /// </summary>
-        /// <param name="other">The vector to test.</param>
-        /// <returns>True if the vectors are equal.</returns>
+        /// <param name="obj">The object to test.</param>
+        /// <returns>True if the objects are equal.</returns>
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj))
@@ -253,8 +253,8 @@ namespace Dwarves.Core.Math
         {
             unchecked
             {
-                int result = X;
-                result = (result * 397) ^ Y;
+                int result = this.X;
+                result = (result * 397) ^ this.Y;
                 return result;
             }
         }

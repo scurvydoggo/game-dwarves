@@ -46,20 +46,26 @@ namespace Dwarves.Core.Terrain.Mutation
         {
             // Get the voxel array
             IVoxels voxels;
-            if (this.Terrain.TryGetChunk(this.Terrain.ChunkIndex(pos.X, pos.Y), out voxels))
+            if (!this.Terrain.TryGetChunk(this.Terrain.ChunkIndex(pos.X, pos.Y), out voxels))
             {
-                for (int z = 0; z < this.DigDepth; z++)
-                {
-                    Vector2I chunkPos = this.Terrain.WorldToChunk(pos);
-
-                    // Get the voxel
-                    Voxel voxel = voxels[chunkPos.X, chunkPos.Y, z];
-
-                    // Update the voxel density
-                    voxel.Density = Voxel.DensityMax;
-                    voxels[chunkPos.X, chunkPos.Y, z] = voxel;
-                }
+                return;
             }
+
+            // Dig down to the given depth
+            for (int z = 0; z < this.DigDepth; z++)
+            {
+                Vector2I chunkPos = this.Terrain.WorldToChunk(pos);
+
+                // Get the voxel
+                Voxel voxel = voxels[chunkPos.X, chunkPos.Y, z];
+
+                // Update the voxel density
+                voxel.Density = Voxel.DensityMax;
+                voxels[chunkPos.X, chunkPos.Y, z] = voxel;
+            }
+
+            // Flag the chunk as requiring a rebuild
+            voxels.RebuildRequired = true;
         }
     }
 }

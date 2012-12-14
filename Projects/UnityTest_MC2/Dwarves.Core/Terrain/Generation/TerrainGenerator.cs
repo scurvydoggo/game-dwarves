@@ -63,6 +63,9 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Fill the terrain
             this.FillTerrain(chunk);
+
+            // Flag the chunk as requiring a rebuild
+            this.Terrain.GetChunk(chunk).RebuildRequired = true;
         }
 
         /// <summary>

@@ -26,7 +26,13 @@ namespace Dwarves.Core.Terrain.Engine
         public StandardVoxels(int width, int height, int depth)
         {
             this.voxels = new Voxel[width, height, depth];
+            this.RebuildRequired = true;
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the mesh requires a rebuild.
+        /// </summary>
+        public bool RebuildRequired { get; set; }
 
         /// <summary>
         /// Gets or sets the voxel at the given position.

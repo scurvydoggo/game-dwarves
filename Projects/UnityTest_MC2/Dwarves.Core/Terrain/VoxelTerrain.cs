@@ -66,7 +66,6 @@ namespace Dwarves.Core.Terrain
             this.ChunkWidth = 1 << chunkWidthLog;
             this.ChunkHeight = 1 << chunkHeightLog;
             this.voxels = new Dictionary<Vector2I, IVoxels>();
-            this.Meshes = new Dictionary<Vector2I, MeshData>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
             this.factory = new TerrainEngineFactory(this.Engine);
         }
@@ -85,11 +84,6 @@ namespace Dwarves.Core.Terrain
         /// Gets or sets the current terrain instance for the application.
         /// </summary>
         public static VoxelTerrain Instance { get; set; }
-
-        /// <summary>
-        /// Gets the mesh data organised by chunk.
-        /// </summary>
-        public Dictionary<Vector2I, MeshData> Meshes { get; private set; }
 
         /// <summary>
         /// Gets the surface heights for each chunk x-position.
@@ -175,6 +169,24 @@ namespace Dwarves.Core.Terrain
         #endregion Indexing and coordinate conversion
 
         #region Chunk Related
+
+        /// <summary>
+        /// Gets a value indicating whether the given chunk requires a mesh rebuild.
+        /// </summary>
+        /// <param name="chunk">The chunk index.</param>
+        /// <returns>True if the chunk requires a mesh rebuild.</returns>
+        public bool RebuildRequired(Vector2I chunk)
+        {
+            IVoxels voxels;
+            if (this.voxels.TryGetValue(chunk, out voxels))
+            {
+                return voxels.RebuildRequired;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Creates a new voxel chunk at the given chunk index.

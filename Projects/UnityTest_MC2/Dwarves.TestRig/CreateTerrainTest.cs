@@ -58,9 +58,11 @@ namespace Dwarves.TestRig
             // Build the mesh for this chunk
             foreach (Vector2I chunk in this.terrainManager.Terrain.Chunks)
             {
-                if (!this.terrainManager.Terrain.Meshes.ContainsKey(chunk))
+                if (this.terrainManager.Terrain.RebuildRequired(chunk))
                 {
                     MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(chunk);
+
+                    // Pretend that the mesh data was applied to a chunk game object
                 }
             }
         }
@@ -83,9 +85,6 @@ namespace Dwarves.TestRig
         private void Terrain_ChunkRemoved(object sender, Vector2I chunk)
         {
             // Destroy the chunk's game object (not done in this test)
-
-            // Clear the mesh
-            this.terrainManager.Terrain.Meshes.Remove(chunk);
         }
     }
 }

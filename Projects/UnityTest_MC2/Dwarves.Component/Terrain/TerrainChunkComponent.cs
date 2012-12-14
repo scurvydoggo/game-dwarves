@@ -60,7 +60,7 @@ namespace Dwarves.Component.Terrain
         public void LateUpdate()
         {
             // Rebuild the mesh for this chunk if required
-            if (!this.terrainManager.Terrain.Meshes.ContainsKey(this.Chunk))
+            if (this.terrainManager.Terrain.RebuildRequired(this.Chunk))
             {
                 this.RebuildMesh();
             }
@@ -71,13 +71,17 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void RebuildMesh()
         {
-            // Remove any existing mesh data for this chunk
-            this.terrainManager.Terrain.Meshes.Remove(this.Chunk);
-
-            // Build the mesh for this chunk
+            // Create the mesh for this chunk
             MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(this.Chunk);
 
-            // TODO: Load the mesh data
+            // Update the mesh filter geometry
+            this.cMeshFilter.mesh.Clear();
+            this.cMeshFilter.mesh.vertices = meshData.Vertices.ToArray();
+            this.cMeshFilter.mesh.triangles = meshData.Indices.ToArray();
+            this.cMeshFilter.mesh.RecalculateNormals();
+
+            // Flag this chunk as no longer requiring a rebuild
+            this.terrainManager.Terrain.GetChunk(this.Chunk).RebuildRequired = false;
         }
     }
 }
