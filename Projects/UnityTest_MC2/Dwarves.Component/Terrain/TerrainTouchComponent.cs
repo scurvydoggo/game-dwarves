@@ -19,19 +19,6 @@ namespace Dwarves.Component.Terrain
     public class TerrainTouchComponent : TouchableComponent
     {
         /// <summary>
-        /// The terrain manager.
-        /// </summary>
-        private TerrainManager terrainManager;
-
-        /// <summary>
-        /// Initialises the component.
-        /// </summary>
-        public void Start()
-        {
-            this.terrainManager = this.GetComponent<TerrainComponent>().TerrainManager;
-        }
-
-        /// <summary>
         /// Handles the on-touch behaviour for the component.
         /// </summary>
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
@@ -41,7 +28,7 @@ namespace Dwarves.Component.Terrain
             var offset = new Vector2(Math.Abs(hitPoint.x - position.X), Math.Abs(hitPoint.y - position.Y));
 
             // Dig at the touched point
-            this.terrainManager.TerrainMutator.Dig(position, offset);
+            TerrainManager.Instance.TerrainMutator.Dig(position, offset);
         }
     }
 }

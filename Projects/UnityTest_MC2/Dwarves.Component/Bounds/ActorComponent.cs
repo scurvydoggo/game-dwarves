@@ -6,6 +6,7 @@
 namespace Dwarves.Component.Bounds
 {
     using System;
+    using Dwarves.Component.Terrain;
     using Dwarves.Core;
     using Dwarves.Core.Bounds;
     using Dwarves.Core.Math;
@@ -49,6 +50,8 @@ namespace Dwarves.Component.Bounds
         /// </summary>
         public void Start()
         {
+            GameObject terrain = GameObject.Find("Terrain");
+
             switch (this.BoundsType)
             {
                 case ActorBoundsType.Camera:
@@ -79,8 +82,9 @@ namespace Dwarves.Component.Bounds
             RectangleI worldBounds = this.getBounds.GetChunkBounds(this.gameObject);
 
             // Get the chunk coordinates for the world bounds
-            Vector2I topCoords = VoxelTerrain.Instance.ChunkIndex(worldBounds.X, worldBounds.Y);
-            Vector2I bottomCoords = VoxelTerrain.Instance.ChunkIndex(worldBounds.Right - 1, worldBounds.Bottom - 1);
+            Vector2I topCoords = TerrainManager.Instance.Terrain.ChunkIndex(worldBounds.X, worldBounds.Y);
+            Vector2I bottomCoords = TerrainManager.Instance.Terrain.ChunkIndex(
+                worldBounds.Right - 1, worldBounds.Bottom - 1);
 
             // Return the bounds in chunk coordinates
             return new RectangleI(

@@ -16,16 +16,11 @@ namespace Dwarves.TestRig
     public class CreateTerrainTest : ITest
     {
         /// <summary>
-        /// The terrain.
-        /// </summary>
-        private TerrainManager terrainManager;
-
-        /// <summary>
         /// Initialises a new instance of the CreateTerrainTest class.
         /// </summary>
         public CreateTerrainTest()
         {
-            this.terrainManager = new TerrainManager(
+            TerrainManager.Initialise(
                 TerrainEngineType.Standard,
                 4,
                 4,
@@ -38,8 +33,8 @@ namespace Dwarves.TestRig
                 10f,
                 0.5f);
 
-            this.terrainManager.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
-            this.terrainManager.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
+            TerrainManager.Instance.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
+            TerrainManager.Instance.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
         }
 
         /// <summary>
@@ -53,18 +48,17 @@ namespace Dwarves.TestRig
                 };
 
             // Load and unload chunks
-            this.terrainManager.LoadUnloadChunks(activeChunks);
+            TerrainManager.Instance.LoadUnloadChunks(activeChunks);
 
             // Build the mesh for this chunk
-            foreach (Vector2I chunk in this.terrainManager.Terrain.Chunks)
+            foreach (Vector2I chunk in TerrainManager.Instance.Terrain.Chunks)
             {
-                if (this.terrainManager.Terrain.RebuildRequired(chunk))
+                if (TerrainManager.Instance.Terrain.RebuildRequired(chunk))
                 {
-                    MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(chunk);
+                    MeshData meshData = TerrainManager.Instance.TerrainMeshBuilder.CreateMesh(chunk);
 
                     // Pretend that the mesh data was applied to a chunk game object
-
-                    this.terrainManager.Terrain.GetChunk(chunk).RebuildRequired = false;
+                    TerrainManager.Instance.Terrain.GetChunk(chunk).RebuildRequired = false;
                 }
             }
         }

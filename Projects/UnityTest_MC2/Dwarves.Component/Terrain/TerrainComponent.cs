@@ -80,16 +80,11 @@ namespace Dwarves.Component.Terrain
         public float Persistence;
 
         /// <summary>
-        /// Gets the terrain manager.
-        /// </summary>
-        public TerrainManager TerrainManager { get; private set; }
-
-        /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
         {
-            this.TerrainManager = new TerrainManager(
+            TerrainManager.Initialise(
                 this.Engine,
                 this.ChunkWidthLog,
                 this.ChunkHeightLog,
@@ -103,8 +98,8 @@ namespace Dwarves.Component.Terrain
                 this.Persistence);
 
             // Register event handlers
-            this.TerrainManager.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
-            this.TerrainManager.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
+            TerrainManager.Instance.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
+            TerrainManager.Instance.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
         }
 
         /// <summary>
@@ -130,7 +125,7 @@ namespace Dwarves.Component.Terrain
             }
 
             // Load and unload chunks
-            this.TerrainManager.LoadUnloadChunks(activeChunks);
+            TerrainManager.Instance.LoadUnloadChunks(activeChunks);
         }
 
         /// <summary>

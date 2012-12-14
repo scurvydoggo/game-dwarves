@@ -20,11 +20,6 @@ namespace Dwarves.Component.Terrain
     public class TerrainChunkComponent : MonoBehaviour
     {
         /// <summary>
-        /// The terrain manager.
-        /// </summary>
-        private TerrainManager terrainManager;
-
-        /// <summary>
         /// The mesh filter component.
         /// </summary>
         private MeshFilter cMeshFilter;
@@ -49,8 +44,6 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Start()
         {
-            // Get a reference to the related components
-            this.terrainManager = this.transform.parent.GetComponent<TerrainComponent>().TerrainManager;
             this.cMeshFilter = this.GetComponent<MeshFilter>();
         }
 
@@ -60,7 +53,7 @@ namespace Dwarves.Component.Terrain
         public void LateUpdate()
         {
             // Rebuild the mesh for this chunk if required
-            if (this.terrainManager.Terrain.RebuildRequired(this.Chunk))
+            if (TerrainManager.Instance.Terrain.RebuildRequired(this.Chunk))
             {
                 this.RebuildMesh();
             }
@@ -72,7 +65,7 @@ namespace Dwarves.Component.Terrain
         public void RebuildMesh()
         {
             // Create the mesh for this chunk
-            MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(this.Chunk);
+            MeshData meshData = TerrainManager.Instance.TerrainMeshBuilder.CreateMesh(this.Chunk);
 
             // Update the mesh filter geometry
             this.cMeshFilter.mesh.Clear();
@@ -81,7 +74,7 @@ namespace Dwarves.Component.Terrain
             this.cMeshFilter.mesh.RecalculateNormals();
 
             // Flag this chunk as no longer requiring a rebuild
-            this.terrainManager.Terrain.GetChunk(this.Chunk).RebuildRequired = false;
+            TerrainManager.Instance.Terrain.GetChunk(this.Chunk).RebuildRequired = false;
         }
     }
 }

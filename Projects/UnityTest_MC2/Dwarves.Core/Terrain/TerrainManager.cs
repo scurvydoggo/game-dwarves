@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Dwarves.Core.Math;
@@ -39,7 +40,7 @@ namespace Dwarves.Core.Terrain
         /// terrain generator.</param>
         /// <param name="persistence">The persistence value, which determines the amplitude for each octave used by the
         /// terrain generator.</param>
-        public TerrainManager(
+        private TerrainManager(
             TerrainEngineType engine,
             int chunkWidthLog,
             int chunkHeightLog,
@@ -52,6 +53,17 @@ namespace Dwarves.Core.Terrain
             float baseFrequency,
             float persistence)
         {
+            // Set the singleton instance
+            if (TerrainManager.Instance == null)
+            {
+                TerrainManager.Instance = this;
+            }
+            else
+            {
+                throw new InvalidOperationException("Only one TerrainManager instance may exist.");
+            }
+
+            // Initialise the terrain
             this.Terrain = new VoxelTerrain(engine, chunkWidthLog, chunkHeightLog, chunkDepth, scale);
 
             // Initialise the serialiser
@@ -69,6 +81,11 @@ namespace Dwarves.Core.Terrain
             // Initialise the mesh builder
             this.TerrainMeshBuilder = new TerrainMeshBuilder(this.Terrain);
         }
+
+        /// <summary>
+        /// Gets the current terrain component.
+        /// </summary>
+        public static TerrainManager Instance { get; private set; }
 
         /// <summary>
         /// Gets the terrain instance.
@@ -94,6 +111,51 @@ namespace Dwarves.Core.Terrain
         /// Gets the terrain mesh builder.
         /// </summary>
         public TerrainMeshBuilder TerrainMeshBuilder { get; private set; }
+
+        /// <summary>
+        /// Initialises the singleton instance.
+        /// </summary>
+        /// <param name="engine">The terrain engine type.</param>
+        /// <param name="chunkWidthLog">The power-of-2 chunk width.</param>
+        /// <param name="chunkHeightLog">The power-of-2 chunk height.</param>
+        /// <param name="chunkDepth">The chunk depth.</param>
+        /// <param name="digDepth">The depth to which digging occurs.</param>
+        /// <param name="scale">The scaling ratio for voxel coordinates to world coordinates (essentially the Level of
+        /// Detail).</param>
+        /// <param name="surfaceAmplitude">The distance from the mean surface height that the terrain oscillates.
+        /// </param>
+        /// <param name="seed">The seed value used by the terrain generator.</param>
+        /// <param name="octaves">The number of octaves of noise used by the terrain generator.</param>
+        /// <param name="baseFrequency">The base frequency which is the frequency of the lowest octave used by the
+        /// terrain generator.</param>
+        /// <param name="persistence">The persistence value, which determines the amplitude for each octave used by the
+        /// terrain generator.</param>
+        public static void Initialise(
+            TerrainEngineType engine,
+            int chunkWidthLog,
+            int chunkHeightLog,
+            int chunkDepth,
+            int digDepth,
+            int scale,
+            int surfaceAmplitude,
+            int seed,
+            int octaves,
+            float baseFrequency,
+            float persistence)
+        {
+            TerrainManager.Instance = new TerrainManager(
+                engine,
+                chunkWidthLog,
+                chunkHeightLog,
+                chunkDepth,
+                digDepth,
+                scale,
+                surfaceAmplitude,
+                seed,
+                octaves,
+                baseFrequency,
+                persistence);
+        }
 
         /// <summary>
         /// Load and unload the chunks that are new or are no longer required.

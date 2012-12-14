@@ -81,11 +81,6 @@ namespace Dwarves.Core.Terrain
         public event ChunkEvent ChunkRemoved;
 
         /// <summary>
-        /// Gets or sets the current terrain instance for the application.
-        /// </summary>
-        public static VoxelTerrain Instance { get; set; }
-
-        /// <summary>
         /// Gets the surface heights for each chunk x-position.
         /// </summary>
         public Dictionary<int, float[]> SurfaceHeights { get; private set; }

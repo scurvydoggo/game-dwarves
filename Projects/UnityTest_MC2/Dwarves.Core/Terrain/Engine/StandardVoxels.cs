@@ -15,7 +15,7 @@ namespace Dwarves.Core.Terrain.Engine
         /// <summary>
         /// The array of voxels.
         /// </summary>
-        private Voxel[, ,] voxels;
+        private Voxel[,,] voxels;
 
         /// <summary>
         /// Initialises a new instance of the StandardVoxels class.
