@@ -106,49 +106,49 @@ namespace Dwarves.Core.Terrain.Generation
             for (int x = 0; x < this.Terrain.ChunkWidth; x++)
             {
                 // Determine where the surface lies for this x-value
-                //float surfaceHeightF = surfaceHeights[x];
-                //int surfaceHeightI = (int)System.Math.Floor(surfaceHeightF);
-                //float deltaHeight = surfaceHeightF - surfaceHeightI;
+                float surfaceHeightF = surfaceHeights[x];
+                int surfaceHeightI = (int)System.Math.Floor(surfaceHeightF);
+                float deltaHeight = surfaceHeightF - surfaceHeightI;
 
                 for (int y = 0; y < this.Terrain.ChunkHeight; y++)
                 {
-                    //int height = originY + y;
+                    int height = originY + y;
 
-                    //// Create the voxel at this point
-                    //Voxel voxel;
-                    //if (height > surfaceHeightI)
-                    //{
-                    //    // This voxel lies above the surface
-                    //    voxel = Voxel.Air;
-                    //}
-                    //else
-                    //{
-                    //    // Determine the material
-                    //    var material = TerrainMaterial.Dirt;
+                    // Create the voxel at this point
+                    Voxel voxel;
+                    if (height > surfaceHeightI)
+                    {
+                        // This voxel lies above the surface
+                        voxel = Voxel.Air;
+                    }
+                    else
+                    {
+                        // Determine the material
+                        var material = TerrainMaterial.Dirt;
 
-                    //    if (height == surfaceHeightI)
-                    //    {
-                    //        // This voxel lies on the surface, so scale the density by the noise value
-                    //        byte density = (byte)(Voxel.DensityMax - (Voxel.DensityMax * deltaHeight));
+                        if (height == surfaceHeightI)
+                        {
+                            // This voxel lies on the surface, so scale the density by the noise value
+                            byte density = (byte)(Voxel.DensityMax - (Voxel.DensityMax * deltaHeight));
 
-                    //        // The density property stores 2 densities. The 'foreground' density which is that which
-                    //        // can be dug, and the 'background' density which represents the original density
-                    //        // Set the foreground and background densities both
-                    //        density = (byte)((density << 4) | density);
+                            // The density property stores 2 densities. The 'foreground' density which is that which
+                            // can be dug, and the 'background' density which represents the original density
+                            // Set the foreground and background densities both
+                            density = (byte)((density << 4) | density);
 
-                    //        voxel = new Voxel(material, density);
-                    //    }
-                    //    else
-                    //    {
-                    //        // The voxel lies under the surface
-                    //        voxel = new Voxel(material, Voxel.DensityMin);
-                    //    }
-                    //}
+                            voxel = new Voxel(material, density);
+                        }
+                        else
+                        {
+                            // The voxel lies under the surface
+                            voxel = new Voxel(material, Voxel.DensityMin);
+                        }
+                    }
 
                     // Set the voxel at each depth point
                     for (int z = 0; z < this.Terrain.ChunkDepth; z++)
                     {
-                        voxels[x, y, z] = z > 0 ? new Voxel(TerrainMaterial.Dirt, Voxel.DensityMin) : Voxel.Air;
+                        voxels[x, y, z] = z > 0 ? voxel : Voxel.Air;
                     }
                 }
             }
