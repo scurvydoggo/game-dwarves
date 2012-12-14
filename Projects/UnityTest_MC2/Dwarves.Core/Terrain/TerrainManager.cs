@@ -53,16 +53,6 @@ namespace Dwarves.Core.Terrain
             float baseFrequency,
             float persistence)
         {
-            // Set the singleton instance
-            if (TerrainManager.Instance == null)
-            {
-                TerrainManager.Instance = this;
-            }
-            else
-            {
-                throw new InvalidOperationException("Only one TerrainManager instance may exist.");
-            }
-
             // Initialise the terrain
             this.Terrain = new VoxelTerrain(engine, chunkWidthLog, chunkHeightLog, chunkDepth, scale);
 
@@ -83,7 +73,7 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Gets the current terrain component.
+        /// Gets the singleton instance.
         /// </summary>
         public static TerrainManager Instance { get; private set; }
 
@@ -143,6 +133,11 @@ namespace Dwarves.Core.Terrain
             float baseFrequency,
             float persistence)
         {
+            if (TerrainManager.Instance != null)
+            {
+                throw new InvalidOperationException("Only one TerrainManager instance may exist.");
+            }
+            
             TerrainManager.Instance = new TerrainManager(
                 engine,
                 chunkWidthLog,
