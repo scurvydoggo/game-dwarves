@@ -18,12 +18,12 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// The maximum density value. This lies outside the surface.
         /// </summary>
-        public const byte DensityMax = 0x0E;
+        public const byte DensityMax = 0xFF;
 
         /// <summary>
         /// The density at which the surface lies (aka the isolevel).
         /// </summary>
-        public const byte DensitySurface = 0x07;
+        public const byte DensitySurface = 0x0F;
 
         /// <summary>
         /// An air voxel that lies outside the terrain.
