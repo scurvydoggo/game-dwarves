@@ -231,18 +231,7 @@ namespace Dwarves.Core.Math
         /// <returns>True if the objects are equal.</returns>
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            else if (obj.GetType() != typeof(Vector2I))
-            {
-                return false;
-            }
-            else
-            {
-                return this.Equals((Vector2I)obj);
-            }
+            return obj is Vector2I && this.Equals((Vector2I)obj);
         }
 
         /// <summary>

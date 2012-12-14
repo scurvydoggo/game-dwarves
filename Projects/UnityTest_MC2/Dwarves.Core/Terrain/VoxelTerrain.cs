@@ -10,6 +10,7 @@ namespace Dwarves.Core.Terrain
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain.Engine;
+    using UnityEngine;
 
     /// <summary>
     /// A chunk event.

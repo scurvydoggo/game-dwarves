@@ -159,9 +159,18 @@ namespace Dwarves.Core.Terrain
         public void LoadUnloadChunks(ICollection<Vector2I> activeChunks)
         {
             // Check if any chunks are now off screen with no actors within and will need to be removed
-            foreach (Vector2I chunk in this.Terrain.Chunks.Where((c) => !activeChunks.Contains(c)).ToArray())
+            var toRemove = new List<Vector2I>();
+            foreach (Vector2I chunk in this.Terrain.Chunks)
             {
-                // Remove the chunk
+                if (activeChunks.Contains(chunk))
+                {
+                    toRemove.Add(chunk);
+                }
+            }
+
+            // Remove the chunks
+            foreach (Vector2I chunk in toRemove)
+            {
                 this.Terrain.RemoveChunk(chunk);
             }
 

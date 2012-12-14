@@ -8,6 +8,7 @@ namespace Dwarves.Core.Terrain.Generation
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain.Engine;
+    using UnityEngine;
 
     /// <summary>
     /// Generates voxel terrain.
