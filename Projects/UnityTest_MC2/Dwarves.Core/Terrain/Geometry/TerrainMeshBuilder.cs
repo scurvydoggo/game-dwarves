@@ -7,6 +7,7 @@ namespace Dwarves.Core.Terrain.Geometry
 {
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -59,6 +60,15 @@ namespace Dwarves.Core.Terrain.Geometry
                     }
                 }
             }
+            
+            // For now, just set the UV coordinates as the x/y position of each vertex. This will look stretched and
+            // awful for things on an angle, but for now it will do
+            var uvs = new Vector2[mesh.Vertices.Count];
+            for (int i = 0; i < mesh.Vertices.Count; i++)
+            {
+                uvs[i] = new Vector2(mesh.Vertices[i].x, mesh.Vertices[i].y);
+            }
+            mesh.UVs = new List<Vector2>(uvs);
 
             return mesh;
         }

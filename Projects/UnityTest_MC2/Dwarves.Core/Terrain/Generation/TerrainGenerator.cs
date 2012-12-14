@@ -148,7 +148,7 @@ namespace Dwarves.Core.Terrain.Generation
                     // Set the voxel at each depth point
                     for (int z = 0; z < this.Terrain.ChunkDepth; z++)
                     {
-                        voxels[x, y, z] = new Voxel(TerrainMaterial.Dirt, Voxel.DensityMin);
+                        voxels[x, y, z] = z > 0 ? new Voxel(TerrainMaterial.Dirt, Voxel.DensityMin) : Voxel.Air;
                     }
                 }
             }

@@ -20,17 +20,23 @@ namespace Dwarves.Core.Geometry
         {
             this.Vertices = new List<Vector3>();
             this.Indices = new List<int>();
+            this.UVs = new List<Vector2>();
         }
 
         /// <summary>
-        /// Gets the vertices.
+        /// Gets or sets the vertices.
         /// </summary>
-        public List<Vector3> Vertices { get; private set; }
+        public List<Vector3> Vertices { get; set; }
 
         /// <summary>
-        /// Gets the triangle indices.
+        /// Gets or sets the triangle indices.
         /// </summary>
-        public List<int> Indices { get; private set; }
+        public List<int> Indices { get; set; }
+
+        /// <summary>
+        /// Gets or sets the UV coordinates.
+        /// </summary>
+        public List<Vector2> UVs { get; set; }
 
         /// <summary>
         /// Gets the index of the latest vertex that was added.

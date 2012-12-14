@@ -45,6 +45,7 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             this.cMeshFilter = this.GetComponent<MeshFilter>();
+            this.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/GreyStone"); ;
         }
 
         /// <summary>
@@ -71,6 +72,7 @@ namespace Dwarves.Component.Terrain
             this.cMeshFilter.mesh.Clear();
             this.cMeshFilter.mesh.vertices = meshData.Vertices.ToArray();
             this.cMeshFilter.mesh.triangles = meshData.Indices.ToArray();
+            this.cMeshFilter.mesh.uv = meshData.UVs.ToArray();
             this.cMeshFilter.mesh.RecalculateNormals();
 
             // Flag this chunk as no longer requiring a rebuild
