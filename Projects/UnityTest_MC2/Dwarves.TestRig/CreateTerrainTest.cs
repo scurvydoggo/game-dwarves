@@ -63,6 +63,8 @@ namespace Dwarves.TestRig
                     MeshData meshData = this.terrainManager.TerrainMeshBuilder.CreateMesh(chunk);
 
                     // Pretend that the mesh data was applied to a chunk game object
+
+                    this.terrainManager.Terrain.GetChunk(chunk).RebuildRequired = false;
                 }
             }
         }
