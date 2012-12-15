@@ -159,22 +159,49 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="pos">The position.</param>
         /// <param name="mesh">The mesh.</param>
-        /// <param name="corners">The voxel data for the cell.</param>
+        /// <param name="corners">The voxel data for cell corners.</param>
         /// <param name="cornerA">The first corner index of the of the edge on which the vertex lies.</param>
         /// <param name="cornerB">The second corner index of the of the edge on which the vertex lies.</param>
         private void CreateVertex(Vector3I pos, MeshData mesh, Voxel[] corners, byte cornerA, byte cornerB)
         {
             // Calculate the position of the two end points between which the vertex lies
-            Vector3I pA = pos + MarchingCubes.CornerVector[cornerA];
-            Vector3I pB = pos + MarchingCubes.CornerVector[cornerB];
+            Vector3I pAI = pos + MarchingCubes.CornerVector[cornerA];
+            Vector3I pBI = pos + MarchingCubes.CornerVector[cornerB];
+            Vector3 pA = new Vector3(pAI.X, pAI.Y, pAI.Z);
+            Vector3 pB = new Vector3(pBI.X, pBI.Y, pBI.Z);
 
             // Interpolate the vertex position between the two end points
             byte densityA = corners[cornerA].Density;
             byte densityB = corners[cornerB].Density;
             Vector3 point = this.InterpolatePoint(pA, pB, densityA, densityB);
 
+            // Calculate the normals at each end point and then interpolate the two normals
+            Vector3 nA = this.CalculateNormal(pAI);
+            Vector3 nB = this.CalculateNormal(pBI);
+            Vector3 normal = this.InterpolatePoint(nA, nB, densityA, densityB);
+
             // Add the vertex to the mesh
             mesh.Vertices.Add(point);
+            mesh.Normals.Add(normal);
+        }
+
+        /// <summary>
+        /// Calculate the normal at the given position.
+        /// </summary>
+        /// <param name="pos">The position.</param>
+        /// <returns>The normal.</returns>
+        private Vector3 CalculateNormal(Vector3I pos)
+        {
+            byte x0 = this.Terrain.GetVoxel(pos - Vector3I.UnitX).Density;
+            byte x1 = this.Terrain.GetVoxel(pos + Vector3I.UnitX).Density;
+            byte y0 = this.Terrain.GetVoxel(pos - Vector3I.UnitY).Density;
+            byte y1 = this.Terrain.GetVoxel(pos + Vector3I.UnitY).Density;
+            byte z0 = this.Terrain.GetVoxel(pos - Vector3I.UnitZ).Density;
+            byte z1 = this.Terrain.GetVoxel(pos + Vector3I.UnitZ).Density;
+            
+            Vector3 normal = new Vector3((x1 - x0) * 0.5f, (y1 - y0) * 0.5f, (z1 - z0) * 0.5f);
+            normal.Normalize();
+            return normal;
         }
 
         /// <summary>
@@ -185,27 +212,27 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="densityA">The first density.</param>
         /// <param name="densityB">The second density.</param>
         /// <returns>The interpolated point.</returns>
-        private Vector3 InterpolatePoint(Vector3I pointA, Vector3I pointB, byte densityA, byte densityB)
+        private Vector3 InterpolatePoint(Vector3 pointA, Vector3 pointB, byte densityA, byte densityB)
         {
-            if (System.Math.Abs(Voxel.DensitySurface - densityA) < Mathf.Epsilon)
+            if (Voxel.DensitySurface - densityA == 0)
             {
-                return new Vector3(pointA.X, pointA.Y, pointA.Z);
+                return pointA;
             }
-            else if (System.Math.Abs(Voxel.DensitySurface - densityB) < Mathf.Epsilon)
+            else if (Voxel.DensitySurface - densityB == 0)
             {
-                return new Vector3(pointB.X, pointB.Y, pointB.Z);
+                return pointB;
             }
-            else if (System.Math.Abs(densityA - densityB) < Mathf.Epsilon)
+            else if (densityA - densityB == 0)
             {
-                return new Vector3(pointA.X, pointA.Y, pointA.Z);
+                return pointA;
             }
             else
             {
                 float mu = (float)(Voxel.DensitySurface - densityA) / (densityB - densityA);
                 return new Vector3(
-                    pointA.X + (mu * (pointB.X - pointA.X)),
-                    pointA.Y + (mu * (pointB.Y - pointA.Y)),
-                    pointA.Z + (mu * (pointB.Z - pointA.Z)));
+                    pointA.x + (mu * (pointB.x - pointA.x)),
+                    pointA.y + (mu * (pointB.y - pointA.y)),
+                    pointA.z + (mu * (pointB.z - pointA.z)));
             }
         }
     }

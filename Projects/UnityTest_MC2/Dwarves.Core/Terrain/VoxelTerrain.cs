@@ -251,7 +251,8 @@ namespace Dwarves.Core.Terrain
         public Voxel GetVoxel(Vector3I pos)
         {
             IVoxels voxels;
-            if (pos.Z < this.ChunkDepth &&
+            if (pos.Z >= 0 &&   
+                pos.Z < this.ChunkDepth &&
                 this.voxels.TryGetValue(this.ChunkIndex(pos.X, pos.Y), out voxels))
             {
                 return voxels[this.WorldToChunk(pos)];
