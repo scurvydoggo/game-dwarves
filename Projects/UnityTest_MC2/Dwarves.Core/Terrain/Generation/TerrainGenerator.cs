@@ -130,12 +130,6 @@ namespace Dwarves.Core.Terrain.Generation
                         {
                             // This voxel lies on the surface, so scale the density by the noise value
                             byte density = (byte)(Voxel.DensityMax - (Voxel.DensityMax * deltaHeight));
-
-                            // The density property stores 2 densities. The 'foreground' density which is that which
-                            // can be dug, and the 'background' density which represents the original density
-                            // Set the foreground and background densities both
-                            density = (byte)((density << 4) | density);
-
                             voxel = new Voxel(material, density);
                         }
                         else
