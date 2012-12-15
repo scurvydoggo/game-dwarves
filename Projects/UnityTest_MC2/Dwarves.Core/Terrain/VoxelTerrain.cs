@@ -5,12 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
-    using System;
     using System.Collections.Generic;
-    using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain.Engine;
-    using UnityEngine;
 
     /// <summary>
     /// A chunk event.
@@ -251,7 +248,7 @@ namespace Dwarves.Core.Terrain
         public Voxel GetVoxel(Vector3I pos)
         {
             IVoxels voxels;
-            if (pos.Z >= 0 &&   
+            if (pos.Z >= 0 &&
                 pos.Z < this.ChunkDepth &&
                 this.voxels.TryGetValue(this.ChunkIndex(pos.X, pos.Y), out voxels))
             {
@@ -264,6 +261,48 @@ namespace Dwarves.Core.Terrain
         }
 
         #endregion Voxel Related
+
+        #region Geometry Related
+
+        /// <summary>
+        /// Indicate that a chunk requires its mesh to be rebuilt.
+        /// </summary>
+        /// <param name="chunk">The chunk.</param>
+        /// <param name="flagNeighbours">Indicates whether the neighbouring chunks should also be flagged for rebuild.
+        /// </param>
+        public void FlagRebuildRequired(Vector2I chunk, bool flagNeighbours)
+        {
+            IVoxels voxels;
+            if (this.voxels.TryGetValue(chunk, out voxels))
+            {
+                voxels.RebuildRequired = true;
+            }
+
+            if (flagNeighbours)
+            {
+                if (this.voxels.TryGetValue(new Vector2I(chunk.X, chunk.Y + 1), out voxels))
+                {
+                    voxels.RebuildRequired = true;
+                }
+
+                if (this.voxels.TryGetValue(new Vector2I(chunk.X + 1, chunk.Y), out voxels))
+                {
+                    voxels.RebuildRequired = true;
+                }
+
+                if (this.voxels.TryGetValue(new Vector2I(chunk.X, chunk.Y - 1), out voxels))
+                {
+                    voxels.RebuildRequired = true;
+                }
+
+                if (this.voxels.TryGetValue(new Vector2I(chunk.X - 1, chunk.Y), out voxels))
+                {
+                    voxels.RebuildRequired = true;
+                }
+            }
+        }
+
+        #endregion Geometry Related
 
         #region Protected Methods
 

@@ -30,7 +30,7 @@ namespace Dwarves.Core.Geometry
         public List<Vector3> Vertices { get; set; }
 
         /// <summary>
-        /// Gets or sets the normals.
+        /// Gets or sets the normal vectors.
         /// </summary>
         public List<Vector3> Normals { get; set; }
 
