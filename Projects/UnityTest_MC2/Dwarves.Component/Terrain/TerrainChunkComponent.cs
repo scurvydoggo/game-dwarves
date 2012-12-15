@@ -45,7 +45,7 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             this.cMeshFilter = this.GetComponent<MeshFilter>();
-            this.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/GreyStone"); ;
+            this.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/GreyStone");
         }
 
         /// <summary>

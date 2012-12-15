@@ -5,9 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Geometry
 {
+    using System.Collections.Generic;
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
-    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -68,6 +68,7 @@ namespace Dwarves.Core.Terrain.Geometry
             {
                 uvs[i] = new Vector2(mesh.Vertices[i].x, mesh.Vertices[i].y);
             }
+
             mesh.UVs = new List<Vector2>(uvs);
 
             return mesh;
