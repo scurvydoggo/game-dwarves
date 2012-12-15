@@ -188,11 +188,18 @@ namespace Dwarves.Core.Terrain
 
                     // Flag the neighbouring meshes requiring rebuild
                     IVoxels voxels;
+                    if (this.Terrain.TryGetChunk(new Vector2I(chunk.X, chunk.Y + 1), out voxels))
+                    {
+                        voxels.RebuildRequired = true;
+                    }
+                    if (this.Terrain.TryGetChunk(new Vector2I(chunk.X + 1, chunk.Y), out voxels))
+                    {
+                        voxels.RebuildRequired = true;
+                    }
                     if (this.Terrain.TryGetChunk(new Vector2I(chunk.X, chunk.Y - 1), out voxels))
                     {
                         voxels.RebuildRequired = true;
                     }
-
                     if (this.Terrain.TryGetChunk(new Vector2I(chunk.X - 1, chunk.Y), out voxels))
                     {
                         voxels.RebuildRequired = true;
