@@ -162,7 +162,7 @@ namespace Dwarves.Core.Terrain
             var toRemove = new List<Vector2I>();
             foreach (Vector2I chunk in this.Terrain.Chunks)
             {
-                if (activeChunks.Contains(chunk))
+                if (!activeChunks.Contains(chunk))
                 {
                     toRemove.Add(chunk);
                 }
