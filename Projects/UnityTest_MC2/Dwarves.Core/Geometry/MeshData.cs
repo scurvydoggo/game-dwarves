@@ -19,6 +19,7 @@ namespace Dwarves.Core.Geometry
         public MeshData()
         {
             this.Vertices = new List<Vector3>();
+            this.Normals = new List<Vector3>();
             this.Indices = new List<int>();
             this.UVs = new List<Vector2>();
         }
@@ -27,6 +28,11 @@ namespace Dwarves.Core.Geometry
         /// Gets or sets the vertices.
         /// </summary>
         public List<Vector3> Vertices { get; set; }
+
+        /// <summary>
+        /// Gets or sets the normals.
+        /// </summary>
+        public List<Vector3> Normals { get; set; }
 
         /// <summary>
         /// Gets or sets the triangle indices.
