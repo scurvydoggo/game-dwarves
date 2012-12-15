@@ -186,12 +186,26 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The interpolated point.</returns>
         private Vector3 InterpolatePoint(Vector3I pointA, Vector3I pointB, byte densityA, byte densityB)
         {
-            // Calculate the density ratio
-            int t = (densityB << 8) / (densityB - densityA);
-            int u = 0x0100 - t; // 256 - t
-
-            Vector3I resultI = (pointA * t) + (pointB * u);
-            return new Vector3(resultI.X, resultI.Y, resultI.Z) / 256; // Divide by 256 to normalise the result
+            if (System.Math.Abs(Voxel.DensitySurface - densityA) < Mathf.Epsilon)
+            {
+                return new Vector3(pointA.X, pointA.Y, pointA.Z);
+            }
+            else if (System.Math.Abs(Voxel.DensitySurface - densityB) < Mathf.Epsilon)
+            {
+                return new Vector3(pointB.X, pointB.Y, pointB.Z);
+            }
+            else if (System.Math.Abs(densityA - densityB) < Mathf.Epsilon)
+            {
+                return new Vector3(pointA.X, pointA.Y, pointA.Z);
+            }
+            else
+            {
+                float mu = (float)(Voxel.DensitySurface - densityA) / (densityB - densityA);
+                return new Vector3(
+                    pointA.X + (mu * (pointB.X - pointA.X)),
+                    pointA.Y + (mu * (pointB.Y - pointA.Y)),
+                    pointA.Z + (mu * (pointB.Z - pointA.Z)));
+            }
         }
     }
 }

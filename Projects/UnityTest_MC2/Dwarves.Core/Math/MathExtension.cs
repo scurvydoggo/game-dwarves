@@ -11,6 +11,11 @@ namespace Dwarves.Core.Math
     public static class MathExtension
     {
         /// <summary>
+        /// The smallest value that a float can have different from zero.
+        /// </summary>
+        public const float Epsilon = 0.00001f;
+
+        /// <summary>
         /// Determines if the given number is a power of two.
         /// </summary>
         /// <param name="value">The number.</param>

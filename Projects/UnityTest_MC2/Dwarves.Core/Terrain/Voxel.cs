@@ -23,7 +23,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// The density at which the surface lies (aka the isolevel).
         /// </summary>
-        public const byte DensitySurface = 0x0F;
+        public const byte DensitySurface = 0x7F;
 
         /// <summary>
         /// An air voxel that lies outside the terrain.
