@@ -112,14 +112,14 @@ namespace Dwarves.Core.Terrain.Mutation
             while (x >= y)
             {
                 // Dig a line for each octant
-                this.DigLine(x + x0, y + y0, x - y, DigDirection.Left, offset);         // From[1, 0] CCW
-                this.DigLine(-x + x0, y + y0, x - y, DigDirection.Right, offset);       // From[-1, 0] CW
-                this.DigLine(x + x0, -y + y0, x - y, DigDirection.Left, offset);        // From[1, 0] CW
-                this.DigLine(-x + x0, -y + y0, x - y, DigDirection.Right, offset);      // From[-1, 0] CCW
-                this.DigLine(y + x0, x + y0, x - y - 1, DigDirection.Down, offset);     // From[0, 1] CW
-                this.DigLine(-y + x0, x + y0, x - y - 1, DigDirection.Down, offset);    // From[0, 1] CCW
-                this.DigLine(y + x0, -x + y0, x - y - 1, DigDirection.Up, offset);      // From[0, -1] CCW
-                this.DigLine(-y + x0, -x + y0, x - y - 1, DigDirection.Up, offset);     // From[0, -1] CW
+                this.DigLine(x + x0, y + y0, x - y + 1, DigDirection.Left, offset);     // From[1, 0] CCW
+                this.DigLine(-x + x0, y + y0, x - y + 1, DigDirection.Right, offset);   // From[-1, 0] CW
+                this.DigLine(x + x0, -y + y0, x - y + 1, DigDirection.Left, offset);    // From[1, 0] CW
+                this.DigLine(-x + x0, -y + y0, x - y + 1, DigDirection.Right, offset);  // From[-1, 0] CCW
+                this.DigLine(y + x0, x + y0, x - y, DigDirection.Down, offset);     // From[0, 1] CW
+                this.DigLine(-y + x0, x + y0, x - y, DigDirection.Down, offset);    // From[0, 1] CCW
+                this.DigLine(y + x0, -x + y0, x - y, DigDirection.Up, offset);      // From[0, -1] CCW
+                this.DigLine(-y + x0, -x + y0, x - y, DigDirection.Up, offset);     // From[0, -1] CW
 
                 // Increment y
                 y++;
