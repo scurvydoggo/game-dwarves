@@ -28,7 +28,7 @@ namespace Dwarves.Component.Terrain
             var offset = new Vector2(Math.Abs(hitPoint.x - position.X), Math.Abs(hitPoint.y - position.Y));
 
             // Dig at the touched point
-            TerrainManager.Instance.TerrainMutator.DigCircle(position, 5, offset);
+            TerrainManager.Instance.TerrainMutator.DigCircle(position, 3, offset);
         }
     }
 }
