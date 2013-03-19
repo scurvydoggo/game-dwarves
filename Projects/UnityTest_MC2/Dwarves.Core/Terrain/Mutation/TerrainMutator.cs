@@ -104,8 +104,8 @@ namespace Dwarves.Core.Terrain.Mutation
             // Begin at the left-most point of the circle moving to the right for each segment on the circumference
             // 'A' refers to the points in the top-half of the circle; 'B' the bottom-half
             float yA, yB;
-            float yAPrev = origin.y;
-            float yBPrev = yAPrev;
+            float yAPrev = origin.y - 1;    // (Minus 1 here so that in the first iteration it begins on origin.y)
+            float yBPrev = origin.y;
 
             // Determine where the circle cuts each cell boundary in the terrain grid
             int x = (int)Math.Ceiling(origin.x - radius);
@@ -114,23 +114,39 @@ namespace Dwarves.Core.Terrain.Mutation
             {
                 // Calculate the Y values where the circle cuts the cell boundary at X
                 float dX = x - origin.x;
-                float dY = (float)Math.Sqrt(dX * dX - radius2);
+                float dY = (float)Math.Sqrt(radius2 - dX * dX);
                 yA = dY + origin.y;
                 yB = -dY + origin.y;
+                
+                // Calculate the lower-end of the segment through which the circle cuts the boundary
+                int xBase = x - 1;
+                int yABase = (int)Math.Floor(yA);
+                int yBBase = (int)Math.Floor(yB);
 
                 // Step vertically through the cells that the circle passes through before reaching X
-                for (int yAStep = ((int)yAPrev) + 1; yAStep < (int)yA; yAStep++)
+                for (int yAStep = (int)Math.Floor(yAPrev) + 1; yAStep <= yABase; yAStep++)
                 {
                     // Calculate the X value where the circle cuts the cell boundary at yAGrid
-                    float xA = (float)Math.Sqrt(yAStep * yAStep - radius2) + origin.x;
+                    float dYAStep = yAStep - origin.y;
+                    float dXA = (float)Math.Sqrt(radius2 - dYAStep * dYAStep);
+                    float xA = origin.x + (x < 0 ? -dXA : dXA);
+
+                    // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                 }
 
                 // Step vertically through the cells that the circle passes through before reaching X
-                for (int yBStep = ((int)yBPrev) - 1; yBStep > (int)yB; yBStep--)
+                for (int yBStep = (int)Math.Floor(yBPrev) - 1; yBStep > yBBase; yBStep--)
                 {
                     // Calculate the X value where the circle cuts the cell boundary at yBGrid
-                    float xB = (float)Math.Sqrt(yBStep * yBStep - radius2) + origin.x;
+                    float dYBStep = yBStep - origin.y;
+                    float dXB = (float)Math.Sqrt(radius2 - dYBStep * dYBStep);
+                    float xB = origin.x + (x < 0 ? -dXB : dXB);
+
+                    // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                 }
+
+                // TODO: Dig along the segment from [xBase, yABase] to [xBase, yABase + 1] at yA
+                // TODO: Dig along the segment from [xBase, yBBase] to [xBase, yBBase + 1] at yB
 
                 yAPrev = yA;
                 yBPrev = yB;
