@@ -24,11 +24,10 @@ namespace Dwarves.Component.Terrain
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
         public override void ProcessTouch(Vector3 hitPoint)
         {
-            var position = new Vector2I((int)Math.Floor(hitPoint.x), (int)Math.Floor(hitPoint.y));
-            var offset = new Vector2(Math.Abs(hitPoint.x - position.X), Math.Abs(hitPoint.y - position.Y));
+            var position = new Vector2(hitPoint.x, hitPoint.y);
 
             // Dig at the touched point
-            TerrainManager.Instance.TerrainMutator.DigCircle(position, 3, offset);
+            TerrainManager.Instance.TerrainMutator.DigCircle(position, 3);
         }
     }
 }

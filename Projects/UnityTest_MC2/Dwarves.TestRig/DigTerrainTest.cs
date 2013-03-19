@@ -5,7 +5,6 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestRig
 {
-    using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using Dwarves.Core.Terrain.Engine;
     using Dwarves.Core.Terrain.Mutation;
@@ -44,7 +43,7 @@ namespace Dwarves.TestRig
         /// </summary>
         public void Update()
         {
-            this.mutator.DigCircle(new Vector2I(0, 0), 3, new Vector2(0.3f, 0.3f));
+            this.mutator.DigCircle(new Vector2(0.3f, 0.3f), 5f);
         }
     }
 }

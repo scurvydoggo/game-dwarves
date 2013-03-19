@@ -93,6 +93,16 @@ namespace Dwarves.Core.Terrain.Mutation
         }
 
         /// <summary>
+        /// Dig a circle in the terrain with the given origin and radius.
+        /// </summary>
+        /// <param name="origin">The origin.</param>
+        /// <param name="radius">The radius.</param>
+        public void DigCircle(Vector2 origin, float radius)
+        {
+            // TODO
+        }
+
+        /// <summary>
         /// Dig a circle in the terrain of the given origin point and radius.
         /// </summary>
         /// <param name="origin">The origin.</param>
