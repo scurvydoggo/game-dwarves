@@ -15,6 +15,9 @@ namespace Dwarves.TestRig
     /// </summary>
     public class DigTerrainTest : ITest
     {
+        /// <summary>
+        /// The terrain mutator.
+        /// </summary>
         private TerrainMutator mutator;
 
         /// <summary>

@@ -26,29 +26,35 @@ namespace Dwarves.Core.Terrain.Mutation
         }
 
         /// <summary>
-        /// The direction to dig.
+        /// The axis on which the grid segment lies.
         /// </summary>
-        public enum DigDirection
+        public enum Axis
         {
             /// <summary>
-            /// Dig up.
+            /// The X axis.
             /// </summary>
-            Up,
+            X,
 
             /// <summary>
-            /// Dig down.
+            /// The Y axis.
             /// </summary>
-            Down,
+            Y
+        }
+
+        /// <summary>
+        /// The direction to dig.
+        /// </summary>
+        public enum Direction
+        {
+            /// <summary>
+            /// Dig to the right or upwards, depending on the axis.
+            /// </summary>
+            RightOrUp,
 
             /// <summary>
-            /// Dig left.
+            /// Dig to the left or downwards, depending on the axis.
             /// </summary>
-            Left,
-
-            /// <summary>
-            /// Dig right.
-            /// </summary>
-            Right
+            LeftOrDown
         }
 
         /// <summary>
@@ -62,11 +68,11 @@ namespace Dwarves.Core.Terrain.Mutation
         public int DigDepth { get; private set; }
 
         /// <summary>
-        /// Dig at the given point.
+        /// Set the density of the given point (from z=0 to z=DigDepth).
         /// </summary>
         /// <param name="position">The position.</param>
-        /// <param name="offset">The fractional offset between [0, 0] and [1, 1].</param>
-        public void DigPoint(Vector2I position, Vector2 offset)
+        /// <param name="density">The density.</param>
+        public void SetDensity(Vector2I position, byte density)
         {
             Vector2I chunk = this.Terrain.ChunkIndex(position.X, position.Y);
 
@@ -74,16 +80,14 @@ namespace Dwarves.Core.Terrain.Mutation
             IVoxels voxels;
             if (this.Terrain.TryGetChunk(chunk, out voxels))
             {
-                // Dig down to the given depth
                 for (int z = 0; z < this.DigDepth; z++)
                 {
-                    Vector2I chunkPos = this.Terrain.WorldToChunk(position);
-
                     // Get the voxel
+                    Vector2I chunkPos = this.Terrain.WorldToChunk(position);
                     Voxel voxel = voxels[chunkPos.X, chunkPos.Y, z];
 
                     // Update the voxel density
-                    voxel.Density = Voxel.DensityMax;
+                    voxel.Density = density;
                     voxels[chunkPos.X, chunkPos.Y, z] = voxel;
                 }
 
@@ -114,7 +118,7 @@ namespace Dwarves.Core.Terrain.Mutation
             {
                 // Calculate the Y values where the circle cuts the cell boundary at X
                 float dX = x - origin.x;
-                float dY = (float)Math.Sqrt(radius2 - dX * dX);
+                float dY = (float)Math.Sqrt(radius2 - (dX * dX));
                 yA = dY + origin.y;
                 yB = -dY + origin.y;
                 
@@ -128,7 +132,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 {
                     // Calculate the X value where the circle cuts the cell boundary at yAGrid
                     float dYAStep = yAStep - origin.y;
-                    float dXA = (float)Math.Sqrt(radius2 - dYAStep * dYAStep);
+                    float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
                     float xA = origin.x + (x < 0 ? -dXA : dXA);
 
                     // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
@@ -139,7 +143,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 {
                     // Calculate the X value where the circle cuts the cell boundary at yBGrid
                     float dYBStep = yBStep - origin.y;
-                    float dXB = (float)Math.Sqrt(radius2 - dYBStep * dYBStep);
+                    float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
                     float xB = origin.x + (x < 0 ? -dXB : dXB);
 
                     // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
@@ -155,103 +159,16 @@ namespace Dwarves.Core.Terrain.Mutation
         }
 
         /// <summary>
-        /// Dig a circle in the terrain of the given origin point and radius.
+        /// Dig a segment between two adjacent points in the voxel terrain.
         /// </summary>
-        /// <param name="origin">The origin.</param>
-        /// <param name="radius">The radius.</param>
-        /// <param name="offset">The fractional offset between [0, 0] and [1, 1].</param>
-        public void DigCircle(Vector2I origin, int radius, Vector2 offset)
+        /// <param name="bottomLeft">The bottom-left point of the segment.</param>
+        /// <param name="value">The value between 0.0 and 1.0, indicating at what point along the segment the terrain
+        /// surface passes through.</param>
+        /// <param name="axis">The axis along which the segment lies.</param>
+        /// <param name="direction">The direction to dig.</param>
+        public void DigSegment(Vector2I bottomLeft, float value, Axis axis, Direction direction)
         {
-            int x0 = origin.X;
-            int y0 = origin.Y;
-
-            // Step through the points of a circle's octant (from [1, 0] moving CCW) and reflect to the other octants
-            int x = radius;
-            int y = 0;
-            int changeX = 1 - (radius << 1);
-            int changeY = 0;
-            int radiusError = 0;
-            while (x >= y)
-            {
-                // Dig a line for each octant
-                this.DigLine(x + x0, y + y0, x - y, DigDirection.Left, offset);     // From[1, 0] CCW
-                this.DigLine(-x + x0, y + y0, x - y, DigDirection.Right, offset);   // From[-1, 0] CW
-                this.DigLine(x + x0, -y + y0, x - y, DigDirection.Left, offset);    // From[1, 0] CW
-                this.DigLine(-x + x0, -y + y0, x - y, DigDirection.Right, offset);  // From[-1, 0] CCW
-                this.DigLine(y + x0, x + y0, x - y - 1, DigDirection.Down, offset);     // From[0, 1] CW
-                this.DigLine(-y + x0, x + y0, x - y - 1, DigDirection.Down, offset);    // From[0, 1] CCW
-                this.DigLine(y + x0, -x + y0, x - y - 1, DigDirection.Up, offset);      // From[0, -1] CCW
-                this.DigLine(-y + x0, -x + y0, x - y - 1, DigDirection.Up, offset);     // From[0, -1] CW
-
-                // Increment y
-                y++;
-
-                // Decrement x if it is closer to the point to the left (from perspective of 1st octant)
-                radiusError += changeY;
-                changeY += 2;
-                if ((radiusError << 1) + changeX > 0)
-                {
-                    x--;
-                    radiusError += changeX;
-                    changeX += 2;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Dig a line.
-        /// </summary>
-        /// <param name="originX">The X origin.</param>
-        /// <param name="originY">The Y origin.</param>
-        /// <param name="length">The length.</param>
-        /// <param name="direction">The direction.</param>
-        /// <param name="offset">The fractional offset between [0, 0] and [1, 1].</param>
-        public void DigLine(int originX, int originY, int length, DigDirection direction, Vector2 offset)
-        {
-            // Sanity check
-            if (length <= 0)
-            {
-                return;
-            }
-
-            // Determine the increment values for each step
-            int stepX;
-            int stepY;
-            switch (direction)
-            {
-                case DigDirection.Right:
-                    stepX = 1;
-                    stepY = 0;
-                    break;
-
-                case DigDirection.Left:
-                    stepX = -1;
-                    stepY = 0;
-                    break;
-
-                case DigDirection.Up:
-                    stepX = 0;
-                    stepY = 1;
-                    break;
-
-                case DigDirection.Down:
-                    stepX = 0;
-                    stepY = -1;
-                    break;
-
-                default:
-                    throw new ArgumentException("direction");
-            }
-
-            // Step through each point in the line
-            int dX = 0;
-            int dY = 0;
-            for (int l = 0; l <= length; l++)
-            {
-                this.DigPoint(new Vector2I(originX + dX, originY + dY), offset);
-                dX += stepX;
-                dY += stepY;
-            }
+            throw new NotImplementedException();
         }
     }
 }
