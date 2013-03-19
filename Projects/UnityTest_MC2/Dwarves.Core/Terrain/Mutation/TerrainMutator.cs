@@ -99,7 +99,43 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="radius">The radius.</param>
         public void DigCircle(Vector2 origin, float radius)
         {
-            // TODO
+            float radius2 = radius * radius;
+
+            // Begin at the left-most point of the circle moving to the right for each segment on the circumference
+            // 'A' refers to the points in the top-half of the circle; 'B' the bottom-half
+            float yA, yB;
+            float yAPrev = origin.y;
+            float yBPrev = yAPrev;
+
+            // Determine where the circle cuts each cell boundary in the terrain grid
+            int x = (int)Math.Ceiling(origin.x - radius);
+            float xEnd = origin.x + radius;
+            while (x < xEnd)
+            {
+                // Calculate the Y values where the circle cuts the cell boundary at X
+                float dX = x - origin.x;
+                float dY = (float)Math.Sqrt(dX * dX - radius2);
+                yA = dY + origin.y;
+                yB = -dY + origin.y;
+
+                // Step vertically through the cells that the circle passes through before reaching X
+                for (int yAStep = ((int)yAPrev) + 1; yAStep < (int)yA; yAStep++)
+                {
+                    // Calculate the X value where the circle cuts the cell boundary at yAGrid
+                    float xA = (float)Math.Sqrt(yAStep * yAStep - radius2) + origin.x;
+                }
+
+                // Step vertically through the cells that the circle passes through before reaching X
+                for (int yBStep = ((int)yBPrev) - 1; yBStep > (int)yB; yBStep--)
+                {
+                    // Calculate the X value where the circle cuts the cell boundary at yBGrid
+                    float xB = (float)Math.Sqrt(yBStep * yBStep - radius2) + origin.x;
+                }
+
+                yAPrev = yA;
+                yBPrev = yB;
+                x++;
+            }
         }
 
         /// <summary>
