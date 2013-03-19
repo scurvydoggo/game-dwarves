@@ -21,7 +21,7 @@ namespace Dwarves.TestRig
         /// <param name="args">The application args.</param>
         private static void Main(string[] args)
         {
-            ITest test = new CreateTerrainTest();
+            ITest test = new DigTerrainTest();
 
             while (true)
             {

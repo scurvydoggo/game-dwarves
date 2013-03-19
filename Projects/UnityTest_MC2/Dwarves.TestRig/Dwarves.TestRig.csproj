@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DigTerrainTest.cs" />
     <Compile Include="CreateTerrainTest.cs" />
     <Compile Include="ITest.cs" />
     <Compile Include="Program.cs" />
