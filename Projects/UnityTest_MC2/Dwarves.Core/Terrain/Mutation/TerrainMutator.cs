@@ -107,9 +107,9 @@ namespace Dwarves.Core.Terrain.Mutation
 
             // Begin at the left-most point of the circle moving to the right for each segment on the circumference
             // 'A' refers to the points in the top-half of the circle; 'B' the bottom-half
+            float yAPrev = origin.y;
+            float yBPrev = yAPrev;
             float yA, yB;
-            float yAPrev = origin.y - 1;    // (Minus 1 here so that in the first iteration it begins on origin.y)
-            float yBPrev = origin.y;
 
             // Determine where the circle cuts each cell boundary in the terrain grid
             int x = (int)Math.Ceiling(origin.x - radius);
@@ -128,34 +128,56 @@ namespace Dwarves.Core.Terrain.Mutation
                 int yBBase = (int)Math.Floor(yB);
 
                 // Step vertically through the cells that the circle passes through before reaching X
-                for (int yAStep = (int)Math.Floor(yAPrev) + 1; yAStep <= yABase; yAStep++)
+                if (((int)dX) <= 0)
                 {
-                    // Calculate the X value where the circle cuts the cell boundary at yAGrid
-                    float dYAStep = yAStep - origin.y;
-                    float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
-                    float xA = origin.x + (x < 0 ? -dXA : dXA);
+                    for (int yAStep = (int)Math.Floor(yAPrev) + 1; yAStep <= yABase; yAStep++)
+                    {
+                        float dYAStep = yAStep - origin.y;
+                        float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
+                        float xA = -dXA + origin.x;
 
-                    // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                        // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                    }
+
+                    for (int yBStep = (int)Math.Floor(yBPrev); yBStep > yBBase; yBStep--)
+                    {
+                        float dYBStep = yBStep - origin.y;
+                        float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
+                        float xB = -dXB + origin.x;
+
+                        // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                    }
+                }
+                else if (((int)dX) >= 0)
+                {
+                    for (int yAStep = (int)Math.Floor(yAPrev); yAStep > yABase; yAStep--)
+                    {
+                        float dYAStep = yAStep - origin.y;
+                        float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
+                        float xA = dXA + origin.x;
+
+                        // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                    }
+
+                    for (int yBStep = (int)Math.Floor(yBPrev) + 1; yBStep <= yBBase; yBStep++)
+                    {
+                        float dYBStep = yBStep - origin.y;
+                        float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
+                        float xB = dXB + origin.x;
+
+                        // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                    }
                 }
 
-                // Step vertically through the cells that the circle passes through before reaching X
-                for (int yBStep = (int)Math.Floor(yBPrev) - 1; yBStep > yBBase; yBStep--)
-                {
-                    // Calculate the X value where the circle cuts the cell boundary at yBGrid
-                    float dYBStep = yBStep - origin.y;
-                    float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
-                    float xB = origin.x + (x < 0 ? -dXB : dXB);
-
-                    // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
-                }
-
-                // TODO: Dig along the segment from [xBase, yABase] to [xBase, yABase + 1] at yA
-                // TODO: Dig along the segment from [xBase, yBBase] to [xBase, yBBase + 1] at yB
+                // TODO: Dig along the segment from [xBase + 1, yABase] to [xBase + 1, yABase + 1] at yA
+                // TODO: Dig along the segment from [xBase + 1, yBBase] to [xBase + 1, yBBase + 1] at yB
 
                 yAPrev = yA;
                 yBPrev = yB;
                 x++;
             }
+
+            // TODO: Dig the vertical cutting points in the right-most part of the circle
         }
 
         /// <summary>
