@@ -177,7 +177,24 @@ namespace Dwarves.Core.Terrain.Mutation
                 x++;
             }
 
-            // TODO: Dig the vertical cutting points in the right-most part of the circle
+            // Dig the last vertical segments of the circle
+            for (int yAStep = (int)Math.Floor(yAPrev); yAStep > 0; yAStep--)
+            {
+                float dYAStep = yAStep - origin.y;
+                float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
+                float xA = dXA + origin.x;
+
+                // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+            }
+
+            for (int yBStep = (int)Math.Floor(yBPrev) + 1; yBStep <= 0; yBStep++)
+            {
+                float dYBStep = yBStep - origin.y;
+                float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
+                float xB = dXB + origin.x;
+
+                // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+            }
         }
 
         /// <summary>
