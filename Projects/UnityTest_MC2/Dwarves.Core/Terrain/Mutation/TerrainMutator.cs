@@ -120,7 +120,45 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="density">The density.</param>
         public void SetDensityLine(Vector2I start, int length, Axis axis, Direction direction, byte density)
         {
-            throw new NotImplementedException();
+            if (length < 0)
+            {
+                return;
+            }
+
+            if (axis == Axis.X)
+            {
+                if (direction == Direction.RightOrUp)
+                {
+                    for (int x = start.X; x < start.X + length; x++)
+                    {
+                        this.SetDensityPoint(new Vector2I(x, start.Y), density);
+                    }
+                }
+                else
+                {
+                    for (int x = start.X; x > start.X - length; x--)
+                    {
+                        this.SetDensityPoint(new Vector2I(x, start.Y), density);
+                    }
+                }
+            }
+            else
+            {
+                if (direction == Direction.RightOrUp)
+                {
+                    for (int y = start.Y; y < start.Y + length; y++)
+                    {
+                        this.SetDensityPoint(new Vector2I(start.X, y), density);
+                    }
+                }
+                else
+                {
+                    for (int y = start.Y; y > start.Y - length; y--)
+                    {
+                        this.SetDensityPoint(new Vector2I(start.X, y), density);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -131,6 +169,7 @@ namespace Dwarves.Core.Terrain.Mutation
         public void DigCircle(Vector2 origin, float radius)
         {
             float radius2 = radius * radius;
+            Vector2I o = new Vector2I((int)Math.Round(origin.x), (int)Math.Round(origin.y));
 
             // Begin at the left-most point of the circle moving to the right for each segment on the circumference
             // 'A' refers to the points in the top-half of the circle; 'B' the bottom-half
@@ -163,7 +202,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
                         float xA = -dXA + origin.x;
 
-                        // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                        // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                        var segment = new Vector2I(xBase, yAStep);
+                        this.SetDensityLine(o, o.X - segment.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.DigSegment(segment, Axis.X, Direction.LeftOrDown, xA - xBase);
                     }
 
                     for (int yBStep = (int)Math.Floor(yBPrev); yBStep > yBBase; yBStep--)
@@ -172,7 +214,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
                         float xB = -dXB + origin.x;
 
-                        // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                        // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                        var segment = new Vector2I(xBase, yBStep);
+                        this.SetDensityLine(o, o.X - segment.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.DigSegment(segment, Axis.X, Direction.LeftOrDown, xB - xBase);
                     }
                 }
                 else if (((int)dX) >= 0)
@@ -183,7 +228,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
                         float xA = dXA + origin.x;
 
-                        // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                        // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                        var segment = new Vector2I(xBase, yAStep);
+                        this.SetDensityLine(o, segment.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.DigSegment(segment, Axis.X, Direction.RightOrUp, xA - xBase);
                     }
 
                     for (int yBStep = (int)Math.Floor(yBPrev) + 1; yBStep <= yBBase; yBStep++)
@@ -192,12 +240,18 @@ namespace Dwarves.Core.Terrain.Mutation
                         float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
                         float xB = dXB + origin.x;
 
-                        // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                        // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                        var segment = new Vector2I(xBase, yBStep);
+                        this.SetDensityLine(o, segment.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.DigSegment(segment, Axis.X, Direction.RightOrUp, xB - xBase);
                     }
                 }
 
-                // TODO: Dig along the segment from [xBase + 1, yABase] to [xBase + 1, yABase + 1] at yA
-                // TODO: Dig along the segment from [xBase + 1, yBBase] to [xBase + 1, yBBase + 1] at yB
+                // Dig along the segment from [xBase + 1, yABase] to [xBase + 1, yABase + 1] at yA
+                this.DigSegment(new Vector2I(xBase + 1, yABase), Axis.Y, Direction.RightOrUp, yA - yABase);
+
+                // Dig along the segment from [xBase + 1, yBBase] to [xBase + 1, yBBase + 1] at yB
+                this.DigSegment(new Vector2I(xBase + 1, yBBase), Axis.Y, Direction.LeftOrDown, yB - yBBase);
 
                 yAPrev = yA;
                 yBPrev = yB;
@@ -235,7 +289,7 @@ namespace Dwarves.Core.Terrain.Mutation
         /// of the segment.</param>
         public void DigSegment(Vector2I bottomLeft, Axis axis, Direction direction, float intersection)
         {
-            throw new NotImplementedException();
+            // TODO
         }
 
         #endregion
