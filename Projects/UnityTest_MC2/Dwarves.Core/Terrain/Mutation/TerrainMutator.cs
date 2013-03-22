@@ -14,6 +14,8 @@ namespace Dwarves.Core.Terrain.Mutation
     /// </summary>
     public class TerrainMutator
     {
+        #region Constructor
+
         /// <summary>
         /// Initialises a new instance of the TerrainMutator class.
         /// </summary>
@@ -24,6 +26,10 @@ namespace Dwarves.Core.Terrain.Mutation
             this.Terrain = terrain;
             this.DigDepth = digDepth;
         }
+
+        #endregion
+
+        #region Enums
 
         /// <summary>
         /// The axis on which the grid segment lies.
@@ -57,6 +63,10 @@ namespace Dwarves.Core.Terrain.Mutation
             LeftOrDown
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>
         /// Gets the terrain.
         /// </summary>
@@ -67,12 +77,16 @@ namespace Dwarves.Core.Terrain.Mutation
         /// </summary>
         public int DigDepth { get; private set; }
 
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// Set the density of the given point (from z=0 to z=DigDepth).
         /// </summary>
         /// <param name="position">The position.</param>
         /// <param name="density">The density.</param>
-        public void SetDensity(Vector2I position, byte density)
+        public void SetDensityPoint(Vector2I position, byte density)
         {
             Vector2I chunk = this.Terrain.ChunkIndex(position.X, position.Y);
 
@@ -94,6 +108,19 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Flag the chunk as requiring a rebuild
                 this.Terrain.FlagRebuildRequired(chunk, true);
             }
+        }
+
+        /// <summary>
+        /// Set the density at each point along a straight line from the start point.
+        /// </summary>
+        /// <param name="start">The start point.</param>
+        /// <param name="length">The length.</param>
+        /// <param name="axis">The axis along which the line lies.</param>
+        /// <param name="direction">The direction to dig.</param>
+        /// <param name="density">The density.</param>
+        public void SetDensityLine(Vector2I start, int length, Axis axis, Direction direction, byte density)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -201,13 +228,16 @@ namespace Dwarves.Core.Terrain.Mutation
         /// Dig a segment between two adjacent points in the voxel terrain.
         /// </summary>
         /// <param name="bottomLeft">The bottom-left point of the segment.</param>
-        /// <param name="value">The value between 0.0 and 1.0, indicating at what point along the segment the terrain
-        /// surface passes through.</param>
         /// <param name="axis">The axis along which the segment lies.</param>
         /// <param name="direction">The direction to dig.</param>
-        public void DigSegment(Vector2I bottomLeft, float value, Axis axis, Direction direction)
+        /// <param name="intersection">A value between 0.0 and 1.0 indicating at what point along the segment the
+        /// terrain surface passes through. 0.0 indicates the bottom/left of the segment; 1.0 indicates the top/right
+        /// of the segment.</param>
+        public void DigSegment(Vector2I bottomLeft, Axis axis, Direction direction, float intersection)
         {
             throw new NotImplementedException();
         }
+
+        #endregion
     }
 }
