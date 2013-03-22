@@ -46,7 +46,7 @@ namespace Dwarves.TestRig
         /// </summary>
         public void Update()
         {
-            this.mutator.DigCircle(new Vector2(0.3f, 0.3f), 5f);
+            this.mutator.DigCircle(new Vector2(50, -100), 10);
         }
     }
 }

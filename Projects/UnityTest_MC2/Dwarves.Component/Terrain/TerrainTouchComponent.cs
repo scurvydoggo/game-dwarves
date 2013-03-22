@@ -27,7 +27,7 @@ namespace Dwarves.Component.Terrain
             var position = new Vector2(hitPoint.x, hitPoint.y);
 
             // Dig at the touched point
-            TerrainManager.Instance.TerrainMutator.DigCircle(position, 3);
+            TerrainManager.Instance.TerrainMutator.DigCircle(position, 5);
         }
     }
 }

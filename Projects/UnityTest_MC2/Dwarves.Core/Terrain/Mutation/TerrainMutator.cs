@@ -169,7 +169,7 @@ namespace Dwarves.Core.Terrain.Mutation
         public void DigCircle(Vector2 origin, float radius)
         {
             float radius2 = radius * radius;
-            Vector2I o = new Vector2I((int)Math.Round(origin.x), (int)Math.Round(origin.y));
+            var originI = new Vector2I((int)Math.Round(origin.x), (int)Math.Round(origin.y));
 
             // Begin at the left-most point of the circle moving to the right for each segment on the circumference
             // 'A' refers to the points in the top-half of the circle; 'B' the bottom-half
@@ -180,6 +180,7 @@ namespace Dwarves.Core.Terrain.Mutation
             // Determine where the circle cuts each cell boundary in the terrain grid
             int x = (int)Math.Ceiling(origin.x - radius);
             float xEnd = origin.x + radius;
+            int xBase = x - 1;
             while (x < xEnd)
             {
                 // Calculate the Y values where the circle cuts the cell boundary at X
@@ -189,7 +190,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 yB = -dY + origin.y;
                 
                 // Calculate the lower-end of the segment through which the circle cuts the boundary
-                int xBase = x - 1;
+                xBase = x - 1;
                 int yABase = (int)Math.Floor(yA);
                 int yBBase = (int)Math.Floor(yB);
 
@@ -203,9 +204,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float xA = -dXA + origin.x;
 
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
-                        var segment = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, o.X - segment.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
-                        this.DigSegment(segment, Axis.X, Direction.LeftOrDown, xA - xBase);
+                        var o = new Vector2I(originI.X, yAStep);
+                        var s = new Vector2I(xBase, yAStep);
+                        this.SetDensityLine(o, o.X - s.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.DigSegment(s, Axis.X, Direction.LeftOrDown, xA - xBase);
                     }
 
                     for (int yBStep = (int)Math.Floor(yBPrev); yBStep > yBBase; yBStep--)
@@ -215,9 +217,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float xB = -dXB + origin.x;
 
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
-                        var segment = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, o.X - segment.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
-                        this.DigSegment(segment, Axis.X, Direction.LeftOrDown, xB - xBase);
+                        var o = new Vector2I(originI.X, yBStep);
+                        var s = new Vector2I(xBase, yBStep);
+                        this.SetDensityLine(o, o.X - s.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.DigSegment(s, Axis.X, Direction.LeftOrDown, xB - xBase);
                     }
                 }
                 else if (((int)dX) >= 0)
@@ -229,9 +232,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float xA = dXA + origin.x;
 
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
-                        var segment = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, segment.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
-                        this.DigSegment(segment, Axis.X, Direction.RightOrUp, xA - xBase);
+                        var o = new Vector2I(originI.X, yAStep);
+                        var s = new Vector2I(xBase, yAStep);
+                        this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
                     }
 
                     for (int yBStep = (int)Math.Floor(yBPrev) + 1; yBStep <= yBBase; yBStep++)
@@ -241,9 +245,10 @@ namespace Dwarves.Core.Terrain.Mutation
                         float xB = dXB + origin.x;
 
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
-                        var segment = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, segment.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
-                        this.DigSegment(segment, Axis.X, Direction.RightOrUp, xB - xBase);
+                        var o = new Vector2I(originI.X, yBStep);
+                        var s = new Vector2I(xBase, yBStep);
+                        this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
                     }
                 }
 
@@ -259,22 +264,30 @@ namespace Dwarves.Core.Terrain.Mutation
             }
 
             // Dig the last vertical segments of the circle
-            for (int yAStep = (int)Math.Floor(yAPrev); yAStep > 0; yAStep--)
+            for (int yAStep = (int)Math.Floor(yAPrev); yAStep > origin.y; yAStep--)
             {
                 float dYAStep = yAStep - origin.y;
                 float dXA = (float)Math.Sqrt(radius2 - (dYAStep * dYAStep));
                 float xA = dXA + origin.x;
 
-                // TODO: Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
+                var o = new Vector2I(originI.X, yAStep);
+                var s = new Vector2I(xBase, yAStep);
+                this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
             }
 
-            for (int yBStep = (int)Math.Floor(yBPrev) + 1; yBStep <= 0; yBStep++)
+            for (int yBStep = (int)Math.Floor(yBPrev) + 1; yBStep <= origin.y; yBStep++)
             {
                 float dYBStep = yBStep - origin.y;
                 float dXB = (float)Math.Sqrt(radius2 - (dYBStep * dYBStep));
                 float xB = dXB + origin.x;
 
-                // TODO: Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
+                var o = new Vector2I(originI.X, yBStep);
+                var s = new Vector2I(xBase, yBStep);
+                this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
             }
         }
 
