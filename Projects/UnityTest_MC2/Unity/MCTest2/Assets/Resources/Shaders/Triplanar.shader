@@ -1,6 +1,8 @@
 Shader "Custom/Triplanar" {
 	Properties {
-		_MainTex ("Base (RGB)", 2D) = "white" {}
+		_Front ("Base (RGB)", 2D) = "white" {}
+		_Top ("Base (RGB)", 2D) = "white" {}
+		_Side ("Base (RGB)", 2D) = "white" {}
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -9,14 +11,14 @@ Shader "Custom/Triplanar" {
 		CGPROGRAM
 		#pragma surface surf Lambert
 
-		sampler2D _MainTex;
+		sampler2D _Front;
 
 		struct Input {
-			float2 uv_MainTex;
+			float2 uv_Front;
 		};
 
 		void surf (Input IN, inout SurfaceOutput o) {
-			half4 c = tex2D (_MainTex, IN.uv_MainTex);
+			half4 c = tex2D (_Front, IN.uv_Front);
 			o.Albedo = c.rgb;
 			o.Alpha = c.a;
 		}
