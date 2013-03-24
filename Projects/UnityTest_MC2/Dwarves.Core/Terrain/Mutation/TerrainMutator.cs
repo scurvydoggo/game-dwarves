@@ -94,6 +94,7 @@ namespace Dwarves.Core.Terrain.Mutation
             IVoxels voxels;
             if (this.Terrain.TryGetChunk(chunk, out voxels))
             {
+                bool digOccurred = false;
                 for (int z = 0; z < this.DigDepth; z++)
                 {
                     // Get the voxel
@@ -101,12 +102,19 @@ namespace Dwarves.Core.Terrain.Mutation
                     Voxel voxel = voxels[chunkPos.X, chunkPos.Y, z];
 
                     // Update the voxel density
-                    voxel.Density = density;
-                    voxels[chunkPos.X, chunkPos.Y, z] = voxel;
+                    if (voxel.Density < density)
+                    {
+                        voxel.Density = density;
+                        voxels[chunkPos.X, chunkPos.Y, z] = voxel;
+                        digOccurred = true;
+                    }
                 }
 
                 // Flag the chunk as requiring a rebuild
-                this.Terrain.FlagRebuildRequired(chunk, true);
+                if (digOccurred)
+                {
+                    this.Terrain.FlagRebuildRequired(chunk, true);
+                }
             }
         }
 
@@ -206,7 +214,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                         var o = new Vector2I(originI.X, yAStep);
                         var s = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, o.X - s.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.LeftOrDown, xA - xBase);
                     }
 
@@ -219,7 +227,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                         var o = new Vector2I(originI.X, yBStep);
                         var s = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, o.X - s.X - 2, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.LeftOrDown, xB - xBase);
                     }
                 }
@@ -234,7 +242,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                         var o = new Vector2I(originI.X, yAStep);
                         var s = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
                     }
 
@@ -247,7 +255,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                         var o = new Vector2I(originI.X, yBStep);
                         var s = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
                     }
                 }
@@ -273,7 +281,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                 var o = new Vector2I(originI.X, yAStep);
                 var s = new Vector2I(xBase, yAStep);
-                this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
                 this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
             }
 
@@ -286,7 +294,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                 var o = new Vector2I(originI.X, yBStep);
                 var s = new Vector2I(xBase, yBStep);
-                this.SetDensityLine(o, s.X - o.X - 1, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
                 this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
             }
         }
@@ -302,7 +310,43 @@ namespace Dwarves.Core.Terrain.Mutation
         /// of the segment.</param>
         public void DigSegment(Vector2I bottomLeft, Axis axis, Direction direction, float intersection)
         {
-            // TODO
+            byte dBottomLeft, dTopRight;
+            if (direction == Direction.RightOrUp)
+            {
+                if (intersection > 0.5f)
+                {
+                    dBottomLeft = Voxel.DensityMax;
+                    dTopRight = (byte)(Voxel.DensityMax * (intersection - 0.5f));
+                }
+                else
+                {
+                    dBottomLeft = (byte)(Voxel.DensityMax * (intersection + 0.5f));
+                    dTopRight = Voxel.DensityMin;
+                }
+            }
+            else
+            {
+                if (intersection > 0.5f)
+                {
+                    dBottomLeft = Voxel.DensityMin;
+                    dTopRight = (byte)(Voxel.DensityMax * (intersection - 0.5f));
+                }
+                else
+                {
+                    dBottomLeft = (byte)(Voxel.DensityMax * (0.5f - intersection));
+                    dTopRight = Voxel.DensityMax;
+                }
+            }
+
+            this.SetDensityPoint(bottomLeft, dBottomLeft);
+            if (axis == Axis.X)
+            {
+                this.SetDensityPoint(new Vector2I(bottomLeft.X + 1, bottomLeft.Y), dTopRight);
+            }
+            else
+            {
+                this.SetDensityPoint(new Vector2I(bottomLeft.X, bottomLeft.Y + 1), dTopRight);
+            }
         }
 
         #endregion
