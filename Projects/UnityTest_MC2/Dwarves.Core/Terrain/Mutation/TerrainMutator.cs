@@ -198,7 +198,6 @@ namespace Dwarves.Core.Terrain.Mutation
                 yB = -dY + origin.y;
                 
                 // Calculate the lower-end of the segment through which the circle cuts the boundary
-                xBase = x - 1;
                 int yABase = (int)Math.Floor(yA);
                 int yBBase = (int)Math.Floor(yB);
 
@@ -269,6 +268,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 yAPrev = yA;
                 yBPrev = yB;
                 x++;
+                xBase = x - 1;
             }
 
             // Dig the last vertical segments of the circle
@@ -329,7 +329,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 if (intersection > 0.5f)
                 {
                     dBottomLeft = Voxel.DensityMin;
-                    dTopRight = (byte)(Voxel.DensityMax * (intersection - 0.5f));
+                    dTopRight = (byte)(Voxel.DensityMax * (1.5f - intersection));
                 }
                 else
                 {
