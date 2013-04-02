@@ -19,18 +19,19 @@ Shader "Custom/Terrain" {
 			    float3 normal : TEXCOORD1;
 			};
 			
+		    sampler2D _Front;
+		    sampler2D _Top;
+		    sampler2D _Side;
+			
 			v2f vert (appdata_base v)
 			{
 			    v2f o;
 			    o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			    o.posOther = mul(UNITY_MATRIX_MVP, v.vertex);
+			    o.posOther = mul(UNITY_MATRIX_MVP, v.vertex * 0.05);
 			    o.normal = normalize(v.normal);
 			    return o;
 			}
 			
-		    sampler2D _Front;
-		    sampler2D _Top;
-		    sampler2D _Side;
 			half4 frag (v2f i) : COLOR
 			{
 				float3 blend_weights = abs(i.normal.xyz);
