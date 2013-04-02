@@ -3,6 +3,7 @@ Shader "Custom/Terrain" {
 		_Front ("Front", 2D) = "white" {}
 		_Top ("Top", 2D) = "white" {}
 		_Side ("Side", 2D) = "white" {}
+		_Scale ("Scale", Float) = 1.0
 	}
 	SubShader {
 		Pass {
@@ -15,19 +16,20 @@ Shader "Custom/Terrain" {
 			
 			struct v2f {
 			    float4 pos : POSITION0;
-			    float3 posOther : TEXCOORD0;
+			    float3 texPos : TEXCOORD0;
 			    float3 normal : TEXCOORD1;
 			};
 			
 		    sampler2D _Front;
 		    sampler2D _Top;
 		    sampler2D _Side;
+		    float _Scale;
 			
 			v2f vert (appdata_base v)
 			{
 			    v2f o;
 			    o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			    o.posOther = mul(UNITY_MATRIX_MVP, v.vertex * 0.05);
+			    o.texPos = v.vertex * _Scale;
 			    o.normal = normalize(v.normal);
 			    return o;
 			}
@@ -47,9 +49,9 @@ Shader "Custom/Terrain" {
 				float4 blended_color; // w holds spec value
 				{
 					// Compute the UV coords for each of the 3 planar projections
-					float2 coord1 = i.posOther.yz;
-					float2 coord2 = i.posOther.zx;
-					float2 coord3 = i.posOther.xy;
+					float2 coord1 = i.texPos.yz;
+					float2 coord2 = i.texPos.zx;
+					float2 coord3 = i.texPos.xy;
 					
 					// Sample color maps for each projection, at those UV coords.  
 					float4 col1 = tex2D(_Side, coord1);  
