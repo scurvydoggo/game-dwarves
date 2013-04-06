@@ -1,42 +1,37 @@
 Shader "Custom/Terrain" {
+
 	Properties {
 		_Front ("Front", 2D) = "white" {}
 		_Top ("Top", 2D) = "white" {}
 		_Side ("Side", 2D) = "white" {}
 		_Scale ("Scale", Float) = 1.0
 	}
+	
 	SubShader {
-		Pass {
-			CGPROGRAM
-// Upgrade NOTE: excluded shader from Xbox360; has structs without semantics (struct v2f members uv)
-#pragma exclude_renderers xbox360
-			#pragma vertex vert
-			#pragma fragment frag
-			#include "UnityCG.cginc"
-			
-			struct v2f {
-			    float4 pos : POSITION0;
-			    float3 texPos : TEXCOORD0;
-			    float3 normal : TEXCOORD1;
-			};
-			
-		    sampler2D _Front;
-		    sampler2D _Top;
-		    sampler2D _Side;
-		    float _Scale;
-			
-			v2f vert (appdata_base v)
+		Tags { "RenderType"="Opaque" }
+		LOD 200
+		
+		CGPROGRAM
+		
+		#pragma surface surf Lambert
+
+		struct Input
+		{
+			float3 worldPos;
+			float3 worldNormal;
+		};
+
+	    sampler2D _Front;
+	    sampler2D _Top;
+	    sampler2D _Side;
+	    float _Scale;
+		
+		void surf (Input IN, inout SurfaceOutput o)
+		{
+			// Calculate the weights to use in blending each of the 3 projections
+			float3 blend_weights;
 			{
-			    v2f o;
-			    o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-			    o.texPos = v.vertex * _Scale;
-			    o.normal = normalize(v.normal);
-			    return o;
-			}
-			
-			half4 frag (v2f i) : COLOR
-			{
-				float3 blend_weights = abs(i.normal.xyz);
+				blend_weights = abs(IN.worldNormal);
 				
 				// Tighten up the blending zone:  
 				blend_weights = (blend_weights - 0.2) * 7;  
@@ -44,32 +39,35 @@ Shader "Custom/Terrain" {
 				
 				// Force weights to sum to 1.0 (very important!)  
 				blend_weights /= (blend_weights.x + blend_weights.y + blend_weights.z ).xxx;   
-				
-				// Now determine a color value for each of the 3 projections, blend them and store blended results
-				float4 blended_color; // w holds spec value
-				{
-					// Compute the UV coords for each of the 3 planar projections
-					float2 coord1 = i.texPos.yz;
-					float2 coord2 = i.texPos.zx;
-					float2 coord3 = i.texPos.xy;
-					
-					// Sample color maps for each projection, at those UV coords.  
-					float4 col1 = tex2D(_Side, coord1);  
-					float4 col2 = tex2D(_Top, coord2); 
-					float4 col3 = tex2D(_Front, coord3);
-					
-					// Finally, blend the results of the 3 planar projections.  
-					blended_color =
-						col1.xyzw * blend_weights.xxxx +  
-                		col2.xyzw * blend_weights.yyyy +  
-                		col3.xyzw * blend_weights.zzzz;  
-				}
-				
-			    //return half4 (i.color, 1);
-			    return half4(blended_color);
 			}
-			ENDCG
+			
+			// Determine a color value for each of the 3 projections, blend them and store blended results
+			float3 blended_color;
+			{
+				float3 scaledPos = IN.worldPos * _Scale;
+			
+				// Compute the UV coords for each of the 3 planar projections
+				float2 coord1 = scaledPos.yz;
+				float2 coord2 = scaledPos.zx;
+				float2 coord3 = scaledPos.xy;
+				
+				// Sample color maps for each projection, at those UV coords.  
+				float4 col1 = tex2D(_Side, coord1);  
+				float4 col2 = tex2D(_Top, coord2); 
+				float4 col3 = tex2D(_Front, coord3);
+				
+				// Finally, blend the results of the 3 planar projections.  
+				blended_color =
+					col1.xyz * blend_weights.xxx +  
+            		col2.xyz * blend_weights.yyy +  
+            		col3.xyz * blend_weights.zzz;  
+			}
+			
+			o.Albedo = blended_color;
 		}
-	} 
+		
+		ENDCG
+	}
+	
 	FallBack "Diffuse"
 }
