@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="Voxel.cs" company="Acidwashed Games">
+// <copyright file="TerrainVoxel.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -8,7 +8,7 @@ namespace Dwarves.Core.Terrain
     /// <summary>
     /// A voxel which represent the density of a point in a plane.
     /// </summary>
-    public struct Voxel
+    public class TerrainVoxel
     {
         /// <summary>
         /// The minimum density value. This lies inside the surface.
@@ -24,19 +24,18 @@ namespace Dwarves.Core.Terrain
         /// The density at which the surface lies (aka the isolevel).
         /// </summary>
         public const byte DensitySurface = 0x7F;
-
+        
         /// <summary>
-        /// An air voxel that lies outside the terrain.
+        /// An empty voxel.
         /// </summary>
-        public static readonly Voxel Air = new Voxel(TerrainMaterial.Air, Voxel.DensityMax);
+        public static readonly TerrainVoxel Empty = new TerrainVoxel(TerrainMaterial.Undefined, TerrainVoxel.DensityMax);
 
         /// <summary>
-        /// Initialises a new instance of the Voxel struct.
+        /// Initialises a new instance of the TerrainVoxel class.
         /// </summary>
         /// <param name="material">The material.</param>
         /// <param name="density">The initial density.</param>
-        public Voxel(TerrainMaterial material, byte density)
-            : this()
+        public TerrainVoxel(TerrainMaterial material, byte density)
         {
             this.Material = material;
             this.Density = density;

@@ -5,18 +5,10 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Dwarves.Component.Bounds;
     using Dwarves.Core.Math;
-    using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain;
-    using Dwarves.Core.Terrain.Engine;
-    using Dwarves.Core.Terrain.Generation;
-    using Dwarves.Core.Terrain.Geometry;
-    using Dwarves.Core.Terrain.Mutation;
-    using Dwarves.Core.Terrain.Serialisation;
     using UnityEngine;
 
     /// <summary>
@@ -24,11 +16,6 @@ namespace Dwarves.Component.Terrain
     /// </summary>
     public class TerrainComponent : MonoBehaviour
     {
-        /// <summary>
-        /// The terrain engine type.
-        /// </summary>
-        public TerrainEngineType Engine;
-
         /// <summary>
         /// The power-of-2 chunk width.
         /// </summary>
@@ -85,7 +72,6 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             TerrainManager.Initialise(
-                this.Engine,
                 this.ChunkWidthLog,
                 this.ChunkHeightLog,
                 this.ChunkDepth,
@@ -132,25 +118,25 @@ namespace Dwarves.Component.Terrain
         /// Handle a chunk add event.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="chunk">The chunk index.</param>
-        private void Terrain_ChunkAdded(object sender, Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        private void Terrain_ChunkAdded(object sender, Vector2I chunkIndex)
         {
             // Create the chunk game object
-            var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunk));
+            var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunkIndex));
             chunkObject.transform.parent = this.transform;
             TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
-            chunkComponent.Chunk = chunk;
+            chunkComponent.Chunk = chunkIndex;
         }
 
         /// <summary>
         /// Handle a chunk removal event.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="chunk">The chunk index.</param>
-        private void Terrain_ChunkRemoved(object sender, Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        private void Terrain_ChunkRemoved(object sender, Vector2I chunkIndex)
         {
             // Find the chunk's component
-            Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunk));
+            Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunkIndex));
             if (chunkTransform != null)
             {
                 // Destroy it!

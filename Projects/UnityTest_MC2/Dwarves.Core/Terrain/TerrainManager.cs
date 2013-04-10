@@ -10,7 +10,6 @@ namespace Dwarves.Core.Terrain
     using System.Linq;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
-    using Dwarves.Core.Terrain.Engine;
     using Dwarves.Core.Terrain.Generation;
     using Dwarves.Core.Terrain.Geometry;
     using Dwarves.Core.Terrain.Mutation;
@@ -25,7 +24,6 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initialises a new instance of the TerrainManager class.
         /// </summary>
-        /// <param name="engine">The terrain engine type.</param>
         /// <param name="chunkWidthLog">The power-of-2 chunk width.</param>
         /// <param name="chunkHeightLog">The power-of-2 chunk height.</param>
         /// <param name="chunkDepth">The chunk depth.</param>
@@ -41,7 +39,6 @@ namespace Dwarves.Core.Terrain
         /// <param name="persistence">The persistence value, which determines the amplitude for each octave used by the
         /// terrain generator.</param>
         private TerrainManager(
-            TerrainEngineType engine,
             int chunkWidthLog,
             int chunkHeightLog,
             int chunkDepth,
@@ -54,7 +51,7 @@ namespace Dwarves.Core.Terrain
             float persistence)
         {
             // Initialise the terrain
-            this.Terrain = new VoxelTerrain(engine, chunkWidthLog, chunkHeightLog, chunkDepth, scale);
+            this.Terrain = new DwarfTerrain(chunkWidthLog, chunkHeightLog, chunkDepth, scale);
 
             // Initialise the serialiser
             this.TerrainSerialiser = new TerrainSerialiser(this.Terrain);
@@ -80,7 +77,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets the terrain instance.
         /// </summary>
-        public VoxelTerrain Terrain { get; private set; }
+        public DwarfTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Gets the terrain serialiser.
@@ -105,7 +102,6 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initialises the singleton instance.
         /// </summary>
-        /// <param name="engine">The terrain engine type.</param>
         /// <param name="chunkWidthLog">The power-of-2 chunk width.</param>
         /// <param name="chunkHeightLog">The power-of-2 chunk height.</param>
         /// <param name="chunkDepth">The chunk depth.</param>
@@ -121,7 +117,6 @@ namespace Dwarves.Core.Terrain
         /// <param name="persistence">The persistence value, which determines the amplitude for each octave used by the
         /// terrain generator.</param>
         public static void Initialise(
-            TerrainEngineType engine,
             int chunkWidthLog,
             int chunkHeightLog,
             int chunkDepth,
@@ -139,7 +134,6 @@ namespace Dwarves.Core.Terrain
             }
             
             TerrainManager.Instance = new TerrainManager(
-                engine,
                 chunkWidthLog,
                 chunkHeightLog,
                 chunkDepth,
@@ -160,34 +154,34 @@ namespace Dwarves.Core.Terrain
         {
             // Check if any chunks are now off screen with no actors within and will need to be removed
             var toRemove = new List<Vector2I>();
-            foreach (Vector2I chunk in this.Terrain.Chunks)
+            foreach (Vector2I chunkIndex in this.Terrain.Chunks)
             {
-                if (!activeChunks.Contains(chunk))
+                if (!activeChunks.Contains(chunkIndex))
                 {
-                    toRemove.Add(chunk);
+                    toRemove.Add(chunkIndex);
                 }
             }
 
             // Remove the chunks
-            foreach (Vector2I chunk in toRemove)
+            foreach (Vector2I chunkIndex in toRemove)
             {
-                this.Terrain.RemoveChunk(chunk);
+                this.Terrain.RemoveChunk(chunkIndex);
             }
 
             // Load the new chunk data
-            foreach (Vector2I chunk in activeChunks)
+            foreach (Vector2I chunkIndex in activeChunks)
             {
-                if (!this.Terrain.ContainsChunk(chunk))
+                if (!this.Terrain.ContainsChunk(chunkIndex))
                 {
-                    // Attempt to deserialise the chunk
-                    if (!this.TerrainSerialiser.TryDeserialise(chunk))
+                    // Deserialise/generate the chunk
+                    TerrainChunk chunk;
+                    if (!this.TerrainSerialiser.TryDeserialise(chunkIndex, out chunk))
                     {
-                        // The chunk doesn't exist to be serialised, so generate it from scratch
-                        this.TerrainGenerator.Generate(chunk);
+                        chunk = this.TerrainGenerator.CreateChunk(chunkIndex);
                     }
 
-                    // Flag for a rebuild of the mesh
-                    this.Terrain.FlagRebuildRequired(chunk, true);
+                    // Add the chunk
+                    this.Terrain.AddChunk(chunk, chunkIndex);
                 }
             }
         }

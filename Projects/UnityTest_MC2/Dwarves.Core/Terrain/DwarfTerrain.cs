@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="VoxelTerrain.cs" company="Acidwashed Games">
+// <copyright file="DwarfTerrain.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -7,24 +7,23 @@ namespace Dwarves.Core.Terrain
 {
     using System.Collections.Generic;
     using Dwarves.Core.Math;
-    using Dwarves.Core.Terrain.Engine;
 
     /// <summary>
     /// A chunk event.
     /// </summary>
     /// <param name="sender">The sender of the event.</param>
-    /// <param name="chunk">The chunk index.</param>
-    public delegate void ChunkEvent(object sender, Vector2I chunk);
+    /// <param name="chunkIndex">The chunk index.</param>
+    public delegate void ChunkEvent(object sender, Vector2I chunkIndex);
 
     /// <summary>
     /// Represents the terrain.
     /// </summary>
-    public class VoxelTerrain
+    public class DwarfTerrain
     {
         /// <summary>
-        /// The voxel data organised by chunk.
+        /// The active chunks.
         /// </summary>
-        private Dictionary<Vector2I, IVoxels> voxels;
+        private Dictionary<Vector2I, TerrainChunk> chunks;
 
         /// <summary>
         /// The power-of-2 height of the chunk for quickly determining chunk index.
@@ -37,44 +36,31 @@ namespace Dwarves.Core.Terrain
         private int chunkHeightLog;
 
         /// <summary>
-        /// The terrain factory.
+        /// Initialises a new instance of the DwarfTerrain class.
         /// </summary>
-        private TerrainEngineFactory factory;
-
-        /// <summary>
-        /// Initialises a new instance of the VoxelTerrain class.
-        /// </summary>
-        /// <param name="engine">The type of terrain engine.</param>
         /// <param name="chunkWidthLog">The power-of-2 width of the chunk.</param>
         /// <param name="chunkHeightLog">The power-of-2 height of the chunk.</param>
         /// <param name="chunkDepth">The depth of the chunk.</param>
         /// <param name="scale">The scaling ratio.</param>
-        public VoxelTerrain(
-            TerrainEngineType engine,
-            int chunkWidthLog,
-            int chunkHeightLog,
-            int chunkDepth,
-            int scale)
+        public DwarfTerrain(int chunkWidthLog, int chunkHeightLog, int chunkDepth, int scale)
         {
-            this.Engine = engine;
             this.chunkWidthLog = chunkWidthLog;
             this.chunkHeightLog = chunkHeightLog;
             this.ChunkDepth = chunkDepth;
             this.Scale = scale;
             this.ChunkWidth = 1 << chunkWidthLog;
             this.ChunkHeight = 1 << chunkHeightLog;
-            this.voxels = new Dictionary<Vector2I, IVoxels>();
+            this.chunks = new Dictionary<Vector2I, TerrainChunk>();
             this.SurfaceHeights = new Dictionary<int, float[]>();
-            this.factory = new TerrainEngineFactory(this.Engine);
         }
 
         /// <summary>
-        /// Indicates that a chunk of voxels was added.
+        /// Indicates that a chunk was added.
         /// </summary>
         public event ChunkEvent ChunkAdded;
 
         /// <summary>
-        /// Indicates that a chunk of voxels was removed.
+        /// Indicates that a chunk was removed.
         /// </summary>
         public event ChunkEvent ChunkRemoved;
 
@@ -82,11 +68,6 @@ namespace Dwarves.Core.Terrain
         /// Gets the surface heights for each chunk x-position.
         /// </summary>
         public Dictionary<int, float[]> SurfaceHeights { get; private set; }
-
-        /// <summary>
-        /// Gets the type of terrain engine.
-        /// </summary>
-        public TerrainEngineType Engine { get; private set; }
 
         /// <summary>
         /// Gets the chunk width.
@@ -104,7 +85,7 @@ namespace Dwarves.Core.Terrain
         public int ChunkDepth { get; private set; }
 
         /// <summary>
-        /// Gets the scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).
+        /// Gets the scaling ratio for terrain coordinates to world coordinates (essentially the Level of Detail).
         /// </summary>
         public int Scale { get; private set; }
 
@@ -113,7 +94,7 @@ namespace Dwarves.Core.Terrain
         /// </summary>
         public IEnumerable<Vector2I> Chunks
         {
-            get { return this.voxels.Keys; }
+            get { return this.chunks.Keys; }
         }
 
         #region Indexing and coordinate conversion
@@ -132,11 +113,11 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Get the origin of the given chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>The origin of the chunk in world coordinates.</returns>
-        public Vector2I GetChunkOrigin(Vector2I chunk)
+        public Vector2I GetChunkOrigin(Vector2I chunkIndex)
         {
-            return new Vector2I(chunk.X * this.ChunkWidth, chunk.Y * this.ChunkHeight);
+            return new Vector2I(chunkIndex.X * this.ChunkWidth, chunkIndex.Y * this.ChunkHeight);
         }
 
         /// <summary>
@@ -166,14 +147,14 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets a value indicating whether the given chunk requires a mesh rebuild.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>True if the chunk requires a mesh rebuild.</returns>
-        public bool RebuildRequired(Vector2I chunk)
+        public bool RebuildRequired(Vector2I chunkIndex)
         {
-            IVoxels voxels;
-            if (this.voxels.TryGetValue(chunk, out voxels))
+            TerrainChunk chunk;
+            if (this.chunks.TryGetValue(chunkIndex, out chunk))
             {
-                return voxels.RebuildRequired;
+                return chunk.RebuildRequired;
             }
             else
             {
@@ -182,58 +163,62 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Creates a new voxel chunk at the given chunk index.
+        /// Add the given chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        public void NewChunk(Vector2I chunk)
+        /// <param name="chunk">The chunk.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void AddChunk(TerrainChunk chunk, Vector2I chunkIndex)
         {
-            this.voxels.Add(chunk, this.factory.CreateVoxels(this.ChunkWidth, this.ChunkHeight, this.ChunkDepth));
+            this.chunks.Add(chunkIndex, chunk);
 
-            // Notify listeners of chunk creation
-            this.OnChunkAdded(chunk);
+            // Flag this chunk mesh for rebuild
+            this.FlagRebuildRequired(chunkIndex, true);
+
+            // Notify listeners of chunk addition
+            this.OnChunkAdded(chunkIndex);
         }
 
         /// <summary>
-        /// Remove the voxels for the given chunk.
+        /// Remove the given chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        public void RemoveChunk(Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        public void RemoveChunk(Vector2I chunkIndex)
         {
-            this.voxels.Remove(chunk);
+            this.chunks.Remove(chunkIndex);
 
             // Notify listeners of chunk removal
-            this.OnChunkRemoved(chunk);
+            this.OnChunkRemoved(chunkIndex);
         }
 
         /// <summary>
-        /// Get the chunk of voxels.
+        /// Get the chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        /// <returns>The voxels.</returns>
-        public IVoxels GetChunk(Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <returns>The chunk.</returns>
+        public TerrainChunk GetChunk(Vector2I chunkIndex)
         {
-            return this.voxels[chunk];
+            return this.chunks[chunkIndex];
         }
 
         /// <summary>
-        /// Try to get the chunk of voxels.
+        /// Try to get the chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        /// <param name="voxels">The voxels.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="chunk">The chunk.</param>
         /// <returns>True if the chunk exists.</returns>
-        public bool TryGetChunk(Vector2I chunk, out IVoxels voxels)
+        public bool TryGetChunk(Vector2I chunkIndex, out TerrainChunk chunk)
         {
-            return this.voxels.TryGetValue(chunk, out voxels);
+            return this.chunks.TryGetValue(chunkIndex, out chunk);
         }
 
         /// <summary>
         /// Determine if the given chunk exists.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>True if the chunk exists.</returns>
-        public bool ContainsChunk(Vector2I chunk)
+        public bool ContainsChunk(Vector2I chunkIndex)
         {
-            return this.voxels.ContainsKey(chunk);
+            return this.chunks.ContainsKey(chunkIndex);
         }
 
         #endregion Chunk Related
@@ -241,22 +226,20 @@ namespace Dwarves.Core.Terrain
         #region Voxel Related
 
         /// <summary>
-        /// Gets or sets the voxel at the given position.
+        /// Gets or sets the voxel at the given world position.
         /// </summary>
-        /// <param name="pos">The position.</param>
+        /// <param name="pos">The world position.</param>
         /// <returns>The voxel.</returns>
-        public Voxel GetVoxel(Vector3I pos)
+        public TerrainVoxel GetVoxel(Vector3I pos)
         {
-            IVoxels voxels;
-            if (pos.Z >= 0 &&
-                pos.Z < this.ChunkDepth &&
-                this.voxels.TryGetValue(this.ChunkIndex(pos.X, pos.Y), out voxels))
+            TerrainChunk chunk;
+            if (this.chunks.TryGetValue(this.ChunkIndex(pos.X, pos.Y), out chunk))
             {
-                return voxels[this.WorldToChunk(pos)];
+                return chunk.GetVoxel(this.WorldToChunk(pos));
             }
             else
             {
-                return Voxel.Air;
+                return TerrainVoxel.Empty;
             }
         }
 
@@ -267,37 +250,37 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Indicate that a chunk requires its mesh to be rebuilt.
         /// </summary>
-        /// <param name="chunk">The chunk.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="flagNeighbours">Indicates whether the neighbouring chunks should also be flagged for rebuild.
         /// </param>
-        public void FlagRebuildRequired(Vector2I chunk, bool flagNeighbours)
+        public void FlagRebuildRequired(Vector2I chunkIndex, bool flagNeighbours)
         {
-            IVoxels voxels;
-            if (this.voxels.TryGetValue(chunk, out voxels))
+            TerrainChunk chunk;
+            if (this.chunks.TryGetValue(chunkIndex, out chunk))
             {
-                voxels.RebuildRequired = true;
+                chunk.RebuildRequired = true;
             }
 
             if (flagNeighbours)
             {
-                if (this.voxels.TryGetValue(new Vector2I(chunk.X, chunk.Y + 1), out voxels))
+                if (this.chunks.TryGetValue(new Vector2I(chunkIndex.X, chunkIndex.Y + 1), out chunk))
                 {
-                    voxels.RebuildRequired = true;
+                    chunk.RebuildRequired = true;
                 }
 
-                if (this.voxels.TryGetValue(new Vector2I(chunk.X + 1, chunk.Y), out voxels))
+                if (this.chunks.TryGetValue(new Vector2I(chunkIndex.X + 1, chunkIndex.Y), out chunk))
                 {
-                    voxels.RebuildRequired = true;
+                    chunk.RebuildRequired = true;
                 }
 
-                if (this.voxels.TryGetValue(new Vector2I(chunk.X, chunk.Y - 1), out voxels))
+                if (this.chunks.TryGetValue(new Vector2I(chunkIndex.X, chunkIndex.Y - 1), out chunk))
                 {
-                    voxels.RebuildRequired = true;
+                    chunk.RebuildRequired = true;
                 }
 
-                if (this.voxels.TryGetValue(new Vector2I(chunk.X - 1, chunk.Y), out voxels))
+                if (this.chunks.TryGetValue(new Vector2I(chunkIndex.X - 1, chunkIndex.Y), out chunk))
                 {
-                    voxels.RebuildRequired = true;
+                    chunk.RebuildRequired = true;
                 }
             }
         }
@@ -309,24 +292,24 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Fire the ChunkAdded event.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        protected void OnChunkAdded(Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        protected void OnChunkAdded(Vector2I chunkIndex)
         {
             if (this.ChunkAdded != null)
             {
-                this.ChunkAdded(this, chunk);
+                this.ChunkAdded(this, chunkIndex);
             }
         }
 
         /// <summary>
         /// Fire the ChunkRemoved event.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        protected void OnChunkRemoved(Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        protected void OnChunkRemoved(Vector2I chunkIndex)
         {
             if (this.ChunkRemoved != null)
             {
-                this.ChunkRemoved(this, chunk);
+                this.ChunkRemoved(this, chunkIndex);
             }
         }
 

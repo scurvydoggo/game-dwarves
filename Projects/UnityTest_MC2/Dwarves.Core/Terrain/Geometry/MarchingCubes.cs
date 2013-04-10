@@ -358,7 +358,7 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="corners">The corners of the cell.</param>
         /// <returns>The case code.</returns>
-        public static byte GetCaseCode(Voxel[] corners)
+        public static byte GetCaseCode(TerrainVoxel[] corners)
         {
             byte code = 0;
             byte konj = 0x01;

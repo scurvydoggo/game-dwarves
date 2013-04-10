@@ -1,23 +1,28 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="TerrainMaterial.cs" company="Acidwashed Games">
+// <copyright file="SurfacePosition.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
     /// <summary>
-    /// Represents a terrain material.
+    /// The position of the surface relative to the chunk.
     /// </summary>
-    public enum TerrainMaterial : byte
+    public enum SurfacePosition
     {
         /// <summary>
-        /// Undefined.
+        /// The surface passes through the chunk.
         /// </summary>
-        Undefined,
+        Inside,
 
         /// <summary>
-        /// Dirt material.
+        /// The surface lies above the chunk.
         /// </summary>
-        Dirt
+        Above,
+
+        /// <summary>
+        /// The surface lies below the chunk.
+        /// </summary>
+        Below
     }
 }

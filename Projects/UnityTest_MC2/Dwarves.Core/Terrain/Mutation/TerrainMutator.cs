@@ -21,7 +21,7 @@ namespace Dwarves.Core.Terrain.Mutation
         /// </summary>
         /// <param name="terrain">The terrain.</param>
         /// <param name="digDepth">The depth to which digging occurs.</param>
-        public TerrainMutator(VoxelTerrain terrain, int digDepth)
+        public TerrainMutator(DwarfTerrain terrain, int digDepth)
         {
             this.Terrain = terrain;
             this.DigDepth = digDepth;
@@ -70,7 +70,7 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <summary>
         /// Gets the terrain.
         /// </summary>
-        public VoxelTerrain Terrain { get; private set; }
+        public DwarfTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Gets the depth to which digging occurs.
@@ -88,32 +88,36 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="density">The density.</param>
         public void SetDensityPoint(Vector2I position, byte density)
         {
-            Vector2I chunk = this.Terrain.ChunkIndex(position.X, position.Y);
+            Vector2I chunkIndex = this.Terrain.ChunkIndex(position.X, position.Y);
 
-            // Get the voxel array
-            IVoxels voxels;
-            if (this.Terrain.TryGetChunk(chunk, out voxels))
+            // Get the chunk
+            TerrainChunk chunk;
+            if (this.Terrain.TryGetChunk(chunkIndex, out chunk))
             {
                 bool digOccurred = false;
-                for (int z = 0; z < this.DigDepth; z++)
+                
+                Vector2I chunkPos = this.Terrain.WorldToChunk(position);
+                TerrainPoint point = chunk.Points[chunkPos.X, chunkPos.Y];
+                if (point != null)
                 {
-                    // Get the voxel
-                    Vector2I chunkPos = this.Terrain.WorldToChunk(position);
-                    Voxel voxel = voxels[chunkPos.X, chunkPos.Y, z];
-
-                    // Update the voxel density
-                    if (voxel.Density < density)
+                    for (int z = 0; z < this.DigDepth; z++)
                     {
-                        voxel.Density = density;
-                        voxels[chunkPos.X, chunkPos.Y, z] = voxel;
-                        digOccurred = true;
+                        // Get the voxel
+                        TerrainVoxel voxel = point.GetVoxel(z);
+
+                        // Update the voxel density
+                        if (voxel.Density < density)
+                        {
+                            voxel.Density = density;
+                            digOccurred = true;
+                        }
                     }
                 }
 
                 // Flag the chunk as requiring a rebuild
                 if (digOccurred)
                 {
-                    this.Terrain.FlagRebuildRequired(chunk, true);
+                    this.Terrain.FlagRebuildRequired(chunkIndex, true);
                 }
             }
         }
@@ -213,7 +217,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                         var o = new Vector2I(originI.X, yAStep);
                         var s = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, TerrainVoxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.LeftOrDown, xA - xBase);
                     }
 
@@ -226,7 +230,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                         var o = new Vector2I(originI.X, yBStep);
                         var s = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, Voxel.DensityMax);
+                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, TerrainVoxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.LeftOrDown, xB - xBase);
                     }
                 }
@@ -241,7 +245,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                         var o = new Vector2I(originI.X, yAStep);
                         var s = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
                     }
 
@@ -254,7 +258,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                         var o = new Vector2I(originI.X, yBStep);
                         var s = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
                     }
                 }
@@ -281,7 +285,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                 var o = new Vector2I(originI.X, yAStep);
                 var s = new Vector2I(xBase, yAStep);
-                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
                 this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
             }
 
@@ -294,7 +298,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                 var o = new Vector2I(originI.X, yBStep);
                 var s = new Vector2I(xBase, yBStep);
-                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, Voxel.DensityMax);
+                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
                 this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
             }
         }
@@ -315,26 +319,26 @@ namespace Dwarves.Core.Terrain.Mutation
             {
                 if (intersection > 0.5f)
                 {
-                    dBottomLeft = Voxel.DensityMax;
-                    dTopRight = (byte)(Voxel.DensityMax * (intersection - 0.5f));
+                    dBottomLeft = TerrainVoxel.DensityMax;
+                    dTopRight = (byte)(TerrainVoxel.DensityMax * (intersection - 0.5f));
                 }
                 else
                 {
-                    dBottomLeft = (byte)(Voxel.DensityMax * (intersection + 0.5f));
-                    dTopRight = Voxel.DensityMin;
+                    dBottomLeft = (byte)(TerrainVoxel.DensityMax * (intersection + 0.5f));
+                    dTopRight = TerrainVoxel.DensityMin;
                 }
             }
             else
             {
                 if (intersection > 0.5f)
                 {
-                    dBottomLeft = Voxel.DensityMin;
-                    dTopRight = (byte)(Voxel.DensityMax * (1.5f - intersection));
+                    dBottomLeft = TerrainVoxel.DensityMin;
+                    dTopRight = (byte)(TerrainVoxel.DensityMax * (1.5f - intersection));
                 }
                 else
                 {
-                    dBottomLeft = (byte)(Voxel.DensityMax * (0.5f - intersection));
-                    dTopRight = Voxel.DensityMax;
+                    dBottomLeft = (byte)(TerrainVoxel.DensityMax * (0.5f - intersection));
+                    dTopRight = TerrainVoxel.DensityMax;
                 }
             }
 

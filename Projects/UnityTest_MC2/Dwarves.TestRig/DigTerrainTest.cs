@@ -6,7 +6,6 @@
 namespace Dwarves.TestRig
 {
     using Dwarves.Core.Terrain;
-    using Dwarves.Core.Terrain.Engine;
     using Dwarves.Core.Terrain.Mutation;
     using UnityEngine;
 
@@ -26,7 +25,6 @@ namespace Dwarves.TestRig
         public DigTerrainTest()
         {
             TerrainManager.Initialise(
-                TerrainEngineType.Standard,
                 4,
                 4,
                 5,

@@ -24,7 +24,7 @@ namespace Dwarves.Core.Terrain.Geometry
         /// Initialises a new instance of the TerrainMeshBuilder class.
         /// </summary>
         /// <param name="terrain">The terrain.</param>
-        public TerrainMeshBuilder(VoxelTerrain terrain)
+        public TerrainMeshBuilder(DwarfTerrain terrain)
         {
             this.Terrain = terrain;
             this.sharedIndices = new SharedIndices(this.Terrain.ChunkWidth, this.Terrain.ChunkWidth);
@@ -33,14 +33,14 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <summary>
         /// Gets the terrain.
         /// </summary>
-        public VoxelTerrain Terrain { get; private set; }
+        public DwarfTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Creates a mesh for the given chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>The mesh.</returns>
-        public MeshData CreateMesh(Vector2I chunk)
+        public MeshData CreateMesh(Vector2I chunkIndex)
         {
             // Create a new mesh
             var mesh = new MeshData();
@@ -49,7 +49,7 @@ namespace Dwarves.Core.Terrain.Geometry
             this.sharedIndices.Reset();
 
             // Create the mesh for each cell in the chunk
-            var chunkOrigin = this.Terrain.GetChunkOrigin(chunk);
+            var chunkOrigin = this.Terrain.GetChunkOrigin(chunkIndex);
             for (int z = 0; z < this.Terrain.ChunkDepth; z++)
             {
                 for (int x = chunkOrigin.X; x < chunkOrigin.X + this.Terrain.ChunkWidth; x++)
@@ -82,7 +82,7 @@ namespace Dwarves.Core.Terrain.Geometry
         private void CreateMeshCell(Vector3I pos, MeshData mesh)
         {
             // Get the voxels at each corner of the cell
-            var corners = new Voxel[8];
+            var corners = new TerrainVoxel[8];
             for (int i = 0; i < corners.Length; i++)
             {
                 corners[i] = this.Terrain.GetVoxel(pos + MarchingCubes.CornerVector[i]);
@@ -162,7 +162,7 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="corners">The voxel data for cell corners.</param>
         /// <param name="cornerA">The first corner index of the of the edge on which the vertex lies.</param>
         /// <param name="cornerB">The second corner index of the of the edge on which the vertex lies.</param>
-        private void CreateVertex(Vector3I pos, MeshData mesh, Voxel[] corners, byte cornerA, byte cornerB)
+        private void CreateVertex(Vector3I pos, MeshData mesh, TerrainVoxel[] corners, byte cornerA, byte cornerB)
         {
             // Calculate the position of the two end points between which the vertex lies
             Vector3I pAI = pos + MarchingCubes.CornerVector[cornerA];
@@ -214,11 +214,11 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The interpolated point.</returns>
         private Vector3 InterpolatePoint(Vector3 pointA, Vector3 pointB, byte densityA, byte densityB)
         {
-            if (Voxel.DensitySurface - densityA == 0)
+            if (TerrainVoxel.DensitySurface - densityA == 0)
             {
                 return pointA;
             }
-            else if (Voxel.DensitySurface - densityB == 0)
+            else if (TerrainVoxel.DensitySurface - densityB == 0)
             {
                 return pointB;
             }
@@ -228,7 +228,7 @@ namespace Dwarves.Core.Terrain.Geometry
             }
             else
             {
-                float mu = (float)(Voxel.DensitySurface - densityA) / (densityB - densityA);
+                float mu = (float)(TerrainVoxel.DensitySurface - densityA) / (densityB - densityA);
                 return new Vector3(
                     pointA.x + (mu * (pointB.x - pointA.x)),
                     pointA.y + (mu * (pointB.y - pointA.y)),

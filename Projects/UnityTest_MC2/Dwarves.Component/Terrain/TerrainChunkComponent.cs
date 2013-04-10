@@ -5,11 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
-    using System.Collections.Generic;
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
-    using Dwarves.Core.Terrain.Geometry;
     using UnityEngine;
 
     /// <summary>
@@ -32,11 +30,11 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// Gets the label for the given chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
+        /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>The chunk label.</returns>
-        public static string GetLabel(Vector2I chunk)
+        public static string GetLabel(Vector2I chunkIndex)
         {
-            return "Chunk[" + chunk.X + "," + chunk.Y + "]";
+            return "Chunk[" + chunkIndex.X + "," + chunkIndex.Y + "]";
         }
 
         /// <summary>

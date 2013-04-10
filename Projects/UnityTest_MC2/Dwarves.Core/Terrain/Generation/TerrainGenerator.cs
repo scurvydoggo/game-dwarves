@@ -7,8 +7,6 @@ namespace Dwarves.Core.Terrain.Generation
 {
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
-    using Dwarves.Core.Terrain.Engine;
-    using UnityEngine;
 
     /// <summary>
     /// Generates voxel terrain.
@@ -22,7 +20,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="noiseGenerator">The noise generator.</param>
         /// <param name="surfaceAmplitude">The distance from the mean surface height that the terrain oscillates.
         /// </param>
-        public TerrainGenerator(VoxelTerrain terrain, INoiseGenerator noiseGenerator, int surfaceAmplitude)
+        public TerrainGenerator(DwarfTerrain terrain, INoiseGenerator noiseGenerator, int surfaceAmplitude)
         {
             this.Terrain = terrain;
             this.NoiseGenerator = noiseGenerator;
@@ -32,7 +30,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Gets the terrain.
         /// </summary>
-        public VoxelTerrain Terrain { get; private set; }
+        public DwarfTerrain Terrain { get; private set; }
 
         /// <summary>
         /// Gets or sets the noise generator.
@@ -45,28 +43,20 @@ namespace Dwarves.Core.Terrain.Generation
         public int SurfaceAmplitude { get; set; }
 
         /// <summary>
-        /// Generates the voxel terrain for the given chunk.
+        /// Creates a new chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        public void Generate(Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <returns>The chunk.</returns>
+        public TerrainChunk CreateChunk(Vector2I chunkIndex)
         {
-            // Create the voxel chunk if it doesn't yet exist
-            if (!this.Terrain.ContainsChunk(chunk))
+            // Get/generate the surface heights for this chunk
+            float[] surface;
+            if (!this.Terrain.SurfaceHeights.TryGetValue(chunkIndex.X, out surface))
             {
-                this.Terrain.NewChunk(chunk);
+                surface = this.GenerateSurfaceHeights(chunkIndex.X);
             }
 
-            // Generate the surface heights for this chunk if they don't exist
-            if (!this.Terrain.SurfaceHeights.ContainsKey(chunk.X))
-            {
-                this.Terrain.SurfaceHeights.Add(chunk.X, this.GenerateSurfaceHeights(chunk.X));
-            }
-
-            // Fill the terrain
-            this.FillTerrain(chunk);
-
-            // Flag the chunk as requiring a rebuild
-            this.Terrain.FlagRebuildRequired(chunk, true);
+            return this.CreateChunk(chunkIndex, surface);
         }
 
         /// <summary>
@@ -92,60 +82,107 @@ namespace Dwarves.Core.Terrain.Generation
         }
 
         /// <summary>
-        /// Fill the terrain.
+        /// Generate a new chunk.
         /// </summary>
-        /// <param name="chunk">The chunk index.</param>
-        private void FillTerrain(Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="surfaceHeights">The surface heights.</param>
+        /// <returns>The chunk.</returns>
+        private TerrainChunk CreateChunk(Vector2I chunkIndex, float[] surfaceHeights)
         {
-            // Get the voxels and surface heights
-            IVoxels voxels = this.Terrain.GetChunk(chunk);
-            float[] surfaceHeights = this.Terrain.SurfaceHeights[chunk.X];
+            int originX = chunkIndex.X * this.Terrain.ChunkWidth;
+            int originY = chunkIndex.Y * this.Terrain.ChunkHeight;
 
-            // Fill the voxel array
-            int originY = chunk.Y * this.Terrain.ChunkHeight;
+            // Fill the points
+            TerrainPoint[,] points = new TerrainPoint[this.Terrain.ChunkWidth, this.Terrain.ChunkHeight];
+            SurfacePosition? surfacePositionChunk = null;
             for (int x = 0; x < this.Terrain.ChunkWidth; x++)
             {
-                // Determine where the surface lies for this x-value
-                float surfaceHeightF = surfaceHeights[x];
-                int surfaceHeightI = (int)System.Math.Floor(surfaceHeightF);
-                float deltaHeight = surfaceHeightF - surfaceHeightI;
+                // Determine where the surface lies for this x position
+                float surface = surfaceHeights[x];
+                int surfaceI = (int)System.Math.Floor(surface);
+                float surfaceFractional = surface - surfaceI;
 
+                // Create the points
                 for (int y = 0; y < this.Terrain.ChunkHeight; y++)
                 {
-                    int height = originY + y;
+                    points[x, y] = this.CreatePoint(originX + x, originY + y, surfaceI, surfaceFractional);
+                }
 
-                    // Create the voxel at this point
-                    Voxel voxel;
-                    if (height > surfaceHeightI)
+                // Determine whether the surface lies above/below/inside at this x position
+                SurfacePosition surfacePositionX;
+                if (surfaceI < originY)
+                {
+                    surfacePositionX = SurfacePosition.Below;
+                }
+                else
+                {
+                    if (surfaceI < originY + this.Terrain.ChunkHeight)
                     {
-                        // This voxel lies above the surface
-                        voxel = Voxel.Air;
+                        surfacePositionX = SurfacePosition.Inside;
                     }
                     else
                     {
-                        // Determine the material
-                        var material = TerrainMaterial.Dirt;
-
-                        if (height == surfaceHeightI)
-                        {
-                            // This voxel lies on the surface, so scale the density by the noise value
-                            byte density = (byte)(Voxel.DensityMax - (Voxel.DensityMax * deltaHeight));
-                            voxel = new Voxel(material, density);
-                        }
-                        else
-                        {
-                            // The voxel lies under the surface
-                            voxel = new Voxel(material, Voxel.DensityMin);
-                        }
-                    }
-
-                    // Set the voxel at each depth point
-                    for (int z = 0; z < this.Terrain.ChunkDepth; z++)
-                    {
-                        voxels[x, y, z] = z > 0 && z < this.Terrain.ChunkDepth - 1 ? voxel : Voxel.Air;
+                        surfacePositionX = SurfacePosition.Above;
                     }
                 }
+
+                // Check if the surface so far lies above/below/inside the chunk
+                if (!surfacePositionChunk.HasValue)
+                {
+                    surfacePositionChunk = surfacePositionX;
+                }
+                else if (surfacePositionChunk.Value != surfacePositionX)
+                {
+                    surfacePositionChunk = SurfacePosition.Inside;
+                }
             }
+
+            return new TerrainChunk(points, surfacePositionChunk.Value);
+        }
+
+        /// <summary>
+        /// Creates the point at the given world position.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="surfaceI">The integral portion of the surface height at this x position.</param>
+        /// <param name="surfaceFractional">The fractional portion of the surface height at this x position.</param>
+        /// <returns>The point. Null value represents an 'air' point.</returns>
+        private TerrainPoint CreatePoint(int x, int y, int surfaceI, float surfaceFractional)
+        {
+            TerrainPoint point = null;
+
+            if (y <= surfaceI)
+            {
+                // Determine the material
+                var material = TerrainMaterial.Dirt;
+
+                // Determine the density
+                byte density;
+                if (y == surfaceI)
+                {
+                    // This voxel lies on the surface, so scale the density by the noise value
+                    density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surfaceFractional));
+                }
+                else
+                {
+                    // The voxel lies under the surface
+                    density = TerrainVoxel.DensityMin;
+                }
+
+                // Create the voxel at each depth point
+                TerrainVoxel[] voxels = new TerrainVoxel[this.Terrain.ChunkDepth];
+                for (int z = 0; z < voxels.Length; z++)
+                {
+                    voxels[z] = z > 0 && z < voxels.Length - 1 ?
+                        new TerrainVoxel(material, density) : TerrainVoxel.Empty;
+                }
+
+                // Create the point
+                point = new TerrainPoint(voxels);
+            }
+
+            return point;
         }
     }
 }

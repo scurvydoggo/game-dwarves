@@ -8,7 +8,6 @@ namespace Dwarves.TestRig
     using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
-    using Dwarves.Core.Terrain.Engine;
 
     /// <summary>
     /// A test for creating the terrain in the game.
@@ -21,7 +20,6 @@ namespace Dwarves.TestRig
         public CreateTerrainTest()
         {
             TerrainManager.Initialise(
-                TerrainEngineType.Standard,
                 4,
                 4,
                 5,
@@ -51,14 +49,14 @@ namespace Dwarves.TestRig
             TerrainManager.Instance.LoadUnloadChunks(activeChunks);
 
             // Build the mesh for this chunk
-            foreach (Vector2I chunk in TerrainManager.Instance.Terrain.Chunks)
+            foreach (Vector2I chunkIndex in TerrainManager.Instance.Terrain.Chunks)
             {
-                if (TerrainManager.Instance.Terrain.RebuildRequired(chunk))
+                if (TerrainManager.Instance.Terrain.RebuildRequired(chunkIndex))
                 {
-                    MeshData meshData = TerrainManager.Instance.TerrainMeshBuilder.CreateMesh(chunk);
+                    MeshData meshData = TerrainManager.Instance.TerrainMeshBuilder.CreateMesh(chunkIndex);
 
                     // Pretend that the mesh data was applied to a chunk game object
-                    TerrainManager.Instance.Terrain.GetChunk(chunk).RebuildRequired = false;
+                    TerrainManager.Instance.Terrain.GetChunk(chunkIndex).RebuildRequired = false;
                 }
             }
         }
@@ -67,8 +65,8 @@ namespace Dwarves.TestRig
         /// Handle a chunk add event.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="chunk">The chunk index.</param>
-        private void Terrain_ChunkAdded(object sender, Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        private void Terrain_ChunkAdded(object sender, Vector2I chunkIndex)
         {
             // Create the chunk's game object (not done in this test)
         }
@@ -77,8 +75,8 @@ namespace Dwarves.TestRig
         /// Handle a chunk removal event.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="chunk">The chunk index.</param>
-        private void Terrain_ChunkRemoved(object sender, Vector2I chunk)
+        /// <param name="chunkIndex">The chunk index.</param>
+        private void Terrain_ChunkRemoved(object sender, Vector2I chunkIndex)
         {
             // Destroy the chunk's game object (not done in this test)
         }

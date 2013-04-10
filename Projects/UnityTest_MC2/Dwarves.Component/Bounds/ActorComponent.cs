@@ -5,12 +5,10 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Bounds
 {
-    using System;
-    using Dwarves.Component.Terrain;
-    using Dwarves.Core;
     using Dwarves.Core.Bounds;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
+    using System;
     using UnityEngine;
 
     /// <summary>
