@@ -47,8 +47,9 @@ namespace Dwarves.Core.Terrain
         public byte Density { get; set; }
 
         /// <summary>
-        /// Creates an empty voxel with an undefined material and a maximum density (ie. an 'air' voxel).
+        /// Creates an empty voxel with an undefined material and a maximum density (i.e. an 'air' voxel).
         /// </summary>
+        /// <returns>The voxel.</returns>
         public static TerrainVoxel CreateEmpty()
         {
             return new TerrainVoxel(TerrainMaterial.Undefined, TerrainVoxel.DensityMax);

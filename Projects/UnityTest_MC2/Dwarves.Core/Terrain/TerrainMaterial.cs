@@ -11,7 +11,7 @@ namespace Dwarves.Core.Terrain
     public enum TerrainMaterial : byte
     {
         /// <summary>
-        /// Undefined.
+        /// An undefined material.
         /// </summary>
         Undefined,
 

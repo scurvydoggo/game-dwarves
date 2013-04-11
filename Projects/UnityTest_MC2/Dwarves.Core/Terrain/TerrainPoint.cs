@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain
 {
+    using Dwarves.Core.Light;
+
     /// <summary>
     /// A point in the terrain. The point represents a column of voxels along the Z-axis when viewing a 2D cross
     /// section of the terrain from the side.
@@ -20,10 +22,25 @@ namespace Dwarves.Core.Terrain
         /// Initialises a new instance of the TerrainPoint class.
         /// </summary>
         /// <param name="voxels">The voxels.</param>
-        public TerrainPoint(TerrainVoxel[] voxels)
+        public TerrainPoint(TerrainVoxel[] voxels) : this(voxels, null)
+        {
+        }
+
+        /// <summary>
+        /// Initialises a new instance of the TerrainPoint class.
+        /// </summary>
+        /// <param name="voxels">The voxels.</param>
+        /// <param name="light">The light value.</param>
+        public TerrainPoint(TerrainVoxel[] voxels, RGB? light)
         {
             this.voxels = voxels;
+            this.Light = light;
         }
+
+        /// <summary>
+        /// Gets or sets the light value.
+        /// </summary>
+        public RGB? Light { get; set; }
         
         /// <summary>
         /// Gets the voxel at the given z depth.
