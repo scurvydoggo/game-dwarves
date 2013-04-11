@@ -184,20 +184,25 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3 pA = new Vector3(pAI.X, pAI.Y, pAI.Z);
             Vector3 pB = new Vector3(pBI.X, pBI.Y, pBI.Z);
 
-            // Interpolate the vertex position between the two end points
+            // Get the end point densities
             byte densityA = corners[cornerA].Density;
             byte densityB = corners[cornerB].Density;
-            Vector3 point = this.InterpolatePoint(pA, pB, densityA, densityB);
+
+            // Calculate the interpolation ratio
+            float ratio = this.CalculateRatio(densityA, densityB);
+
+            // Interpolate the vertex position between the two end points
+            Vector3 point = this.InterpolatePoint(pA, pB, ratio);
 
             // Calculate the normals at each end point and then interpolate the two normals
             Vector3 nA = this.CalculateNormal(pAI);
             Vector3 nB = this.CalculateNormal(pBI);
-            Vector3 normal = this.InterpolatePoint(nA, nB, densityA, densityB);
+            Vector3 normal = this.InterpolatePoint(nA, nB, ratio);
 
             // Interpolate the color value between the two end points
             Colour? colorA = light[cornerA];
             Colour? colorB = light[cornerB];
-            Color color = this.InterpolateColor(pA, pB, colorA, colorB);
+            Color color = this.InterpolateColor(colorA, colorB, ratio);
 
             // Add the vertex to the mesh
             mesh.Vertices.Add(point);
@@ -225,52 +230,60 @@ namespace Dwarves.Core.Terrain.Geometry
         }
 
         /// <summary>
+        /// Calculate the interpolation ratio of where the surface lies between points A and B.
+        /// </summary>
+        /// <param name="densityA">The density at point A.</param>
+        /// <param name="densityB">The density at point B.</param>
+        /// <returns>The interpolation ratio between 0 and 1.</returns>
+        private float CalculateRatio(byte densityA, byte densityB)
+        {
+            if (TerrainVoxel.DensitySurface - densityA == 0)
+            {
+                return 0;
+            }
+            else if (TerrainVoxel.DensitySurface - densityB == 0)
+            {
+                return 1;
+            }
+            else if (densityA - densityB == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return (float)(TerrainVoxel.DensitySurface - densityA) / (densityB - densityA);
+            }
+        }
+
+        /// <summary>
         /// Interpolate between the two points.
         /// </summary>
         /// <param name="pointA">The first point.</param>
         /// <param name="pointB">The second point.</param>
-        /// <param name="densityA">The first density.</param>
-        /// <param name="densityB">The second density.</param>
+        /// <param name="ratio">The interpolation value.</param>
         /// <returns>The interpolated point.</returns>
-        private Vector3 InterpolatePoint(Vector3 pointA, Vector3 pointB, byte densityA, byte densityB)
+        private Vector3 InterpolatePoint(Vector3 pointA, Vector3 pointB, float ratio)
         {
-            if (TerrainVoxel.DensitySurface - densityA == 0)
-            {
-                return pointA;
-            }
-            else if (TerrainVoxel.DensitySurface - densityB == 0)
-            {
-                return pointB;
-            }
-            else if (densityA - densityB == 0)
-            {
-                return pointA;
-            }
-            else
-            {
-                float mu = (float)(TerrainVoxel.DensitySurface - densityA) / (densityB - densityA);
-                return new Vector3(
-                    pointA.x + (mu * (pointB.x - pointA.x)),
-                    pointA.y + (mu * (pointB.y - pointA.y)),
-                    pointA.z + (mu * (pointB.z - pointA.z)));
-            }
+            return new Vector3(
+                pointA.x + (ratio * (pointB.x - pointA.x)),
+                pointA.y + (ratio * (pointB.y - pointA.y)),
+                pointA.z + (ratio * (pointB.z - pointA.z)));
         }
 
         /// <summary>
         /// Interpolate the colour between the two points.
         /// </summary>
-        /// <param name="pointA">The first point.</param>
-        /// <param name="pointB">The second point.</param>
         /// <param name="colorA">The first colour.</param>
         /// <param name="colorB">The second colour.</param>
+        /// <param name="ratio">The interpolation value.</param>
         /// <returns>The interpolated colour.</returns>
-        private Color InterpolateColor(Vector3 pointA, Vector3 pointB, Colour? colorA, Colour? colorB)
+        private Color InterpolateColor(Colour? colorA, Colour? colorB, float ratio)
         {
             if (colorA.HasValue)
             {
                 if (colorB.HasValue)
                 {
-                    return this.InterpolateColor(pointA, pointB, colorA.Value, colorB.Value);
+                    return this.InterpolateColor(colorA.Value, colorB.Value, ratio);
                 }
                 else
                 {
@@ -293,15 +306,16 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <summary>
         /// Interpolate the colour between the two points.
         /// </summary>
-        /// <param name="pointA">The first point.</param>
-        /// <param name="pointB">The second point.</param>
         /// <param name="colorA">The first colour.</param>
         /// <param name="colorB">The second colour.</param>
+        /// <param name="ratio">The interpolation value.</param>
         /// <returns>The interpolated colour.</returns>
-        private Color InterpolateColor(Vector3 pointA, Vector3 pointB, Colour colorA, Colour colorB)
+        private Color InterpolateColor(Colour colorA, Colour colorB, float ratio)
         {
-            // TODO
-            return Color.yellow;
+            return new Color(
+                colorA.R + (ratio * (colorB.R - colorA.R)),
+                colorA.G + (ratio * (colorB.G - colorA.G)),
+                colorA.B + (ratio * (colorB.B - colorA.B)));
         }
     }
 }
