@@ -1,32 +1,32 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="RGB.cs" company="Acidwashed Games">
+// <copyright file="Light.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Light
+namespace Dwarves.Core.Lighting
 {
     /// <summary>
-    /// Represents an RGB colour.
+    /// Represents a lighting value.
     /// </summary>
-    public struct RGB
+    public struct Light
     {
         /// <summary>
-        /// White color.
+        /// Blinding light.
         /// </summary>
-        public static readonly RGB White = new RGB(byte.MaxValue, byte.MaxValue, byte.MaxValue);
+        public static readonly Light White = new Light(byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
         /// <summary>
-        /// Black color.
+        /// Pure darkness.
         /// </summary>
-        public static readonly RGB Black = new RGB(byte.MinValue, byte.MinValue, byte.MinValue);
+        public static readonly Light Black = new Light(byte.MinValue, byte.MinValue, byte.MinValue);
 
         /// <summary>
-        /// Initialises a new instance of the RGB struct.
+        /// Initialises a new instance of the Light struct.
         /// </summary>
         /// <param name="r">The R value.</param>
         /// <param name="g">The G value.</param>
         /// <param name="b">The B value.</param>
-        public RGB(byte r, byte g, byte b) : this()
+        public Light(byte r, byte g, byte b) : this()
         {
             this.R = r;
             this.G = g;

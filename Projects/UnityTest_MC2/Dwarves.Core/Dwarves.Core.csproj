@@ -45,7 +45,7 @@
     <Compile Include="Bounds\IMethodGetBounds.cs" />
     <Compile Include="Bounds\MethodGetBoundsCamera.cs" />
     <Compile Include="Geometry\MeshData.cs" />
-    <Compile Include="Light\RGB.cs" />
+    <Compile Include="Lighting\Light.cs" />
     <Compile Include="Math\Vector3I.cs" />
     <Compile Include="Math\MathExtension.cs" />
     <Compile Include="Math\Noise\CompoundNoiseGenerator.cs" />
