@@ -74,7 +74,7 @@ namespace Dwarves.Core.Terrain.Geometry
         {
             // Get the voxels and light at each corner of the cell
             var corners = new TerrainVoxel[8];
-            var light = new Colour?[8];
+            var light = new Color?[8];
             for (int i = 0; i < corners.Length; i++)
             {
                 Vector3I cornerPos = pos + MarchingCubes.CornerVector[i];
@@ -82,7 +82,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 if (point != null)
                 {
                     corners[i] = point.GetVoxel(cornerPos.Z);
-                    light[i] = point.Light.Value;
+                    light[i] = point.Light.Value.ToColor();
                 }
                 else
                 {
@@ -174,7 +174,7 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3I pos,
             MeshData mesh,
             TerrainVoxel[] corners,
-            Colour?[] light,
+            Color?[] light,
             byte cornerA,
             byte cornerB)
         {
@@ -200,8 +200,8 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3 normal = this.InterpolatePoint(nA, nB, ratio);
 
             // Interpolate the color value between the two end points
-            Colour? colorA = light[cornerA];
-            Colour? colorB = light[cornerB];
+            Color? colorA = light[cornerA];
+            Color? colorB = light[cornerB];
             Color color = this.InterpolateColor(colorA, colorB, ratio);
 
             // Add the vertex to the mesh
@@ -277,7 +277,7 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="colorB">The second colour.</param>
         /// <param name="ratio">The interpolation value.</param>
         /// <returns>The interpolated colour.</returns>
-        private Color InterpolateColor(Colour? colorA, Colour? colorB, float ratio)
+        private Color InterpolateColor(Color? colorA, Color? colorB, float ratio)
         {
             if (colorA.HasValue)
             {
@@ -287,14 +287,14 @@ namespace Dwarves.Core.Terrain.Geometry
                 }
                 else
                 {
-                    return new Color(colorA.Value.R, colorA.Value.G, colorA.Value.B);
+                    return colorA.Value;
                 }
             }
             else
             {
                 if (colorB.HasValue)
                 {
-                    return new Color(colorB.Value.R, colorB.Value.G, colorB.Value.B);
+                    return colorB.Value;
                 }
                 else
                 {
@@ -310,12 +310,12 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="colorB">The second colour.</param>
         /// <param name="ratio">The interpolation value.</param>
         /// <returns>The interpolated colour.</returns>
-        private Color InterpolateColor(Colour colorA, Colour colorB, float ratio)
+        private Color InterpolateColor(Color colorA, Color colorB, float ratio)
         {
             return new Color(
-                colorA.R + (ratio * (colorB.R - colorA.R)),
-                colorA.G + (ratio * (colorB.G - colorA.G)),
-                colorA.B + (ratio * (colorB.B - colorA.B)));
+                colorA.r + (ratio * (colorB.r - colorA.r)),
+                colorA.g + (ratio * (colorB.g - colorA.g)),
+                colorA.b + (ratio * (colorB.b - colorA.b)));
         }
     }
 }

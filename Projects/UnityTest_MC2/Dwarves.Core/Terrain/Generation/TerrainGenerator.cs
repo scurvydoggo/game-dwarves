@@ -8,6 +8,7 @@ namespace Dwarves.Core.Terrain.Generation
     using Dwarves.Core.Lighting;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
+    using UnityEngine;
 
     /// <summary>
     /// Generates voxel terrain.
@@ -177,6 +178,12 @@ namespace Dwarves.Core.Terrain.Generation
                 material = TerrainMaterial.Undefined;
                 light = Colour.White;
             }
+
+            // TODO: Remove this
+            int val =  255 - (int)(System.Math.Abs((float)y) * 8);
+            byte lightTest = val > 0 ? (byte)val : (byte)0;
+            light = new Colour(lightTest, lightTest, lightTest);
+            // TODO: Remove this
 
             // Create the voxel at each depth point
             TerrainVoxel[] voxels = new TerrainVoxel[this.Terrain.ChunkDepth];

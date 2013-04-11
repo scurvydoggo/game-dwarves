@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Lighting
 {
+    using UnityEngine;
+
     /// <summary>
     /// Represents a colour value.
     /// </summary>
@@ -47,5 +49,17 @@ namespace Dwarves.Core.Lighting
         /// Gets or sets the B value.
         /// </summary>
         public byte B { get; set; }
+
+        /// <summary>
+        /// Convert to the UnityEngine colour type.
+        /// </summary>
+        /// <returns>The colour.</returns>
+        public Color ToColor()
+        {
+            return new Color(
+                (float)this.R / byte.MaxValue,
+                (float)this.G / byte.MaxValue,
+                (float)this.B / byte.MaxValue);
+        }
     }
 }
