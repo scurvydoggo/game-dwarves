@@ -266,7 +266,18 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The interpolated colour.</returns>
         private Color InterpolateColor(Vector3 pointA, Vector3 pointB, Colour? colorA, Colour? colorB)
         {
-            if (!colorA.HasValue)
+            if (colorA.HasValue)
+            {
+                if (colorB.HasValue)
+                {
+                    return this.InterpolateColor(pointA, pointB, colorA.Value, colorB.Value);
+                }
+                else
+                {
+                    return new Color(colorA.Value.R, colorA.Value.G, colorA.Value.B);
+                }
+            }
+            else
             {
                 if (colorB.HasValue)
                 {
@@ -277,14 +288,20 @@ namespace Dwarves.Core.Terrain.Geometry
                     return Color.black;
                 }
             }
-            else if (!colorB.HasValue)
-            {
-                return new Color(colorA.Value.R, colorA.Value.G, colorA.Value.B);
-            }
+        }
 
-            // Interpolate between the two points
-            // TODO: Bugger it, for now just return color A
-            return new Color(colorA.Value.R, colorA.Value.G, colorA.Value.B);
+        /// <summary>
+        /// Interpolate the colour between the two points.
+        /// </summary>
+        /// <param name="pointA">The first point.</param>
+        /// <param name="pointB">The second point.</param>
+        /// <param name="colorA">The first colour.</param>
+        /// <param name="colorB">The second colour.</param>
+        /// <returns>The interpolated colour.</returns>
+        private Color InterpolateColor(Vector3 pointA, Vector3 pointB, Colour colorA, Colour colorB)
+        {
+            // TODO
+            return Color.yellow;
         }
     }
 }
