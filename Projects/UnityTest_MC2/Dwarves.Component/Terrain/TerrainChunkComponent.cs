@@ -71,7 +71,6 @@ namespace Dwarves.Component.Terrain
             this.cMeshFilter.mesh.vertices = meshData.Vertices.ToArray();
             this.cMeshFilter.mesh.normals = meshData.Normals.ToArray();
             this.cMeshFilter.mesh.triangles = meshData.Indices.ToArray();
-            this.cMeshFilter.mesh.uv = meshData.UVs.ToArray();
 
             // Flag this chunk as no longer requiring a rebuild
             TerrainManager.Instance.Terrain.GetChunk(this.Chunk).RebuildRequired = false;
