@@ -161,14 +161,14 @@ namespace Dwarves.Core.Terrain.Generation
                 // This voxel lies on the surface, so scale the density by the noise value
                 density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surfaceFractional));
                 material = TerrainMaterial.Dirt;
-                light = new Colour(128, 128, 128);
+                light = Colour.White;
             }
             else if (y <= surfaceI)
             {
                 // The voxel lies under the surface
                 density = TerrainVoxel.DensityMin;
                 material = TerrainMaterial.Dirt;
-                light = new Colour(128, 128, 128);
+                light = Colour.White;
             }
             else
             {

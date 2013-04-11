@@ -19,6 +19,7 @@ Shader "Custom/Terrain" {
 		{
 			float3 worldPos;
 			float3 worldNormal;
+			float4 color : COLOR;
 		};
 
 	    sampler2D _Front;
@@ -60,8 +61,11 @@ Shader "Custom/Terrain" {
 				blended_color =
 					col1.xyz * blend_weights.xxx +  
             		col2.xyz * blend_weights.yyy +  
-            		col3.xyz * blend_weights.zzz;  
+            		col3.xyz * blend_weights.zzz;
 			}
+			
+			// Apply the light value
+			blended_color *= IN.color.xyz;
 			
 			o.Albedo = blended_color;
 		}
