@@ -95,6 +95,11 @@ namespace Dwarves.Core.Terrain.Geometry
                 // For these cases there is no triangulation
                 return;
             }
+            else if ((caseCode & 0xCC) == 0xCC)
+            {
+                // For this case the surface is fully facing away from the camera (behind the terrain)
+                return;
+            }
 
             // Look up the geometry and vertex data for this case code
             CellGeometry geometry = MarchingCubes.CellGeometry[MarchingCubes.CellClass[caseCode]];
