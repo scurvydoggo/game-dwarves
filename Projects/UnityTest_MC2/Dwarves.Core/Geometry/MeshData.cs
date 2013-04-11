@@ -21,7 +21,7 @@ namespace Dwarves.Core.Geometry
             this.Vertices = new List<Vector3>();
             this.Normals = new List<Vector3>();
             this.Indices = new List<int>();
-            this.Light = new List<Vector3>();
+            this.Light = new List<Color>();
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Dwarves.Core.Geometry
         /// <summary>
         /// Gets or sets the light value at each vertex.
         /// </summary>
-        public List<Vector3> Light { get; set; }
+        public List<Color> Light { get; set; }
 
         /// <summary>
         /// Gets the index of the latest vertex that was added.

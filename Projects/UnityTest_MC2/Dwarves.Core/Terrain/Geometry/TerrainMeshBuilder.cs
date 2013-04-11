@@ -136,7 +136,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 // Check if a new vertex should be created
                 if (actualIndex == -1)
                 {
-                    this.CreateVertex(pos, mesh, corners, cornerA, cornerB);
+                    this.CreateVertex(pos, mesh, corners, light, cornerA, cornerB);
                     actualIndex = mesh.LatestVertexIndex();
                 }
 
@@ -167,9 +167,16 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="pos">The position.</param>
         /// <param name="mesh">The mesh.</param>
         /// <param name="corners">The voxel data for cell corners.</param>
+        /// <param name="light">The light data for cell corners.</param>
         /// <param name="cornerA">The first corner index of the of the edge on which the vertex lies.</param>
         /// <param name="cornerB">The second corner index of the of the edge on which the vertex lies.</param>
-        private void CreateVertex(Vector3I pos, MeshData mesh, TerrainVoxel[] corners, byte cornerA, byte cornerB)
+        private void CreateVertex(
+            Vector3I pos,
+            MeshData mesh,
+            TerrainVoxel[] corners,
+            Colour?[] light,
+            byte cornerA,
+            byte cornerB)
         {
             // Calculate the position of the two end points between which the vertex lies
             Vector3I pAI = pos + MarchingCubes.CornerVector[cornerA];
@@ -187,9 +194,15 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3 nB = this.CalculateNormal(pBI);
             Vector3 normal = this.InterpolatePoint(nA, nB, densityA, densityB);
 
+            // Interpolate the color value between the two end points
+            Colour? colorA = light[cornerA];
+            Colour? colorB = light[cornerB];
+            Color color = this.InterpolateColor(pA, pB, colorA, colorB);
+
             // Add the vertex to the mesh
             mesh.Vertices.Add(point);
             mesh.Normals.Add(normal);
+            mesh.Light.Add(color);
         }
 
         /// <summary>
@@ -241,6 +254,37 @@ namespace Dwarves.Core.Terrain.Geometry
                     pointA.y + (mu * (pointB.y - pointA.y)),
                     pointA.z + (mu * (pointB.z - pointA.z)));
             }
+        }
+
+        /// <summary>
+        /// Interpolate the colour between the two points.
+        /// </summary>
+        /// <param name="pointA">The first point.</param>
+        /// <param name="pointB">The second point.</param>
+        /// <param name="colorA">The first colour.</param>
+        /// <param name="colorB">The second colour.</param>
+        /// <returns>The interpolated colour.</returns>
+        private Color InterpolateColor(Vector3 pointA, Vector3 pointB, Colour? colorA, Colour? colorB)
+        {
+            if (!colorA.HasValue)
+            {
+                if (colorB.HasValue)
+                {
+                    return new Color(colorB.Value.R, colorB.Value.G, colorB.Value.B);
+                }
+                else
+                {
+                    return Color.black;
+                }
+            }
+            else if (!colorB.HasValue)
+            {
+                return new Color(colorA.Value.R, colorA.Value.G, colorA.Value.B);
+            }
+
+            // Interpolate between the two points
+            // TODO: Bugger it, for now just return color A
+            return new Color(colorA.Value.R, colorA.Value.G, colorA.Value.B);
         }
     }
 }
