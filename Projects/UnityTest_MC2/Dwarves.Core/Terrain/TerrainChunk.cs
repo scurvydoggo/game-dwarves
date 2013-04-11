@@ -47,15 +47,7 @@ namespace Dwarves.Core.Terrain
         /// <returns>The voxel.</returns>
         public TerrainVoxel GetVoxel(Vector3I pos)
         {
-            TerrainPoint point = this.Points[pos.X, pos.Y];
-            if (point != null)
-            {
-                return point.GetVoxel(pos.Z);
-            }
-            else
-            {
-                return TerrainVoxel.Empty;
-            }
+            return this.Points[pos.X, pos.Y].GetVoxel(pos.Z);
         }
     }
 }

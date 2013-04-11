@@ -239,7 +239,7 @@ namespace Dwarves.Core.Terrain
             }
             else
             {
-                return TerrainVoxel.Empty;
+                return TerrainVoxel.CreateEmpty();
             }
         }
 

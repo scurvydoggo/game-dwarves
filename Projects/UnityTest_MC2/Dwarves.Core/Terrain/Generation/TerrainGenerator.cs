@@ -150,39 +150,38 @@ namespace Dwarves.Core.Terrain.Generation
         /// <returns>The point. Null value represents an 'air' point.</returns>
         private TerrainPoint CreatePoint(int x, int y, int surfaceI, float surfaceFractional)
         {
-            TerrainPoint point = null;
+            byte density;
+            TerrainMaterial material;
 
-            if (y <= surfaceI)
+            // Determine the density and material at this point
+            if (y == surfaceI)
             {
-                // Determine the material
-                var material = TerrainMaterial.Dirt;
-
-                // Determine the density
-                byte density;
-                if (y == surfaceI)
-                {
-                    // This voxel lies on the surface, so scale the density by the noise value
-                    density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surfaceFractional));
-                }
-                else
-                {
-                    // The voxel lies under the surface
-                    density = TerrainVoxel.DensityMin;
-                }
-
-                // Create the voxel at each depth point
-                TerrainVoxel[] voxels = new TerrainVoxel[this.Terrain.ChunkDepth];
-                for (int z = 0; z < voxels.Length; z++)
-                {
-                    voxels[z] = z > 0 && z < voxels.Length - 1 ?
-                        new TerrainVoxel(material, density) : TerrainVoxel.Empty;
-                }
-
-                // Create the point
-                point = new TerrainPoint(voxels);
+                // This voxel lies on the surface, so scale the density by the noise value
+                density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surfaceFractional));
+                material = TerrainMaterial.Dirt;
+            }
+            else if (y <= surfaceI)
+            {
+                // The voxel lies under the surface
+                density = TerrainVoxel.DensityMin;
+                material = TerrainMaterial.Dirt;
+            }
+            else
+            {
+                // The voxel lies above the surface
+                density = TerrainVoxel.DensityMax;
+                material = TerrainMaterial.Undefined;
             }
 
-            return point;
+            // Create the voxel at each depth point
+            TerrainVoxel[] voxels = new TerrainVoxel[this.Terrain.ChunkDepth];
+            for (int z = 0; z < voxels.Length; z++)
+            {
+                voxels[z] = z > 0 && z < voxels.Length - 1 ?
+                    new TerrainVoxel(material, density) : TerrainVoxel.CreateEmpty();
+            }
+
+            return new TerrainPoint(voxels);
         }
     }
 }
