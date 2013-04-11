@@ -153,7 +153,7 @@ namespace Dwarves.Core.Terrain.Generation
         {
             byte density;
             TerrainMaterial material;
-            Light? light;
+            Colour? light;
 
             // Determine the density and material at this point
             if (y == surfaceI)
@@ -161,21 +161,21 @@ namespace Dwarves.Core.Terrain.Generation
                 // This voxel lies on the surface, so scale the density by the noise value
                 density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surfaceFractional));
                 material = TerrainMaterial.Dirt;
-                light = null;
+                light = new Colour(128, 128, 128);
             }
             else if (y <= surfaceI)
             {
                 // The voxel lies under the surface
                 density = TerrainVoxel.DensityMin;
                 material = TerrainMaterial.Dirt;
-                light = null;
+                light = new Colour(128, 128, 128);
             }
             else
             {
                 // The voxel lies above the surface
                 density = TerrainVoxel.DensityMax;
                 material = TerrainMaterial.Undefined;
-                light = Light.White;
+                light = Colour.White;
             }
 
             // Create the voxel at each depth point

@@ -223,10 +223,28 @@ namespace Dwarves.Core.Terrain
 
         #endregion Chunk Related
 
-        #region Voxel Related
+        #region Point Related
 
         /// <summary>
-        /// Gets or sets the voxel at the given world position.
+        /// Gets the point at the given world position.
+        /// </summary>
+        /// <param name="pos">The world position.</param>
+        /// <returns>The point.</returns>
+        public TerrainPoint GetPoint(Vector3I pos)
+        {
+            TerrainChunk chunk;
+            if (this.chunks.TryGetValue(this.ChunkIndex(pos.X, pos.Y), out chunk))
+            {
+                return chunk.GetPoint(this.WorldToChunk(pos));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the voxel at the given world position.
         /// </summary>
         /// <param name="pos">The world position.</param>
         /// <returns>The voxel.</returns>
@@ -243,7 +261,7 @@ namespace Dwarves.Core.Terrain
             }
         }
 
-        #endregion Voxel Related
+        #endregion Point Related
 
         #region Geometry Related
 

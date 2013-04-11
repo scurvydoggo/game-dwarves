@@ -7,6 +7,7 @@ namespace Dwarves.Core.Terrain.Geometry
 {
     using System.Collections.Generic;
     using Dwarves.Core.Geometry;
+    using Dwarves.Core.Lighting;
     using Dwarves.Core.Math;
     using UnityEngine;
 
@@ -60,7 +61,7 @@ namespace Dwarves.Core.Terrain.Geometry
                     }
                 }
             }
-            
+
             // For now, just set the UV coordinates as the x/y position of each vertex. This will look stretched and
             // awful for things on an angle, but for now it will do
             var uvs = new Vector2[mesh.Vertices.Count];
@@ -81,11 +82,22 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="mesh">The mesh data.</param>
         private void CreateMeshCell(Vector3I pos, MeshData mesh)
         {
-            // Get the voxels at each corner of the cell
+            // Get the voxels and light at each corner of the cell
             var corners = new TerrainVoxel[8];
+            var light = new Colour?[8];
             for (int i = 0; i < corners.Length; i++)
             {
-                corners[i] = this.Terrain.GetVoxel(pos + MarchingCubes.CornerVector[i]);
+                Vector3I cornerPos = pos + MarchingCubes.CornerVector[i];
+                TerrainPoint point = this.Terrain.GetPoint(cornerPos);
+                if (point != null)
+                {
+                    corners[i] = point.GetVoxel(cornerPos.Z);
+                    light[i] = point.Light.Value;
+                }
+                else
+                {
+                    corners[i] = TerrainVoxel.CreateEmpty();
+                }
             }
 
             // Get the case code
@@ -203,7 +215,7 @@ namespace Dwarves.Core.Terrain.Geometry
             byte y1 = this.Terrain.GetVoxel(pos + Vector3I.UnitY).Density;
             byte z0 = this.Terrain.GetVoxel(pos - Vector3I.UnitZ).Density;
             byte z1 = this.Terrain.GetVoxel(pos + Vector3I.UnitZ).Density;
-            
+
             Vector3 normal = new Vector3((x1 - x0) * 0.5f, (y1 - y0) * 0.5f, (z1 - z0) * 0.5f);
             normal.Normalize();
             return normal;

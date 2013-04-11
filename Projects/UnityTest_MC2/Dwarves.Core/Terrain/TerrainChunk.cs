@@ -41,6 +41,16 @@ namespace Dwarves.Core.Terrain
         public bool RebuildRequired { get; set; }
 
         /// <summary>
+        /// Gets the point at the given chunk position.
+        /// </summary>
+        /// <param name="pos">The chunk position.</param>
+        /// <returns>The point.</returns>
+        public TerrainPoint GetPoint(Vector3I pos)
+        {
+            return this.Points[pos.X, pos.Y];
+        }
+
+        /// <summary>
         /// Gets the voxel at the given chunk position.
         /// </summary>
         /// <param name="pos">The chunk position.</param>

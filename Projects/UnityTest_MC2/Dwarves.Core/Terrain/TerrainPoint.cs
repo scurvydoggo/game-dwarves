@@ -31,7 +31,7 @@ namespace Dwarves.Core.Terrain
         /// </summary>
         /// <param name="voxels">The voxels.</param>
         /// <param name="light">The light value.</param>
-        public TerrainPoint(TerrainVoxel[] voxels, Light? light)
+        public TerrainPoint(TerrainVoxel[] voxels, Colour? light)
         {
             this.voxels = voxels;
             this.Light = light;
@@ -40,7 +40,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets or sets the light value.
         /// </summary>
-        public Light? Light { get; set; }
+        public Colour? Light { get; set; }
         
         /// <summary>
         /// Gets the voxel at the given z depth.

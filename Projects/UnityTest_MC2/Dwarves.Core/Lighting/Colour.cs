@@ -1,32 +1,32 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="Light.cs" company="Acidwashed Games">
+// <copyright file="Colour.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Lighting
 {
     /// <summary>
-    /// Represents a lighting value.
+    /// Represents a colour value.
     /// </summary>
-    public struct Light
+    public struct Colour
     {
         /// <summary>
         /// Blinding light.
         /// </summary>
-        public static readonly Light White = new Light(byte.MaxValue, byte.MaxValue, byte.MaxValue);
+        public static readonly Colour White = new Colour(byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
         /// <summary>
         /// Pure darkness.
         /// </summary>
-        public static readonly Light Black = new Light(byte.MinValue, byte.MinValue, byte.MinValue);
+        public static readonly Colour Black = new Colour(byte.MinValue, byte.MinValue, byte.MinValue);
 
         /// <summary>
-        /// Initialises a new instance of the Light struct.
+        /// Initialises a new instance of the Colour struct.
         /// </summary>
         /// <param name="r">The R value.</param>
         /// <param name="g">The G value.</param>
         /// <param name="b">The B value.</param>
-        public Light(byte r, byte g, byte b) : this()
+        public Colour(byte r, byte g, byte b) : this()
         {
             this.R = r;
             this.G = g;
