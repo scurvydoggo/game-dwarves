@@ -5,8 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestRig
 {
-    using Dwarves.Core.Terrain;
-    using Dwarves.Core.Terrain.Mutation;
+    using Dwarves.Core;
     using UnityEngine;
 
     /// <summary>
@@ -15,28 +14,20 @@ namespace Dwarves.TestRig
     public class DigTerrainTest : ITest
     {
         /// <summary>
-        /// The terrain mutator.
-        /// </summary>
-        private TerrainMutator mutator;
-
-        /// <summary>
         /// Initialises a new instance of the DigTerrainTest class.
         /// </summary>
         public DigTerrainTest()
         {
-            TerrainManager.Initialise(
+            TerrainSystem.Initialise(
                 4,
                 4,
                 5,
                 3,
-                1,
                 10,
                 1,
                 10,
                 10f,
                 0.5f);
-
-            this.mutator = new TerrainMutator(TerrainManager.Instance.Terrain, 3);
         }
 
         /// <summary>
@@ -44,7 +35,7 @@ namespace Dwarves.TestRig
         /// </summary>
         public void Update()
         {
-            this.mutator.DigCircle(new Vector2(0.9f, 0.9f), 10);
+            TerrainSystem.Instance.Mutator.DigCircle(new Vector2(0.9f, 0.9f), 10);
         }
     }
 }

@@ -1,47 +1,53 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="MethodGetBoundsCamera.cs" company="Acidwashed Games">
+// <copyright file="CameraBoundsComponent.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
-namespace Dwarves.Core.Bounds
+namespace Dwarves.Component.Bounds
 {
     using System;
     using Dwarves.Core.Math;
     using UnityEngine;
 
     /// <summary>
-    /// Implements a method of obtaining a camera's bounds.
+    /// Provides the 2D bounds of a camera.
     /// </summary>
-    public class MethodGetBoundsCamera : IMethodGetBounds
+    [RequireComponent(typeof(Camera))]
+    public class CameraBoundsComponent : MonoBehaviour
     {
         /// <summary>
         /// The plane at Z=0.
         /// </summary>
-        private Plane planeZ;
+        private static readonly Plane PlaneZ = new Plane(Vector3.back, Vector3.zero);
 
         /// <summary>
-        /// Initialises a new instance of the MethodGetBoundsCamera class.
+        /// The camera component.
         /// </summary>
-        public MethodGetBoundsCamera()
+        private Camera cCamera;
+
+        /// <summary>
+        /// Initialises the component.
+        /// </summary>
+        public void Start()
         {
-            this.planeZ = new Plane(Vector3.back, Vector3.zero);
+            this.cCamera = this.GetComponent<Camera>();
         }
 
         /// <summary>
-        /// Get the entity's bounds in chunk-coordinates.
+        /// Get the bounds in world coordinates.
         /// </summary>
-        /// <param name="entity">The entity.</param>
         /// <returns>The bounds.</returns>
-        public RectangleI GetChunkBounds(GameObject entity)
+        public RectangleI GetBounds()
         {
             // Cast a ray at the bottom left and top right corners of the viewport
-            Ray bottomRay = Camera.main.ViewportPointToRay(new Vector3(0, 0, 0));
-            Ray topRay = Camera.main.ViewportPointToRay(new Vector3(1, 1, 0));
+            Ray bottomRay = this.camera.ViewportPointToRay(new Vector3(0, 0, 0));
+            Ray topRay = this.camera.ViewportPointToRay(new Vector3(1, 1, 0));
 
             // Determine the distance to Z=0 along the ray vector (since the ray will be at an angle)
             float bottomDistance;
             float topDistance;
-            if (this.planeZ.Raycast(bottomRay, out bottomDistance) && this.planeZ.Raycast(topRay, out topDistance))
+            if (CameraBoundsComponent.PlaneZ.Raycast(bottomRay, out bottomDistance) &&
+                CameraBoundsComponent.PlaneZ.Raycast(topRay, out topDistance))
             {
                 // Get the position where the ray intersects the Z=0 plane
                 Vector3 bottom = bottomRay.GetPoint(Math.Abs(bottomDistance));

@@ -5,9 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestRig
 {
-    using Dwarves.Core.Geometry;
+    using System.Collections.Generic;
+    using Dwarves.Core;
     using Dwarves.Core.Math;
-    using Dwarves.Core.Terrain;
 
     /// <summary>
     /// A test for creating the terrain in the game.
@@ -19,20 +19,19 @@ namespace Dwarves.TestRig
         /// </summary>
         public CreateTerrainTest()
         {
-            TerrainManager.Initialise(
+            TerrainSystem.Initialise(
                 4,
                 4,
                 5,
                 3,
-                1,
                 10,
                 1,
                 10,
                 10f,
                 0.5f);
 
-            TerrainManager.Instance.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
-            TerrainManager.Instance.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
+            TerrainSystem.Instance.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
+            TerrainSystem.Instance.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
         }
 
         /// <summary>
@@ -40,25 +39,13 @@ namespace Dwarves.TestRig
         /// </summary>
         public void Update()
         {
-            var activeChunks = new Vector2I[]
+            var activeChunks = new Dictionary<Vector2I, bool>()
                 {
-                    new Vector2I(0, 0)
+                    { new Vector2I(0, 0), true }
                 };
 
             // Load and unload chunks
-            TerrainManager.Instance.LoadUnloadChunks(activeChunks);
-
-            // Build the mesh for this chunk
-            foreach (Vector2I chunkIndex in TerrainManager.Instance.Terrain.Chunks)
-            {
-                if (TerrainManager.Instance.Terrain.RebuildRequired(chunkIndex))
-                {
-                    MeshData meshData = TerrainManager.Instance.TerrainMeshBuilder.CreateMesh(chunkIndex);
-
-                    // Pretend that the mesh data was applied to a chunk game object
-                    TerrainManager.Instance.Terrain.GetChunk(chunkIndex).RebuildRequired = false;
-                }
-            }
+            TerrainSystem.Instance.Update(activeChunks);
         }
 
         /// <summary>

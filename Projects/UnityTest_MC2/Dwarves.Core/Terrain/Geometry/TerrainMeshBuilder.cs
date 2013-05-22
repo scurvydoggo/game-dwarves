@@ -5,9 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Geometry
 {
-    using System.Collections.Generic;
     using Dwarves.Core.Geometry;
-    using Dwarves.Core.Lighting;
     using Dwarves.Core.Math;
     using UnityEngine;
 
@@ -17,9 +15,9 @@ namespace Dwarves.Core.Terrain.Geometry
     public class TerrainMeshBuilder
     {
         /// <summary>
-        /// The shared indices to keep track of while creating meshes. This instance is reused for all mesh creation.
+        /// The terrain.
         /// </summary>
-        private SharedIndices sharedIndices;
+        private DwarfTerrain terrain;
 
         /// <summary>
         /// Initialises a new instance of the TerrainMeshBuilder class.
@@ -27,42 +25,39 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <param name="terrain">The terrain.</param>
         public TerrainMeshBuilder(DwarfTerrain terrain)
         {
-            this.Terrain = terrain;
-            this.sharedIndices = new SharedIndices(this.Terrain.ChunkWidth, this.Terrain.ChunkWidth);
+            this.terrain = terrain;
         }
 
         /// <summary>
-        /// Gets the terrain.
-        /// </summary>
-        public DwarfTerrain Terrain { get; private set; }
-
-        /// <summary>
-        /// Creates a mesh for the given chunk.
+        /// Rebuild the MeshData for the given chunk. This is a heavy operation which takes a few frames to complete,
+        /// so is best handled asynchronously.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
-        /// <returns>The mesh.</returns>
-        public MeshData CreateMesh(Vector2I chunkIndex)
+        public void RebuildMesh(Vector2I chunkIndex)
         {
-            // Create a new mesh
-            var mesh = new MeshData();
+            TerrainChunk chunk = this.terrain.GetChunk(chunkIndex);
 
-            // Clear the shared indices cache
-            this.sharedIndices.Reset();
+            // Initialise the arrays of shared indices
+            var sharedIndices = new SharedIndices(Metrics.ChunkWidth, Metrics.ChunkWidth);
+
+            // Clear the mesh data
+            chunk.Mesh.Data.Clear();
 
             // Create the mesh for each cell in the chunk
-            var chunkOrigin = this.Terrain.GetChunkOrigin(chunkIndex);
-            for (int z = 0; z < this.Terrain.ChunkDepth; z++)
+            var chunkOrigin = Metrics.GetChunkOrigin(chunkIndex);
+            for (int z = 0; z < Metrics.ChunkDepth; z++)
             {
-                for (int x = chunkOrigin.X; x < chunkOrigin.X + this.Terrain.ChunkWidth; x++)
+                for (int x = chunkOrigin.X; x < chunkOrigin.X + Metrics.ChunkWidth; x++)
                 {
-                    for (int y = chunkOrigin.Y; y < chunkOrigin.Y + this.Terrain.ChunkHeight; y++)
+                    for (int y = chunkOrigin.Y; y < chunkOrigin.Y + Metrics.ChunkHeight; y++)
                     {
-                        this.CreateMeshCell(new Vector3I(x, y, z), mesh);
+                        this.CreateMeshCell(new Vector3I(x, y, z), chunk.Mesh.Data, sharedIndices);
                     }
                 }
             }
 
-            return mesh;
+            // Flag the mesh data as changed
+            chunk.Mesh.SetMeshDataChanged();
         }
 
         /// <summary>
@@ -70,7 +65,8 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="pos">The position.</param>
         /// <param name="mesh">The mesh data.</param>
-        private void CreateMeshCell(Vector3I pos, MeshData mesh)
+        /// <param name="sharedIndices">The shared indices for the chunk.</param>
+        private void CreateMeshCell(Vector3I pos, MeshData mesh, SharedIndices sharedIndices)
         {
             // Get the voxels and light at each corner of the cell
             var corners = new TerrainVoxel[8];
@@ -78,7 +74,7 @@ namespace Dwarves.Core.Terrain.Geometry
             for (int i = 0; i < corners.Length; i++)
             {
                 Vector3I cornerPos = pos + MarchingCubes.CornerVector[i];
-                TerrainPoint point = this.Terrain.GetPoint(cornerPos);
+                TerrainPoint point = this.terrain.GetPoint(cornerPos);
                 if (point != null)
                 {
                     corners[i] = point.GetVoxel(cornerPos.Z);
@@ -108,7 +104,7 @@ namespace Dwarves.Core.Terrain.Geometry
             ushort[] vertexData = MarchingCubes.VertexData[caseCode];
 
             // Calculate the mask which indicates whether vertices can be shared for a given direction
-            Vector3I chunkPos = this.Terrain.WorldToChunk(pos);
+            Vector3I chunkPos = Metrics.WorldToChunk(pos);
             byte directionMask = (byte)((chunkPos.X > 0 ? 1 : 0) | ((chunkPos.Z > 0 ? 1 : 0) << 1) | ((chunkPos.Y > 0 ? 1 : 0) << 2));
 
             // Get the indices for each vertex in this cell, creating the vertices if necessary (otherwise use shared)
@@ -130,7 +126,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 int actualIndex = -1;
                 if (cornerB != 7 && (sharedDirection & directionMask) == sharedDirection)
                 {
-                    actualIndex = this.sharedIndices.GetIndexInDirection(chunkPos, sharedDirection, sharedIndex);
+                    actualIndex = sharedIndices.GetIndexInDirection(chunkPos, sharedDirection, sharedIndex);
                 }
 
                 // Check if a new vertex should be created
@@ -143,7 +139,7 @@ namespace Dwarves.Core.Terrain.Geometry
                 // Cache this vertex index so it can be used by other cells
                 if ((sharedDirection & 8) != 0)
                 {
-                    this.sharedIndices[chunkPos, sharedIndex] = mesh.LatestVertexIndex();
+                    sharedIndices[chunkPos, sharedIndex] = mesh.LatestVertexIndex();
                 }
 
                 actualIndices[i] = (ushort)actualIndex;
@@ -217,12 +213,12 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The normal.</returns>
         private Vector3 CalculateNormal(Vector3I pos)
         {
-            byte x0 = this.Terrain.GetVoxel(pos - Vector3I.UnitX).Density;
-            byte x1 = this.Terrain.GetVoxel(pos + Vector3I.UnitX).Density;
-            byte y0 = this.Terrain.GetVoxel(pos - Vector3I.UnitY).Density;
-            byte y1 = this.Terrain.GetVoxel(pos + Vector3I.UnitY).Density;
-            byte z0 = this.Terrain.GetVoxel(pos - Vector3I.UnitZ).Density;
-            byte z1 = this.Terrain.GetVoxel(pos + Vector3I.UnitZ).Density;
+            byte x0 = this.terrain.GetVoxel(pos - Vector3I.UnitX).Density;
+            byte x1 = this.terrain.GetVoxel(pos + Vector3I.UnitX).Density;
+            byte y0 = this.terrain.GetVoxel(pos - Vector3I.UnitY).Density;
+            byte y1 = this.terrain.GetVoxel(pos + Vector3I.UnitY).Density;
+            byte z0 = this.terrain.GetVoxel(pos - Vector3I.UnitZ).Density;
+            byte z1 = this.terrain.GetVoxel(pos + Vector3I.UnitZ).Density;
 
             Vector3 normal = new Vector3((x1 - x0) * 0.5f, (y1 - y0) * 0.5f, (z1 - z0) * 0.5f);
             normal.Normalize();

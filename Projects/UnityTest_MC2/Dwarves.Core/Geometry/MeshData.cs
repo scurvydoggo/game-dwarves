@@ -25,24 +25,35 @@ namespace Dwarves.Core.Geometry
         }
 
         /// <summary>
-        /// Gets or sets the vertices.
+        /// Gets the vertices.
         /// </summary>
-        public List<Vector3> Vertices { get; set; }
+        public List<Vector3> Vertices { get; private set; }
 
         /// <summary>
-        /// Gets or sets the normal vectors.
+        /// Gets the normal vectors.
         /// </summary>
-        public List<Vector3> Normals { get; set; }
+        public List<Vector3> Normals { get; private set; }
 
         /// <summary>
-        /// Gets or sets the triangle indices.
+        /// Gets the triangle indices.
         /// </summary>
-        public List<int> Indices { get; set; }
+        public List<int> Indices { get; private set; }
 
         /// <summary>
-        /// Gets or sets the light value at each vertex.
+        /// Gets the light value at each vertex.
         /// </summary>
-        public List<Color> Light { get; set; }
+        public List<Color> Light { get; private set; }
+
+        /// <summary>
+        /// Clear the mesh data.
+        /// </summary>
+        public void Clear()
+        {
+            this.Vertices.Clear();
+            this.Normals.Clear();
+            this.Indices.Clear();
+            this.Light.Clear();
+        }
 
         /// <summary>
         /// Gets the index of the latest vertex that was added.

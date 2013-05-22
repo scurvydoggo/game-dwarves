@@ -14,17 +14,24 @@ namespace Dwarves.Core.Terrain.Mutation
     /// </summary>
     public class TerrainMutator
     {
+        #region Private Variables
+
+        /// <summary>
+        /// The terrain.
+        /// </summary>
+        private DwarfTerrain terrain;
+
+        #endregion
+
         #region Constructor
 
         /// <summary>
         /// Initialises a new instance of the TerrainMutator class.
         /// </summary>
         /// <param name="terrain">The terrain.</param>
-        /// <param name="digDepth">The depth to which digging occurs.</param>
-        public TerrainMutator(DwarfTerrain terrain, int digDepth)
+        public TerrainMutator(DwarfTerrain terrain)
         {
-            this.Terrain = terrain;
-            this.DigDepth = digDepth;
+            this.terrain = terrain;
         }
 
         #endregion
@@ -65,20 +72,6 @@ namespace Dwarves.Core.Terrain.Mutation
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Gets the terrain.
-        /// </summary>
-        public DwarfTerrain Terrain { get; private set; }
-
-        /// <summary>
-        /// Gets the depth to which digging occurs.
-        /// </summary>
-        public int DigDepth { get; private set; }
-
-        #endregion
-
         #region Public Methods
 
         /// <summary>
@@ -88,19 +81,19 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="density">The density.</param>
         public void SetDensityPoint(Vector2I position, byte density)
         {
-            Vector2I chunkIndex = this.Terrain.ChunkIndex(position.X, position.Y);
+            Vector2I chunkIndex = Metrics.ChunkIndex(position.X, position.Y);
 
             // Get the chunk
             TerrainChunk chunk;
-            if (this.Terrain.TryGetChunk(chunkIndex, out chunk))
+            if (this.terrain.TryGetChunk(chunkIndex, out chunk))
             {
                 bool digOccurred = false;
-                
-                Vector2I chunkPos = this.Terrain.WorldToChunk(position);
+
+                Vector2I chunkPos = Metrics.WorldToChunk(position);
                 TerrainPoint point = chunk.Points[chunkPos.X, chunkPos.Y];
                 if (point != null)
                 {
-                    for (int z = 0; z < this.DigDepth; z++)
+                    for (int z = 0; z < Metrics.DigDepth; z++)
                     {
                         // Get the voxel
                         TerrainVoxel voxel = point.GetVoxel(z);
@@ -114,11 +107,12 @@ namespace Dwarves.Core.Terrain.Mutation
                     }
                 }
 
-                // Flag the chunk as requiring a rebuild
-                if (digOccurred)
-                {
-                    this.Terrain.FlagRebuildRequired(chunkIndex, true);
-                }
+                // TODO
+                //// Flag the chunk as requiring a rebuild
+                ////if (digOccurred)
+                ////{
+                ////    this.terrain.FlagRebuildRequired(chunkIndex, true);
+                ////}
             }
         }
 

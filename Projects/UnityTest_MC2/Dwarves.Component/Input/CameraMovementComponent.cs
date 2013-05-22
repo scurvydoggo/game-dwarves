@@ -31,7 +31,7 @@ namespace Dwarves.Component.Input
         {
             // Check if the camera should pan
 #if UNITY_IPHONE || UNITY_ANDRIOD
-        // TODO        
+        // TODO
 #else
             float moveDistance = this.Speed * Time.deltaTime;
 

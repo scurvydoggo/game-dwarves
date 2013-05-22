@@ -5,11 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
-    using System;
     using Dwarves.Component.Input;
     using Dwarves.Core;
-    using Dwarves.Core.Math;
-    using Dwarves.Core.Terrain;
     using UnityEngine;
 
     /// <summary>
@@ -27,7 +24,7 @@ namespace Dwarves.Component.Terrain
             var position = new Vector2(hitPoint.x, hitPoint.y);
 
             // Dig at the touched point
-            TerrainManager.Instance.TerrainMutator.DigCircle(position, 2);
+            TerrainSystem.Instance.Mutator.DigCircle(position, 2);
         }
     }
 }

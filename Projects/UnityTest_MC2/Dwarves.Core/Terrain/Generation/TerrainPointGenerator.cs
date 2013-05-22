@@ -1,5 +1,5 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="TerrainGenerator.cs" company="Acidwashed Games">
+// <copyright file="TerrainPointGenerator.cs" company="Acidwashed Games">
 //     Copyright 2012 Acidwashed Games. All right reserved.
 // </copyright>
 // ----------------------------------------------------------------------------
@@ -8,96 +8,40 @@ namespace Dwarves.Core.Terrain.Generation
     using Dwarves.Core.Lighting;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
-    using UnityEngine;
 
     /// <summary>
-    /// Generates voxel terrain.
+    /// Generates terrain voxels.
     /// </summary>
-    public class TerrainGenerator
+    public class TerrainPointGenerator
     {
         /// <summary>
-        /// Initialises a new instance of the TerrainGenerator class.
+        /// The noise generator.
         /// </summary>
-        /// <param name="terrain">The terrain.</param>
+        private INoiseGenerator noiseGenerator;
+
+        /// <summary>
+        /// Initialises a new instance of the TerrainPointGenerator class.
+        /// </summary>
         /// <param name="noiseGenerator">The noise generator.</param>
-        /// <param name="surfaceAmplitude">The distance from the mean surface height that the terrain oscillates.
-        /// </param>
-        public TerrainGenerator(DwarfTerrain terrain, INoiseGenerator noiseGenerator, int surfaceAmplitude)
+        public TerrainPointGenerator(INoiseGenerator noiseGenerator)
         {
-            this.Terrain = terrain;
-            this.NoiseGenerator = noiseGenerator;
-            this.SurfaceAmplitude = surfaceAmplitude;
+            this.noiseGenerator = noiseGenerator;
         }
-
-        /// <summary>
-        /// Gets the terrain.
-        /// </summary>
-        public DwarfTerrain Terrain { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the noise generator.
-        /// </summary>
-        public INoiseGenerator NoiseGenerator { get; set; }
-
-        /// <summary>
-        /// Gets or sets the distance from the mean surface height that the terrain oscillates.
-        /// </summary>
-        public int SurfaceAmplitude { get; set; }
 
         /// <summary>
         /// Creates a new chunk.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
-        /// <returns>The chunk.</returns>
-        public TerrainChunk CreateChunk(Vector2I chunkIndex)
-        {
-            // Get/generate the surface heights for this chunk
-            float[] surface;
-            if (!this.Terrain.SurfaceHeights.TryGetValue(chunkIndex.X, out surface))
-            {
-                surface = this.GenerateSurfaceHeights(chunkIndex.X);
-            }
-
-            return this.CreateChunk(chunkIndex, surface);
-        }
-
-        /// <summary>
-        /// Generate the heights for each x-coordinate for the given chunk.
-        /// </summary>
-        /// <param name="chunkIndexX">The chunk index's x component.</param>
-        /// <returns>The surface heights.</returns>
-        private float[] GenerateSurfaceHeights(int chunkIndexX)
-        {
-            var heights = new float[this.Terrain.ChunkWidth];
-
-            int originX = chunkIndexX * this.Terrain.ChunkWidth;
-            for (int x = 0; x < this.Terrain.ChunkWidth; x++)
-            {
-                // Generate the noise value at this x position
-                float noise = this.NoiseGenerator.Generate(originX + x);
-
-                // Obtain the height by scaling the noise with the surface amplitude
-                heights[x] = noise * this.SurfaceAmplitude;
-            }
-
-            return heights;
-        }
-
-        /// <summary>
-        /// Generate a new chunk.
-        /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
+        /// <param name="chunk">The chunk.</param>
         /// <param name="surfaceHeights">The surface heights.</param>
-        /// <returns>The chunk.</returns>
-        private TerrainChunk CreateChunk(Vector2I chunkIndex, float[] surfaceHeights)
+        public void GeneratePoints(Vector2I chunkIndex, TerrainChunk chunk, float[] surfaceHeights)
         {
-            int originX = chunkIndex.X * this.Terrain.ChunkWidth;
-            int originY = chunkIndex.Y * this.Terrain.ChunkHeight;
+            int originX = chunkIndex.X * Metrics.ChunkWidth;
+            int originY = chunkIndex.Y * Metrics.ChunkHeight;
 
             // Fill the points
-            TerrainPoint[,] points = new TerrainPoint[this.Terrain.ChunkWidth, this.Terrain.ChunkHeight];
-            SurfacePosition? surfacePositionChunk = null;
-            for (int x = 0; x < this.Terrain.ChunkWidth; x++)
+            SurfacePosition? surfacePosition = null;
+            for (int x = 0; x < Metrics.ChunkWidth; x++)
             {
                 // Determine where the surface lies for this x position
                 float surface = surfaceHeights[x];
@@ -105,9 +49,9 @@ namespace Dwarves.Core.Terrain.Generation
                 float surfaceFractional = surface - surfaceI;
 
                 // Create the points
-                for (int y = 0; y < this.Terrain.ChunkHeight; y++)
+                for (int y = 0; y < Metrics.ChunkHeight; y++)
                 {
-                    points[x, y] = this.CreatePoint(originX + x, originY + y, surfaceI, surfaceFractional);
+                    chunk.Points[x, y] = this.CreatePoint(originX + x, originY + y, surfaceI, surfaceFractional);
                 }
 
                 // Determine whether the surface lies above/below/inside at this x position
@@ -118,7 +62,7 @@ namespace Dwarves.Core.Terrain.Generation
                 }
                 else
                 {
-                    if (surfaceI < originY + this.Terrain.ChunkHeight)
+                    if (surfaceI < originY + Metrics.ChunkHeight)
                     {
                         surfacePositionX = SurfacePosition.Inside;
                     }
@@ -129,17 +73,17 @@ namespace Dwarves.Core.Terrain.Generation
                 }
 
                 // Check if the surface so far lies above/below/inside the chunk
-                if (!surfacePositionChunk.HasValue)
+                if (!surfacePosition.HasValue)
                 {
-                    surfacePositionChunk = surfacePositionX;
+                    surfacePosition = surfacePositionX;
                 }
-                else if (surfacePositionChunk.Value != surfacePositionX)
+                else if (surfacePosition.Value != surfacePositionX)
                 {
-                    surfacePositionChunk = SurfacePosition.Inside;
+                    surfacePosition = SurfacePosition.Inside;
                 }
             }
 
-            return new TerrainChunk(points, surfacePositionChunk.Value);
+            chunk.SurfacePosition = surfacePosition.Value;
         }
 
         /// <summary>
@@ -180,13 +124,13 @@ namespace Dwarves.Core.Terrain.Generation
             }
 
             // TODO: Remove this
-            int val =  255 - (int)(System.Math.Abs((float)y) * 8);
+            int val = 255 - (int)(System.Math.Abs((float)y) * 8);
             byte lightTest = val > 0 ? (byte)val : (byte)0;
             light = new Colour(lightTest, lightTest, lightTest);
             // TODO: Remove this
 
             // Create the voxel at each depth point
-            TerrainVoxel[] voxels = new TerrainVoxel[this.Terrain.ChunkDepth];
+            TerrainVoxel[] voxels = new TerrainVoxel[Metrics.ChunkDepth];
             for (int z = 0; z < voxels.Length; z++)
             {
                 voxels[z] = z > 0 && z < voxels.Length - 1 ?

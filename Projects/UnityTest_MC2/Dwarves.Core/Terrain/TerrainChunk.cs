@@ -6,7 +6,6 @@
 namespace Dwarves.Core.Terrain
 {
     using Dwarves.Core.Math;
-    using UnityEngine;
 
     /// <summary>
     /// A terrain chunk.
@@ -16,13 +15,10 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initialises a new instance of the TerrainChunk class.
         /// </summary>
-        /// <param name="points">The points in the chunk.</param>
-        /// <param name="surfacePosition">The surface position relative to this chunk.</param>
-        public TerrainChunk(TerrainPoint[,] points, SurfacePosition surfacePosition)
+        public TerrainChunk()
         {
-            this.Points = points;
-            this.SurfacePosition = surfacePosition;
-            this.RebuildRequired = false;
+            this.Points = new TerrainPoint[Metrics.ChunkWidth, Metrics.ChunkHeight];
+            this.Mesh = new TerrainChunkMesh();
         }
 
         /// <summary>
@@ -33,12 +29,12 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets the surface position relative to this chunk.
         /// </summary>
-        public SurfacePosition SurfacePosition { get; private set; }
+        public SurfacePosition SurfacePosition { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the mesh requires a rebuild.
+        /// Gets the mesh.
         /// </summary>
-        public bool RebuildRequired { get; set; }
+        public TerrainChunkMesh Mesh { get; private set; }
 
         /// <summary>
         /// Gets the point at the given chunk position.

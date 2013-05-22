@@ -14,39 +14,25 @@ namespace Dwarves.Core.Terrain.Serialisation
     public class TerrainSerialiser
     {
         /// <summary>
-        /// Initialises a new instance of the TerrainSerialiser class.
-        /// </summary>
-        /// <param name="terrain">The terrain.</param>
-        public TerrainSerialiser(DwarfTerrain terrain)
-        {
-            this.Terrain = terrain;
-        }
-
-        /// <summary>
-        /// Gets the terrain.
-        /// </summary>
-        public DwarfTerrain Terrain { get; private set; }
-
-        /// <summary>
-        /// Serialise the given terrain chunk.
+        /// Serialise the point data of the chunk.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
-        public void Serialise(Vector2I chunkIndex)
+        /// <param name="chunk">The chunk.</param>
+        public void SerialisePointData(Vector2I chunkIndex, TerrainChunk chunk)
         {
             // TODO
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Attempts to deserialise the given terrain chunk.
+        /// Attempt to deserialise the point data of the chunk.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="chunk">The chunk.</param>
         /// <returns>True if the terrain chunk was deserialised.</returns>
-        public bool TryDeserialise(Vector2I chunkIndex, out TerrainChunk chunk)
+        public bool TryDeserialisePoints(Vector2I chunkIndex, TerrainChunk chunk)
         {
             // TODO: This is not yet implemented
-            chunk = null;
             return false;
         }
     }

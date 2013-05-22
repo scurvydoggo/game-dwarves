@@ -5,7 +5,9 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
-    using Dwarves.Core.Geometry;
+    using System.Linq;
+    using Dwarves.Core;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using UnityEngine;
@@ -49,32 +51,53 @@ namespace Dwarves.Component.Terrain
         /// <summary>
         /// Called once per frame after the Update method has been called for all components.
         /// </summary>
-        public void LateUpdate()
+        public void Update()
         {
-            // Rebuild the mesh for this chunk if required
-            if (TerrainManager.Instance.Terrain.RebuildRequired(this.Chunk))
+            Job job = JobSystem.Instance.Scheduler.Run(
+                this.UpdateMeshFilterJob,
+                this.Chunk,
+                JobFactory.UpdateMeshFilter(this.Chunk),
+                JobReuse.ReuseAny);
+
+            // Wait for this job to complete if this is a priority chunk
+            if (JobSystem.Instance.Scheduler.PriorityChunks.Contains(this.Chunk))
             {
-                this.RebuildMesh();
+                JobSystem.Instance.AddFrameJob(job);
             }
         }
 
         /// <summary>
-        /// Build the mesh for this chunk.
+        /// Update the MeshFilter data for this chunk.
         /// </summary>
-        public void RebuildMesh()
+        /// <param name="parameter">The parameter.</param>
+        /// <param name="ct">The cancellation token for the job.</param>
+        private void UpdateMeshFilterJob(object parameter, CancellationToken ct)
         {
             // Create the mesh for this chunk
-            MeshData meshData = TerrainManager.Instance.TerrainMeshBuilder.CreateMesh(this.Chunk);
+            TerrainChunk chunk = TerrainSystem.Instance.Terrain.GetChunk(this.Chunk);
 
-            // Update the mesh filter geometry
-            this.cMeshFilter.mesh.Clear();
-            this.cMeshFilter.mesh.vertices = meshData.Vertices.ToArray();
-            this.cMeshFilter.mesh.normals = meshData.Normals.ToArray();
-            this.cMeshFilter.mesh.triangles = meshData.Indices.ToArray();
-            this.cMeshFilter.mesh.colors = meshData.Light.ToArray();
+            if (chunk.Mesh.MeshDataChanged)
+            {
+                // Copy the mesh data into arrays
+                Vector3[] vertices = chunk.Mesh.Data.Vertices.ToArray();
+                Vector3[] normals = chunk.Mesh.Data.Normals.ToArray();
+                int[] triangles = chunk.Mesh.Data.Indices.ToArray();
+                Color[] colors = chunk.Mesh.Data.Light.ToArray();
 
-            // Flag this chunk as no longer requiring a rebuild
-            TerrainManager.Instance.Terrain.GetChunk(this.Chunk).RebuildRequired = false;
+                // Reset the mesh data changed flag
+                chunk.Mesh.ResetMeshDataChanged();
+
+                // Update the mesh filter geometry
+                GameScheduler.Instance.Invoke(
+                    () =>
+                    {
+                        this.cMeshFilter.mesh.Clear();
+                        this.cMeshFilter.mesh.vertices = chunk.Mesh.Data.Vertices.ToArray();
+                        this.cMeshFilter.mesh.normals = chunk.Mesh.Data.Normals.ToArray();
+                        this.cMeshFilter.mesh.triangles = chunk.Mesh.Data.Indices.ToArray();
+                        this.cMeshFilter.mesh.colors = chunk.Mesh.Data.Light.ToArray();
+                    });
+            }
         }
     }
 }

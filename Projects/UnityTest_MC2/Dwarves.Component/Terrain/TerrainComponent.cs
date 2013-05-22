@@ -7,8 +7,8 @@ namespace Dwarves.Component.Terrain
 {
     using System.Collections.Generic;
     using Dwarves.Component.Bounds;
+    using Dwarves.Core;
     using Dwarves.Core.Math;
-    using Dwarves.Core.Terrain;
     using UnityEngine;
 
     /// <summary>
@@ -37,11 +37,6 @@ namespace Dwarves.Component.Terrain
         public int DigDepth;
 
         /// <summary>
-        /// The scaling ratio for voxel coordinates to world coordinates (essentially the Level of Detail).
-        /// </summary>
-        public int Scale;
-
-        /// <summary>
         /// The distance from the mean surface height that the terrain oscillates.
         /// </summary>
         public int SurfaceAmplitude;
@@ -67,16 +62,26 @@ namespace Dwarves.Component.Terrain
         public float Persistence;
 
         /// <summary>
+        /// The distance (in chunk coordinates) from the viewport at which chunks should begin loading in advance.
+        /// </summary>
+        public int DistanceChunkBeginLoad;
+
+        /// <summary>
+        /// The main camera bounds component.
+        /// </summary>
+        private CameraBoundsComponent cCameraBounds;
+
+        /// <summary>
         /// Initialises the component.
         /// </summary>
         public void Start()
         {
-            TerrainManager.Initialise(
+            // Initialise the terrain sub system
+            TerrainSystem.Initialise(
                 this.ChunkWidthLog,
                 this.ChunkHeightLog,
                 this.ChunkDepth,
                 this.DigDepth,
-                this.Scale,
                 this.SurfaceAmplitude,
                 this.Seed,
                 this.Octaves,
@@ -84,8 +89,11 @@ namespace Dwarves.Component.Terrain
                 this.Persistence);
 
             // Register event handlers
-            TerrainManager.Instance.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
-            TerrainManager.Instance.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
+            TerrainSystem.Instance.Terrain.ChunkAdded += this.Terrain_ChunkAdded;
+            TerrainSystem.Instance.Terrain.ChunkRemoved += this.Terrain_ChunkRemoved;
+
+            // Get the main camera bounds component
+            this.cCameraBounds = Camera.main.GetComponent<CameraBoundsComponent>();
         }
 
         /// <summary>
@@ -93,25 +101,72 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            // Determine which chunks are currently active
-            var activeChunks = new HashSet<Vector2I>();
-            foreach (ActorComponent actor in GameObject.FindObjectsOfType(typeof(ActorComponent)))
-            {
-                // Get the chunk-bounds of the actor
-                RectangleI bounds = actor.GetChunkBounds();
+            // Get the active chunks
+            Dictionary<Vector2I, bool> activeChunks = this.GetActiveChunks();
 
-                // Step through each chunk index in the actor bounds
-                for (int x = bounds.X; x < bounds.Right; x++)
+            // Update the terrain system
+            TerrainSystem.Instance.Update(activeChunks);
+        }
+
+        /// <summary>
+        /// Gets the chunks that are current active. The boolean value indicates whether the chunk is required this
+        /// frame.
+        /// </summary>
+        /// <returns>The active chunks.</returns>
+        private Dictionary<Vector2I, bool> GetActiveChunks()
+        {
+            // bool indicates if the chunk is required or if the loading can be deferred to a background thread
+            var activeChunks = new Dictionary<Vector2I, bool>();
+
+            // Add the chunks that the camera is pointing directly at. These are required to be loaded this frame
+            RectangleI cameraBounds = Metrics.WorldToChunk(this.cCameraBounds.GetBounds());
+            this.PopulateActiveChunks(activeChunks, cameraBounds, true);
+
+            // Add the camera-bordering chunks to begin loading in advance
+            var borderBounds = new RectangleI(
+                cameraBounds.X - this.DistanceChunkBeginLoad,
+                cameraBounds.Y - this.DistanceChunkBeginLoad,
+                cameraBounds.Width + (this.DistanceChunkBeginLoad * 2),
+                cameraBounds.Height + (this.DistanceChunkBeginLoad * 2));
+            this.PopulateActiveChunks(activeChunks, borderBounds, false);
+
+            // Add all other chunks which contain significant actors
+            foreach (ActorBoundsComponent actor in GameObject.FindObjectsOfType(typeof(ActorBoundsComponent)))
+            {
+                var actorBounds = Metrics.WorldToChunk(actor.GetBounds());
+                this.PopulateActiveChunks(activeChunks, actorBounds, false);
+            }
+
+            return activeChunks;
+        }
+
+        /// <summary>
+        /// Adds each chunk within the given world bounds to the given dictionary.
+        /// </summary>
+        /// <param name="chunks">The dictionary being populated.</param>
+        /// <param name="chunkBounds">The bounds in chunk coordinates.</param>
+        /// <param name="requiredThisFrame">Indicates whether the chunks are required in this frame.</param>
+        private void PopulateActiveChunks(
+            Dictionary<Vector2I, bool> chunks,
+            RectangleI chunkBounds,
+            bool requiredThisFrame)
+        {
+            for (int x = chunkBounds.X; x < chunkBounds.Right; x++)
+            {
+                for (int y = chunkBounds.Y; y > chunkBounds.Bottom; y--)
                 {
-                    for (int y = bounds.Y; y > bounds.Bottom; y--)
+                    var chunkIndex = new Vector2I(x, y);
+                    bool alreadyRequiredThisFrame;
+                    if (!chunks.TryGetValue(chunkIndex, out alreadyRequiredThisFrame))
                     {
-                        activeChunks.Add(new Vector2I(x, y));
+                        chunks.Add(chunkIndex, requiredThisFrame);
+                    }
+                    else if (requiredThisFrame && !alreadyRequiredThisFrame)
+                    {
+                        chunks[chunkIndex] = requiredThisFrame;
                     }
                 }
             }
-
-            // Load and unload chunks
-            TerrainManager.Instance.LoadUnloadChunks(activeChunks);
         }
 
         /// <summary>
@@ -121,11 +176,15 @@ namespace Dwarves.Component.Terrain
         /// <param name="chunkIndex">The chunk index.</param>
         private void Terrain_ChunkAdded(object sender, Vector2I chunkIndex)
         {
-            // Create the chunk game object
-            var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunkIndex));
-            chunkObject.transform.parent = this.transform;
-            TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
-            chunkComponent.Chunk = chunkIndex;
+            GameScheduler.Instance.Invoke(
+                () =>
+                {
+                    // Create the chunk game object
+                    var chunkObject = new GameObject(TerrainChunkComponent.GetLabel(chunkIndex));
+                    chunkObject.transform.parent = this.transform;
+                    TerrainChunkComponent chunkComponent = chunkObject.AddComponent<TerrainChunkComponent>();
+                    chunkComponent.Chunk = chunkIndex;
+                });
         }
 
         /// <summary>
@@ -135,13 +194,17 @@ namespace Dwarves.Component.Terrain
         /// <param name="chunkIndex">The chunk index.</param>
         private void Terrain_ChunkRemoved(object sender, Vector2I chunkIndex)
         {
-            // Find the chunk's component
-            Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunkIndex));
-            if (chunkTransform != null)
-            {
-                // Destroy it!
-                GameObject.Destroy(chunkTransform.gameObject);
-            }
+            GameScheduler.Instance.Invoke(
+                () =>
+                {
+                    // Find the chunk's component
+                    Transform chunkTransform = this.transform.FindChild(TerrainChunkComponent.GetLabel(chunkIndex));
+                    if (chunkTransform != null)
+                    {
+                        // Destroy it!
+                        GameObject.Destroy(chunkTransform.gameObject);
+                    }
+                });
         }
     }
 }

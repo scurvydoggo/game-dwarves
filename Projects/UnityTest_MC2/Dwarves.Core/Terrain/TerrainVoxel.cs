@@ -24,7 +24,7 @@ namespace Dwarves.Core.Terrain
         /// The density at which the surface lies (aka the isolevel).
         /// </summary>
         public const byte DensitySurface = 0x7F;
-        
+
         /// <summary>
         /// Initialises a new instance of the TerrainVoxel class.
         /// </summary>

@@ -5,9 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Geometry
 {
-    using Dwarves.Core.Geometry;
     using Dwarves.Core.Math;
-    using UnityEngine;
 
     /// <summary>
     /// Reference to the vertex indices of the voxels in the current and previous z planes.
@@ -15,7 +13,7 @@ namespace Dwarves.Core.Terrain.Geometry
     public class SharedIndices
     {
         /// <summary>
-        /// The shared indices. 1st dimension indicates z index; 2nd indicates x,y position of cell; 3rd indicates
+        /// The shared indices. 1st dimension indicates z index; second indicates x,y position of cell; third indicates
         /// the vertex index of each of the sharable vertices.
         /// </summary>
         private int[][,][] indices;
