@@ -15,9 +15,9 @@ namespace Dwarves.Component
     public class GameSchedulerComponent : MonoBehaviour
     {
         /// <summary>
-        /// Called once per frame after other Update methods.
+        /// Called once per frame.
         /// </summary>
-        public void LateUpdate()
+        public void Update()
         {
             // Wait for any jobs that are to be completed this frame
             JobSystem.Instance.WaitForFrameJobs();

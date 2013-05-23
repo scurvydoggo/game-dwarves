@@ -154,10 +154,19 @@ namespace Dwarves.Core
                         && !activeChunks.Keys.Any(c => j.Info.HasChunk(c));
                 });
 
-            // Get the priority chunks
+            // Get the current chunks and surface heights
+            var currentChunks = new HashSet<Vector2I>(this.Terrain.GetChunksThreadSafe());
+
+            // Get the new and priority chunks
+            var newChunks = new List<Vector2I>();
             var priorityChunks = new List<Vector2I>();
             foreach (KeyValuePair<Vector2I, bool> kvp in activeChunks)
             {
+                if (!currentChunks.Contains(kvp.Key))
+                {
+                    newChunks.Add(kvp.Key);
+                }
+
                 if (kvp.Value)
                 {
                     priorityChunks.Add(kvp.Key);
@@ -166,10 +175,6 @@ namespace Dwarves.Core
 
             // Prioritise the scheduled jobs for the priority chunks
             JobSystem.Instance.Scheduler.PriorityChunks = priorityChunks.ToArray();
-
-            // Get the current chunks and surface heights
-            Vector2I[] currentChunks = this.Terrain.GetChunksThreadSafe();
-            Vector2I[] newChunks = activeChunks.Keys.Except(currentChunks).ToArray();
 
             // Remove the chunks that are no longer used
             foreach (Vector2I chunk in currentChunks)
