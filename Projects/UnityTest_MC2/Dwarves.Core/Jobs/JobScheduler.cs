@@ -91,8 +91,6 @@ namespace Dwarves.Core.Jobs
         /// <returns>The job.</returns>
         public Job Run(JobWorkAction work, object parameter, JobInfo info, JobReuse reuse = JobReuse.None)
         {
-            UnityEngine.Debug.Log("Why do I have to log this?");
-
             // Create the job
             var job = new Job(work, parameter, info);
 
