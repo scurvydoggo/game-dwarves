@@ -8,6 +8,7 @@ namespace Dwarves.Core.Jobs
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using Dwarves.Core.Math;
 
     /// <summary>
@@ -16,11 +17,6 @@ namespace Dwarves.Core.Jobs
     /// </summary>
     public class JobScheduler : IDisposable
     {
-        /// <summary>
-        /// The job lock.
-        /// </summary>
-        private readonly object jobsLock = new object();
-
         /// <summary>
         /// The root jobs, which are jobs with no dependents (no other jobs depend on them).
         /// </summary>
@@ -35,6 +31,11 @@ namespace Dwarves.Core.Jobs
         /// The job comparer.
         /// </summary>
         private JobComparer comparer;
+
+        /// <summary>
+        /// The job lock.
+        /// </summary>
+        private SpinLock jobsLock;
 
         /// <summary>
         /// Indicates whether the instance has been disposed.
@@ -58,6 +59,7 @@ namespace Dwarves.Core.Jobs
             this.rootJobs = new List<Job>();
             this.jobPool = new JobPool(threadCount);
             this.comparer = new JobComparer();
+            this.jobsLock = new SpinLock(5);
         }
 
         /// <summary>
@@ -94,8 +96,8 @@ namespace Dwarves.Core.Jobs
             // Create the job
             var job = new Job(work, parameter, info);
 
-            // Insert the job into the dependency tree
-            lock (this.jobsLock)
+            this.jobsLock.Enter();
+            try
             {
                 HashSet<Job> allJobs = this.GetAllJobs();
                 if (allJobs.Count > 0)
@@ -212,6 +214,10 @@ namespace Dwarves.Core.Jobs
                     job.IsQueuedForExecution = true;
                 }
             }
+            finally
+            {
+                this.jobsLock.Exit();
+            }
 
             return job;
         }
@@ -222,7 +228,8 @@ namespace Dwarves.Core.Jobs
         /// <param name="selector">The chunks.</param>
         public void CancelJobsWhere(Predicate<Job> selector)
         {
-            lock (this.jobsLock)
+            this.jobsLock.Enter();
+            try
             {
                 foreach (Job job in this.GetAllJobs())
                 {
@@ -232,26 +239,10 @@ namespace Dwarves.Core.Jobs
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Recursively enumerates all the jobs.
-        /// </summary>
-        /// <returns>The jobs.</returns>
-        private HashSet<Job> GetAllJobs()
-        {
-            var jobs = new HashSet<Job>();
-            foreach (Job job in this.rootJobs)
+            finally
             {
-                foreach (Job dependency in job.GetAllDependencies())
-                {
-                    jobs.Add(dependency);
-                }
-
-                jobs.Add(job);
+                this.jobsLock.Exit();
             }
-
-            return jobs;
         }
 
         /// <summary>
@@ -260,7 +251,8 @@ namespace Dwarves.Core.Jobs
         /// <param name="job">The job.</param>
         private void RemoveCompletedJob(Job job)
         {
-            lock (this.jobsLock)
+            this.jobsLock.Enter();
+            try
             {
                 // Remove this job from dependencies
                 foreach (Job dependency in job.Dependencies)
@@ -305,6 +297,30 @@ namespace Dwarves.Core.Jobs
                     this.rootJobs.Remove(job);
                 }
             }
+            finally
+            {
+                this.jobsLock.Exit();
+            }
+        }
+
+        /// <summary>
+        /// Recursively enumerates all the jobs.
+        /// </summary>
+        /// <returns>The jobs.</returns>
+        private HashSet<Job> GetAllJobs()
+        {
+            var jobs = new HashSet<Job>();
+            foreach (Job job in this.rootJobs)
+            {
+                foreach (Job dependency in job.GetAllDependencies())
+                {
+                    jobs.Add(dependency);
+                }
+
+                jobs.Add(job);
+            }
+
+            return jobs;
         }
 
         /// <summary>
@@ -348,6 +364,50 @@ namespace Dwarves.Core.Jobs
         private void Job_Completed(object sender, Job job)
         {
             this.RemoveCompletedJob(job);
+        }
+
+        /// <summary>
+        /// A fast yet CPU-intensive locking mechanism.
+        /// </summary>
+        private class SpinLock
+        {
+            /// <summary>
+            /// Indicates whether the lock is currently held.
+            /// </summary>
+            private int isLockHeld;
+
+            /// <summary>
+            /// The iterations to spin between each check on the lock status.
+            /// </summary>
+            private int spinIterations;
+
+            /// <summary>
+            /// Initialises a new instance of the SpinLock class.
+            /// </summary>
+            /// <param name="spinIterations">The iterations to spin between each check on the lock status.</param>
+            public SpinLock(int spinIterations)
+            {
+                this.spinIterations = spinIterations;
+            }
+
+            /// <summary>
+            /// Enter the lock.
+            /// </summary>
+            public void Enter()
+            {
+                while (Interlocked.CompareExchange(ref this.isLockHeld, 1, 0) != 0)
+                {
+                    Thread.SpinWait(this.spinIterations);
+                }
+            }
+
+            /// <summary>
+            /// Release the lock.
+            /// </summary>
+            public void Exit()
+            {
+                Interlocked.Exchange(ref this.isLockHeld, 0);
+            }
         }
     }
 }
