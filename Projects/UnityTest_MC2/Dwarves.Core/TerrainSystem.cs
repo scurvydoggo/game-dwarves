@@ -159,12 +159,21 @@ namespace Dwarves.Core
 
             // Get the new and priority chunks
             var newChunks = new List<Vector2I>();
+            var newChunksAndNeighbours = new HashSet<Vector2I>();
             var priorityChunks = new List<Vector2I>();
             foreach (KeyValuePair<Vector2I, bool> kvp in activeChunks)
             {
                 if (!currentChunks.Contains(kvp.Key))
                 {
+                    // Add the new chunk
                     newChunks.Add(kvp.Key);
+
+                    // Add the neighbours
+                    newChunksAndNeighbours.Add(kvp.Key);
+                    foreach (Vector2I neighbour in TerrainChunk.GetNeighbours(kvp.Key))
+                    {
+                        newChunksAndNeighbours.Add(neighbour);
+                    }
                 }
 
                 if (kvp.Value)
@@ -225,8 +234,8 @@ namespace Dwarves.Core
                     JobReuse.ReuseAny);
             }
 
-            // Build the mesh data for each new chunk
-            foreach (Vector2I chunk in newChunks)
+            // Rebuild the new chunks and their neighbours
+            foreach (Vector2I chunk in newChunksAndNeighbours)
             {
                 JobSystem.Instance.Scheduler.Run(
                     this.RebuildMeshJob,
