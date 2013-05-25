@@ -172,7 +172,10 @@ namespace Dwarves.Core
                     newChunksAndNeighbours.Add(kvp.Key);
                     foreach (Vector2I neighbour in TerrainChunk.GetNeighbours(kvp.Key))
                     {
-                        newChunksAndNeighbours.Add(neighbour);
+                        if (currentChunks.Contains(neighbour))
+                        {
+                            newChunksAndNeighbours.Add(neighbour);
+                        }
                     }
                 }
 
