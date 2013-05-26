@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
-    using System.Linq;
     using Dwarves.Core.Math;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An access requirement for a job.
@@ -21,7 +21,7 @@ namespace Dwarves.Core.Jobs
         public JobAccess(JobAccessType type, params Vector2I[] chunks)
         {
             this.Type = type;
-            this.Chunks = chunks;
+            this.Chunks = new HashSet<Vector2I>(chunks);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Gets the chunks being accessed.
         /// </summary>
-        public Vector2I[] Chunks { get; private set; }
+        public HashSet<Vector2I> Chunks { get; private set; }
 
         /// <summary>
         /// Determine whether this uses any of the same chunks.
@@ -41,7 +41,15 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if this uses one or more of the same chunks.</returns>
         public bool HasAnyChunks(JobAccess other)
         {
-            return this.Chunks.Any(c => other.Chunks.Contains(c));
+            foreach (Vector2I chunk in this.Chunks)
+            {
+                if (other.Chunks.Contains(chunk))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -51,7 +59,15 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if this uses all of the same chunks.</returns>
         public bool HasAllChunks(JobAccess other)
         {
-            return this.Chunks.All(c => other.Chunks.Contains(c));
+            foreach (Vector2I chunk in this.Chunks)
+            {
+                if (!other.Chunks.Contains(chunk))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
