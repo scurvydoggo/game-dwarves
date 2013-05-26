@@ -267,15 +267,15 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Determine whether this is dependent on the given job.
+        /// Determine whether any dependencies of this are dependent on the given job.
         /// </summary>
         /// <param name="job">The job.</param>
         /// <returns>True if this is dependent.</returns>
-        public bool HasDependency(Job job)
+        public bool HasSubDependency(Job job)
         {
             foreach (Job dependency in this.Dependencies)
             {
-                if (dependency == job || dependency.HasDependency(job))
+                if (dependency.HasDependency(job))
                 {
                     return true;
                 }
@@ -285,15 +285,15 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Determine whether the given job is dependent on this.
+        /// Recursively determine whether the given job is dependent on any dependents of this.
         /// </summary>
         /// <param name="job">The job.</param>
         /// <returns>True if this has a dependent.</returns>
-        public bool HasDependent(Job job)
+        public bool HasSubDependent(Job job)
         {
             foreach (Job dependent in this.Dependents)
             {
-                if (dependent == job || dependent.HasDependent(job))
+                if (dependent.HasDependent(job))
                 {
                     return true;
                 }
@@ -339,6 +339,42 @@ namespace Dwarves.Core.Jobs
             {
                 this.Completed(this, this);
             }
+        }
+
+        /// <summary>
+        /// Recursively determine whether this is dependent on the given job.
+        /// </summary>
+        /// <param name="job">The job.</param>
+        /// <returns>True if this is dependent.</returns>
+        private bool HasDependency(Job job)
+        {
+            foreach (Job dependency in this.Dependencies)
+            {
+                if (dependency == job || dependency.HasDependency(job))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Recursively determine whether the given job is dependent on this.
+        /// </summary>
+        /// <param name="job">The job.</param>
+        /// <returns>True if this has a dependent.</returns>
+        private bool HasDependent(Job job)
+        {
+            foreach (Job dependent in this.Dependents)
+            {
+                if (dependent == job || dependent.HasDependent(job))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

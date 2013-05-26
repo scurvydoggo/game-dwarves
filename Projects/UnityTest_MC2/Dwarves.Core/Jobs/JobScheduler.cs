@@ -7,7 +7,6 @@ namespace Dwarves.Core.Jobs
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using Dwarves.Core.Math;
 
@@ -137,7 +136,7 @@ namespace Dwarves.Core.Jobs
                     for (int i = 0; i < job.Dependencies.Count; i++)
                     {
                         Job dependency = job.Dependencies[i];
-                        if (job.Dependencies.Any(j => j.HasDependency(dependency)))
+                        if (job.HasSubDependency(dependency))
                         {
                             job.Dependencies.RemoveAt(i--);
                         }
@@ -154,7 +153,7 @@ namespace Dwarves.Core.Jobs
                     for (int i = 0; i < job.Dependents.Count; i++)
                     {
                         Job dependent = job.Dependents[i];
-                        if (job.Dependents.Any(j => j.HasDependent(dependent)))
+                        if (job.HasSubDependent(dependent))
                         {
                             job.Dependents.RemoveAt(i--);
                         }
