@@ -105,10 +105,12 @@ namespace Dwarves.Core.Jobs
                     // Attempt to reuse an existing job
                     if (reuse != JobReuse.None)
                     {
-                        Job reusable = allJobs.FirstOrDefault(j => this.CanReuse(j, job, reuse));
-                        if (reusable != null)
+                        foreach (Job existing in allJobs)
                         {
-                            return reusable;
+                            if (this.CanReuse(existing, job, reuse))
+                            {
+                                return existing;
+                            }
                         }
                     }
 
