@@ -6,7 +6,6 @@
 namespace Dwarves.Core.Jobs
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Dwarves.Core.Math;
 
     /// <summary>
@@ -90,7 +89,15 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if this uses one or more of the same chunks.</returns>
         public bool HasAnyChunks(JobInfo other)
         {
-            return this.chunks.Any(c => other.chunks.Contains(c));
+            foreach (Vector2I chunk in this.chunks)
+            {
+                if (other.chunks.Contains(chunk))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -100,7 +107,15 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if this uses all of the same chunks.</returns>
         public bool HasAllChunks(JobInfo other)
         {
-            return this.chunks.All(c => other.chunks.Contains(c));
+            foreach (Vector2I chunk in this.chunks)
+            {
+                if (!other.chunks.Contains(chunk))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
