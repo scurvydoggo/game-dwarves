@@ -23,6 +23,11 @@ namespace Dwarves.Core.Jobs
         private List<Job> rootJobs;
 
         /// <summary>
+        /// All of the jobs, mirrored in this set for convenience.
+        /// </summary>
+        private HashSet<Job> allJobs;
+
+        /// <summary>
         /// The pool of jobs to be executed.
         /// </summary>
         private JobPool jobPool;
@@ -56,7 +61,8 @@ namespace Dwarves.Core.Jobs
         /// <param name="threadCount">The number of threads to spawn.</param>
         public JobScheduler(int threadCount)
         {
-            this.rootJobs = new List<Job>();
+            this.rootJobs = new List<Job>(50);
+            this.allJobs = new HashSet<Job>();
             this.jobPool = new JobPool(threadCount);
             this.comparer = new JobComparer();
             this.jobsLock = new SpinLock(5);
@@ -99,13 +105,12 @@ namespace Dwarves.Core.Jobs
             this.jobsLock.Enter();
             try
             {
-                HashSet<Job> allJobs = this.GetAllJobs();
-                if (allJobs.Count > 0)
+                if (this.allJobs.Count > 0)
                 {
                     // Attempt to reuse an existing job
                     if (reuse != JobReuse.None)
                     {
-                        foreach (Job existing in allJobs)
+                        foreach (Job existing in this.allJobs)
                         {
                             if (this.CanReuse(existing, job, reuse))
                             {
@@ -115,7 +120,7 @@ namespace Dwarves.Core.Jobs
                     }
 
                     // Add the full set of dependents and dependencies (including ancestors)
-                    foreach (Job existing in allJobs)
+                    foreach (Job existing in this.allJobs)
                     {
                         int comparison = this.comparer.Compare(job, existing);
                         if (comparison > 0)
@@ -215,6 +220,9 @@ namespace Dwarves.Core.Jobs
                     this.jobPool.Enqueue(job);
                     job.IsQueuedForExecution = true;
                 }
+
+                // Add the job to the 'all' set
+                this.allJobs.Add(job);
             }
             finally
             {
@@ -233,7 +241,7 @@ namespace Dwarves.Core.Jobs
             this.jobsLock.Enter();
             try
             {
-                foreach (Job job in this.GetAllJobs())
+                foreach (Job job in this.allJobs)
                 {
                     if (selector(job))
                     {
@@ -298,31 +306,14 @@ namespace Dwarves.Core.Jobs
                     // The job has no dependents so remove this root node
                     this.rootJobs.Remove(job);
                 }
+
+                // Remove the job from the 'all' set
+                this.allJobs.Remove(job);
             }
             finally
             {
                 this.jobsLock.Exit();
             }
-        }
-
-        /// <summary>
-        /// Recursively enumerates all the jobs.
-        /// </summary>
-        /// <returns>The jobs.</returns>
-        private HashSet<Job> GetAllJobs()
-        {
-            var jobs = new HashSet<Job>();
-            foreach (Job job in this.rootJobs)
-            {
-                foreach (Job dependency in job.GetAllDependencies())
-                {
-                    jobs.Add(dependency);
-                }
-
-                jobs.Add(job);
-            }
-
-            return jobs;
         }
 
         /// <summary>
