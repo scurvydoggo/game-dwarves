@@ -118,71 +118,44 @@ namespace Dwarves.Core.Jobs
                         }
                     }
 
-                    // Add the full set of dependents and dependencies (including ancestors)
+                    // Add the dependents and dependencies
                     foreach (Job existing in this.allJobs)
                     {
                         int comparison = this.comparer.Compare(job, existing);
                         if (comparison > 0)
                         {
-                            job.Dependents.Add(existing);
-                        }
-                        else if (comparison < 0)
-                        {
-                            job.Dependencies.Add(existing);
-                        }
-                    }
-
-                    // Trim the non-direct dependencies
-                    for (int i = 0; i < job.Dependencies.Count; i++)
-                    {
-                        Job dependency = job.Dependencies[i];
-                        if (job.HasSubDependency(dependency))
-                        {
-                            job.Dependencies.RemoveAt(i--);
-                        }
-                        else
-                        {
-                            dependency.Dependents.Add(job);
-
-                            // Remove this job from the root list (if it is there) as it now has a dependent
-                            this.rootJobs.Remove(dependency);
-                        }
-                    }
-
-                    // Trim the non-direct dependents
-                    for (int i = 0; i < job.Dependents.Count; i++)
-                    {
-                        Job dependent = job.Dependents[i];
-                        if (job.HasSubDependent(dependent))
-                        {
-                            job.Dependents.RemoveAt(i--);
-                        }
-                        else
-                        {
-                            // This is a direct dependent. Check if this dependent is already queued for execution
-                            if (!dependent.IsQueuedForExecution)
+                            // The existing job is a dependent. Check whether it is a direct-dependent
+                            if (!job.HasSubDependent(existing))
                             {
-                                dependent.Dependencies.Add(job);
-                            }
-                            else
-                            {
-                                // Remove dependent from the execution queue
-                                if (this.jobPool.Remove(dependent))
+                                // Ensure that the existing job isn't queued for execution, as this new job comes first
+                                if (!existing.IsQueuedForExecution || this.jobPool.Remove(existing))
                                 {
-                                    dependent.IsQueuedForExecution = false;
-                                    dependent.Dependencies.Add(job);
+                                    existing.IsQueuedForExecution = false;
+                                    job.Dependents.Add(existing);
+                                    existing.Dependencies.Add(job);
                                 }
                                 else
                                 {
                                     // The dependent couldn't be unqueued, probably because it is already executing
                                     // We will make our job depend on this, since they can't run at the same time
-                                    job.Dependents.RemoveAt(i--);
-                                    job.Dependencies.Add(dependent);
-                                    dependent.Dependents.Add(job);
+                                    job.Dependencies.Add(existing);
+                                    existing.Dependents.Add(job);
 
-                                    // Remove this job from the root list (if it is there) as it now has a dependent
-                                    this.rootJobs.Remove(dependent);
+                                    // Remove existing from the root list (if it is there) as it now has a dependent
+                                    this.rootJobs.Remove(existing);
                                 }
+                            }
+                        }
+                        else if (comparison < 0)
+                        {
+                            // The existing job is a dependency. Check whether it is a direct-dependency
+                            if (!job.HasSubDependency(existing))
+                            {
+                                job.Dependencies.Add(existing);
+                                existing.Dependents.Add(job);
+
+                                // Remove existing from the root list (if it is there) as it now has a dependent
+                                this.rootJobs.Remove(existing);
                             }
                         }
                     }

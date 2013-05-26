@@ -68,8 +68,8 @@ namespace Dwarves.Core.Jobs
             this.Id = JobId.GenerateId();
             this.WorkParameter = parameter;
             this.Info = info;
-            this.Dependencies = new List<Job>();
-            this.Dependents = new List<Job>();
+            this.Dependencies = new HashSet<Job>();
+            this.Dependents = new HashSet<Job>();
         }
 
         /// <summary>
@@ -95,12 +95,12 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Gets the jobs that this is dependent on.
         /// </summary>
-        public List<Job> Dependencies { get; private set; }
+        public HashSet<Job> Dependencies { get; private set; }
 
         /// <summary>
         /// Gets the jobs that are dependent on this.
         /// </summary>
-        public List<Job> Dependents { get; private set; }
+        public HashSet<Job> Dependents { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the job is queued for execution.
@@ -348,11 +348,18 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if this is dependent.</returns>
         private bool HasDependency(Job job)
         {
-            foreach (Job dependency in this.Dependencies)
+            if (this.Dependencies.Contains(job))
             {
-                if (dependency == job || dependency.HasDependency(job))
+                return true;
+            }
+            else
+            {
+                foreach (Job dependency in this.Dependencies)
                 {
-                    return true;
+                    if (dependency.HasDependency(job))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -366,11 +373,18 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if this has a dependent.</returns>
         private bool HasDependent(Job job)
         {
-            foreach (Job dependent in this.Dependents)
+            if (this.Dependents.Contains(job))
             {
-                if (dependent == job || dependent.HasDependent(job))
+                return true;
+            }
+            else
+            {
+                foreach (Job dependent in this.Dependents)
                 {
-                    return true;
+                    if (dependent.HasDependent(job))
+                    {
+                        return true;
+                    }
                 }
             }
 
