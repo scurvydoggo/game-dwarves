@@ -118,16 +118,25 @@ namespace Dwarves.Component.Terrain
             // bool indicates if the chunk is required or if the loading can be deferred to a background thread
             var activeChunks = new Dictionary<Vector2I, bool>();
 
+            // Get the bounds within the camera
+            RectangleI cameraPointBounds = this.cCameraBounds.GetBounds();
+            Vector2I top = Metrics.ChunkIndex(cameraPointBounds.X, cameraPointBounds.Y);
+            Vector2I bottom = Metrics.ChunkIndex(cameraPointBounds.Right - 1, cameraPointBounds.Bottom - 1);
+            var cameraChunkBounds = new RectangleI(
+                top.X - 2,
+                top.Y + 2,
+                bottom.X - top.X + 4,
+                top.Y - bottom.Y + 4);
+
             // Add the chunks that the camera is pointing directly at. These are required to be loaded this frame
-            RectangleI cameraBounds = Metrics.WorldToChunk(this.cCameraBounds.GetBounds());
-            this.PopulateActiveChunks(activeChunks, cameraBounds, true);
+            this.PopulateActiveChunks(activeChunks, cameraChunkBounds, true);
 
             // Add the camera-bordering chunks to begin loading in advance
             var borderBounds = new RectangleI(
-                cameraBounds.X - this.DistanceChunkBeginLoad,
-                cameraBounds.Y - this.DistanceChunkBeginLoad,
-                cameraBounds.Width + (this.DistanceChunkBeginLoad * 2),
-                cameraBounds.Height + (this.DistanceChunkBeginLoad * 2));
+                cameraChunkBounds.X - this.DistanceChunkBeginLoad,
+                cameraChunkBounds.Y - this.DistanceChunkBeginLoad,
+                cameraChunkBounds.Width + (this.DistanceChunkBeginLoad * 2),
+                cameraChunkBounds.Height + (this.DistanceChunkBeginLoad * 2));
             this.PopulateActiveChunks(activeChunks, borderBounds, false);
 
             // Add all other chunks which contain significant actors

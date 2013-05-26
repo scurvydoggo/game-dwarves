@@ -54,7 +54,10 @@ namespace Dwarves.Component.Bounds
                 Vector3 top = topRay.GetPoint(Math.Abs(topDistance));
 
                 return new RectangleI(
-                    (int)bottom.x - 2, (int)top.y + 1, (int)(top.x - bottom.x) + 4, (int)(top.y - bottom.y) + 2);
+                    (int)bottom.x,
+                    (int)Math.Ceiling(top.y),
+                    (int)Math.Ceiling(top.x - bottom.x + 1),
+                    (int)Math.Ceiling(top.y - bottom.y + 1));
             }
             else
             {
