@@ -8,7 +8,6 @@ namespace Dwarves.Core
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain;
@@ -145,22 +144,13 @@ namespace Dwarves.Core
         /// required in this frame (otherwise loading is deferred to a background thread).</param>
         private void LoadUnloadChunks(Dictionary<Vector2I, bool> activeChunks)
         {
-            // Cancel any jobs which operate on non-active chunks
-            JobSystem.Instance.Scheduler.CancelJobsWhere(
-                (j) =>
-                {
-                    return
-                        j.Info.Behaviour != JobBehaviour.RemoveChunk
-                        && !activeChunks.Keys.Any(c => j.Info.HasChunk(c));
-                });
+            // Update the active queues on the job system
+            JobSystem.Instance.Scheduler.UpdateActiveChunks(activeChunks);
 
-            // Get the current chunks and surface heights
+            // Get the current and new chunks
             var currentChunks = new HashSet<Vector2I>(this.Terrain.GetChunksThreadSafe());
-
-            // Get the new and priority chunks
             var newChunks = new List<Vector2I>();
             var newChunksAndNeighbours = new HashSet<Vector2I>();
-            var priorityChunks = new List<Vector2I>();
             foreach (KeyValuePair<Vector2I, bool> kvp in activeChunks)
             {
                 if (!currentChunks.Contains(kvp.Key))
@@ -178,27 +168,22 @@ namespace Dwarves.Core
                         }
                     }
                 }
-
-                if (kvp.Value)
-                {
-                    priorityChunks.Add(kvp.Key);
-                }
             }
 
-            // Prioritise the scheduled jobs for the priority chunks
-            JobSystem.Instance.Scheduler.PriorityChunks = priorityChunks.ToArray();
-
             // Remove the chunks that are no longer used
+            var toRemove = new List<Vector2I>();
             foreach (Vector2I chunk in currentChunks)
             {
                 if (!activeChunks.ContainsKey(chunk))
                 {
-                    JobSystem.Instance.Scheduler.Run(
-                        this.RemoveChunkJob,
-                        chunk,
-                        JobFactory.RemoveChunk(chunk),
-                        JobReuse.ReusePending);
+                    toRemove.Add(chunk);
                 }
+            }
+
+            // Enqueue the chunk removal job
+            if (toRemove.Count > 0)
+            {
+                JobSystem.Instance.Scheduler.Enqueue(() => this.RemoveChunksJob(toRemove), false);
             }
 
             // Determine which surfaces are new and need to be generated
@@ -212,103 +197,83 @@ namespace Dwarves.Core
                 }
             }
 
-            // Generate the surface heights
+            // Enqueue the generate the surface heights job
             if (newSurfaces.Count > 0)
             {
-                JobSystem.Instance.Scheduler.Run(
-                    this.AddSurfaceHeightsJob,
-                    newSurfaces,
-                    JobFactory.AddSurfaceHeights(),
-                    JobReuse.MergePending);
+                JobSystem.Instance.Scheduler.Enqueue(() => this.AddSurfaceHeightsJob(newSurfaces), true);
             }
 
-            // Add each new chunk and then load the point data
-            foreach (Vector2I chunk in newChunks)
+            if (newChunks.Count > 0)
             {
-                JobSystem.Instance.Scheduler.Run(
-                    this.AddChunkJob,
-                    chunk,
-                    JobFactory.AddChunk(chunk),
-                    JobReuse.ReuseAny);
-                JobSystem.Instance.Scheduler.Run(
-                    this.LoadPointsJob,
-                    chunk,
-                    JobFactory.LoadPoints(chunk),
-                    JobReuse.ReuseAny);
+                // Add the new chunks
+                JobSystem.Instance.Scheduler.Enqueue(() => this.AddChunksJob(newChunks), true);
+
+                // Load the point data for each new chunk
+                foreach (Vector2I chunk in newChunks)
+                {
+                    JobSystem.Instance.Scheduler.Enqueue(() => this.LoadPointsJob(chunk), true, chunk);
+                }
             }
 
             // Rebuild the new chunks and their neighbours
             foreach (Vector2I chunk in newChunksAndNeighbours)
             {
-                JobSystem.Instance.Scheduler.Run(
-                    this.RebuildMeshJob,
-                    chunk,
-                    JobFactory.RebuildMesh(chunk),
-                    JobReuse.ReusePending);
+                Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
+                JobSystem.Instance.Scheduler.Enqueue(() => this.RebuildMeshJob(chunk), true, neighbours);
             }
         }
 
         /// <summary>
         /// Adds surface heights.
         /// </summary>
-        /// <param name="parameter">The parameter.</param>
-        /// <param name="ct">The cancellation token for the job.</param>
-        private void AddSurfaceHeightsJob(object parameter, CancellationToken ct)
+        /// <param name="xChunks">The chunk x positions.</param>
+        private void AddSurfaceHeightsJob(HashSet<int> xChunks)
         {
-            foreach (int x in parameter as HashSet<int>)
+            foreach (int x in xChunks)
             {
                 // Generate the surface heights for this x position
-                ct.ThrowIfCancelled();
                 float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(x);
                 TerrainSystem.Instance.Terrain.AddSurfaceHeights(x, heights);
             }
         }
 
         /// <summary>
-        /// Adds a chunk.
+        /// Adds chunks.
         /// </summary>
-        /// <param name="parameter">The parameter.</param>
-        /// <param name="ct">The cancellation token for the job.</param>
-        private void AddChunkJob(object parameter, CancellationToken ct)
+        /// <param name="chunks">The chunks.</param>
+        private void AddChunksJob(List<Vector2I> chunks)
         {
-            var chunkIndex = (Vector2I)parameter;
-
-            ct.ThrowIfCancelled();
-            TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
+            foreach (Vector2I chunkIndex in chunks)
+            {
+                TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
+            }
         }
 
         /// <summary>
-        /// Removes a chunk.
+        /// Removes chunks.
         /// </summary>
-        /// <param name="parameter">The parameter.</param>
-        /// <param name="ct">The cancellation token for the job.</param>
-        private void RemoveChunkJob(object parameter, CancellationToken ct)
+        /// <param name="chunks">The chunks.</param>
+        private void RemoveChunksJob(List<Vector2I> chunks)
         {
-            var chunkIndex = (Vector2I)parameter;
-
-            ct.ThrowIfCancelled();
-            TerrainSystem.Instance.Terrain.RemoveChunk(chunkIndex);
+            foreach (Vector2I chunkIndex in chunks)
+            {
+                TerrainSystem.Instance.Terrain.RemoveChunk(chunkIndex);
+            }
         }
 
         /// <summary>
         /// Loads the point data of a chunk.
         /// </summary>
-        /// <param name="parameter">The parameter.</param>
-        /// <param name="ct">The cancellation token for the job.</param>
-        private void LoadPointsJob(object parameter, CancellationToken ct)
+        /// <param name="chunkIndex">The chunk index.</param>
+        private void LoadPointsJob(Vector2I chunkIndex)
         {
-            var chunkIndex = (Vector2I)parameter;
-
             // Get the chunk
-            ct.ThrowIfCancelled();
             TerrainChunk chunk = this.Terrain.GetChunk(chunkIndex);
 
             // Attempt to deserialise the point data
-            ct.ThrowIfCancelled();
             if (!this.serialiser.TryDeserialisePoints(chunkIndex, chunk))
             {
                 // Generate the point data
-                ct.ThrowIfCancelled();
                 float[] heights = this.Terrain.GetSurfaceHeights(chunkIndex.X);
                 this.pointGenerator.GeneratePoints(chunkIndex, chunk, heights);
             }
@@ -317,14 +282,10 @@ namespace Dwarves.Core
         /// <summary>
         /// Rebuilds the mesh data of a chunk.
         /// </summary>
-        /// <param name="parameter">The parameter.</param>
-        /// <param name="ct">The cancellation token for the job.</param>
-        private void RebuildMeshJob(object parameter, CancellationToken ct)
+        /// <param name="chunkIndex">The chunk index.</param>
+        private void RebuildMeshJob(Vector2I chunkIndex)
         {
-            var chunkIndex = (Vector2I)parameter;
-
             // Rebuild the mesh data
-            ct.ThrowIfCancelled();
             this.meshBuilder.RebuildMesh(chunkIndex);
         }
     }

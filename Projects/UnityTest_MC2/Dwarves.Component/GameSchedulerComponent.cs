@@ -19,9 +19,6 @@ namespace Dwarves.Component
         /// </summary>
         public void Update()
         {
-            // Wait for any jobs that are to be completed this frame
-            JobSystem.Instance.WaitForFrameJobs();
-
             // Invoke each action that was queued for invocation
             foreach (Action action in GameScheduler.Instance.TakeInvokeList())
             {

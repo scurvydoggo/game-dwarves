@@ -5,9 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Component.Terrain
 {
-    using System.Linq;
     using Dwarves.Core;
-    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using UnityEngine;
@@ -53,25 +51,14 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            Job job = JobSystem.Instance.Scheduler.Run(
-                this.UpdateMeshFilterJob,
-                this.Chunk,
-                JobFactory.UpdateMeshFilter(this.Chunk),
-                JobReuse.ReuseAny);
-
-            // Wait for this job to complete if this is a priority chunk
-            if (JobSystem.Instance.Scheduler.PriorityChunks.Contains(this.Chunk))
-            {
-                JobSystem.Instance.AddFrameJob(job);
-            }
+            JobSystem.Instance.Scheduler.Enqueue(
+                this.UpdateMeshFilterJob, true, TerrainChunk.GetNeighbours(this.Chunk));
         }
 
         /// <summary>
         /// Update the MeshFilter data for this chunk.
         /// </summary>
-        /// <param name="parameter">The parameter.</param>
-        /// <param name="ct">The cancellation token for the job.</param>
-        private void UpdateMeshFilterJob(object parameter, CancellationToken ct)
+        private void UpdateMeshFilterJob()
         {
             // Create the mesh for this chunk
             TerrainChunk chunk = TerrainSystem.Instance.Terrain.GetChunk(this.Chunk);

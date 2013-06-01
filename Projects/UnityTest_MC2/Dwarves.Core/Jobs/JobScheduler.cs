@@ -1,45 +1,43 @@
 ﻿// ----------------------------------------------------------------------------
-// <copyright file="JobScheduler.cs" company="Acidwashed Games">
-//     Copyright 2012 Acidwashed Games. All right reserved.
+// <copyright file="JobScheduler.cs" company="Dematic">
+//     Copyright © Dematic 2009-2013. All rights reserved
 // </copyright>
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using Dwarves.Core.Math;
 
     /// <summary>
-    /// Schedules jobs to be executed in parallel. A dependency tree is maintained for the scheduled jobs such that
-    /// jobs are executed in the correct logical order and that no resource conflicts arise.
+    /// The job scheduler.
     /// </summary>
     public class JobScheduler : IDisposable
     {
         /// <summary>
-        /// The root jobs, which are jobs with no dependents (no other jobs depend on them).
+        /// The jobs for each chunk.
         /// </summary>
-        private List<Job> rootJobs;
+        private Dictionary<Vector2I, ChunkJobQueue> queues;
 
         /// <summary>
-        /// All of the jobs, mirrored in this set for convenience.
+        /// The jobs which require all queues.
         /// </summary>
-        private HashSet<Job> allJobs;
+        private List<Job> masterJobs;
 
         /// <summary>
-        /// The pool of jobs to be executed.
+        /// The queue of master jobs.
+        /// </summary>
+        private JobQueue masterQueue;
+
+        /// <summary>
+        /// The pool of worker threads to execute jobs.
         /// </summary>
         private JobPool jobPool;
 
         /// <summary>
-        /// The job comparer.
+        /// The queues lock.
         /// </summary>
-        private JobComparer comparer;
-
-        /// <summary>
-        /// The job lock.
-        /// </summary>
-        private SpinLock jobsLock;
+        private SpinLock spinLock;
 
         /// <summary>
         /// Indicates whether the instance has been disposed.
@@ -49,31 +47,14 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Initialises a new instance of the JobScheduler class.
         /// </summary>
-        public JobScheduler()
-            : this(Environment.ProcessorCount)
-        {
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the JobScheduler class.
-        /// </summary>
         /// <param name="threadCount">The number of threads to spawn.</param>
         public JobScheduler(int threadCount)
         {
-            this.rootJobs = new List<Job>(50);
-            this.allJobs = new HashSet<Job>();
+            this.queues = new Dictionary<Vector2I, ChunkJobQueue>();
+            this.spinLock = new SpinLock(10);
+            this.masterQueue = new JobQueue();
+            this.masterJobs = new List<Job>();
             this.jobPool = new JobPool(threadCount);
-            this.comparer = new JobComparer();
-            this.jobsLock = new SpinLock(5);
-        }
-
-        /// <summary>
-        /// Gets or sets the priority chunks.
-        /// </summary>
-        public Vector2I[] PriorityChunks
-        {
-            get { return this.jobPool.PriorityChunks; }
-            set { this.jobPool.PriorityChunks = value; }
         }
 
         /// <summary>
@@ -89,289 +70,184 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Schedules a job to be executed.
+        /// Enqueue a job.
         /// </summary>
-        /// <param name="work">The work to be executed.</param>
-        /// <param name="parameter">The work parameter.</param>
-        /// <param name="info">The job information and access requirements.</param>
-        /// <param name="reuse">Indicates the job reuse behaviour.</param>
-        /// <returns>The job.</returns>
-        public Job Run(JobWorkAction work, object parameter, JobInfo info, JobReuse reuse = JobReuse.None)
+        /// <param name="action">The action delegate.</param>
+        /// <param name="canSkip">Indicates whether the job can be skipped.</param>
+        /// <param name="chunks">The chunks to which this job belongs.</param>
+        public void Enqueue(Action action, bool canSkip, params Vector2I[] chunks)
         {
-            // Create the job
-            var job = new Job(work, parameter, info);
-
-            this.jobsLock.Enter();
-            try
+            if (chunks.Length > 0)
             {
-                if (this.allJobs.Count > 0)
-                {
-                    // Attempt to reuse an existing job
-                    if (reuse != JobReuse.None)
-                    {
-                        foreach (Job existing in this.allJobs)
-                        {
-                            if (this.CanReuse(existing, job, reuse))
-                            {
-                                return existing;
-                            }
-                        }
-                    }
-
-                    // Add the dependents and dependencies
-                    foreach (Job existing in this.allJobs)
-                    {
-                        int comparison = this.comparer.Compare(job, existing);
-                        if (comparison > 0)
-                        {
-                            // The existing job is a dependent. Check whether it is a direct-dependent
-                            if (!job.HasSubDependent(existing))
-                            {
-                                // Ensure that the existing job isn't queued for execution, as this new job comes first
-                                if (!existing.IsQueuedForExecution || this.jobPool.Remove(existing))
-                                {
-                                    existing.IsQueuedForExecution = false;
-                                    job.Dependents.Add(existing);
-                                    existing.Dependencies.Add(job);
-                                }
-                                else
-                                {
-                                    // The dependent couldn't be unqueued, probably because it is already executing
-                                    // We will make our job depend on this, since they can't run at the same time
-                                    job.Dependencies.Add(existing);
-                                    existing.Dependents.Add(job);
-
-                                    // Remove existing from the root list (if it is there) as it now has a dependent
-                                    this.rootJobs.Remove(existing);
-                                }
-                            }
-                        }
-                        else if (comparison < 0)
-                        {
-                            // The existing job is a dependency. Check whether it is a direct-dependency
-                            if (!job.HasSubDependency(existing))
-                            {
-                                job.Dependencies.Add(existing);
-                                existing.Dependents.Add(job);
-
-                                // Remove existing from the root list (if it is there) as it now has a dependent
-                                this.rootJobs.Remove(existing);
-                            }
-                        }
-                    }
-
-                    // Remove any relations that this job bridges
-                    if (job.Dependencies.Count > 0 && job.Dependents.Count > 0)
-                    {
-                        foreach (Job dependency in job.Dependencies)
-                        {
-                            foreach (Job dependent in job.Dependents)
-                            {
-                                if (dependent.Dependencies.Contains(dependency))
-                                {
-                                    dependent.Dependencies.Remove(dependency);
-                                    dependency.Dependents.Remove(dependent);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Register the completion handler
+                // Create the job
+                var job = new Job(action, canSkip, false);
+                job.IsPendingChanged += this.Job_IsPendingChanged;
                 job.Completed += this.Job_Completed;
 
-                // If this job has no dependents, add it as a root node
-                if (job.Dependents.Count == 0)
+                // Get the owners of the job, creating the owner queues if necessary
+                JobQueue[] owners = new JobQueue[chunks.Length];
+                this.spinLock.Enter();
+                try
                 {
-                    this.rootJobs.Add(job);
-                }
-
-                // If this job has no dependencies, enqueue it for execution
-                if (job.Dependencies.Count == 0)
-                {
-                    this.jobPool.Enqueue(job);
-                    job.IsQueuedForExecution = true;
-                }
-
-                // Add the job to the 'all' set
-                this.allJobs.Add(job);
-            }
-            finally
-            {
-                this.jobsLock.Exit();
-            }
-
-            return job;
-        }
-
-        /// <summary>
-        /// Cancel any jobs that meet the criteria of the selector.
-        /// </summary>
-        /// <param name="selector">The chunks.</param>
-        public void CancelJobsWhere(Predicate<Job> selector)
-        {
-            this.jobsLock.Enter();
-            try
-            {
-                foreach (Job job in this.allJobs)
-                {
-                    if (selector(job))
+                    for (int i = 0; i < chunks.Length; i++)
                     {
-                        job.Cancel();
+                        Vector2I chunk = chunks[i];
+                        ChunkJobQueue queue;
+                        if (!this.queues.TryGetValue(chunk, out queue))
+                        {
+                            queue = new ChunkJobQueue(chunk, this.masterJobs);
+                            queue.QueueIdle += this.ChunkJobs_QueueIdle;
+                            this.queues.Add(chunk, queue);
+                        }
+
+                        owners[i] = queue.Queue;
                     }
                 }
+                finally
+                {
+                    this.spinLock.Exit();
+                }
+
+                // Add the owners and enqueue the job
+                job.AddOwners(owners);
+                foreach (JobQueue queue in owners)
+                {
+                    queue.Enqueue(job);
+                }
             }
-            finally
+            else
             {
-                this.jobsLock.Exit();
+                // Create the job
+                var job = new Job(action, canSkip, true);
+                job.IsPendingChanged += this.Job_IsPendingChanged;
+                job.Completed += this.Job_Completed;
+
+                // Add this as a master job and get the owner queues
+                JobQueue[] owners;
+                this.spinLock.Enter();
+                try
+                {
+                    // Add this as a master job
+                    this.masterJobs.Add(job);
+
+                    owners = new JobQueue[this.queues.Count + 1];
+                    owners[0] = this.masterQueue;
+
+                    int i = 1;
+                    foreach (ChunkJobQueue jobs in this.queues.Values)
+                    {
+                        owners[i++] = jobs.Queue;
+                    }
+                }
+                finally
+                {
+                    this.spinLock.Exit();
+                }
+
+                // Enqueue the job
+                job.AddOwners(owners);
+                foreach (JobQueue queue in owners)
+                {
+                    queue.Enqueue(job);
+                }
             }
         }
 
         /// <summary>
-        /// Removes a job that has completed.
+        /// Update the chunks that are currently active.
+        /// </summary>
+        /// <param name="activeChunks">The currently active chunks.</param>
+        public void UpdateActiveChunks(Dictionary<Vector2I, bool> activeChunks)
+        {
+            this.spinLock.Enter();
+            try
+            {
+                foreach (ChunkJobQueue jobs in this.queues.Values)
+                {
+                    jobs.Queue.FlaggedForRemoval = activeChunks.ContainsKey(jobs.Chunk);
+                }
+            }
+            finally
+            {
+                this.spinLock.Exit();
+            }
+        }
+
+        /// <summary>
+        /// Moves the owner queues of a job forward. This means each queue is stepped to the job after this one.
         /// </summary>
         /// <param name="job">The job.</param>
-        private void RemoveCompletedJob(Job job)
+        private void MoveToNextJob(Job job)
         {
-            this.jobsLock.Enter();
-            try
+            if (job.IsMasterJob)
             {
-                // Remove this job from dependencies
-                foreach (Job dependency in job.Dependencies)
+                this.spinLock.Enter();
+                try
                 {
-                    dependency.Dependents.Remove(job);
-
-                    // All dependents are removed from the given job so add it as a root job now
-                    if (dependency.Dependents.Count == 0)
-                    {
-                        this.rootJobs.Add(dependency);
-                    }
+                    this.masterJobs.Remove(job);
                 }
-
-                if (job.Dependents.Count > 0)
+                finally
                 {
-                    foreach (Job dependent in job.Dependents)
-                    {
-                        // Remove this job from the dependent
-                        dependent.Dependencies.Remove(job);
+                    this.spinLock.Exit();
+                }
+            }
 
-                        // Bridge the gap between dependents and dependencies
-                        foreach (Job dependency in job.Dependencies)
-                        {
-                            dependent.Dependencies.Add(dependency);
-                            dependency.Dependents.Add(dependent);
+            foreach (JobQueue owner in job.GetOwners())
+            {
+                owner.MoveNext();
+            }
+        }
 
-                            // Remove this job from the root list (if it is there) as it now has a dependent
-                            this.rootJobs.Remove(dependency);
-                        }
-
-                        // If this dependent has no dependencies, enqueue it for execution
-                        if (dependent.Dependencies.Count == 0)
-                        {
-                            this.jobPool.Enqueue(dependent);
-                            dependent.IsQueuedForExecution = true;
-                        }
-                    }
+        /// <summary>
+        /// Handle a job pending execution.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="job">The job.</param>
+        private void Job_IsPendingChanged(object sender, Job job)
+        {
+            if (job.IsPending)
+            {
+                if (!job.IsSkipRequested)
+                {
+                    // Enqueue this job to be executed
+                    this.jobPool.Enqueue(job);
                 }
                 else
                 {
-                    // The job has no dependents so remove this root node
-                    this.rootJobs.Remove(job);
+                    // Skip the job by moving each owner queue forward
+                    this.MoveToNextJob(job);
                 }
+            }
+        }
 
-                // Remove the job from the 'all' set
-                this.allJobs.Remove(job);
+        /// <summary>
+        /// Handle a job entering the completed state.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="job">The job.</param>
+        private void Job_Completed(object sender, Job job)
+        {
+            this.MoveToNextJob(job);
+        }
+
+        /// <summary>
+        /// Handle a job queue becoming idle.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="jobs">The chunk jobs.</param>
+        private void ChunkJobs_QueueIdle(object sender, ChunkJobQueue jobs)
+        {
+            this.spinLock.Enter();
+            try
+            {
+                if (jobs.Queue.IsIdle && jobs.Queue.FlaggedForRemoval)
+                {
+                    this.queues.Remove(jobs.Chunk);
+                }
             }
             finally
             {
-                this.jobsLock.Exit();
-            }
-        }
-
-        /// <summary>
-        /// Determine whether the an duplicate can be used as a substitute for a new job.
-        /// </summary>
-        /// <param name="existingJob">The existing job.</param>
-        /// <param name="newJob">The new job.</param>
-        /// <param name="action">The action to be taken for duplicate jobs.</param>
-        /// <returns>True if the existing duplicate can be used in place of the new job.</returns>
-        private bool CanReuse(Job existingJob, Job newJob, JobReuse action)
-        {
-            if (!existingJob.IsSubstitute(newJob))
-            {
-                return false;
-            }
-
-            switch (action)
-            {
-                case JobReuse.None:
-                    return false;
-
-                case JobReuse.ReuseAny:
-                    return true;
-
-                case JobReuse.ReusePending:
-                    return !existingJob.IsCommenced;
-
-                case JobReuse.MergePending:
-                    return existingJob.TryMerge(newJob);
-
-                default:
-                    throw new InvalidOperationException("Unexpected duplicate action: " + action);
-            }
-        }
-
-        /// <summary>
-        /// Handles the completion of a job.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="job">The job that completed.</param>
-        private void Job_Completed(object sender, Job job)
-        {
-            this.RemoveCompletedJob(job);
-        }
-
-        /// <summary>
-        /// A fast yet CPU-intensive locking mechanism.
-        /// </summary>
-        private class SpinLock
-        {
-            /// <summary>
-            /// Indicates whether the lock is currently held.
-            /// </summary>
-            private int isLockHeld;
-
-            /// <summary>
-            /// The iterations to spin between each check on the lock status.
-            /// </summary>
-            private int spinIterations;
-
-            /// <summary>
-            /// Initialises a new instance of the SpinLock class.
-            /// </summary>
-            /// <param name="spinIterations">The iterations to spin between each check on the lock status.</param>
-            public SpinLock(int spinIterations)
-            {
-                this.spinIterations = spinIterations;
-            }
-
-            /// <summary>
-            /// Enter the lock.
-            /// </summary>
-            public void Enter()
-            {
-                while (Interlocked.CompareExchange(ref this.isLockHeld, 1, 0) != 0)
-                {
-                    Thread.SpinWait(this.spinIterations);
-                }
-            }
-
-            /// <summary>
-            /// Release the lock.
-            /// </summary>
-            public void Exit()
-            {
-                Interlocked.Exchange(ref this.isLockHeld, 0);
+                this.spinLock.Exit();
             }
         }
     }
