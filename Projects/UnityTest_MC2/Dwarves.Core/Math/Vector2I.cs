@@ -249,5 +249,18 @@ namespace Dwarves.Core.Math
         }
 
         #endregion Equality
+
+        #region Other
+
+        /// <summary>
+        /// Gets the string representation.
+        /// </summary>
+        /// <returns>The string representation.</returns>
+        public override string ToString()
+        {
+            return "[" + this.X + "," + this.Y + "]";
+        }
+
+        #endregion Other
     }
 }
