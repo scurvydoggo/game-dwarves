@@ -37,7 +37,7 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// The queues lock.
         /// </summary>
-        private SpinLock spinLock;
+        private SpinLock queuesLock;
 
         /// <summary>
         /// Indicates whether the instance has been disposed.
@@ -51,7 +51,7 @@ namespace Dwarves.Core.Jobs
         public JobScheduler(int threadCount)
         {
             this.queues = new Dictionary<Vector2I, ChunkJobQueue>();
-            this.spinLock = new SpinLock(10);
+            this.queuesLock = new SpinLock(10);
             this.masterQueue = new JobQueue();
             this.masterJobs = new List<Job>();
             this.jobPool = new JobPool(threadCount);
@@ -86,7 +86,7 @@ namespace Dwarves.Core.Jobs
 
                 // Get the owners of the job, creating the owner queues if necessary
                 JobQueue[] owners = new JobQueue[chunks.Length];
-                this.spinLock.Enter();
+                this.queuesLock.Enter();
                 try
                 {
                     for (int i = 0; i < chunks.Length; i++)
@@ -105,7 +105,7 @@ namespace Dwarves.Core.Jobs
                 }
                 finally
                 {
-                    this.spinLock.Exit();
+                    this.queuesLock.Exit();
                 }
 
                 // Add the owners and enqueue the job
@@ -124,7 +124,7 @@ namespace Dwarves.Core.Jobs
 
                 // Add this as a master job and get the owner queues
                 JobQueue[] owners;
-                this.spinLock.Enter();
+                this.queuesLock.Enter();
                 try
                 {
                     // Add this as a master job
@@ -141,7 +141,7 @@ namespace Dwarves.Core.Jobs
                 }
                 finally
                 {
-                    this.spinLock.Exit();
+                    this.queuesLock.Exit();
                 }
 
                 // Enqueue the job
@@ -159,7 +159,7 @@ namespace Dwarves.Core.Jobs
         /// <param name="activeChunks">The currently active chunks.</param>
         public void UpdateActiveChunks(Dictionary<Vector2I, bool> activeChunks)
         {
-            this.spinLock.Enter();
+            this.queuesLock.Enter();
             try
             {
                 foreach (ChunkJobQueue jobs in this.queues.Values)
@@ -169,7 +169,7 @@ namespace Dwarves.Core.Jobs
             }
             finally
             {
-                this.spinLock.Exit();
+                this.queuesLock.Exit();
             }
         }
 
@@ -181,14 +181,14 @@ namespace Dwarves.Core.Jobs
         {
             if (job.IsMasterJob)
             {
-                this.spinLock.Enter();
+                this.queuesLock.Enter();
                 try
                 {
                     this.masterJobs.Remove(job);
                 }
                 finally
                 {
-                    this.spinLock.Exit();
+                    this.queuesLock.Exit();
                 }
             }
 
@@ -237,7 +237,7 @@ namespace Dwarves.Core.Jobs
         /// <param name="jobs">The chunk jobs.</param>
         private void ChunkJobs_QueueIdle(object sender, ChunkJobQueue jobs)
         {
-            this.spinLock.Enter();
+            this.queuesLock.Enter();
             try
             {
                 if (jobs.Queue.IsIdle && jobs.Queue.FlaggedForRemoval)
@@ -247,7 +247,7 @@ namespace Dwarves.Core.Jobs
             }
             finally
             {
-                this.spinLock.Exit();
+                this.queuesLock.Exit();
             }
         }
     }
