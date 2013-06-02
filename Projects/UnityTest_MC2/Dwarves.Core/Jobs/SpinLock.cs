@@ -39,7 +39,7 @@ namespace Dwarves.Core.Jobs
             int wait = this.spinIterations;
             while (Interlocked.CompareExchange(ref this.isLockHeld, 1, 0) != 0)
             {
-                if (wait < 25)
+                if (wait < 1000)
                 {
                     Thread.SpinWait(wait);
                     wait *= 2;
