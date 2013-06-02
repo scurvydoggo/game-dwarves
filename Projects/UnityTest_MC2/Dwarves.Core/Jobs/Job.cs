@@ -52,12 +52,13 @@ namespace Dwarves.Core.Jobs
         /// <param name="action">The action delegate.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
         /// <param name="isMasterJob">Indicates whether this is a master job.</param>
-        public Job(Action action, bool canSkip, bool isMasterJob)
+        /// <param name="ownerCapacity">The initial capacity for the owners list.</param>
+        public Job(Action action, bool canSkip, bool isMasterJob, int ownerCapacity)
         {
             this.action = action;
             this.canSkip = canSkip;
             this.IsMasterJob = isMasterJob;
-            this.owners = new List<JobQueue>(20);
+            this.owners = new List<JobQueue>(ownerCapacity);
         }
 
         /// <summary>

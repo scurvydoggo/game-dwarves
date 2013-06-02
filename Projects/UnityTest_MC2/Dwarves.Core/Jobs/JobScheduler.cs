@@ -80,7 +80,7 @@ namespace Dwarves.Core.Jobs
             if (chunks.Length > 0)
             {
                 // Create the job
-                var job = new Job(action, canSkip, false);
+                var job = new Job(action, canSkip, false, chunks.Length);
                 job.IsPendingChanged += this.Job_IsPendingChanged;
                 job.Completed += this.Job_Completed;
 
@@ -118,7 +118,7 @@ namespace Dwarves.Core.Jobs
             else
             {
                 // Create the job
-                var job = new Job(action, canSkip, true);
+                var job = new Job(action, canSkip, true, this.queues.Count + 10);
                 job.IsPendingChanged += this.Job_IsPendingChanged;
                 job.Completed += this.Job_Completed;
 
