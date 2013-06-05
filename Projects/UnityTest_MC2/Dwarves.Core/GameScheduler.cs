@@ -81,7 +81,7 @@ namespace Dwarves.Core
         /// <param name="ex">The exception.</param>
         public void SetUnhandledException(Exception ex)
         {
-            if (ex != null && this.UnhandledException == null)
+            if (this.UnhandledException == null)
             {
                 this.UnhandledException = ex;
             }
