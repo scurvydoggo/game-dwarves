@@ -45,6 +45,11 @@ namespace Dwarves.Core
         }
 
         /// <summary>
+        /// Gets the unhandled exception to be processed on the main thread, causing the game to exit.
+        /// </summary>
+        public Exception UnhandledException { get; private set; }
+
+        /// <summary>
         /// Enqueues an action to be invoked on the main thread.
         /// </summary>
         /// <param name="action">The action to be invoked.</param>
@@ -67,6 +72,18 @@ namespace Dwarves.Core
                 var actions = this.invokeList.ToArray();
                 this.invokeList.Clear();
                 return actions;
+            }
+        }
+
+        /// <summary>
+        /// Sets an unhandled exception which causes the game to halt.
+        /// </summary>
+        /// <param name="ex">The exception.</param>
+        public void SetUnhandledException(Exception ex)
+        {
+            if (ex != null && this.UnhandledException == null)
+            {
+                this.UnhandledException = ex;
             }
         }
     }

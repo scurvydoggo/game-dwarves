@@ -95,23 +95,11 @@ namespace Dwarves.Core.Jobs
         public bool IsCompleted { get; private set; }
 
         /// <summary>
-        /// Gets the error that occurred during execution. Null if no error occurred.
-        /// </summary>
-        public Exception Error { get; private set; }
-
-        /// <summary>
         /// Execute the job.
         /// </summary>
         public void Execute()
         {
-            try
-            {
-                this.action();
-            }
-            catch (Exception ex)
-            {
-                this.Error = ex;
-            }
+            this.action();
 
             this.IsCompleted = true;
             if (this.Completed != null)

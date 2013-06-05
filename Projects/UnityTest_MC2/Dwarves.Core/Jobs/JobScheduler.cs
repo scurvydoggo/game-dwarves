@@ -228,13 +228,6 @@ namespace Dwarves.Core.Jobs
         /// <param name="job">The job.</param>
         private void Job_Completed(object sender, Job job)
         {
-            // Throw an exception if an error ocurred
-            if (job.Error != null)
-            {
-                UnityEngine.Debug.LogError(job.Error.Message);
-                throw job.Error;
-            }
-
             this.MoveToNextJob(job);
         }
 
