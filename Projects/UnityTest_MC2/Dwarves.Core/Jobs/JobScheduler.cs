@@ -85,11 +85,10 @@ namespace Dwarves.Core.Jobs
                 job.Completed += this.Job_Completed;
 
                 // Get the owners of the job, creating the owner queues if necessary
-                JobQueue[] owners = new JobQueue[chunks.Length + 1];
+                JobQueue[] owners = new JobQueue[chunks.Length];
                 this.queuesLock.Enter();
                 try
                 {
-                    owners[0] = this.masterQueue;
                     for (int i = 0; i < chunks.Length; i++)
                     {
                         Vector2I chunk = chunks[i];
@@ -101,7 +100,7 @@ namespace Dwarves.Core.Jobs
                             this.queues.Add(chunk, queue);
                         }
 
-                        owners[i + 1] = queue.Queue;
+                        owners[i] = queue.Queue;
                     }
                 }
                 finally
