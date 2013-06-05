@@ -8,7 +8,6 @@ namespace Dwarves.Core.Jobs
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using UnityEngine;
 
     /// <summary>
     /// The pool of worker threads for executing jobs.
@@ -122,8 +121,6 @@ namespace Dwarves.Core.Jobs
             }
             catch (Exception ex)
             {
-                Debug.LogError("Unhandled exception in worker: " + ex.Message);
-
                 // Set the exception to be processed on the main thread, which will kill the game
                 GameScheduler.Instance.SetUnhandledException(ex);
             }
