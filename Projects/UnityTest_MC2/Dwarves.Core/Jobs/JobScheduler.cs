@@ -85,10 +85,11 @@ namespace Dwarves.Core.Jobs
                 job.Completed += this.Job_Completed;
 
                 // Get the owners of the job, creating the owner queues if necessary
-                JobQueue[] owners = new JobQueue[chunks.Length];
+                JobQueue[] owners = new JobQueue[chunks.Length + 1];
                 this.queuesLock.Enter();
                 try
                 {
+                    owners[0] = this.masterQueue;
                     for (int i = 0; i < chunks.Length; i++)
                     {
                         Vector2I chunk = chunks[i];
@@ -100,7 +101,7 @@ namespace Dwarves.Core.Jobs
                             this.queues.Add(chunk, queue);
                         }
 
-                        owners[i] = queue.Queue;
+                        owners[i + 1] = queue.Queue;
                     }
                 }
                 finally
@@ -227,6 +228,13 @@ namespace Dwarves.Core.Jobs
         /// <param name="job">The job.</param>
         private void Job_Completed(object sender, Job job)
         {
+            // Throw an exception if an error ocurred
+            if (job.Error != null)
+            {
+                UnityEngine.Debug.LogError(job.Error.Message);
+                throw job.Error;
+            }
+
             this.MoveToNextJob(job);
         }
 
