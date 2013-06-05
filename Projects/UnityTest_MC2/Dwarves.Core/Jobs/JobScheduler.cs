@@ -164,7 +164,7 @@ namespace Dwarves.Core.Jobs
             {
                 foreach (ChunkJobQueue jobs in this.queues.Values)
                 {
-                    jobs.Queue.FlaggedForRemoval = activeChunks.ContainsKey(jobs.Chunk);
+                    jobs.Queue.FlaggedForRemoval = !activeChunks.ContainsKey(jobs.Chunk);
                 }
             }
             finally
