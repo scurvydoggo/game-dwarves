@@ -5,23 +5,29 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
-    using System;
     using System.Collections.Generic;
+
+    /// <summary>
+    /// A job queue event.
+    /// </summary>
+    /// <param name="sender">The sender of the event.</param>
+    /// <param name="queue">The job queue.</param>
+    public delegate void JobQueueEvent(object sender, JobQueue queue);
 
     /// <summary>
     /// The job queue for a chunk.
     /// </summary>
-    public class JobQueue
+    public abstract class JobQueue
     {
-        /// <summary>
-        /// The job that is currently pending or executing.
-        /// </summary>
-        private Job pendingJob;
-
         /// <summary>
         /// The queue of jobs to be executed.
         /// </summary>
         private Queue<Job> queue;
+
+        /// <summary>
+        /// The job that is currently pending or executing.
+        /// </summary>
+        private Job pendingJob;
 
         /// <summary>
         /// The queue lock.
@@ -38,30 +44,9 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Initialises a new instance of the JobQueue class.
-        /// </summary>
-        /// <param name="masterJobs">The current master jobs which must be immediately queued.</param>
-        public JobQueue(List<Job> masterJobs)
-        {
-            this.queue = new Queue<Job>();
-            this.queueLock = new SpinLock(10);
-
-            if (masterJobs.Count > 0)
-            {
-                foreach (Job job in masterJobs)
-                {
-                    this.queue.Enqueue(job);
-                    job.AddOwners(this);
-                }
-
-                this.MoveNext();
-            }
-        }
-
-        /// <summary>
         /// The queue has become idle.
         /// </summary>
-        public event EventHandler Idle;
+        public event JobQueueEvent Idle;
 
         /// <summary>
         /// Gets a value indicating whether the queue is currently idle with no items queued.
@@ -80,7 +65,7 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Enqueues a job.
         /// </summary>
-        /// <param name="job">The jobs.</param>
+        /// <param name="job">The job.</param>
         public void Enqueue(Job job)
         {
             bool jobIsPending;
@@ -135,6 +120,10 @@ namespace Dwarves.Core.Jobs
 
             if (nextJob != null)
             {
+                if (!nextJob.IsMasterJob)
+                {
+                }
+
                 // Indicate to the job that this queue is pending
                 nextJob.IncrementPendingQueues(this.FlaggedForRemoval);
             }
@@ -143,7 +132,7 @@ namespace Dwarves.Core.Jobs
                 // The queue is now idle
                 if (this.Idle != null)
                 {
-                    this.Idle(this, EventArgs.Empty);
+                    this.Idle(this, this);
                 }
             }
         }

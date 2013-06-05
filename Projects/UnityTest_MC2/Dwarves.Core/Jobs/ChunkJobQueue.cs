@@ -5,21 +5,13 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
-    using System;
     using System.Collections.Generic;
     using Dwarves.Core.Math;
 
     /// <summary>
-    /// A ChunkJobs event.
-    /// </summary>
-    /// <param name="sender">The sender of the event.</param>
-    /// <param name="jobs">The chunk jobs.</param>
-    public delegate void ChunkJobsEvent(object sender, ChunkJobQueue jobs);
-
-    /// <summary>
     /// The job queue for a chunk.
     /// </summary>
-    public class ChunkJobQueue
+    public class ChunkJobQueue : JobQueue
     {
         /// <summary>
         /// Initialises a new instance of the ChunkJobQueue class.
@@ -29,36 +21,23 @@ namespace Dwarves.Core.Jobs
         public ChunkJobQueue(Vector2I chunk, List<Job> masterJobs)
         {
             this.Chunk = chunk;
-            this.Queue = new JobQueue(masterJobs);
-            this.Queue.Idle += this.Queue_Idle;
-        }
 
-        /// <summary>
-        /// The queue has become idle.
-        /// </summary>
-        public event ChunkJobsEvent QueueIdle;
+            // Enqueue the existing master jobs
+            if (masterJobs.Count > 0)
+            {
+                foreach (Job job in masterJobs)
+                {
+                    job.AddOwners(this);
+                    this.Enqueue(job);
+                }
+
+                this.MoveNext();
+            }
+        }
 
         /// <summary>
         /// Gets the chunk.
         /// </summary>
         public Vector2I Chunk { get; private set; }
-
-        /// <summary>
-        /// Gets the job queue for the chunk.
-        /// </summary>
-        public JobQueue Queue { get; private set; }
-
-        /// <summary>
-        /// Handles the queue becoming idle.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The event args.</param>
-        private void Queue_Idle(object sender, EventArgs e)
-        {
-            if (this.QueueIdle != null)
-            {
-                this.QueueIdle(this, this);
-            }
-        }
     }
 }

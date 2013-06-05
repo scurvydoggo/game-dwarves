@@ -15,19 +15,19 @@ namespace Dwarves.Core.Jobs
     public class JobScheduler : IDisposable
     {
         /// <summary>
-        /// The jobs for each chunk.
+        /// The master job queue.
         /// </summary>
-        private Dictionary<Vector2I, ChunkJobQueue> queues;
+        private MasterJobQueue masterQueue;
 
         /// <summary>
-        /// The jobs which require all queues.
+        /// All the jobs in the master queue.
         /// </summary>
-        private List<Job> masterJobs;
+        private List<Job> masterQueueJobs;
 
         /// <summary>
-        /// The queue of master jobs.
+        /// The job queue for each chunk.
         /// </summary>
-        private JobQueue masterQueue;
+        private Dictionary<Vector2I, ChunkJobQueue> chunkQueues;
 
         /// <summary>
         /// The pool of worker threads to execute jobs.
@@ -50,11 +50,11 @@ namespace Dwarves.Core.Jobs
         /// <param name="threadCount">The number of threads to spawn.</param>
         public JobScheduler(int threadCount)
         {
-            this.queues = new Dictionary<Vector2I, ChunkJobQueue>();
-            this.queuesLock = new SpinLock(10);
-            this.masterQueue = new JobQueue();
-            this.masterJobs = new List<Job>();
+            this.masterQueue = new MasterJobQueue();
+            this.masterQueueJobs = new List<Job>();
+            this.chunkQueues = new Dictionary<Vector2I, ChunkJobQueue>();
             this.jobPool = new JobPool(threadCount);
+            this.queuesLock = new SpinLock(10);
         }
 
         /// <summary>
@@ -93,14 +93,14 @@ namespace Dwarves.Core.Jobs
                     {
                         Vector2I chunk = chunks[i];
                         ChunkJobQueue queue;
-                        if (!this.queues.TryGetValue(chunk, out queue))
+                        if (!this.chunkQueues.TryGetValue(chunk, out queue))
                         {
-                            queue = new ChunkJobQueue(chunk, this.masterJobs);
-                            queue.QueueIdle += this.ChunkJobs_QueueIdle;
-                            this.queues.Add(chunk, queue);
+                            queue = new ChunkJobQueue(chunk, this.masterQueueJobs);
+                            queue.Idle += this.ChunkJobs_QueueIdle;
+                            this.chunkQueues.Add(chunk, queue);
                         }
 
-                        owners[i] = queue.Queue;
+                        owners[i] = queue;
                     }
                 }
                 finally
@@ -118,7 +118,7 @@ namespace Dwarves.Core.Jobs
             else
             {
                 // Create the job
-                var job = new Job(action, canSkip, true, this.queues.Count + 10);
+                var job = new Job(action, canSkip, true, this.chunkQueues.Count + 10);
                 job.IsPendingChanged += this.Job_IsPendingChanged;
                 job.Completed += this.Job_Completed;
 
@@ -127,16 +127,16 @@ namespace Dwarves.Core.Jobs
                 this.queuesLock.Enter();
                 try
                 {
-                    // Add this as a master job
-                    this.masterJobs.Add(job);
+                    // Add this to the master queue job list
+                    this.masterQueueJobs.Add(job);
 
-                    owners = new JobQueue[this.queues.Count + 1];
-                    owners[0] = this.masterQueue;
-
-                    int i = 1;
-                    foreach (ChunkJobQueue jobs in this.queues.Values)
+                    // Get the owners which is *all* chunk queues plus the master queue itself
+                    int i = 0;
+                    owners = new JobQueue[this.chunkQueues.Count + 1];
+                    owners[i++] = this.masterQueue;
+                    foreach (ChunkJobQueue jobs in this.chunkQueues.Values)
                     {
-                        owners[i++] = jobs.Queue;
+                        owners[i++] = jobs;
                     }
                 }
                 finally
@@ -162,9 +162,9 @@ namespace Dwarves.Core.Jobs
             this.queuesLock.Enter();
             try
             {
-                foreach (ChunkJobQueue jobs in this.queues.Values)
+                foreach (ChunkJobQueue queue in this.chunkQueues.Values)
                 {
-                    jobs.Queue.FlaggedForRemoval = !activeChunks.ContainsKey(jobs.Chunk);
+                    queue.FlaggedForRemoval = !activeChunks.ContainsKey(queue.Chunk);
                 }
             }
             finally
@@ -184,7 +184,7 @@ namespace Dwarves.Core.Jobs
                 this.queuesLock.Enter();
                 try
                 {
-                    this.masterJobs.Remove(job);
+                    this.masterQueueJobs.Remove(job);
                 }
                 finally
                 {
@@ -231,18 +231,18 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Handle a job queue becoming idle.
+        /// Handle a chunk queue becoming idle.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
-        /// <param name="jobs">The chunk jobs.</param>
-        private void ChunkJobs_QueueIdle(object sender, ChunkJobQueue jobs)
+        /// <param name="queue">The job queue.</param>
+        private void ChunkJobs_QueueIdle(object sender, JobQueue queue)
         {
             this.queuesLock.Enter();
             try
             {
-                if (jobs.Queue.IsIdle && jobs.Queue.FlaggedForRemoval)
+                if (queue.IsIdle && queue.FlaggedForRemoval)
                 {
-                    this.queues.Remove(jobs.Chunk);
+                    this.chunkQueues.Remove((queue as ChunkJobQueue).Chunk);
                 }
             }
             finally

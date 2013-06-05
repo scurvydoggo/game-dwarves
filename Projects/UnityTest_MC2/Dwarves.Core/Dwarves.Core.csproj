@@ -48,6 +48,7 @@
     <Compile Include="Jobs\JobScheduler.cs" />
     <Compile Include="Jobs\JobPool.cs" />
     <Compile Include="Jobs\JobQueue.cs" />
+    <Compile Include="Jobs\MasterJobQueue.cs" />
     <Compile Include="Jobs\SpinLock.cs" />
     <Compile Include="TerrainSystem.cs" />
     <Compile Include="JobSystem.cs" />

@@ -114,16 +114,19 @@ namespace Dwarves.Core.Jobs
         /// <param name="requestSkip">Indicates that the owner queue wishes to skip this job.</param>
         public void IncrementPendingQueues(bool requestSkip)
         {
-            int pendingCount = Interlocked.Increment(ref this.pendingCount);
-            if (requestSkip)
+            if (!this.IsPending)
             {
-                Interlocked.Increment(ref this.skipCount);
-            }
+                int pendingCount = Interlocked.Increment(ref this.pendingCount);
+                if (requestSkip)
+                {
+                    Interlocked.Increment(ref this.skipCount);
+                }
 
-            if (pendingCount == this.owners.Count)
-            {
-                this.IsPending = true;
-                this.IsPendingChanged(this, this);
+                if (pendingCount == this.owners.Count)
+                {
+                    this.IsPending = true;
+                    this.IsPendingChanged(this, this);
+                }
             }
         }
 
