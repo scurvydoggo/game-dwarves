@@ -162,6 +162,16 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
+        /// Determine if the given surface heights exist.
+        /// </summary>
+        /// <param name="x">The x position of the surface.</param>
+        /// <returns>True if the surface heights exists.</returns>
+        public bool HasSurfaceHeights(int x)
+        {
+            return this.surfaceHeights.ContainsKey(x);
+        }
+
+        /// <summary>
         /// Get the chunk.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
@@ -187,7 +197,7 @@ namespace Dwarves.Core.Terrain
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
         /// <returns>True if the chunk exists.</returns>
-        public bool ContainsChunk(Vector2I chunkIndex)
+        public bool HasChunk(Vector2I chunkIndex)
         {
             return this.chunks.ContainsKey(chunkIndex);
         }

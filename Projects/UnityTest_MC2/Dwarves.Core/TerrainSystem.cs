@@ -231,9 +231,12 @@ namespace Dwarves.Core
         {
             foreach (int x in xChunks)
             {
-                // Generate the surface heights for this x position
-                float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(x);
-                TerrainSystem.Instance.Terrain.AddSurfaceHeights(x, heights);
+                if (!TerrainSystem.Instance.Terrain.HasSurfaceHeights(x))
+                {
+                    // Generate the surface heights for this x position
+                    float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(x);
+                    TerrainSystem.Instance.Terrain.AddSurfaceHeights(x, heights);
+                }
             }
         }
 
@@ -245,7 +248,10 @@ namespace Dwarves.Core
         {
             foreach (Vector2I chunkIndex in chunks)
             {
-                TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
+                if (!TerrainSystem.Instance.Terrain.HasChunk(chunkIndex))
+                {
+                    TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
+                }
             }
         }
 
