@@ -30,8 +30,6 @@ namespace Dwarves.Core.Jobs
                     job.AddOwners(this);
                     this.Enqueue(job);
                 }
-
-                this.MoveNext();
             }
         }
 
