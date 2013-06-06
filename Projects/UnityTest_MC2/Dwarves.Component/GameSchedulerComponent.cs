@@ -15,6 +15,11 @@ namespace Dwarves.Component
     public class GameSchedulerComponent : MonoBehaviour
     {
         /// <summary>
+        /// The last thrown exception.
+        /// </summary>
+        private Exception lastThrown;
+
+        /// <summary>
         /// Called once per frame.
         /// </summary>
         public void Update()
@@ -33,6 +38,12 @@ namespace Dwarves.Component
         {
             if (GameScheduler.Instance.UnhandledException != null)
             {
+                if (this.lastThrown != GameScheduler.Instance.UnhandledException)
+                {
+                    this.lastThrown = GameScheduler.Instance.UnhandledException;
+                    throw this.lastThrown;
+                }
+
                 string error = GameScheduler.Instance.UnhandledException.Message;
                 GUI.Box(new Rect(0, 0, Screen.width, Screen.height), string.Empty);
                 GUI.Box(new Rect(0, (Screen.height / 2) - 30, Screen.width, 60), error);
