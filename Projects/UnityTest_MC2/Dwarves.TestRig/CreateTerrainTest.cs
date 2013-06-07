@@ -6,6 +6,7 @@
 namespace Dwarves.TestRig
 {
     using System.Collections.Generic;
+    using System.Threading;
     using Dwarves.Core;
     using Dwarves.Core.Math;
 
@@ -64,11 +65,15 @@ namespace Dwarves.TestRig
                 // Load and unload chunks
                 TerrainSystem.Instance.Update(activeChunks);
 
+                // Scroll the view
                 x++;
                 if (x % 3 == 0)
                 {
                     y++;
                 }
+
+                // Limit the scroll speed
+                Thread.Sleep(100);
             }
         }
 
