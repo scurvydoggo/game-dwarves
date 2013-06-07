@@ -123,6 +123,7 @@ namespace Dwarves.Core.Jobs
             {
                 // Set the exception to be processed on the main thread, which will kill the game
                 GameScheduler.Instance.SetUnhandledException(ex);
+                throw ex;
             }
         }
 
