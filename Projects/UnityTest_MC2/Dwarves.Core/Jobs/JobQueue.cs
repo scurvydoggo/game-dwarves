@@ -120,10 +120,6 @@ namespace Dwarves.Core.Jobs
 
             if (nextJob != null)
             {
-                if (!nextJob.IsMasterJob)
-                {
-                }
-
                 // Indicate to the job that this queue is pending
                 nextJob.IncrementPendingQueues(this.FlaggedForRemoval);
             }
