@@ -39,13 +39,37 @@ namespace Dwarves.TestRig
         /// </summary>
         public void Update()
         {
-            var activeChunks = new Dictionary<Vector2I, bool>()
-                {
-                    { new Vector2I(0, 0), true }
-                };
+            int x = 0;
+            int y = 0;
+            int widthHalf = 4;
+            int heightHalf = 2;
+            int lookAhead = 1;
 
-            // Load and unload chunks
-            TerrainSystem.Instance.Update(activeChunks);
+            while (true)
+            {
+                var activeChunks = new Dictionary<Vector2I, bool>();
+                for (int cX = x - widthHalf - lookAhead; cX < x + widthHalf + lookAhead; cX++)
+                {
+                    for (int cY = y - heightHalf - lookAhead; cY < y + heightHalf + lookAhead; cY++)
+                    {
+                        bool isPriority =
+                            cX >= x - widthHalf &&
+                            cX <= x + widthHalf &&
+                            cY >= y - heightHalf &&
+                            cY <= y + heightHalf;
+                        activeChunks.Add(new Vector2I(cX, cY), isPriority);
+                    }
+                }
+
+                // Load and unload chunks
+                TerrainSystem.Instance.Update(activeChunks);
+
+                x++;
+                if (x % 3 == 0)
+                {
+                    y++;
+                }
+            }
         }
 
         /// <summary>
