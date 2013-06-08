@@ -73,7 +73,7 @@ namespace Dwarves.TestRig
                 }
 
                 // Limit the scroll speed
-                Thread.Sleep(100);
+                Thread.Sleep(5);
             }
         }
 
