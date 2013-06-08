@@ -174,6 +174,36 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Gets the master queue state.
+        /// </summary>
+        /// <returns>The queue state.</returns>
+        public MasterJobQueueState GetMasterQueueState()
+        {
+            return this.masterQueue.State;
+        }
+
+        /// <summary>
+        /// Gets the chunk queue state.
+        /// </summary>
+        /// <param name="chunk">The chunk.</param>
+        /// <returns>The queue state.</returns>
+        public ChunkJobQueueState GetChunkQueueState(Vector2I chunk)
+        {
+            ChunkJobQueue queue;
+            this.queuesLock.Enter();
+            try
+            {
+                this.chunkQueues.TryGetValue(chunk, out queue);
+            }
+            finally
+            {
+                this.queuesLock.Exit();
+            }
+
+            return queue != null ? queue.State : null;
+        }
+
+        /// <summary>
         /// Moves the owner queues of a job forward. This means each queue is stepped to the job after this one.
         /// </summary>
         /// <param name="job">The job.</param>
