@@ -21,6 +21,7 @@ namespace Dwarves.Core.Jobs
         public ChunkJobQueue(Vector2I chunk, List<Job> masterJobs)
         {
             this.Chunk = chunk;
+            this.State = new ChunkJobQueueState();
 
             // Enqueue the existing master jobs
             if (masterJobs.Count > 0)
@@ -37,5 +38,10 @@ namespace Dwarves.Core.Jobs
         /// Gets the chunk.
         /// </summary>
         public Vector2I Chunk { get; private set; }
+
+        /// <summary>
+        /// Gets the queue state.
+        /// </summary>
+        public ChunkJobQueueState State { get; private set; }
     }
 }

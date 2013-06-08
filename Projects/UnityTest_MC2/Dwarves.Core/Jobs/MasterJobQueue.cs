@@ -16,6 +16,12 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public MasterJobQueue()
         {
+            this.State = new MasterJobQueueState();
         }
+
+        /// <summary>
+        /// Gets the queue state.
+        /// </summary>
+        public MasterJobQueueState State { get; private set; }
     }
 }
