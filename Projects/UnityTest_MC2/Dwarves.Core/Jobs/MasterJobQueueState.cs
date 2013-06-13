@@ -90,7 +90,6 @@ namespace Dwarves.Core.Jobs
                         if (context.IsAdd != isAdd)
                         {
                             this.addRemoveChunks[chunk] = new AddRemoveContext(id, isAdd);
-                            return true;
                         }
                         else
                         {
@@ -105,7 +104,6 @@ namespace Dwarves.Core.Jobs
                     else
                     {
                         this.addRemoveChunks.Add(chunk, new AddRemoveContext(id, isAdd));
-                        return true;
                     }
                 }
             }
