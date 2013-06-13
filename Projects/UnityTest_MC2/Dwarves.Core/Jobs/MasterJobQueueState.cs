@@ -32,6 +32,8 @@ namespace Dwarves.Core.Jobs
             this.addSurfaceHeightsSet = new HashSet<int>();
         }
 
+        #region AddSurfaceHeights
+
         /// <summary>
         /// Add AddSurfaceHeights work to the queue state. Duplicates of existing work is trimmed from the incoming
         /// set.
@@ -76,5 +78,7 @@ namespace Dwarves.Core.Jobs
                 }
             }
         }
+
+        #endregion
     }
 }
