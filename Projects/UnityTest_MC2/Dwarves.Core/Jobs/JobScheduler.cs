@@ -80,22 +80,19 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Enqueue a job.
         /// </summary>
-        /// <param name="workAction">The action delegate.</param>
-        /// <param name="completionAction">The completion handler to register with the job. This can be null.</param>
+        /// <param name="workAction">The work to be executed by the job.</param>
+        /// <param name="finaliseAction">The finalisation to be executed on completion. This can be null.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
         /// <param name="chunks">The chunks to which this job belongs.</param>
-        public void Enqueue(Action workAction, Action completionAction, bool canSkip, params Vector2I[] chunks)
+        public void Enqueue(Action workAction, Action finaliseAction, bool canSkip, params Vector2I[] chunks)
         {
-            // Create the job
             bool isMasterJob = chunks.Length == 0;
             int ownerCapacity = isMasterJob ? this.chunkQueues.Count + 10 : chunks.Length;
-            var job = new Job(workAction, canSkip, isMasterJob, ownerCapacity);
+
+            // Create the job
+            var job = new Job(workAction, finaliseAction, canSkip, isMasterJob, ownerCapacity);
             job.IsPendingChanged += this.Job_IsPendingChanged;
             job.Completed += this.Job_Completed;
-            if (completionAction != null)
-            {
-                job.Completed += (s, j) => completionAction();
-            }
 
             if (!job.IsMasterJob)
             {

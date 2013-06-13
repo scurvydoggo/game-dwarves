@@ -22,9 +22,14 @@ namespace Dwarves.Core.Jobs
     public class Job
     {
         /// <summary>
-        /// The action delegate.
+        /// The work to be executed by the job.
         /// </summary>
-        private Action action;
+        private Action workAction;
+
+        /// <summary>
+        /// The finalisation to be executed on completion. This can be null.
+        /// </summary>
+        private Action finaliseAction;
 
         /// <summary>
         /// Indicates whether the job can be skipped.
@@ -49,13 +54,15 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Initialises a new instance of the Job class.
         /// </summary>
-        /// <param name="action">The action delegate.</param>
+        /// <param name="workAction">The work to be executed by the job.</param>
+        /// <param name="finaliseAction">The finalisation to be executed on completion. This can be null.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
         /// <param name="isMasterJob">Indicates whether this is a master job.</param>
         /// <param name="ownerCapacity">The initial capacity for the owners list.</param>
-        public Job(Action action, bool canSkip, bool isMasterJob, int ownerCapacity)
+        public Job(Action workAction, Action finaliseAction, bool canSkip, bool isMasterJob, int ownerCapacity)
         {
-            this.action = action;
+            this.workAction = workAction;
+            this.finaliseAction = finaliseAction;
             this.canSkip = canSkip;
             this.IsMasterJob = isMasterJob;
             this.owners = new List<JobQueue>(ownerCapacity);
@@ -99,7 +106,19 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void Execute()
         {
-            this.action();
+            try
+            {
+                // Perform the work
+                this.workAction();
+            }
+            finally
+            {
+                // Finalise the job
+                if (this.finaliseAction != null)
+                {
+                    this.finaliseAction();
+                }
+            }
 
             this.IsCompleted = true;
             if (this.Completed != null)
