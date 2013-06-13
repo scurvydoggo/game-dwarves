@@ -55,8 +55,8 @@ namespace Dwarves.Component.Terrain
             {
                 JobSystem.Instance.Scheduler.Enqueue(
                     this.UpdateMeshFilterJob,
+                    () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
                     true,
-                    (s, j) => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
                     this.Chunk);
             }
         }

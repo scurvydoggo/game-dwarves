@@ -197,8 +197,8 @@ namespace Dwarves.Core
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.RemoveChunksJob(toRemove),
-                        false,
-                        (s, j) => JobSystem.Instance.Scheduler.MasterQueueState.CompleteRemoveChunks(toRemove));
+                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteRemoveChunks(toRemove),
+                        false);
                 }
             }
 
@@ -210,8 +210,8 @@ namespace Dwarves.Core
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.AddChunksJob(newChunks),
-                        true,
-                        (s, j) => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddChunks(addChunksSet));
+                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddChunks(addChunksSet),
+                        true);
                 }
 
                 // Load the point data for each new chunk
@@ -221,8 +221,8 @@ namespace Dwarves.Core
                     {
                         JobSystem.Instance.Scheduler.Enqueue(
                             () => this.LoadPointsJob(chunk),
+                            () => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteLoadPoints(),
                             true,
-                            (s, j) => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteLoadPoints(),
                             chunk);
                     }
                 }
@@ -234,8 +234,8 @@ namespace Dwarves.Core
                     {
                         JobSystem.Instance.Scheduler.Enqueue(
                             () => this.RebuildMeshJob(chunk),
+                            () => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteRebuildMesh(),
                             true,
-                            (s, j) => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteRebuildMesh(),
                             TerrainChunk.GetNeighbours(chunk));
                     }
                 }
