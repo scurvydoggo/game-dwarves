@@ -218,7 +218,7 @@ namespace Dwarves.Core
 
         /// <summary>
         /// Adds chunks.
-        /// </summary>
+        /// </summary>B
         /// <param name="chunks">The chunks.</param>
         private void AddChunksJob(List<Vector2I> chunks)
         {
