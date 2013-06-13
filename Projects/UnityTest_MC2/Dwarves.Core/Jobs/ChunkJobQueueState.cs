@@ -38,6 +38,23 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Check whether a LoadPoints job can execute.
+        /// </summary>
+        /// <returns>True if the job can be executed.</returns>
+        public bool CanLoadPoints()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// Completes a LoadPoints job.
+        /// </summary>
+        public void CompleteLoadPoints()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
         /// Check whether a RebuildMesh job can execute.
         /// </summary>
         /// <returns>True if the job can be executed.</returns>

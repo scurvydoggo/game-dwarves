@@ -52,7 +52,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(this.Chunk);
+            ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetQueueState(this.Chunk);
             if (chunkQueueState.CanUpdateMeshFilter())
             {
                 JobSystem.Instance.Scheduler.Enqueue(

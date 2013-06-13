@@ -5,13 +5,13 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
-    using Dwarves.Core.Math;
     using System;
     using System.Collections.Generic;
+    using Dwarves.Core.Math;
 
     /// <summary>
     /// The state of the master job queue.
-    /// </summary>
+    /// </summary>List
     public class MasterJobQueueState
     {
         /// <summary>
@@ -24,6 +24,7 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Check whether a AddChunks job can execute.
         /// </summary>
+        /// <param name="chunks">The chunks.</param>
         /// <returns>True if the job can be executed.</returns>
         public bool CanAddChunks(List<Vector2I> chunks)
         {
@@ -42,6 +43,7 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Check whether a RemoveChunks job can execute.
         /// </summary>
+        /// <param name="chunks">The chunks.</param>
         /// <returns>True if the job can be executed.</returns>
         public bool CanRemoveChunks(List<Vector2I> chunks)
         {

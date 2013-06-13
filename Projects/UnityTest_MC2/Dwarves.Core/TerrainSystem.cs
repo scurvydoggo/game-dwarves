@@ -7,7 +7,6 @@ namespace Dwarves.Core
 {
     using System;
     using System.Collections.Generic;
-    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain;
@@ -218,19 +217,25 @@ namespace Dwarves.Core
                 // Load the point data for each new chunk
                 foreach (Vector2I chunk in newChunks)
                 {
-                    JobSystem.Instance.Scheduler.Enqueue(() => this.LoadPointsJob(chunk), true, null, chunk);
+                    if (JobSystem.Instance.Scheduler.GetQueueState(chunk).CanLoadPoints())
+                    {
+                        JobSystem.Instance.Scheduler.Enqueue(
+                            () => this.LoadPointsJob(chunk),
+                            true,
+                            (s, j) => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteLoadPoints(),
+                            chunk);
+                    }
                 }
 
                 // Rebuild the new chunks and their neighbours
                 foreach (Vector2I chunk in newChunksAndNeighbours)
                 {
-                    ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(chunk);
-                    if (chunkQueueState.CanRebuildMesh())
+                    if (JobSystem.Instance.Scheduler.GetQueueState(chunk).CanRebuildMesh())
                     {
                         JobSystem.Instance.Scheduler.Enqueue(
                             () => this.RebuildMeshJob(chunk),
                             true,
-                            (s, j) => chunkQueueState.CompleteRebuildMesh(),
+                            (s, j) => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteRebuildMesh(),
                             TerrainChunk.GetNeighbours(chunk));
                     }
                 }

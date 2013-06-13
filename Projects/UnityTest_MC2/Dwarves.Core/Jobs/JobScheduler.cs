@@ -210,7 +210,7 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         /// <param name="chunk">The chunk.</param>
         /// <returns>The queue state.</returns>
-        public ChunkJobQueueState GetChunkQueueState(Vector2I chunk)
+        public ChunkJobQueueState GetQueueState(Vector2I chunk)
         {
             ChunkJobQueue queue;
             this.queuesLock.Enter();
