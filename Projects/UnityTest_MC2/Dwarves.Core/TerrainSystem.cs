@@ -130,9 +130,8 @@ namespace Dwarves.Core
         /// <summary>
         /// Called once per frame.
         /// </summary>
-        /// <param name="activeChunks">The currently active chunks. The boolean value indicates whether the chunks are
-        /// required this frame.</param>
-        public void Update(Dictionary<Vector2I, bool> activeChunks)
+        /// <param name="activeChunks">The currently active chunks.</param>
+        public void Update(HashSet<Vector2I> activeChunks)
         {
             this.LoadUnloadChunks(activeChunks);
         }
@@ -140,9 +139,8 @@ namespace Dwarves.Core
         /// <summary>
         /// Load and unload the chunks that are new or are no longer required.
         /// </summary>
-        /// <param name="activeChunks">The currently active chunks. The boolean value indicates whether the chunks are
-        /// required in this frame (otherwise loading is deferred to a background thread).</param>
-        private void LoadUnloadChunks(Dictionary<Vector2I, bool> activeChunks)
+        /// <param name="activeChunks">The currently active chunks.</param>
+        private void LoadUnloadChunks(HashSet<Vector2I> activeChunks)
         {
             // Update the active queues on the job system
             JobSystem.Instance.Scheduler.UpdateActiveChunks(activeChunks);
@@ -151,18 +149,18 @@ namespace Dwarves.Core
             var currentChunks = new HashSet<Vector2I>(this.Terrain.GetChunksThreadSafe());
             var newChunks = new List<Vector2I>();
             var newChunksAndNeighbours = new HashSet<Vector2I>();
-            foreach (KeyValuePair<Vector2I, bool> kvp in activeChunks)
+            foreach (Vector2I chunk in activeChunks)
             {
-                if (!currentChunks.Contains(kvp.Key))
+                if (!currentChunks.Contains(chunk))
                 {
                     // Add the new chunk
-                    newChunks.Add(kvp.Key);
+                    newChunks.Add(chunk);
 
                     // Add the neighbours
-                    newChunksAndNeighbours.Add(kvp.Key);
-                    foreach (Vector2I neighbour in TerrainChunk.GetNeighbours(kvp.Key))
+                    newChunksAndNeighbours.Add(chunk);
+                    foreach (Vector2I neighbour in TerrainChunk.GetNeighbours(chunk))
                     {
-                        if (activeChunks.ContainsKey(neighbour))
+                        if (activeChunks.Contains(neighbour))
                         {
                             newChunksAndNeighbours.Add(neighbour);
                         }
@@ -174,7 +172,7 @@ namespace Dwarves.Core
             var toRemove = new List<Vector2I>();
             foreach (Vector2I chunk in currentChunks)
             {
-                if (!activeChunks.ContainsKey(chunk))
+                if (!activeChunks.Contains(chunk))
                 {
                     toRemove.Add(chunk);
                 }

@@ -48,17 +48,12 @@ namespace Dwarves.TestRig
 
             while (true)
             {
-                var activeChunks = new Dictionary<Vector2I, bool>();
+                var activeChunks = new HashSet<Vector2I>();
                 for (int cX = x - widthHalf - lookAhead; cX < x + widthHalf + lookAhead; cX++)
                 {
                     for (int cY = y - heightHalf - lookAhead; cY < y + heightHalf + lookAhead; cY++)
                     {
-                        bool isPriority =
-                            cX >= x - widthHalf &&
-                            cX <= x + widthHalf &&
-                            cY >= y - heightHalf &&
-                            cY <= y + heightHalf;
-                        activeChunks.Add(new Vector2I(cX, cY), isPriority);
+                        activeChunks.Add(new Vector2I(cX, cY));
                     }
                 }
 

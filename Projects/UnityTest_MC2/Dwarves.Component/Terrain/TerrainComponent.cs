@@ -102,48 +102,38 @@ namespace Dwarves.Component.Terrain
         public void Update()
         {
             // Get the active chunks
-            Dictionary<Vector2I, bool> activeChunks = this.GetActiveChunks();
+            HashSet<Vector2I> activeChunks = this.GetActiveChunks();
 
             // Update the terrain system
             TerrainSystem.Instance.Update(activeChunks);
         }
 
         /// <summary>
-        /// Gets the chunks that are current active. The boolean value indicates whether the chunk is required this
-        /// frame.
+        /// Gets the chunks that are current active.
         /// </summary>
         /// <returns>The active chunks.</returns>
-        private Dictionary<Vector2I, bool> GetActiveChunks()
+        private HashSet<Vector2I> GetActiveChunks()
         {
             // bool indicates if the chunk is required or if the loading can be deferred to a background thread
-            var activeChunks = new Dictionary<Vector2I, bool>();
+            var activeChunks = new HashSet<Vector2I>();
 
             // Get the bounds within the camera
             RectangleI cameraPointBounds = this.cCameraBounds.GetBounds();
             Vector2I top = Metrics.ChunkIndex(cameraPointBounds.X, cameraPointBounds.Y);
             Vector2I bottom = Metrics.ChunkIndex(cameraPointBounds.Right - 1, cameraPointBounds.Bottom - 1);
             var cameraChunkBounds = new RectangleI(
-                top.X - 2,
-                top.Y + 2,
-                bottom.X - top.X + 4,
-                top.Y - bottom.Y + 4);
+                top.X - 2 - this.DistanceChunkBeginLoad,
+                top.Y + 2 + this.DistanceChunkBeginLoad,
+                bottom.X - top.X + 4 + (this.DistanceChunkBeginLoad * 2),
+                top.Y - bottom.Y + 4 + (this.DistanceChunkBeginLoad * 2));
 
             // Add the chunks that the camera is pointing directly at. These are required to be loaded this frame
-            this.PopulateActiveChunks(activeChunks, cameraChunkBounds, true);
-
-            // Add the camera-bordering chunks to begin loading in advance
-            var borderBounds = new RectangleI(
-                cameraChunkBounds.X - this.DistanceChunkBeginLoad,
-                cameraChunkBounds.Y - this.DistanceChunkBeginLoad,
-                cameraChunkBounds.Width + (this.DistanceChunkBeginLoad * 2),
-                cameraChunkBounds.Height + (this.DistanceChunkBeginLoad * 2));
-            this.PopulateActiveChunks(activeChunks, borderBounds, false);
+            this.PopulateActiveChunks(activeChunks, cameraChunkBounds);
 
             // Add all other chunks which contain significant actors
             foreach (ActorBoundsComponent actor in GameObject.FindObjectsOfType(typeof(ActorBoundsComponent)))
             {
-                var actorBounds = Metrics.WorldToChunk(actor.GetBounds());
-                this.PopulateActiveChunks(activeChunks, actorBounds, false);
+                this.PopulateActiveChunks(activeChunks, Metrics.WorldToChunk(actor.GetBounds()));
             }
 
             return activeChunks;
@@ -154,26 +144,13 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         /// <param name="chunks">The dictionary being populated.</param>
         /// <param name="chunkBounds">The bounds in chunk coordinates.</param>
-        /// <param name="requiredThisFrame">Indicates whether the chunks are required in this frame.</param>
-        private void PopulateActiveChunks(
-            Dictionary<Vector2I, bool> chunks,
-            RectangleI chunkBounds,
-            bool requiredThisFrame)
+        private void PopulateActiveChunks(HashSet<Vector2I> chunks, RectangleI chunkBounds)
         {
             for (int x = chunkBounds.X; x < chunkBounds.Right; x++)
             {
                 for (int y = chunkBounds.Y; y > chunkBounds.Bottom; y--)
                 {
-                    var chunkIndex = new Vector2I(x, y);
-                    bool alreadyRequiredThisFrame;
-                    if (!chunks.TryGetValue(chunkIndex, out alreadyRequiredThisFrame))
-                    {
-                        chunks.Add(chunkIndex, requiredThisFrame);
-                    }
-                    else if (requiredThisFrame && !alreadyRequiredThisFrame)
-                    {
-                        chunks[chunkIndex] = requiredThisFrame;
-                    }
+                    chunks.Add(new Vector2I(x, y));
                 }
             }
         }
