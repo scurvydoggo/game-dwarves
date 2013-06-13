@@ -145,19 +145,27 @@ namespace Dwarves.Core
             // Update the active queues on the job system
             JobSystem.Instance.Scheduler.UpdateActiveChunks(activeChunks);
 
-            // Get the current and new chunks
+            // Get the current chunks
             var currentChunks = new HashSet<Vector2I>(this.Terrain.GetChunksThreadSafe());
-            var newChunks = new List<Vector2I>();
-            var newChunksAndNeighbours = new HashSet<Vector2I>();
+
+            // Get the new chunks
+            List<Vector2I> newChunks = null;
+            HashSet<Vector2I> newChunksAndNeighbours = null;
             foreach (Vector2I chunk in activeChunks)
             {
                 if (!currentChunks.Contains(chunk))
                 {
+                    if (newChunks == null)
+                    {
+                        newChunks = new List<Vector2I>();
+                        newChunksAndNeighbours = new HashSet<Vector2I>();
+                    }
+
                     // Add the new chunk
                     newChunks.Add(chunk);
+                    newChunksAndNeighbours.Add(chunk);
 
                     // Add the neighbours
-                    newChunksAndNeighbours.Add(chunk);
                     foreach (Vector2I neighbour in TerrainChunk.GetNeighbours(chunk))
                     {
                         if (activeChunks.Contains(neighbour))
@@ -168,25 +176,30 @@ namespace Dwarves.Core
                 }
             }
 
-            // Remove the chunks that are no longer used
-            var toRemove = new List<Vector2I>();
+            // Get the chunks that are no longer used
+            List<Vector2I> toRemove = null;
             foreach (Vector2I chunk in currentChunks)
             {
                 if (!activeChunks.Contains(chunk))
                 {
+                    if (toRemove == null)
+                    {
+                        toRemove = new List<Vector2I>();
+                    }
+
                     toRemove.Add(chunk);
                 }
             }
 
             // Enqueue the chunk removal job
-            if (toRemove.Count > 0)
+            if (toRemove != null)
             {
                 JobSystem.Instance.Scheduler.Enqueue(() => this.RemoveChunksJob(toRemove), false, null);
             }
 
-            if (newChunks.Count > 0)
+            // Enqueue the chunk add jobs
+            if (newChunks != null)
             {
-                // Add the new chunks
                 JobSystem.Instance.Scheduler.Enqueue(() => this.AddChunksJob(newChunks), true, null);
 
                 // Load the point data for each new chunk
@@ -194,20 +207,20 @@ namespace Dwarves.Core
                 {
                     JobSystem.Instance.Scheduler.Enqueue(() => this.LoadPointsJob(chunk), true, null, chunk);
                 }
-            }
 
-            // Rebuild the new chunks and their neighbours
-            foreach (Vector2I chunk in newChunksAndNeighbours)
-            {
-                ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(chunk);
-                if (chunkQueueState.CanRebuildMesh())
+                // Rebuild the new chunks and their neighbours
+                foreach (Vector2I chunk in newChunksAndNeighbours)
                 {
-                    Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.RebuildMeshJob(chunk),
-                        true,
-                        (s, j) => chunkQueueState.CompleteRebuildMesh(),
-                        neighbours);
+                    ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(chunk);
+                    if (chunkQueueState.CanRebuildMesh())
+                    {
+                        Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
+                        JobSystem.Instance.Scheduler.Enqueue(
+                            () => this.RebuildMeshJob(chunk),
+                            true,
+                            (s, j) => chunkQueueState.CompleteRebuildMesh(),
+                            neighbours);
+                    }
                 }
             }
         }
