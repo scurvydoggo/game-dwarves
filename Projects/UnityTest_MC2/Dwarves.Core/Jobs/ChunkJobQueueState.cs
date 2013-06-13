@@ -11,6 +11,11 @@ namespace Dwarves.Core.Jobs
     public class ChunkJobQueueState
     {
         /// <summary>
+        /// The locking object for load points related jobs.
+        /// </summary>
+        private readonly object loadPointsLock = new object();
+
+        /// <summary>
         /// The locking object for mesh related jobs.
         /// </summary>
         private readonly object meshLock = new object();
@@ -19,6 +24,11 @@ namespace Dwarves.Core.Jobs
         /// Indicates whether the mesh data will be newer than the mesh filter once all queued jobs are complete.
         /// </summary>
         private bool meshFilterUpdateRequired;
+
+        /// <summary>
+        /// Indicates whether a job is queued to load the points.
+        /// </summary>
+        private bool loadPoints;
 
         /// <summary>
         /// Indicates whether a job is queued to rebuild the chunk mesh.
@@ -43,7 +53,18 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be executed.</returns>
         public bool CanLoadPoints()
         {
-            throw new System.NotImplementedException();
+            lock (this.loadPointsLock)
+            {
+                if (!this.loadPoints)
+                {
+                    this.loadPoints = true;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
         /// <summary>
@@ -51,7 +72,10 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void CompleteLoadPoints()
         {
-            throw new System.NotImplementedException();
+            lock (this.loadPointsLock)
+            {
+                this.loadPoints = false;
+            }
         }
 
         /// <summary>
