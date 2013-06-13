@@ -206,6 +206,9 @@ namespace Dwarves.Core
             // Enqueue the new chunk jobs
             if (newChunks != null)
             {
+                // Ensure that a job queue exists for each of the new chunks
+                JobSystem.Instance.Scheduler.InitialiseQueues(newChunks);
+
                 // Add the chunks
                 Guid id = Guid.NewGuid();
                 var addChunksSet = new List<Vector2I>(newChunks);

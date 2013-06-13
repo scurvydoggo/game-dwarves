@@ -78,6 +78,26 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Initialises a job queue for each chunk.
+        /// </summary>
+        /// <param name="chunks">The chunks.</param>
+        public void InitialiseQueues(IEnumerable<Vector2I> chunks)
+        {
+            this.queuesLock.Enter();
+            try
+            {
+                foreach (Vector2I chunk in chunks)
+                {
+                    this.GetOrInitialiseQueue(chunk);
+                }
+            }
+            finally
+            {
+                this.queuesLock.Exit();
+            }
+        }
+
+        /// <summary>
         /// Enqueue a job.
         /// </summary>
         /// <param name="workAction">The work to be executed by the job.</param>
@@ -104,16 +124,7 @@ namespace Dwarves.Core.Jobs
                 {
                     for (int i = 0; i < chunks.Length; i++)
                     {
-                        Vector2I chunk = chunks[i];
-                        ChunkJobQueue queue;
-                        if (!this.chunkQueues.TryGetValue(chunk, out queue))
-                        {
-                            queue = new ChunkJobQueue(chunk, this.masterQueueJobs);
-                            queue.Idle += this.ChunkJobs_QueueIdle;
-                            this.chunkQueues.Add(chunk, queue);
-                        }
-
-                        owners[i] = queue;
+                        owners[i] = this.GetOrInitialiseQueue(chunks[i]);
                     }
                 }
                 finally
@@ -213,6 +224,24 @@ namespace Dwarves.Core.Jobs
             }
 
             return queue != null ? queue.State : null;
+        }
+
+        /// <summary>
+        /// Gets the job queue for the given chunk, initialising the queue if one doesn't exist.
+        /// </summary>
+        /// <param name="chunk">The chunk.</param>
+        /// <returns>The job queue.</returns>
+        private ChunkJobQueue GetOrInitialiseQueue(Vector2I chunk)
+        {
+            ChunkJobQueue queue;
+            if (!this.chunkQueues.TryGetValue(chunk, out queue))
+            {
+                queue = new ChunkJobQueue(chunk, this.masterQueueJobs);
+                queue.Idle += this.ChunkJobs_QueueIdle;
+                this.chunkQueues.Add(chunk, queue);
+            }
+
+            return queue;
         }
 
         /// <summary>
