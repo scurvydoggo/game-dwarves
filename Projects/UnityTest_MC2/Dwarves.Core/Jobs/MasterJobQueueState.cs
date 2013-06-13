@@ -35,12 +35,11 @@ namespace Dwarves.Core.Jobs
         #region AddSurfaceHeights
 
         /// <summary>
-        /// Add AddSurfaceHeights work to the queue state. Duplicates of existing work is trimmed from the incoming
-        /// set.
+        /// Prepares a AddSurfaceHeights job. Duplicates of existing work are trimmed from the given positions.
         /// </summary>
         /// <param name="positions">The chunk x positions.</param>
-        /// <returns>True if new x positions were added to queue state.</returns>
-        public bool AddForAddSurfaceHeights(HashSet<int> positions)
+        /// <returns>True if the job can be executed.</returns>
+        public bool CanAddSurfaceHeights(HashSet<int> positions)
         {
             // Add the new surface heights, checking for duplicates
             var duplicates = new List<int>();
@@ -65,10 +64,10 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Remove AddSurfaceHeights work from the queue state.
+        /// Completes a AddSurfaceHeights job for the given positions.
         /// </summary>
         /// <param name="positions">The chunk x positions.</param>
-        public void RemoveForAddSurfaceHeights(HashSet<int> positions)
+        public void CompleteAddSurfaceHeights(HashSet<int> positions)
         {
             lock (this.addSurfaceHeightsLock)
             {

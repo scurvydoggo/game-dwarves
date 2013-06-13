@@ -204,12 +204,12 @@ namespace Dwarves.Core
             // Enqueue the generate the surface heights job
             if (newSurfaces.Count > 0)
             {
-                if (masterQueueState.AddForAddSurfaceHeights(newSurfaces))
+                if (masterQueueState.CanAddSurfaceHeights(newSurfaces))
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.AddSurfaceHeightsJob(newSurfaces),
                         true,
-                        (s, j) => masterQueueState.RemoveForAddSurfaceHeights(newSurfaces));
+                        (s, j) => masterQueueState.CompleteAddSurfaceHeights(newSurfaces));
                 }
             }
 
@@ -228,8 +228,16 @@ namespace Dwarves.Core
             // Rebuild the new chunks and their neighbours
             foreach (Vector2I chunk in newChunksAndNeighbours)
             {
-                Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
-                JobSystem.Instance.Scheduler.Enqueue(() => this.RebuildMeshJob(chunk), true, null, neighbours);
+                ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(chunk);
+                if (chunkQueueState.CanRebuildMesh())
+                {
+                    Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
+                    JobSystem.Instance.Scheduler.Enqueue(
+                        () => this.RebuildMeshJob(chunk),
+                        true,
+                        (s, j) => chunkQueueState.CompleteRebuildMesh(),
+                        neighbours);
+                }
             }
         }
 
