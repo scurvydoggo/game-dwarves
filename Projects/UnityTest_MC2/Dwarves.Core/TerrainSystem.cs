@@ -215,7 +215,7 @@ namespace Dwarves.Core
                 if (JobSystem.Instance.Scheduler.MasterQueueState.CanAddChunks(addChunksSet, id))
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.AddChunksJob(newChunks),
+                        () => this.AddChunksJob(addChunksSet),
                         () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddRemoveChunks(addChunksSet, id),
                         true);
                 }
