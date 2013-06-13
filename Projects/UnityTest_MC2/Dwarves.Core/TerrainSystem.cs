@@ -241,12 +241,9 @@ namespace Dwarves.Core
         {
             foreach (int x in positions)
             {
-                if (!TerrainSystem.Instance.Terrain.HasSurfaceHeights(x))
-                {
-                    // Generate the surface heights for this x position
-                    float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(x);
-                    TerrainSystem.Instance.Terrain.AddSurfaceHeights(x, heights);
-                }
+                // Generate the surface heights for this x position
+                float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(x);
+                TerrainSystem.Instance.Terrain.AddSurfaceHeights(x, heights);
             }
         }
 
