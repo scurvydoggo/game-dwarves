@@ -6,6 +6,7 @@
 namespace Dwarves.Component.Terrain
 {
     using Dwarves.Core;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using UnityEngine;
@@ -51,7 +52,8 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            if (JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CanUpdateMeshFilter())
+            ChunkJobQueueState queueState = JobSystem.Instance.Scheduler.GetQueueState(this.Chunk);
+            if (queueState != null && queueState.CanUpdateMeshFilter())
             {
                 JobSystem.Instance.Scheduler.Enqueue(
                     this.UpdateMeshFilterJob,
