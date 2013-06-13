@@ -7,8 +7,6 @@ namespace Dwarves.Core
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
     using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
@@ -190,29 +188,6 @@ namespace Dwarves.Core
                 JobSystem.Instance.Scheduler.Enqueue(() => this.RemoveChunksJob(toRemove), false, null);
             }
 
-            // Determine which surfaces are new and need to be generated
-            int[] surfaceHeights = this.Terrain.GetSurfaceHeightIndicesThreadSafe();
-            var newSurfaces = new HashSet<int>();
-            foreach (Vector2I chunk in newChunks)
-            {
-                if (!surfaceHeights.Contains(chunk.X))
-                {
-                    newSurfaces.Add(chunk.X);
-                }
-            }
-
-            // Enqueue the generate the surface heights job
-            if (newSurfaces.Count > 0)
-            {
-                if (masterQueueState.CanAddSurfaceHeights(newSurfaces))
-                {
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.AddSurfaceHeightsJob(newSurfaces),
-                        true,
-                        (s, j) => masterQueueState.CompleteAddSurfaceHeights(newSurfaces));
-                }
-            }
-
             if (newChunks.Count > 0)
             {
                 // Add the new chunks
@@ -242,20 +217,6 @@ namespace Dwarves.Core
         }
 
         /// <summary>
-        /// Adds surface heights.
-        /// </summary>
-        /// <param name="positions">The chunk x positions.</param>
-        private void AddSurfaceHeightsJob(HashSet<int> positions)
-        {
-            foreach (int x in positions)
-            {
-                // Generate the surface heights for this x position
-                float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(x);
-                TerrainSystem.Instance.Terrain.AddSurfaceHeights(x, heights);
-            }
-        }
-
-        /// <summary>
         /// Adds chunks.
         /// </summary>
         /// <param name="chunks">The chunks.</param>
@@ -263,10 +224,14 @@ namespace Dwarves.Core
         {
             foreach (Vector2I chunkIndex in chunks)
             {
-                if (!TerrainSystem.Instance.Terrain.HasChunk(chunkIndex))
+                // Add the surface heights for the chunk's x position
+                if (!TerrainSystem.Instance.Terrain.HasSurfaceHeights(chunkIndex.X))
                 {
-                    TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
+                    float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(chunkIndex.X);
+                    TerrainSystem.Instance.Terrain.AddSurfaceHeights(chunkIndex.X, heights);
                 }
+
+                TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
             }
         }
 
@@ -279,6 +244,12 @@ namespace Dwarves.Core
             foreach (Vector2I chunkIndex in chunks)
             {
                 TerrainSystem.Instance.Terrain.RemoveChunk(chunkIndex);
+
+                // Remove the surface heights if they are no longer required
+                if (TerrainSystem.Instance.Terrain.CanRemoveSurfaceHeights(chunkIndex.X))
+                {
+                    TerrainSystem.Instance.Terrain.RemoveSurfaceHeights(chunkIndex.X);
+                }
             }
         }
 

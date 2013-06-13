@@ -6,7 +6,6 @@
 namespace Dwarves.Core.Terrain
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Dwarves.Core.Math;
 
     /// <summary>
@@ -25,11 +24,6 @@ namespace Dwarves.Core.Terrain
         /// Locking object for adding/removing terrain.
         /// </summary>
         private readonly object chunksLock = new object();
-
-        /// <summary>
-        /// Locking object for adding/removing surface heights.
-        /// </summary>
-        private readonly object surfacesLock = new object();
 
         /// <summary>
         /// The chunks.
@@ -76,21 +70,6 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Gets the surface height indices. This is a thread-safe operation to be used when accessing the terrain from
-        /// outside of a scheduled job.
-        /// </summary>
-        /// <returns>The surface height indices.</returns>
-        public int[] GetSurfaceHeightIndicesThreadSafe()
-        {
-            lock (this.surfacesLock)
-            {
-                var indices = new int[this.surfaceHeights.Count];
-                this.surfaceHeights.Keys.CopyTo(indices, 0);
-                return indices;
-            }
-        }
-
-        /// <summary>
         /// Add a chunk.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
@@ -120,55 +99,10 @@ namespace Dwarves.Core.Terrain
                 removed = this.chunks.Remove(chunkIndex);
             }
 
-            if (removed)
+            if (removed && this.ChunkRemoved != null)
             {
-                // Remove the surface heights if this is the last chunk at this x position
-                if (!this.chunks.Keys.Any(c => c.X == chunkIndex.X))
-                {
-                    lock (this.surfacesLock)
-                    {
-                        this.surfaceHeights.Remove(chunkIndex.X);
-                    }
-                }
-
-                if (this.ChunkRemoved != null)
-                {
-                    this.ChunkRemoved(this, chunkIndex);
-                }
+                this.ChunkRemoved(this, chunkIndex);
             }
-        }
-
-        /// <summary>
-        /// Adds the surface heights.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <param name="heights">The heights.</param>
-        public void AddSurfaceHeights(int x, float[] heights)
-        {
-            lock (this.surfacesLock)
-            {
-                this.surfaceHeights.Add(x, heights);
-            }
-        }
-
-        /// <summary>
-        /// Get the surface heights.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <returns>The heights.</returns>
-        public float[] GetSurfaceHeights(int x)
-        {
-            return this.surfaceHeights[x];
-        }
-
-        /// <summary>
-        /// Determine if the given surface heights exist.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <returns>True if the surface heights exists.</returns>
-        public bool HasSurfaceHeights(int x)
-        {
-            return this.surfaceHeights.ContainsKey(x);
         }
 
         /// <summary>
@@ -200,6 +134,63 @@ namespace Dwarves.Core.Terrain
         public bool HasChunk(Vector2I chunkIndex)
         {
             return this.chunks.ContainsKey(chunkIndex);
+        }
+
+        /// <summary>
+        /// Adds the surface heights.
+        /// </summary>
+        /// <param name="x">The x position of the surface.</param>
+        /// <param name="heights">The heights.</param>
+        public void AddSurfaceHeights(int x, float[] heights)
+        {
+            this.surfaceHeights.Add(x, heights);
+        }
+
+        /// <summary>
+        /// Removes the surface heights.
+        /// </summary>
+        /// <param name="x">The x position of the surface.</param>
+        public void RemoveSurfaceHeights(int x)
+        {
+            this.surfaceHeights.Remove(x);
+        }
+
+        /// <summary>
+        /// Get the surface heights.
+        /// </summary>
+        /// <param name="x">The x position of the surface.</param>
+        /// <returns>The heights.</returns>
+        public float[] GetSurfaceHeights(int x)
+        {
+            return this.surfaceHeights[x];
+        }
+
+        /// <summary>
+        /// Determine if the given surface heights exist.
+        /// </summary>
+        /// <param name="x">The x position of the surface.</param>
+        /// <returns>True if the surface heights exists.</returns>
+        public bool HasSurfaceHeights(int x)
+        {
+            return this.surfaceHeights.ContainsKey(x);
+        }
+
+        /// <summary>
+        /// Determines whether the given surface heights can be removed.
+        /// </summary>
+        /// <param name="x">The x position of the surface.</param>
+        /// <returns>True if the surface can be removed.</returns>
+        public bool CanRemoveSurfaceHeights(int x)
+        {
+            foreach (Vector2I chunkIndex in this.chunks.Keys)
+            {
+                if (chunkIndex.X == x)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
