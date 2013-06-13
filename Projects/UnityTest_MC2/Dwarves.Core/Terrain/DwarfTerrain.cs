@@ -31,17 +31,12 @@ namespace Dwarves.Core.Terrain
         private Dictionary<Vector2I, TerrainChunk> chunks;
 
         /// <summary>
-        /// The surface heights for each chunk x-position.
-        /// </summary>
-        private Dictionary<int, float[]> surfaceHeights;
-
-        /// <summary>
         /// Initialises a new instance of the DwarfTerrain class.
         /// </summary>
         public DwarfTerrain()
         {
             this.chunks = new Dictionary<Vector2I, TerrainChunk>();
-            this.surfaceHeights = new Dictionary<int, float[]>();
+            this.SurfaceHeights = new Dictionary<int, float[]>();
         }
 
         /// <summary>
@@ -53,6 +48,11 @@ namespace Dwarves.Core.Terrain
         /// Indicates that a chunk was removed.
         /// </summary>
         public event ChunkEvent ChunkRemoved;
+
+        /// <summary>
+        /// Gets the surface heights for each chunk x-position.
+        /// </summary>
+        public Dictionary<int, float[]> SurfaceHeights { get; private set; }
 
         /// <summary>
         /// Gets the chunks. This is a thread-safe operation to be used when accessing the terrain from outside of a
@@ -137,60 +137,21 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Adds the surface heights.
+        /// Determines whether a chunk exists at the given x position.
         /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <param name="heights">The heights.</param>
-        public void AddSurfaceHeights(int x, float[] heights)
-        {
-            this.surfaceHeights.Add(x, heights);
-        }
-
-        /// <summary>
-        /// Removes the surface heights.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        public void RemoveSurfaceHeights(int x)
-        {
-            this.surfaceHeights.Remove(x);
-        }
-
-        /// <summary>
-        /// Get the surface heights.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <returns>The heights.</returns>
-        public float[] GetSurfaceHeights(int x)
-        {
-            return this.surfaceHeights[x];
-        }
-
-        /// <summary>
-        /// Determine if the given surface heights exist.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <returns>True if the surface heights exists.</returns>
-        public bool HasSurfaceHeights(int x)
-        {
-            return this.surfaceHeights.ContainsKey(x);
-        }
-
-        /// <summary>
-        /// Determines whether the given surface heights can be removed.
-        /// </summary>
-        /// <param name="x">The x position of the surface.</param>
-        /// <returns>True if the surface can be removed.</returns>
-        public bool CanRemoveSurfaceHeights(int x)
+        /// <param name="x">The x position in chunk coordinates.</param>
+        /// <returns>True if a chunk exists.</returns>
+        public bool HasChunkAtX(int x)
         {
             foreach (Vector2I chunkIndex in this.chunks.Keys)
             {
                 if (chunkIndex.X == x)
                 {
-                    return false;
+                    return true;
                 }
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>

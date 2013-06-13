@@ -225,10 +225,10 @@ namespace Dwarves.Core
             foreach (Vector2I chunkIndex in chunks)
             {
                 // Add the surface heights for the chunk's x position
-                if (!TerrainSystem.Instance.Terrain.HasSurfaceHeights(chunkIndex.X))
+                if (!TerrainSystem.Instance.Terrain.SurfaceHeights.ContainsKey(chunkIndex.X))
                 {
                     float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(chunkIndex.X);
-                    TerrainSystem.Instance.Terrain.AddSurfaceHeights(chunkIndex.X, heights);
+                    TerrainSystem.Instance.Terrain.SurfaceHeights.Add(chunkIndex.X, heights);
                 }
 
                 TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
@@ -246,9 +246,9 @@ namespace Dwarves.Core
                 TerrainSystem.Instance.Terrain.RemoveChunk(chunkIndex);
 
                 // Remove the surface heights if they are no longer required
-                if (TerrainSystem.Instance.Terrain.CanRemoveSurfaceHeights(chunkIndex.X))
+                if (!TerrainSystem.Instance.Terrain.HasChunkAtX(chunkIndex.X))
                 {
-                    TerrainSystem.Instance.Terrain.RemoveSurfaceHeights(chunkIndex.X);
+                    TerrainSystem.Instance.Terrain.SurfaceHeights.Remove(chunkIndex.X);
                 }
             }
         }
@@ -266,7 +266,7 @@ namespace Dwarves.Core
             if (!this.serialiser.TryDeserialisePoints(chunkIndex, chunk))
             {
                 // Generate the point data
-                float[] heights = this.Terrain.GetSurfaceHeights(chunkIndex.X);
+                float[] heights = this.Terrain.SurfaceHeights[chunkIndex.X];
                 this.pointGenerator.GeneratePoints(chunkIndex, chunk, heights);
             }
         }
