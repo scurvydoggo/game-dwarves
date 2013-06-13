@@ -214,12 +214,11 @@ namespace Dwarves.Core
                     ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(chunk);
                     if (chunkQueueState.CanRebuildMesh())
                     {
-                        Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
                         JobSystem.Instance.Scheduler.Enqueue(
                             () => this.RebuildMeshJob(chunk),
                             true,
                             (s, j) => chunkQueueState.CompleteRebuildMesh(),
-                            neighbours);
+                            TerrainChunk.GetNeighbours(chunk));
                     }
                 }
             }
