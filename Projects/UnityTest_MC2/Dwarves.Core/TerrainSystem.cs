@@ -194,13 +194,26 @@ namespace Dwarves.Core
             // Enqueue the chunk removal job
             if (toRemove != null)
             {
-                JobSystem.Instance.Scheduler.Enqueue(() => this.RemoveChunksJob(toRemove), false, null);
+                if (JobSystem.Instance.Scheduler.MasterQueueState.CanRemoveChunks(toRemove))
+                {
+                    JobSystem.Instance.Scheduler.Enqueue(
+                        () => this.RemoveChunksJob(toRemove),
+                        false,
+                        (s, j) => JobSystem.Instance.Scheduler.MasterQueueState.CompleteRemoveChunks(toRemove));
+                }
             }
 
             // Enqueue the chunk add jobs
             if (newChunks != null)
             {
-                JobSystem.Instance.Scheduler.Enqueue(() => this.AddChunksJob(newChunks), true, null);
+                var addChunksSet = new List<Vector2I>(newChunks);
+                if (JobSystem.Instance.Scheduler.MasterQueueState.CanAddChunks(addChunksSet))
+                {
+                    JobSystem.Instance.Scheduler.Enqueue(
+                        () => this.AddChunksJob(newChunks),
+                        true,
+                        (s, j) => JobSystem.Instance.Scheduler.MasterQueueState.CompleteRemoveChunks(addChunksSet));
+                }
 
                 // Load the point data for each new chunk
                 foreach (Vector2I chunk in newChunks)

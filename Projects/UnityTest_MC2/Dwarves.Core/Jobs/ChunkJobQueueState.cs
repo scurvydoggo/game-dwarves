@@ -38,7 +38,7 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Prepares a RebuildMesh job.
+        /// Check whether a RebuildMesh job can execute.
         /// </summary>
         /// <returns>True if the job can be executed.</returns>
         public bool CanRebuildMesh()
@@ -70,7 +70,7 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Prepares a UpdateMeshFilter job.
+        /// Check whether a UpdateMeshFilter job can execute.
         /// </summary>
         /// <returns>True if the job can be executed.</returns>
         public bool CanUpdateMeshFilter()
