@@ -211,7 +211,7 @@ namespace Dwarves.Core
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.AddChunksJob(newChunks),
                         true,
-                        (s, j) => JobSystem.Instance.Scheduler.MasterQueueState.CompleteRemoveChunks(addChunksSet));
+                        (s, j) => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddChunks(addChunksSet));
                 }
 
                 // Load the point data for each new chunk
