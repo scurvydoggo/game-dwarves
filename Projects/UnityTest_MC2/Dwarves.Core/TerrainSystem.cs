@@ -193,11 +193,12 @@ namespace Dwarves.Core
             // Enqueue the chunk removal job
             if (toRemove != null)
             {
-                if (JobSystem.Instance.Scheduler.MasterQueueState.CanRemoveChunks(toRemove))
+                Guid id = Guid.NewGuid();
+                if (JobSystem.Instance.Scheduler.MasterQueueState.CanRemoveChunks(toRemove, id))
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.RemoveChunksJob(toRemove),
-                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteRemoveChunks(toRemove),
+                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddRemoveChunks(toRemove, id),
                         false);
                 }
             }
@@ -206,12 +207,13 @@ namespace Dwarves.Core
             if (newChunks != null)
             {
                 // Add the chunks
+                Guid id = Guid.NewGuid();
                 var addChunksSet = new List<Vector2I>(newChunks);
-                if (JobSystem.Instance.Scheduler.MasterQueueState.CanAddChunks(addChunksSet))
+                if (JobSystem.Instance.Scheduler.MasterQueueState.CanAddChunks(addChunksSet, id))
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.AddChunksJob(newChunks),
-                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddChunks(addChunksSet),
+                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddRemoveChunks(addChunksSet, id),
                         true);
                 }
 
