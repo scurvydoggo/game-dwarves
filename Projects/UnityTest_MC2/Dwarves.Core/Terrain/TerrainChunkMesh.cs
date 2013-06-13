@@ -24,26 +24,5 @@ namespace Dwarves.Core.Terrain
         /// Gets or sets the mesh data.
         /// </summary>
         public MeshData Data { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the mesh data has changed.
-        /// </summary>
-        public bool MeshDataChanged { get; private set; }
-
-        /// <summary>
-        /// Set the mesh data changed flag.
-        /// </summary>
-        public void SetMeshDataChanged()
-        {
-            this.MeshDataChanged = true;
-        }
-
-        /// <summary>
-        /// Reset the mesh data changed flag.
-        /// </summary>
-        public void ResetMeshDataChanged()
-        {
-            this.MeshDataChanged = false;
-        }
     }
 }

@@ -6,6 +6,7 @@
 namespace Dwarves.Component.Terrain
 {
     using Dwarves.Core;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using UnityEngine;
@@ -51,7 +52,15 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            JobSystem.Instance.Scheduler.Enqueue(this.UpdateMeshFilterJob, true, null);
+            ChunkJobQueueState chunkQueueState = JobSystem.Instance.Scheduler.GetChunkQueueState(this.Chunk);
+            if (chunkQueueState.CanUpdateMeshFilter())
+            {
+                JobSystem.Instance.Scheduler.Enqueue(
+                    this.UpdateMeshFilterJob,
+                    true,
+                    (s, j) => chunkQueueState.CompleteUpdateMeshFilter(),
+                    this.Chunk);
+            }
         }
 
         /// <summary>
@@ -59,32 +68,26 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         private void UpdateMeshFilterJob()
         {
-            // The chunk may be mid-removal where this game object is still alive, so safely check if chunk exists
+            // The chunk may be mid-removal where this game object is still alive, so safely access it via TryGet
             TerrainChunk chunk;
             if (TerrainSystem.Instance.Terrain.TryGetChunk(this.Chunk, out chunk))
             {
-                if (chunk.Mesh.MeshDataChanged)
-                {
-                    // Copy the mesh data into arrays
-                    Vector3[] vertices = chunk.Mesh.Data.Vertices.ToArray();
-                    Vector3[] normals = chunk.Mesh.Data.Normals.ToArray();
-                    int[] triangles = chunk.Mesh.Data.Indices.ToArray();
-                    Color[] colors = chunk.Mesh.Data.Light.ToArray();
+                // Copy the mesh data into arrays
+                Vector3[] vertices = chunk.Mesh.Data.Vertices.ToArray();
+                Vector3[] normals = chunk.Mesh.Data.Normals.ToArray();
+                int[] triangles = chunk.Mesh.Data.Indices.ToArray();
+                Color[] colors = chunk.Mesh.Data.Light.ToArray();
 
-                    // Reset the mesh data changed flag
-                    chunk.Mesh.ResetMeshDataChanged();
-
-                    // Update the mesh filter geometry
-                    GameScheduler.Instance.Invoke(
-                        () =>
-                        {
-                            this.cMeshFilter.mesh.Clear();
-                            this.cMeshFilter.mesh.vertices = chunk.Mesh.Data.Vertices.ToArray();
-                            this.cMeshFilter.mesh.normals = chunk.Mesh.Data.Normals.ToArray();
-                            this.cMeshFilter.mesh.triangles = chunk.Mesh.Data.Indices.ToArray();
-                            this.cMeshFilter.mesh.colors = chunk.Mesh.Data.Light.ToArray();
-                        });
-                }
+                // Update the mesh filter geometry
+                GameScheduler.Instance.Invoke(
+                    () =>
+                    {
+                        this.cMeshFilter.mesh.Clear();
+                        this.cMeshFilter.mesh.vertices = chunk.Mesh.Data.Vertices.ToArray();
+                        this.cMeshFilter.mesh.normals = chunk.Mesh.Data.Normals.ToArray();
+                        this.cMeshFilter.mesh.triangles = chunk.Mesh.Data.Indices.ToArray();
+                        this.cMeshFilter.mesh.colors = chunk.Mesh.Data.Light.ToArray();
+                    });
             }
         }
     }

@@ -55,9 +55,6 @@ namespace Dwarves.Core.Terrain.Geometry
                     }
                 }
             }
-
-            // Flag the mesh data as changed
-            chunk.Mesh.SetMeshDataChanged();
         }
 
         /// <summary>
