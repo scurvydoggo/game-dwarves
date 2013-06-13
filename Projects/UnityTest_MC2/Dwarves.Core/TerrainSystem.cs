@@ -144,8 +144,6 @@ namespace Dwarves.Core
         /// required in this frame (otherwise loading is deferred to a background thread).</param>
         private void LoadUnloadChunks(Dictionary<Vector2I, bool> activeChunks)
         {
-            MasterJobQueueState masterQueueState = JobSystem.Instance.Scheduler.GetMasterQueueState();
-
             // Update the active queues on the job system
             JobSystem.Instance.Scheduler.UpdateActiveChunks(activeChunks);
 
