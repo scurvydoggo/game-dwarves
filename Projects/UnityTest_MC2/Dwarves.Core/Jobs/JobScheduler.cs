@@ -169,10 +169,10 @@ namespace Dwarves.Core.Jobs
         /// <param name="activeChunks">The currently active chunks.</param>
         public void UpdateActiveChunks(Dictionary<Vector2I, bool> activeChunks)
         {
+            List<Vector2I> removeNow = null;
             this.queuesLock.Enter();
             try
             {
-                List<Vector2I> removeNow = null;
                 foreach (ChunkJobQueue queue in this.chunkQueues.Values)
                 {
                     bool remove = !activeChunks.ContainsKey(queue.Chunk);
