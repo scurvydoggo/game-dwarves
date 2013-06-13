@@ -94,10 +94,11 @@ namespace Dwarves.Core.Jobs
             job.IsPendingChanged += this.Job_IsPendingChanged;
             job.Completed += this.Job_Completed;
 
+            // Get the owners of the job, creating the owner queues if necessary
+            JobQueue[] owners;
             if (!job.IsMasterJob)
             {
-                // Get the owners of the job, creating the owner queues if necessary
-                JobQueue[] owners = new JobQueue[chunks.Length];
+                owners = new JobQueue[chunks.Length];
                 this.queuesLock.Enter();
                 try
                 {
@@ -119,24 +120,12 @@ namespace Dwarves.Core.Jobs
                 {
                     this.queuesLock.Exit();
                 }
-
-                // Add the owners and enqueue the job
-                job.AddOwners(owners);
-                foreach (JobQueue queue in owners)
-                {
-                    queue.Enqueue(job);
-                }
             }
             else
             {
-                // Add this as a master job and get the owner queues
-                JobQueue[] owners;
                 this.queuesLock.Enter();
                 try
                 {
-                    // Add this to the master queue job list
-                    this.masterQueueJobs.Add(job);
-
                     // Get the owners which is *all* chunk queues plus the master queue itself
                     int i = 0;
                     owners = new JobQueue[this.chunkQueues.Count + 1];
@@ -145,18 +134,21 @@ namespace Dwarves.Core.Jobs
                     {
                         owners[i++] = jobs;
                     }
+
+                    // Add this to the master queue job list
+                    this.masterQueueJobs.Add(job);
                 }
                 finally
                 {
                     this.queuesLock.Exit();
                 }
+            }
 
-                // Enqueue the job
-                job.AddOwners(owners);
-                foreach (JobQueue queue in owners)
-                {
-                    queue.Enqueue(job);
-                }
+            // Add the owners and enqueue the job
+            job.AddOwners(owners);
+            foreach (JobQueue queue in owners)
+            {
+                queue.Enqueue(job);
             }
         }
 
