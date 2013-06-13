@@ -58,6 +58,14 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Gets the master queue state.
+        /// </summary>
+        public MasterJobQueueState MasterQueueState
+        {
+            get { return this.masterQueue.State; }
+        }
+
+        /// <summary>
         /// Dispose the instance.
         /// </summary>
         public void Dispose()
@@ -161,27 +169,32 @@ namespace Dwarves.Core.Jobs
         /// <param name="activeChunks">The currently active chunks.</param>
         public void UpdateActiveChunks(Dictionary<Vector2I, bool> activeChunks)
         {
+            var removeNow = new List<Vector2I>();
             this.queuesLock.Enter();
             try
             {
                 foreach (ChunkJobQueue queue in this.chunkQueues.Values)
                 {
-                    queue.FlaggedForRemoval = !activeChunks.ContainsKey(queue.Chunk);
+                    bool remove = !activeChunks.ContainsKey(queue.Chunk);
+                    if (remove && queue.IsIdle)
+                    {
+                        removeNow.Add(queue.Chunk);
+                    }
+                    else
+                    {
+                        queue.FlaggedForRemoval = remove;
+                    }
+                }
+
+                foreach (Vector2I chunk in removeNow)
+                {
+                    this.chunkQueues.Remove(chunk);
                 }
             }
             finally
             {
                 this.queuesLock.Exit();
             }
-        }
-
-        /// <summary>
-        /// Gets the master queue state.
-        /// </summary>
-        /// <returns>The queue state.</returns>
-        public MasterJobQueueState GetMasterQueueState()
-        {
-            return this.masterQueue.State;
         }
 
         /// <summary>
