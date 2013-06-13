@@ -202,9 +202,10 @@ namespace Dwarves.Core
                 }
             }
 
-            // Enqueue the chunk add jobs
+            // Enqueue the new chunk jobs
             if (newChunks != null)
             {
+                // Add the chunks
                 var addChunksSet = new List<Vector2I>(newChunks);
                 if (JobSystem.Instance.Scheduler.MasterQueueState.CanAddChunks(addChunksSet))
                 {
