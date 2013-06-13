@@ -74,16 +74,23 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         /// <param name="action">The action delegate.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
+        /// <param name="completionHandler">The completion handler to register with the job.</param>
         /// <param name="chunks">The chunks to which this job belongs.</param>
-        public void Enqueue(Action action, bool canSkip, params Vector2I[] chunks)
+        public void Enqueue(Action action, bool canSkip, JobEvent completionHandler, params Vector2I[] chunks)
         {
-            if (chunks.Length > 0)
+            // Create the job
+            bool isMasterJob = chunks.Length == 0;
+            int ownerCapacity = isMasterJob ? this.chunkQueues.Count + 10 : chunks.Length;
+            var job = new Job(action, canSkip, isMasterJob, ownerCapacity);
+            job.IsPendingChanged += this.Job_IsPendingChanged;
+            job.Completed += this.Job_Completed;
+            if (completionHandler != null)
             {
-                // Create the job
-                var job = new Job(action, canSkip, false, chunks.Length);
-                job.IsPendingChanged += this.Job_IsPendingChanged;
-                job.Completed += this.Job_Completed;
+                job.Completed += completionHandler;
+            }
 
+            if (!job.IsMasterJob)
+            {
                 // Get the owners of the job, creating the owner queues if necessary
                 JobQueue[] owners = new JobQueue[chunks.Length];
                 this.queuesLock.Enter();
@@ -117,11 +124,6 @@ namespace Dwarves.Core.Jobs
             }
             else
             {
-                // Create the job
-                var job = new Job(action, canSkip, true, this.chunkQueues.Count + 10);
-                job.IsPendingChanged += this.Job_IsPendingChanged;
-                job.Completed += this.Job_Completed;
-
                 // Add this as a master job and get the owner queues
                 JobQueue[] owners;
                 this.queuesLock.Enter();

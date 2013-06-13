@@ -8,6 +8,8 @@ namespace Dwarves.Core
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain;
@@ -144,6 +146,8 @@ namespace Dwarves.Core
         /// required in this frame (otherwise loading is deferred to a background thread).</param>
         private void LoadUnloadChunks(Dictionary<Vector2I, bool> activeChunks)
         {
+            MasterJobQueueState masterQueueState = JobSystem.Instance.Scheduler.GetMasterQueueState();
+
             // Update the active queues on the job system
             JobSystem.Instance.Scheduler.UpdateActiveChunks(activeChunks);
 
@@ -183,7 +187,7 @@ namespace Dwarves.Core
             // Enqueue the chunk removal job
             if (toRemove.Count > 0)
             {
-                JobSystem.Instance.Scheduler.Enqueue(() => this.RemoveChunksJob(toRemove), false);
+                JobSystem.Instance.Scheduler.Enqueue(() => this.RemoveChunksJob(toRemove), false, null);
             }
 
             // Determine which surfaces are new and need to be generated
@@ -200,18 +204,24 @@ namespace Dwarves.Core
             // Enqueue the generate the surface heights job
             if (newSurfaces.Count > 0)
             {
-                JobSystem.Instance.Scheduler.Enqueue(() => this.AddSurfaceHeightsJob(newSurfaces), true);
+                if (masterQueueState.AddForAddSurfaceHeights(newSurfaces))
+                {
+                    JobSystem.Instance.Scheduler.Enqueue(
+                        () => this.AddSurfaceHeightsJob(newSurfaces),
+                        true,
+                        (s, j) => masterQueueState.RemoveForAddSurfaceHeights(newSurfaces));
+                }
             }
 
             if (newChunks.Count > 0)
             {
                 // Add the new chunks
-                JobSystem.Instance.Scheduler.Enqueue(() => this.AddChunksJob(newChunks), true);
+                JobSystem.Instance.Scheduler.Enqueue(() => this.AddChunksJob(newChunks), true, null);
 
                 // Load the point data for each new chunk
                 foreach (Vector2I chunk in newChunks)
                 {
-                    JobSystem.Instance.Scheduler.Enqueue(() => this.LoadPointsJob(chunk), true, chunk);
+                    JobSystem.Instance.Scheduler.Enqueue(() => this.LoadPointsJob(chunk), true, null, chunk);
                 }
             }
 
@@ -219,17 +229,17 @@ namespace Dwarves.Core
             foreach (Vector2I chunk in newChunksAndNeighbours)
             {
                 Vector2I[] neighbours = TerrainChunk.GetNeighbours(chunk);
-                JobSystem.Instance.Scheduler.Enqueue(() => this.RebuildMeshJob(chunk), true, neighbours);
+                JobSystem.Instance.Scheduler.Enqueue(() => this.RebuildMeshJob(chunk), true, null, neighbours);
             }
         }
 
         /// <summary>
         /// Adds surface heights.
         /// </summary>
-        /// <param name="xChunks">The chunk x positions.</param>
-        private void AddSurfaceHeightsJob(HashSet<int> xChunks)
+        /// <param name="positions">The chunk x positions.</param>
+        private void AddSurfaceHeightsJob(HashSet<int> positions)
         {
-            foreach (int x in xChunks)
+            foreach (int x in positions)
             {
                 if (!TerrainSystem.Instance.Terrain.HasSurfaceHeights(x))
                 {

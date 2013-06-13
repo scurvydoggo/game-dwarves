@@ -51,7 +51,7 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            JobSystem.Instance.Scheduler.Enqueue(this.UpdateMeshFilterJob, true);
+            JobSystem.Instance.Scheduler.Enqueue(this.UpdateMeshFilterJob, true, null);
         }
 
         /// <summary>
