@@ -41,13 +41,6 @@ namespace Dwarves.Core.Jobs
         private bool updateMeshFilter;
 
         /// <summary>
-        /// Initialises a new instance of the ChunkJobQueueState class.
-        /// </summary>
-        public ChunkJobQueueState()
-        {
-        }
-
-        /// <summary>
         /// Check whether a LoadPoints job can execute.
         /// </summary>
         /// <returns>True if the job can be executed.</returns>
