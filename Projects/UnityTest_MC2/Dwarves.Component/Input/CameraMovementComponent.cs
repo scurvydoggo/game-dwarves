@@ -13,6 +13,21 @@ namespace Dwarves.Component.Input
     public class CameraMovementComponent : MonoBehaviour
     {
         /// <summary>
+        /// The furthest Z distance.
+        /// </summary>
+        public float ZoomFurthest = -20;
+
+        /// <summary>
+        /// The closest Z distance.
+        /// </summary>
+        public float ZoomClosest = -2;
+
+        /// <summary>
+        /// The zoom step size.
+        /// </summary>
+        public float ZoomStep = 1;
+
+        /// <summary>
         /// The duration the camera will continue panning under inertia after a drag.
         /// </summary>
         public float Deceleration = -1;
@@ -66,6 +81,31 @@ namespace Dwarves.Component.Input
             {
                 this.underInertia = true;
                 this.inertiaDirection = Vector3.Normalize(this.dragVelocity);
+            }
+
+            // Check if we should zoom
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll != 0)
+            {
+                float z;
+                if (scroll > 0)
+                {
+                    z = this.transform.position.z + this.ZoomStep;
+                    if (z > this.ZoomClosest)
+                    {
+                        z = this.ZoomClosest;
+                    }
+                }
+                else
+                {
+                    z = this.transform.position.z - this.ZoomStep;
+                    if (z < this.ZoomFurthest)
+                    {
+                        z = this.ZoomFurthest;
+                    }
+                }
+
+                this.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, z);
             }
 
             if (Input.GetMouseButton(0))
