@@ -52,7 +52,7 @@ namespace Dwarves.Component.Input
         /// </summary>
         public void Start()
         {
-            this.planeZ = new Plane(Vector3.back, Vector3.zero);
+            this.planeZ = new Plane(Vector3.back, 1);
         }
 
         /// <summary>
