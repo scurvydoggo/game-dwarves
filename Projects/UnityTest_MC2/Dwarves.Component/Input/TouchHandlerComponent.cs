@@ -30,8 +30,7 @@ namespace Dwarves.Component.Input
             this.planeZ = new Plane(Vector3.back, Vector3.zero);
 
             // Get a refernce to the terrain's touchable component
-            GameObject terrain = GameObject.Find("Terrain");
-            this.terrainTouchable = terrain.GetComponent<TouchableComponent>();
+            this.terrainTouchable = GameObject.Find("Terrain").GetComponent<TouchableComponent>();
         }
 
         /// <summary>
@@ -59,23 +58,11 @@ namespace Dwarves.Component.Input
         /// <returns>True if a touch is currently being made.</returns>
         private bool TryGetTouchPosition(out Vector3 touchPosition)
         {
-#if UNITY_IPHONE || UNITY_ANDRIOD
-        if (Input.touchesCount == 1)
-        {
-            Touch touch = Input.touches[0];
-            if (touch.phase == TouchPhase.Began || touch.phase == TouchPhase.Moved)
-            {
-                touchPosition = touch.position;
-                return true;
-            }
-        }
-#else
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(1))
             {
                 touchPosition = Input.mousePosition;
                 return true;
             }
-#endif
 
             // No valid touch is currently being made
             touchPosition = Vector3.zero;
