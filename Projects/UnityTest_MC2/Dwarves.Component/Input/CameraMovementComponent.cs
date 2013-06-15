@@ -65,14 +65,12 @@ namespace Dwarves.Component.Input
             {
                 this.dragOrigin = this.GetWorldPoint(Input.mousePosition);
                 this.underInertia = false;
-                Screen.showCursor = false;
                 return;
             }
             else if (Input.GetMouseButtonUp(0))
             {
                 this.underInertia = true;
                 this.inertiaDirection = Vector3.Normalize(this.dragVelocity);
-                Screen.showCursor = true;
             }
 
             // Perform mouse-drag movement
