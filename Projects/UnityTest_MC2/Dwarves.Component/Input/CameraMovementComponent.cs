@@ -13,11 +13,6 @@ namespace Dwarves.Component.Input
     public class CameraMovementComponent : MonoBehaviour
     {
         /// <summary>
-        /// The keyboard movement speed.
-        /// </summary>
-        public float KeySpeed = 20;
-
-        /// <summary>
         /// The duration the camera will continue panning under inertia after a drag.
         /// </summary>
         public float Deceleration = -1;
@@ -73,110 +68,40 @@ namespace Dwarves.Component.Input
                 this.inertiaDirection = Vector3.Normalize(this.dragVelocity);
             }
 
-            // Perform mouse-drag movement
-            if (!this.PerformDragMovement())
-            {
-                // Perform keyboard movement
-                if (this.PerformKeyboardMovement())
-                {
-                    this.underInertia = false;
-                }
-                else
-                {
-                    // Perform inertia-based movement
-                    this.PerformInertiaMovement();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Perform mouse-drag movement.
-        /// </summary>
-        /// <returns>True if movement occurred.</returns>
-        private bool PerformDragMovement()
-        {
             if (Input.GetMouseButton(0))
             {
+                // Perform mouse-drag movement
                 this.dragVelocity = this.dragOrigin - this.GetWorldPoint(Input.mousePosition);
                 this.transform.position += this.dragVelocity;
-                return true;
             }
             else
             {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Perform keyboard-based movement.
-        /// </summary>
-        /// <returns>True if movement occurred.</returns>
-        private bool PerformKeyboardMovement()
-        {
-            bool keyboardMoveOccurred = false;
-            float moveDistance = this.KeySpeed * Time.smoothDeltaTime;
-
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                this.transform.position += new Vector3(-moveDistance, 0, 0);
-                keyboardMoveOccurred = true;
-            }
-            else if (Input.GetKey(KeyCode.RightArrow))
-            {
-                this.transform.position += new Vector3(moveDistance, 0, 0);
-                keyboardMoveOccurred = true;
-            }
-
-            if (Input.GetKey(KeyCode.UpArrow))
-            {
-                this.transform.position += new Vector3(0, moveDistance, 0);
-                keyboardMoveOccurred = true;
-            }
-            else if (Input.GetKey(KeyCode.DownArrow))
-            {
-                this.transform.position += new Vector3(0, -moveDistance, 0);
-                keyboardMoveOccurred = true;
-            }
-
-            return keyboardMoveOccurred;
-        }
-
-        /// <summary>
-        /// Perform inertia based movement.
-        /// </summary>
-        /// <returns>True if movement occurred.</returns>
-        private bool PerformInertiaMovement()
-        {
-            if (this.underInertia)
-            {
-                float distance = this.Deceleration * Time.smoothDeltaTime;
-
-                this.dragVelocity.x += Vector3.Dot(this.inertiaDirection, Vector3.right) * distance;
-                if (this.dragVelocity.x * this.inertiaDirection.x < 0)
+                // Perform inertia-based movement
+                if (this.underInertia)
                 {
-                    this.dragVelocity.x = 0;
-                }
+                    float distance = this.Deceleration * Time.smoothDeltaTime;
 
-                this.dragVelocity.y += Vector3.Dot(this.inertiaDirection, Vector3.up) * distance;
-                if (this.dragVelocity.y * this.inertiaDirection.y < 0)
-                {
-                    this.dragVelocity.y = 0;
-                }
+                    this.dragVelocity.x += Vector3.Dot(this.inertiaDirection, Vector3.right) * distance;
+                    if (this.dragVelocity.x * this.inertiaDirection.x < 0)
+                    {
+                        this.dragVelocity.x = 0;
+                    }
 
-                if (this.dragVelocity.x != 0 && this.dragVelocity.y != 0)
-                {
-                    this.transform.position += this.dragVelocity;
-                    return true;
+                    this.dragVelocity.y += Vector3.Dot(this.inertiaDirection, Vector3.up) * distance;
+                    if (this.dragVelocity.y * this.inertiaDirection.y < 0)
+                    {
+                        this.dragVelocity.y = 0;
+                    }
+
+                    if (this.dragVelocity.x != 0 && this.dragVelocity.y != 0)
+                    {
+                        this.transform.position += this.dragVelocity;
+                    }
+                    else
+                    {
+                        this.underInertia = false;
+                    }
                 }
-                else
-                {
-                    this.underInertia = false;
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
             }
         }
 
