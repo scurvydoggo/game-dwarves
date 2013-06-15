@@ -18,6 +18,11 @@ namespace Dwarves.Component.Input
         public float KeySpeed = 20;
 
         /// <summary>
+        /// The duration the camera will continue panning under inertia after a drag.
+        /// </summary>
+        public float Deceleration = -1;
+
+        /// <summary>
         /// The plane at Z=0.
         /// </summary>
         private Plane planeZ;
@@ -26,6 +31,21 @@ namespace Dwarves.Component.Input
         /// The origin of the current drag.
         /// </summary>
         private Vector3 dragOrigin;
+
+        /// <summary>
+        /// The velocity of the drag.
+        /// </summary>
+        private Vector3 dragVelocity;
+
+        /// <summary>
+        /// The direction of the inertia drag.
+        /// </summary>
+        private Vector3 inertiaDirection;
+
+        /// <summary>
+        /// Indicates whether the camera is moving under inertia from a mouse drag.
+        /// </summary>
+        private bool underInertia;
 
         /// <summary>
         /// Initialises the component.
@@ -40,40 +60,125 @@ namespace Dwarves.Component.Input
         /// </summary>
         public void Update()
         {
+            // Check if we're at a mouse-drag endpoint
             if (Input.GetMouseButtonDown(0))
             {
                 this.dragOrigin = this.GetWorldPoint(Input.mousePosition);
+                this.underInertia = false;
+                Screen.showCursor = false;
                 return;
             }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                this.underInertia = true;
+                this.inertiaDirection = Vector3.Normalize(this.dragVelocity);
+                Screen.showCursor = true;
+            }
 
+            // Perform mouse-drag movement
+            if (!this.PerformDragMovement())
+            {
+                // Perform keyboard movement
+                if (this.PerformKeyboardMovement())
+                {
+                    this.underInertia = false;
+                }
+                else
+                {
+                    // Perform inertia-based movement
+                    this.PerformInertiaMovement();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Perform mouse-drag movement.
+        /// </summary>
+        /// <returns>True if movement occurred.</returns>
+        private bool PerformDragMovement()
+        {
             if (Input.GetMouseButton(0))
             {
-                var currentPos = this.GetWorldPoint(Input.mousePosition);
-                Vector3 movePos = this.dragOrigin - currentPos;
-                this.transform.position += movePos;
+                this.dragVelocity = this.dragOrigin - this.GetWorldPoint(Input.mousePosition);
+                this.transform.position += this.dragVelocity;
+                return true;
             }
             else
             {
-                // Check if the camera should pan
-                float moveDistance = this.KeySpeed * Time.deltaTime;
+                return false;
+            }
+        }
 
-                if (Input.GetKey(KeyCode.LeftArrow))
+        /// <summary>
+        /// Perform keyboard-based movement.
+        /// </summary>
+        /// <returns>True if movement occurred.</returns>
+        private bool PerformKeyboardMovement()
+        {
+            bool keyboardMoveOccurred = false;
+            float moveDistance = this.KeySpeed * Time.smoothDeltaTime;
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                this.transform.position += new Vector3(-moveDistance, 0, 0);
+                keyboardMoveOccurred = true;
+            }
+            else if (Input.GetKey(KeyCode.RightArrow))
+            {
+                this.transform.position += new Vector3(moveDistance, 0, 0);
+                keyboardMoveOccurred = true;
+            }
+
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                this.transform.position += new Vector3(0, moveDistance, 0);
+                keyboardMoveOccurred = true;
+            }
+            else if (Input.GetKey(KeyCode.DownArrow))
+            {
+                this.transform.position += new Vector3(0, -moveDistance, 0);
+                keyboardMoveOccurred = true;
+            }
+
+            return keyboardMoveOccurred;
+        }
+
+        /// <summary>
+        /// Perform inertia based movement.
+        /// </summary>
+        /// <returns>True if movement occurred.</returns>
+        private bool PerformInertiaMovement()
+        {
+            if (this.underInertia)
+            {
+                float distance = this.Deceleration * Time.smoothDeltaTime;
+
+                this.dragVelocity.x += Vector3.Dot(this.inertiaDirection, Vector3.right) * distance;
+                if (this.dragVelocity.x * this.inertiaDirection.x < 0)
                 {
-                    this.transform.position += new Vector3(-moveDistance, 0, 0);
-                }
-                else if (Input.GetKey(KeyCode.RightArrow))
-                {
-                    this.transform.position += new Vector3(moveDistance, 0, 0);
+                    this.dragVelocity.x = 0;
                 }
 
-                if (Input.GetKey(KeyCode.UpArrow))
+                this.dragVelocity.y += Vector3.Dot(this.inertiaDirection, Vector3.up) * distance;
+                if (this.dragVelocity.y * this.inertiaDirection.y < 0)
                 {
-                    this.transform.position += new Vector3(0, moveDistance, 0);
+                    this.dragVelocity.y = 0;
                 }
-                else if (Input.GetKey(KeyCode.DownArrow))
+
+                if (this.dragVelocity.x != 0 && this.dragVelocity.y != 0)
                 {
-                    this.transform.position += new Vector3(0, -moveDistance, 0);
+                    this.transform.position += this.dragVelocity;
+                    return true;
                 }
+                else
+                {
+                    this.underInertia = false;
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
             }
         }
 
