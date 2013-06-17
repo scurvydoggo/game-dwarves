@@ -18,16 +18,8 @@ namespace Dwarves.TestRig
         /// </summary>
         public DigTerrainTest()
         {
-            TerrainSystem.Initialise(
-                4,
-                4,
-                5,
-                3,
-                10,
-                1,
-                10,
-                10f,
-                0.5f);
+            var createTerrain = new CreateTerrainTest();
+            createTerrain.Update();
         }
 
         /// <summary>

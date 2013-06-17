@@ -133,7 +133,7 @@ namespace Dwarves.Component.Terrain
             // Add all other chunks which contain significant actors
             foreach (ActorBoundsComponent actor in GameObject.FindObjectsOfType(typeof(ActorBoundsComponent)))
             {
-                this.PopulateActiveChunks(activeChunks, Metrics.WorldToChunk(actor.GetBounds()));
+                this.PopulateActiveChunks(activeChunks, Metrics.ChunkIndices(actor.GetBounds()));
             }
 
             return activeChunks;

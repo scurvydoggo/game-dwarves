@@ -5,20 +5,23 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
+    using System.Collections.Generic;
+    using Dwarves.Core.Math;
+
     /// <summary>
     /// The state of a chunk job queue.
     /// </summary>
     public class ChunkJobQueueState
     {
         /// <summary>
-        /// The locking object for load points related jobs.
+        /// The locking object for jobs.
         /// </summary>
-        private readonly object loadPointsLock = new object();
+        private readonly object jobsLock = new object();
 
         /// <summary>
-        /// The locking object for mesh related jobs.
+        /// Indicates whether the point data will be newer than the mesh data once all queued jobs are complete.
         /// </summary>
-        private readonly object meshLock = new object();
+        private bool rebuildMeshRequired;
 
         /// <summary>
         /// Indicates whether the mesh data will be newer than the mesh filter once all queued jobs are complete.
@@ -33,12 +36,25 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Indicates whether a job is queued to rebuild the chunk mesh.
         /// </summary>
-        private bool rebuildMesh;
+        private bool rebuildingMesh;
 
         /// <summary>
         /// Indicates whether a job is queued to update the mesh filter.
         /// </summary>
-        private bool updateMeshFilter;
+        private bool updatingMeshFilter;
+
+        /// <summary>
+        /// The dictionary tracking the current dig circle jobs.
+        /// </summary>
+        private Dictionary<Vector2I, int> digCircle;
+
+        /// <summary>
+        /// Initialises a new instance of the ChunkJobQueueState class.
+        /// </summary>
+        public ChunkJobQueueState()
+        {
+            this.digCircle = new Dictionary<Vector2I, int>();
+        }
 
         /// <summary>
         /// Check whether a LoadPoints job can execute.
@@ -46,11 +62,12 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be executed.</returns>
         public bool CanLoadPoints()
         {
-            lock (this.loadPointsLock)
+            lock (this.jobsLock)
             {
                 if (!this.loadPoints)
                 {
                     this.loadPoints = true;
+                    this.rebuildMeshRequired = true;
                     return true;
                 }
                 else
@@ -65,9 +82,58 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void CompleteLoadPoints()
         {
-            lock (this.loadPointsLock)
+            lock (this.jobsLock)
             {
                 this.loadPoints = false;
+            }
+        }
+
+        /// <summary>
+        /// Check whether a DigCircle job can execute.
+        /// </summary>
+        /// <param name="origin">The circle origin.</param>
+        /// <param name="radius">The circle radius.</param>
+        /// <returns>True if the job can be executed.</returns>
+        public bool CanDigCircle(Vector2I origin, int radius)
+        {
+            lock (this.jobsLock)
+            {
+                int existing;
+                if (this.digCircle.TryGetValue(origin, out existing))
+                {
+                    if (radius > existing)
+                    {
+                        this.digCircle[origin] = radius;
+                        this.rebuildMeshRequired = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    this.digCircle.Add(origin, radius);
+                    this.rebuildMeshRequired = true;
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Completes a DigCircle job.
+        /// </summary>
+        /// <param name="origin">The circle origin.</param>
+        /// <param name="radius">The circle radius.</param>
+        public void CompleteDigCircle(Vector2I origin, int radius)
+        {
+            lock (this.jobsLock)
+            {
+                if (this.digCircle[origin] == radius)
+                {
+                    this.digCircle.Remove(origin);
+                }
             }
         }
 
@@ -77,11 +143,12 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be executed.</returns>
         public bool CanRebuildMesh()
         {
-            lock (this.meshLock)
+            lock (this.jobsLock)
             {
-                if (!this.rebuildMesh)
+                if (!this.rebuildingMesh && this.rebuildMeshRequired)
                 {
-                    this.rebuildMesh = true;
+                    this.rebuildingMesh = true;
+                    this.rebuildMeshRequired = false;
                     this.meshFilterUpdateRequired = true;
                     return true;
                 }
@@ -97,9 +164,9 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void CompleteRebuildMesh()
         {
-            lock (this.meshLock)
+            lock (this.jobsLock)
             {
-                this.rebuildMesh = false;
+                this.rebuildingMesh = false;
             }
         }
 
@@ -109,11 +176,11 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be executed.</returns>
         public bool CanUpdateMeshFilter()
         {
-            lock (this.meshLock)
+            lock (this.jobsLock)
             {
-                if (!this.updateMeshFilter && this.meshFilterUpdateRequired)
+                if (!this.updatingMeshFilter && this.meshFilterUpdateRequired)
                 {
-                    this.updateMeshFilter = true;
+                    this.updatingMeshFilter = true;
                     this.meshFilterUpdateRequired = false;
                     return true;
                 }
@@ -129,9 +196,9 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void CompleteUpdateMeshFilter()
         {
-            lock (this.meshLock)
+            lock (this.jobsLock)
             {
-                this.updateMeshFilter = false;
+                this.updatingMeshFilter = false;
             }
         }
     }

@@ -36,11 +36,6 @@ namespace Dwarves.Core
         private TerrainSurfaceGenerator surfaceGenerator;
 
         /// <summary>
-        /// The mesh builder.
-        /// </summary>
-        private TerrainMeshBuilder meshBuilder;
-
-        /// <summary>
         /// Initialises a new instance of the TerrainSystem class.
         /// </summary>
         /// <param name="seed">The seed value used by the terrain generator.</param>
@@ -65,7 +60,7 @@ namespace Dwarves.Core
             this.serialiser = new TerrainSerialiser();
             this.pointGenerator = new TerrainPointGenerator(this.Noise);
             this.surfaceGenerator = new TerrainSurfaceGenerator(this.Noise);
-            this.meshBuilder = new TerrainMeshBuilder(this.Terrain);
+            this.MeshBuilder = new TerrainMeshBuilder(this.Terrain);
         }
 
         /// <summary>
@@ -82,6 +77,11 @@ namespace Dwarves.Core
         /// Gets the terrain mutator.
         /// </summary>
         public TerrainMutator Mutator { get; private set; }
+
+        /// <summary>
+        /// Gets the mesh builder.
+        /// </summary>
+        public TerrainMeshBuilder MeshBuilder { get; private set; }
 
         /// <summary>
         /// Gets the noise generator for the terrain.
@@ -239,7 +239,7 @@ namespace Dwarves.Core
                     if (JobSystem.Instance.Scheduler.GetQueueState(chunk).CanRebuildMesh())
                     {
                         JobSystem.Instance.Scheduler.Enqueue(
-                            () => this.RebuildMeshJob(chunk),
+                            () => this.MeshBuilder.RebuildMesh(chunk),
                             () => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteRebuildMesh(),
                             true,
                             TerrainChunk.GetNeighbours(chunk));
@@ -301,16 +301,6 @@ namespace Dwarves.Core
                 float[] heights = this.Terrain.SurfaceHeights[chunkIndex.X];
                 this.pointGenerator.GeneratePoints(chunkIndex, chunk, heights);
             }
-        }
-
-        /// <summary>
-        /// Rebuilds the mesh data of a chunk.
-        /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
-        private void RebuildMeshJob(Vector2I chunkIndex)
-        {
-            // Rebuild the mesh data
-            this.meshBuilder.RebuildMesh(chunkIndex);
         }
     }
 }

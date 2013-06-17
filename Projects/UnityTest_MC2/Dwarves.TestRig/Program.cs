@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.TestRig
 {
+    using System.Threading;
+
     /// <summary>
     /// The main class.
     /// </summary>
@@ -16,11 +18,13 @@ namespace Dwarves.TestRig
         /// <param name="args">The application args.</param>
         private static void Main(string[] args)
         {
-            ITest test = new CreateTerrainTest();
+            ////ITest test = new CreateTerrainTest();
+            ITest test = new DigTerrainTest();
 
             while (true)
             {
                 test.Update();
+                Thread.Sleep(1);
             }
         }
     }

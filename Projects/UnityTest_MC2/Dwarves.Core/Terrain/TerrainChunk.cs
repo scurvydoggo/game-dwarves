@@ -37,7 +37,7 @@ namespace Dwarves.Core.Terrain
         public TerrainChunkMesh Mesh { get; private set; }
 
         /// <summary>
-        /// Gets an array containing the indices of the given chunk and its 8 neighbours.
+        /// Gets the chunk indices of the given chunk and its 8 neighbours.
         /// </summary>
         /// <param name="chunk">The chunk.</param>
         /// <returns>The chunk index and its neighbours.</returns>
@@ -55,6 +55,27 @@ namespace Dwarves.Core.Terrain
                     new Vector2I(chunk.X, chunk.Y - 1),
                     new Vector2I(chunk.X + 1, chunk.Y - 1)
                 };
+        }
+
+        /// <summary>
+        /// Gets the chunk indices within the given bounds.
+        /// </summary>
+        /// <param name="bounds">The bounds.</param>
+        /// <returns>The chunk indices.</returns>
+        public static Vector2I[] GetChunks(RectangleI bounds)
+        {
+            var chunks = new Vector2I[bounds.Width * bounds.Height];
+
+            int i = 0;
+            for (int x = bounds.X; x < bounds.X + bounds.Width; x++)
+            {
+                for (int y = bounds.Y; y < bounds.Y + bounds.Height; y++)
+                {
+                    chunks[i++] = new Vector2I(x, y);
+                }
+            }
+
+            return chunks;
         }
 
         /// <summary>

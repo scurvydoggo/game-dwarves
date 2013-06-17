@@ -16,6 +16,11 @@ namespace Dwarves.Component.Terrain
     public class TerrainTouchComponent : TouchableComponent
     {
         /// <summary>
+        /// The dig radius.
+        /// </summary>
+        public int DigRadius = 2;
+
+        /// <summary>
         /// Handles the on-touch behaviour for the component.
         /// </summary>
         /// <param name="hitPoint">The point at which the component was touched in world coordinates.</param>
@@ -24,7 +29,7 @@ namespace Dwarves.Component.Terrain
             var position = new Vector2(hitPoint.x, hitPoint.y);
 
             // Dig at the touched point
-            TerrainSystem.Instance.Mutator.DigCircle(position, 2);
+            TerrainSystem.Instance.Mutator.DigCircle(position, this.DigRadius);
         }
     }
 }

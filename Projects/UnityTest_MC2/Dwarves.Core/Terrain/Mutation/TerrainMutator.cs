@@ -6,6 +6,7 @@
 namespace Dwarves.Core.Terrain.Mutation
 {
     using System;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace Dwarves.Core.Terrain.Mutation
         /// </summary>
         private DwarfTerrain terrain;
 
-        #endregion
+        #endregion Private Variables
 
         #region Constructor
 
@@ -34,7 +35,7 @@ namespace Dwarves.Core.Terrain.Mutation
             this.terrain = terrain;
         }
 
-        #endregion
+        #endregion Constructor
 
         #region Enums
 
@@ -70,102 +71,9 @@ namespace Dwarves.Core.Terrain.Mutation
             LeftOrDown
         }
 
-        #endregion
+        #endregion Enums
 
         #region Public Methods
-
-        /// <summary>
-        /// Set the density of the given point (from z=0 to z=DigDepth).
-        /// </summary>
-        /// <param name="position">The position.</param>
-        /// <param name="density">The density.</param>
-        public void SetDensityPoint(Vector2I position, byte density)
-        {
-            Vector2I chunkIndex = Metrics.ChunkIndex(position.X, position.Y);
-
-            // Get the chunk
-            TerrainChunk chunk;
-            if (this.terrain.TryGetChunk(chunkIndex, out chunk))
-            {
-                bool digOccurred = false;
-
-                Vector2I chunkPos = Metrics.WorldToChunk(position);
-                TerrainPoint point = chunk.Points[chunkPos.X, chunkPos.Y];
-                if (point != null)
-                {
-                    for (int z = 0; z < Metrics.DigDepth; z++)
-                    {
-                        // Get the voxel
-                        TerrainVoxel voxel = point.GetVoxel(z);
-
-                        // Update the voxel density
-                        if (voxel.Density < density)
-                        {
-                            voxel.Density = density;
-                            digOccurred = true;
-                        }
-                    }
-                }
-
-                // TODO
-                //// Flag the chunk as requiring a rebuild
-                ////if (digOccurred)
-                ////{
-                ////    this.terrain.FlagRebuildRequired(chunkIndex, true);
-                ////}
-            }
-        }
-
-        /// <summary>
-        /// Set the density at each point along a straight line from the start point.
-        /// </summary>
-        /// <param name="start">The start point.</param>
-        /// <param name="length">The length.</param>
-        /// <param name="axis">The axis along which the line lies.</param>
-        /// <param name="direction">The direction to dig.</param>
-        /// <param name="density">The density.</param>
-        public void SetDensityLine(Vector2I start, int length, Axis axis, Direction direction, byte density)
-        {
-            if (length < 0)
-            {
-                return;
-            }
-
-            if (axis == Axis.X)
-            {
-                if (direction == Direction.RightOrUp)
-                {
-                    for (int x = start.X; x < start.X + length; x++)
-                    {
-                        this.SetDensityPoint(new Vector2I(x, start.Y), density);
-                    }
-                }
-                else
-                {
-                    for (int x = start.X; x > start.X - length; x--)
-                    {
-                        this.SetDensityPoint(new Vector2I(x, start.Y), density);
-                    }
-                }
-            }
-            else
-            {
-                if (direction == Direction.RightOrUp)
-                {
-                    for (int y = start.Y; y < start.Y + length; y++)
-                    {
-                        this.SetDensityPoint(new Vector2I(start.X, y), density);
-                    }
-                }
-                else
-                {
-                    for (int y = start.Y; y > start.Y - length; y--)
-                    {
-                        this.SetDensityPoint(new Vector2I(start.X, y), density);
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Dig a circle in the terrain with the given origin and radius.
@@ -173,6 +81,41 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="origin">The origin.</param>
         /// <param name="radius">The radius.</param>
         public void DigCircle(Vector2 origin, float radius)
+        {
+            Vector2I originI = new Vector2I((int)Math.Round(origin.x), (int)Math.Round(origin.y));
+            int radiusI = (int)radius;
+
+            Vector2I chunk = Metrics.ChunkIndex(originI.X, originI.Y);
+            ChunkJobQueueState queueState = JobSystem.Instance.Scheduler.GetQueueState(chunk);
+            if (queueState != null && queueState.CanDigCircle(originI, radiusI))
+            {
+                // Get the affected chunks
+                var worldBounds = new RectangleI(
+                    (int)(origin.x - (radius / 2)) - 1,
+                    (int)(origin.y - (radius / 2)) - 1,
+                    (int)radius + 3,
+                    (int)radius + 3);
+                RectangleI chunkBounds = Metrics.ChunkIndices(worldBounds);
+
+                // Enqueue the job
+                JobSystem.Instance.Scheduler.Enqueue(
+                    () => this.DigCircleJob(origin, radius),
+                    () => queueState.CompleteDigCircle(originI, radiusI),
+                    false,
+                    TerrainChunk.GetChunks(chunkBounds));
+            }
+        }
+
+        #endregion Public Methods
+
+        #region Mutation Methods
+
+        /// <summary>
+        /// Dig a circle in the terrain with the given origin and radius.
+        /// </summary>
+        /// <param name="origin">The origin.</param>
+        /// <param name="radius">The radius.</param>
+        private void DigCircleJob(Vector2 origin, float radius)
         {
             float radius2 = radius * radius;
             var originI = new Vector2I((int)Math.Round(origin.x), (int)Math.Round(origin.y));
@@ -194,7 +137,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 float dY = (float)Math.Sqrt(radius2 - (dX * dX));
                 yA = dY + origin.y;
                 yB = -dY + origin.y;
-                
+
                 // Calculate the lower-end of the segment through which the circle cuts the boundary
                 int yABase = (int)Math.Floor(yA);
                 int yBBase = (int)Math.Floor(yB);
@@ -297,6 +240,10 @@ namespace Dwarves.Core.Terrain.Mutation
             }
         }
 
+        #endregion Mutation Methods
+
+        #region Helper Methods
+
         /// <summary>
         /// Dig a segment between two adjacent points in the voxel terrain.
         /// </summary>
@@ -306,7 +253,7 @@ namespace Dwarves.Core.Terrain.Mutation
         /// <param name="intersection">A value between 0.0 and 1.0 indicating at what point along the segment the
         /// terrain surface passes through. 0.0 indicates the bottom/left of the segment; 1.0 indicates the top/right
         /// of the segment.</param>
-        public void DigSegment(Vector2I bottomLeft, Axis axis, Direction direction, float intersection)
+        private void DigSegment(Vector2I bottomLeft, Axis axis, Direction direction, float intersection)
         {
             byte dBottomLeft, dTopRight;
             if (direction == Direction.RightOrUp)
@@ -347,6 +294,89 @@ namespace Dwarves.Core.Terrain.Mutation
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Set the density of the given point (from z=0 to z=DigDepth).
+        /// </summary>
+        /// <param name="position">The position.</param>
+        /// <param name="density">The density.</param>
+        private void SetDensityPoint(Vector2I position, byte density)
+        {
+            Vector2I chunkIndex = Metrics.ChunkIndex(position.X, position.Y);
+
+            // Get the chunk
+            TerrainChunk chunk;
+            if (this.terrain.TryGetChunk(chunkIndex, out chunk))
+            {
+                Vector2I chunkPos = Metrics.WorldToChunk(position);
+                TerrainPoint point = chunk.Points[chunkPos.X, chunkPos.Y];
+                if (point != null)
+                {
+                    for (int z = 0; z < Metrics.DigDepth; z++)
+                    {
+                        // Get the voxel
+                        TerrainVoxel voxel = point.GetVoxel(z);
+
+                        // Update the voxel density
+                        if (voxel.Density < density)
+                        {
+                            voxel.Density = density;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set the density at each point along a straight line from the start point.
+        /// </summary>
+        /// <param name="start">The start point.</param>
+        /// <param name="length">The length.</param>
+        /// <param name="axis">The axis along which the line lies.</param>
+        /// <param name="direction">The direction to dig.</param>
+        /// <param name="density">The density.</param>
+        private void SetDensityLine(Vector2I start, int length, Axis axis, Direction direction, byte density)
+        {
+            if (length < 0)
+            {
+                return;
+            }
+
+            if (axis == Axis.X)
+            {
+                if (direction == Direction.RightOrUp)
+                {
+                    for (int x = start.X; x < start.X + length; x++)
+                    {
+                        this.SetDensityPoint(new Vector2I(x, start.Y), density);
+                    }
+                }
+                else
+                {
+                    for (int x = start.X; x > start.X - length; x--)
+                    {
+                        this.SetDensityPoint(new Vector2I(x, start.Y), density);
+                    }
+                }
+            }
+            else
+            {
+                if (direction == Direction.RightOrUp)
+                {
+                    for (int y = start.Y; y < start.Y + length; y++)
+                    {
+                        this.SetDensityPoint(new Vector2I(start.X, y), density);
+                    }
+                }
+                else
+                {
+                    for (int y = start.Y; y > start.Y - length; y--)
+                    {
+                        this.SetDensityPoint(new Vector2I(start.X, y), density);
+                    }
+                }
+            }
+        }
+
+        #endregion Helper Methods
     }
 }

@@ -6,7 +6,6 @@
 namespace Dwarves.TestRig
 {
     using System.Collections.Generic;
-    using System.Threading;
     using Dwarves.Core;
     using Dwarves.Core.Math;
 
@@ -16,10 +15,23 @@ namespace Dwarves.TestRig
     public class CreateTerrainTest : ITest
     {
         /// <summary>
+        /// The X position of the camera.
+        /// </summary>
+        private int x;
+
+        /// <summary>
+        /// The Y position of the camera.
+        /// </summary>
+        private int y;
+
+        /// <summary>
         /// Initialises a new instance of the CreateTerrainTest class.
         /// </summary>
         public CreateTerrainTest()
         {
+            this.x = 0;
+            this.y = 0;
+
             TerrainSystem.Initialise(
                 4,
                 4,
@@ -40,35 +52,27 @@ namespace Dwarves.TestRig
         /// </summary>
         public void Update()
         {
-            int x = 0;
-            int y = 0;
             int widthHalf = 4;
             int heightHalf = 2;
             int lookAhead = 1;
 
-            while (true)
+            var activeChunks = new HashSet<Vector2I>();
+            for (int cX = this.x - widthHalf - lookAhead; cX < this.x + widthHalf + lookAhead; cX++)
             {
-                var activeChunks = new HashSet<Vector2I>();
-                for (int cX = x - widthHalf - lookAhead; cX < x + widthHalf + lookAhead; cX++)
+                for (int cY = this.y - heightHalf - lookAhead; cY < this.y + heightHalf + lookAhead; cY++)
                 {
-                    for (int cY = y - heightHalf - lookAhead; cY < y + heightHalf + lookAhead; cY++)
-                    {
-                        activeChunks.Add(new Vector2I(cX, cY));
-                    }
+                    activeChunks.Add(new Vector2I(cX, cY));
                 }
+            }
 
-                // Load and unload chunks
-                TerrainSystem.Instance.Update(activeChunks);
+            // Load and unload chunks
+            TerrainSystem.Instance.Update(activeChunks);
 
-                // Scroll the view
-                x++;
-                if (x % 3 == 0)
-                {
-                    y++;
-                }
-
-                // Limit the scroll speed
-                Thread.Sleep(5);
+            // Scroll the view
+            this.x++;
+            if (this.x % 3 == 0)
+            {
+                this.y++;
             }
         }
 

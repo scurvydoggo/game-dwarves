@@ -24,5 +24,10 @@ namespace Dwarves.Core.Terrain
         /// Gets or sets the mesh data.
         /// </summary>
         public MeshData Data { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a rebuild of the mesh is required.
+        /// </summary>
+        public bool RebuildRequired { get; set; }
     }
 }
