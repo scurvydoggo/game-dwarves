@@ -99,22 +99,6 @@ namespace Dwarves.Core
         }
 
         /// <summary>
-        /// Convert the world bounds into chunk bounds.
-        /// </summary>
-        /// <param name="worldBounds">The bounds.</param>
-        /// <returns>The bounds in chunk coordinates</returns>
-        public static RectangleI ChunkIndices(RectangleI worldBounds)
-        {
-            Vector2I top = Metrics.ChunkIndex(worldBounds.X, worldBounds.Y);
-            Vector2I bottom = Metrics.ChunkIndex(worldBounds.Right - 1, worldBounds.Bottom - 1);
-            return new RectangleI(
-                top.X,
-                top.Y,
-                bottom.X - top.X + 1,
-                top.Y - bottom.Y + 1);
-        }
-
-        /// <summary>
         /// Get the origin of the given chunk.
         /// </summary>
         /// <param name="chunkIndex">The chunk index.</param>
@@ -149,6 +133,22 @@ namespace Dwarves.Core
                 worldPos.X & (Metrics.ChunkWidth - 1),
                 worldPos.Y & (Metrics.ChunkHeight - 1),
                 worldPos.Z);
+        }
+
+        /// <summary>
+        /// Convert the world bounds into chunk bounds.
+        /// </summary>
+        /// <param name="worldBounds">The bounds.</param>
+        /// <returns>The bounds in chunk coordinates</returns>
+        public static RectangleI WorldToChunk(RectangleI worldBounds)
+        {
+            Vector2I top = Metrics.ChunkIndex(worldBounds.X, worldBounds.Y);
+            Vector2I bottom = Metrics.ChunkIndex(worldBounds.Right - 1, worldBounds.Bottom - 1);
+            return new RectangleI(
+                top.X,
+                top.Y,
+                bottom.X - top.X + 1,
+                top.Y - bottom.Y + 1);
         }
     }
 }

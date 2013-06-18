@@ -95,7 +95,7 @@ namespace Dwarves.Core.Terrain.Mutation
                     (int)(origin.y - (radius / 2)) - 1,
                     (int)radius + 3,
                     (int)radius + 3);
-                RectangleI chunkBounds = Metrics.ChunkIndices(worldBounds);
+                RectangleI chunkBounds = Metrics.WorldToChunk(worldBounds);
 
                 // Enqueue the job
                 JobSystem.Instance.Scheduler.Enqueue(
