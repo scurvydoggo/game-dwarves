@@ -55,14 +55,14 @@ namespace Dwarves.Component.Terrain
             ChunkJobQueueState queueState = JobSystem.Instance.Scheduler.GetQueueState(this.Chunk);
             if (queueState != null)
             {
-                if (queueState.CanRebuildMesh())
-                {
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => TerrainSystem.Instance.MeshBuilder.RebuildMesh(this.Chunk),
-                        () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
-                        true,
-                        TerrainChunk.GetNeighbours(this.Chunk));
-                }
+                //if (queueState.CanRebuildMesh())
+                //{
+                //    JobSystem.Instance.Scheduler.Enqueue(
+                //        () => TerrainSystem.Instance.MeshBuilder.RebuildMesh(this.Chunk),
+                //        () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
+                //        true,
+                //        TerrainChunk.GetNeighbours(this.Chunk));
+                //}
 
                 if (queueState.CanUpdateMeshFilter())
                 {
