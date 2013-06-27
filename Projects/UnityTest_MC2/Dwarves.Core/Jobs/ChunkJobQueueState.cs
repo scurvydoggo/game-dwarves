@@ -96,7 +96,7 @@ namespace Dwarves.Core.Jobs
         {
             lock (this.jobsLock)
             {
-                if (!this.rebuildingMesh && this.rebuildMeshRequired)
+                if (!this.rebuildingMesh)// && this.rebuildMeshRequired)
                 {
                     this.rebuildingMesh = true;
                     this.rebuildMeshRequired = false;
