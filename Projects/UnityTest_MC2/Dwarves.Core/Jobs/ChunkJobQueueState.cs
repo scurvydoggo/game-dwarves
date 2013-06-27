@@ -89,55 +89,6 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Check whether a DigCircle job can execute.
-        /// </summary>
-        /// <param name="origin">The circle origin.</param>
-        /// <param name="radius">The circle radius.</param>
-        /// <returns>True if the job can be executed.</returns>
-        public bool CanDigCircle(Vector2I origin, int radius)
-        {
-            lock (this.jobsLock)
-            {
-                int existing;
-                if (this.digCircle.TryGetValue(origin, out existing))
-                {
-                    if (radius > existing)
-                    {
-                        this.digCircle[origin] = radius;
-                        this.rebuildMeshRequired = true;
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    this.digCircle.Add(origin, radius);
-                    this.rebuildMeshRequired = true;
-                    return true;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Completes a DigCircle job.
-        /// </summary>
-        /// <param name="origin">The circle origin.</param>
-        /// <param name="radius">The circle radius.</param>
-        public void CompleteDigCircle(Vector2I origin, int radius)
-        {
-            lock (this.jobsLock)
-            {
-                if (this.digCircle[origin] == radius)
-                {
-                    this.digCircle.Remove(origin);
-                }
-            }
-        }
-
-        /// <summary>
         /// Check whether a RebuildMesh job can execute.
         /// </summary>
         /// <returns>True if the job can be executed.</returns>
@@ -199,6 +150,55 @@ namespace Dwarves.Core.Jobs
             lock (this.jobsLock)
             {
                 this.updatingMeshFilter = false;
+            }
+        }
+
+        /// <summary>
+        /// Check whether a DigCircle job can execute.
+        /// </summary>
+        /// <param name="origin">The circle origin.</param>
+        /// <param name="radius">The circle radius.</param>
+        /// <returns>True if the job can be executed.</returns>
+        public bool CanDigCircle(Vector2I origin, int radius)
+        {
+            lock (this.jobsLock)
+            {
+                int existing;
+                if (this.digCircle.TryGetValue(origin, out existing))
+                {
+                    if (radius > existing)
+                    {
+                        this.digCircle[origin] = radius;
+                        this.rebuildMeshRequired = true;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    this.digCircle.Add(origin, radius);
+                    this.rebuildMeshRequired = true;
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Completes a DigCircle job.
+        /// </summary>
+        /// <param name="origin">The circle origin.</param>
+        /// <param name="radius">The circle radius.</param>
+        public void CompleteDigCircle(Vector2I origin, int radius)
+        {
+            lock (this.jobsLock)
+            {
+                if (this.digCircle[origin] == radius)
+                {
+                    this.digCircle.Remove(origin);
+                }
             }
         }
     }
