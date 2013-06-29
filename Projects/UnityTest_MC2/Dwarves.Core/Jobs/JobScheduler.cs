@@ -250,6 +250,34 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Remove chunks from the list that do not satisfy the selector condition.
+        /// </summary>
+        /// <param name="chunks">The chunks to trim from.</param>
+        /// <param name="selector">The selector.</param>
+        public void TrimChunks(List<Vector2I> chunks, Predicate<ChunkJobQueue> selector)
+        {
+            this.queuesLock.Enter();
+            try
+            {
+                for (int i = chunks.Count - 1; i >= 0; i--)
+                {
+                    ChunkJobQueue queue;
+                    if (this.chunkQueues.TryGetValue(chunks[i], out queue))
+                    {
+                        if (!selector(queue))
+                        {
+                            chunks.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                this.queuesLock.Exit();
+            }
+        }
+
+        /// <summary>
         /// Gets the job queue for the given chunk, initialising the queue if one doesn't exist.
         /// </summary>
         /// <param name="chunk">The chunk.</param>

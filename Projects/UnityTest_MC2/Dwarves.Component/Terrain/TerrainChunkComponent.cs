@@ -57,7 +57,7 @@ namespace Dwarves.Component.Terrain
                 (q) => q.State.ReserveRebuildMesh(this.Chunk),
                 (q) => q.State.UnreserveRebuildMesh(this.Chunk),
                 true,
-                TerrainChunk.GetNeighbours(this.Chunk));
+                TerrainChunk.GetNeighboursIncluding(this.Chunk));
 
             JobSystem.Instance.Scheduler.Enqueue(
                 () => this.UpdateMeshFilterJob(),

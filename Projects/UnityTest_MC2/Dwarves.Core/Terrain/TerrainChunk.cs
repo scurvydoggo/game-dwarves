@@ -41,11 +41,31 @@ namespace Dwarves.Core.Terrain
         /// </summary>
         /// <param name="chunk">The chunk.</param>
         /// <returns>The chunk index and its neighbours.</returns>
-        public static Vector2I[] GetNeighbours(Vector2I chunk)
+        public static Vector2I[] GetNeighboursIncluding(Vector2I chunk)
         {
             return new Vector2I[]
                 {
                     chunk,
+                    new Vector2I(chunk.X + 1, chunk.Y),
+                    new Vector2I(chunk.X + 1, chunk.Y + 1),
+                    new Vector2I(chunk.X, chunk.Y + 1),
+                    new Vector2I(chunk.X - 1, chunk.Y + 1),
+                    new Vector2I(chunk.X - 1, chunk.Y),
+                    new Vector2I(chunk.X - 1, chunk.Y - 1),
+                    new Vector2I(chunk.X, chunk.Y - 1),
+                    new Vector2I(chunk.X + 1, chunk.Y - 1)
+                };
+        }
+
+        /// <summary>
+        /// Gets the 8 neighbours.
+        /// </summary>
+        /// <param name="chunk">The chunk.</param>
+        /// <returns>The chunk neighbours.</returns>
+        public static Vector2I[] GetNeighboursExcluding(Vector2I chunk)
+        {
+            return new Vector2I[]
+                {
                     new Vector2I(chunk.X + 1, chunk.Y),
                     new Vector2I(chunk.X + 1, chunk.Y + 1),
                     new Vector2I(chunk.X, chunk.Y + 1),

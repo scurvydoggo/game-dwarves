@@ -30,11 +30,6 @@ namespace Dwarves.Core.Jobs
         private bool loadPoints;
 
         /// <summary>
-        /// Indicates whether a load points job has completed.
-        /// </summary>
-        private bool loadPointsCompleted;
-
-        /// <summary>
         /// Indicates whether a job is queued to rebuild the chunk mesh.
         /// </summary>
         private bool rebuildingMesh;
@@ -65,6 +60,13 @@ namespace Dwarves.Core.Jobs
         public Vector2I Chunk { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether a load points job has completed.
+        /// </summary>
+        public bool LoadPointsCompleted { get; private set; }
+
+        #region Load Points
+
+        /// <summary>
         /// Check whether a LoadPoints job can execute.
         /// </summary>
         /// <param name="chunk">The chunk being loaded.</param>
@@ -83,13 +85,9 @@ namespace Dwarves.Core.Jobs
             if (this.Chunk == chunk)
             {
                 this.loadPoints = true;
-                this.rebuildMeshRequired = true;
             }
-            else if (this.loadPointsCompleted)
-            {
-                // If a neighbouring chunk has its points loaded, then its mesh will have to be rebuilt
-                this.rebuildMeshRequired = true;
-            }
+
+            this.rebuildMeshRequired = true;
         }
 
         /// <summary>
@@ -101,9 +99,13 @@ namespace Dwarves.Core.Jobs
             if (this.Chunk == chunk)
             {
                 this.loadPoints = false;
-                this.loadPointsCompleted = true;
+                this.LoadPointsCompleted = true;
             }
         }
+
+        #endregion
+
+        #region Rebuild Mesh
 
         /// <summary>
         /// Check whether a RebuildMesh job can execute.
@@ -141,6 +143,10 @@ namespace Dwarves.Core.Jobs
             }
         }
 
+        #endregion
+
+        #region Update Mesh Filter
+
         /// <summary>
         /// Check whether a UpdateMeshFilter job can execute.
         /// </summary>
@@ -166,6 +172,10 @@ namespace Dwarves.Core.Jobs
         {
             this.updatingMeshFilter = false;
         }
+
+        #endregion
+
+        #region Dig Circle
 
         /// <summary>
         /// Check whether a DigCircle job can execute.
@@ -238,5 +248,7 @@ namespace Dwarves.Core.Jobs
                 }
             }
         }
+
+        #endregion
     }
 }
