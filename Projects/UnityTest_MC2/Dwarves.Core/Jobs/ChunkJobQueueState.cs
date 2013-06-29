@@ -62,27 +62,37 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Check whether a LoadPoints job can execute.
         /// </summary>
+        /// <param name="chunk">The chunk being loaded.</param>
         /// <returns>True if the job can be enqueued.</returns>
-        public bool CanLoadPoints()
+        public bool CanLoadPoints(Vector2I chunk)
         {
-            return !this.loadPoints;
+            return this.Chunk != chunk || !this.loadPoints;
         }
 
         /// <summary>
         /// Reserves a LoadPoints job.
         /// </summary>
-        public void ReserveLoadPoints()
+        /// <param name="chunk">The chunk being loaded.</param>
+        public void ReserveLoadPoints(Vector2I chunk)
         {
-            this.loadPoints = true;
+            if (this.Chunk == chunk)
+            {
+                this.loadPoints = true;
+            }
+
             this.rebuildMeshRequired = true;
         }
 
         /// <summary>
         /// Un-reserves a LoadPoints job.
         /// </summary>
-        public void UnreserveLoadPoints()
+        /// <param name="chunk">The chunk being loaded.</param>
+        public void UnreserveLoadPoints(Vector2I chunk)
         {
-            this.loadPoints = false;
+            if (this.Chunk == chunk)
+            {
+                this.loadPoints = false;
+            }
         }
 
         /// <summary>
@@ -92,7 +102,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanRebuildMesh(Vector2I chunk)
         {
-            return this.Chunk != chunk || !this.rebuildingMesh;// && this.rebuildMeshRequired)
+            return this.Chunk != chunk || (!this.rebuildingMesh && this.rebuildMeshRequired);
         }
 
         /// <summary>

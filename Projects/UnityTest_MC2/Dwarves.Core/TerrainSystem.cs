@@ -149,7 +149,6 @@ namespace Dwarves.Core
 
             // Get the new chunks
             List<Vector2I> newChunks = null;
-            HashSet<Vector2I> newChunksAndNeighbours = null;
             foreach (Vector2I chunk in activeChunks)
             {
                 if (!currentChunks.Contains(chunk))
@@ -157,21 +156,10 @@ namespace Dwarves.Core
                     if (newChunks == null)
                     {
                         newChunks = new List<Vector2I>();
-                        newChunksAndNeighbours = new HashSet<Vector2I>();
                     }
 
                     // Add the new chunk
                     newChunks.Add(chunk);
-                    newChunksAndNeighbours.Add(chunk);
-
-                    // Add the neighbours
-                    foreach (Vector2I neighbour in TerrainChunk.GetNeighbours(chunk))
-                    {
-                        if (activeChunks.Contains(neighbour))
-                        {
-                            newChunksAndNeighbours.Add(neighbour);
-                        }
-                    }
                 }
             }
 
@@ -205,9 +193,6 @@ namespace Dwarves.Core
             // Enqueue the new chunk jobs
             if (newChunks != null)
             {
-                // Ensure that a job queue exists for each of the new chunks
-                JobSystem.Instance.Scheduler.InitialiseQueues(newChunks);
-
                 // Add the chunks
                 Guid id = Guid.NewGuid();
                 var addChunksSet = new List<Vector2I>(newChunks);
@@ -223,21 +208,9 @@ namespace Dwarves.Core
                 {
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.LoadPointsJob(chunk),
-                        (q) => q.State.CanLoadPoints(),
-                        (q) => q.State.ReserveLoadPoints(),
-                        (q) => q.State.UnreserveLoadPoints(),
-                        true,
-                        chunk);
-                }
-
-                // Rebuild the new chunks and their neighbours
-                foreach (Vector2I chunk in newChunksAndNeighbours)
-                {
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.MeshBuilder.RebuildMesh(chunk),
-                        (q) => q.State.CanRebuildMesh(chunk),
-                        (q) => q.State.ReserveRebuildMesh(chunk),
-                        (q) => q.State.UnreserveRebuildMesh(chunk),
+                        (q) => q.State.CanLoadPoints(chunk),
+                        (q) => q.State.ReserveLoadPoints(chunk),
+                        (q) => q.State.UnreserveLoadPoints(chunk),
                         true,
                         TerrainChunk.GetNeighbours(chunk));
                 }

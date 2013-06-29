@@ -78,26 +78,6 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Initialises a job queue for each chunk.
-        /// </summary>
-        /// <param name="chunks">The chunks.</param>
-        public void InitialiseQueues(IEnumerable<Vector2I> chunks)
-        {
-            this.queuesLock.Enter();
-            try
-            {
-                foreach (Vector2I chunk in chunks)
-                {
-                    this.GetOrInitialiseQueue(chunk);
-                }
-            }
-            finally
-            {
-                this.queuesLock.Exit();
-            }
-        }
-
-        /// <summary>
         /// Enqueue a master job. A master job requires exclusive access to all chunks.
         /// </summary>
         /// <param name="work">The work to be executed by the job.</param>

@@ -51,16 +51,15 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            //if (queueState.CanRebuildMesh())
-            //{
-            //    JobSystem.Instance.Scheduler.Enqueue(
-            //        () => TerrainSystem.Instance.MeshBuilder.RebuildMesh(this.Chunk),
-            //        () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
-            //        true,
-            //        TerrainChunk.GetNeighbours(this.Chunk));
-            //}
+            JobSystem.Instance.Scheduler.Enqueue(
+                () => this.RebuildMeshJob(),
+                (q) => q.State.CanRebuildMesh(this.Chunk),
+                (q) => q.State.ReserveRebuildMesh(this.Chunk),
+                (q) => q.State.UnreserveRebuildMesh(this.Chunk),
+                true,
+                TerrainChunk.GetNeighbours(this.Chunk));
 
-            bool queued = JobSystem.Instance.Scheduler.Enqueue(
+            JobSystem.Instance.Scheduler.Enqueue(
                 () => this.UpdateMeshFilterJob(),
                 (q) => q.State.CanUpdateMeshFilter(),
                 (q) => q.State.ReserveUpdateMeshFilter(),
@@ -70,11 +69,23 @@ namespace Dwarves.Component.Terrain
         }
 
         /// <summary>
+        /// Rebuild the mesh for this chunk.
+        /// </summary>
+        private void RebuildMeshJob()
+        {
+            // The chunk GameObject (this) is destroyed after the logical instance, so check that it still exists
+            if (TerrainSystem.Instance.Terrain.HasChunk(this.Chunk))
+            {
+                TerrainSystem.Instance.MeshBuilder.RebuildMesh(this.Chunk);
+            }
+        }
+
+        /// <summary>
         /// Update the MeshFilter data for this chunk.
         /// </summary>
         private void UpdateMeshFilterJob()
         {
-            // The chunk may be mid-removal where this game object is still alive, so safely access it via TryGet
+            // The chunk GameObject (this) is destroyed after the logical instance, so check that it still exists
             TerrainChunk chunk;
             if (TerrainSystem.Instance.Terrain.TryGetChunk(this.Chunk, out chunk))
             {
