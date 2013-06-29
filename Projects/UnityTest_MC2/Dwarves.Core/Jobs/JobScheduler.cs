@@ -98,69 +98,133 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Enqueue a master job. A master job requires exclusive access to all chunks.
+        /// </summary>
+        /// <param name="work">The work to be executed by the job.</param>
+        /// <param name="canEnqueue">Evaluates whether the job can be enqueued. If the master queue evaluate false the
+        /// job will not be enqueued.</param>
+        /// <param name="reserveQueue">Reserve the master queue to indicate that this job is currently queued or
+        /// executing.</param>
+        /// <param name="unreserveQueue">Un-reserve the master queue to indicate that this job is no longer queued or
+        /// executing.</param>
+        /// <param name="canSkip">Indicates whether the job can be skipped.</param>
+        /// <returns>True if the job was enqueued.</returns>
+        public bool EnqueueMaster(
+            Action work,
+            Predicate<MasterJobQueue> canEnqueue,
+            Action<MasterJobQueue> reserveQueue,
+            Action<MasterJobQueue> unreserveQueue,
+            bool canSkip)
+        {
+            // Create the job
+            var job = new MasterJob(work, unreserveQueue, canSkip, this.chunkQueues.Count + 10);
+            job.IsPendingChanged += this.Job_IsPendingChanged;
+            job.Completed += this.Job_Completed;
+
+            // Check whether the job can be enqueued and get the full set of queues
+            ChunkJobQueue[] chunkQueues;
+            this.queuesLock.Enter();
+            try
+            {
+                // Determine whether the job can be enqueued in the master queue
+                if (!canEnqueue(this.masterQueue))
+                {
+                    return false;
+                }
+
+                // Reserve the master queue
+                reserveQueue(this.masterQueue);
+
+                // Retain a reference to this master job
+                this.masterQueueJobs.Add(job);
+
+                // Build the set of owners
+                int i = 0;
+                chunkQueues = new ChunkJobQueue[this.chunkQueues.Count];
+                foreach (ChunkJobQueue queue in this.chunkQueues.Values)
+                {
+                    chunkQueues[i++] = queue;
+                }
+            }
+            finally
+            {
+                this.queuesLock.Exit();
+            }
+
+            // Add the owners and enqueue the job
+            job.AddOwners(this.masterQueue);
+            job.AddOwners(chunkQueues);
+            this.masterQueue.Enqueue(job);
+            foreach (ChunkJobQueue queue in chunkQueues)
+            {
+                queue.Enqueue(job);
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Enqueue a job.
         /// </summary>
-        /// <param name="workAction">The work to be executed by the job.</param>
-        /// <param name="finaliseAction">The finalisation to be executed on completion. This can be null.</param>
+        /// <param name="work">The work to be executed by the job.</param>
+        /// <param name="canEnqueue">Evaluates whether the job can be enqueued. If any queue evaluate false the job
+        /// will not be enqueued.</param>
+        /// <param name="reserveQueue">Reserve each queue to indicate that this job is currently queued or executing.
+        /// </param>
+        /// <param name="unreserveQueue">Un-reserve each queue to indicate that this job is no longer queued or
+        /// executing.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
-        /// <param name="chunks">The chunks to which this job belongs.</param>
-        public void Enqueue(Action workAction, Action finaliseAction, bool canSkip, params Vector2I[] chunks)
+        /// <param name="chunks">The chunks to which this job requires exclusive access.</param>
+        /// <returns>True if the job was enqueued.</returns>
+        public bool Enqueue(
+            Action work,
+            Predicate<ChunkJobQueue> canEnqueue,
+            Action<ChunkJobQueue> reserveQueue,
+            Action<ChunkJobQueue> unreserveQueue,
+            bool canSkip,
+            params Vector2I[] chunks)
         {
-            bool isMasterJob = chunks.Length == 0;
-            int ownerCapacity = isMasterJob ? this.chunkQueues.Count + 10 : chunks.Length;
-
             // Create the job
-            var job = new Job(workAction, finaliseAction, canSkip, isMasterJob, ownerCapacity);
+            var job = new ChunkJob(work, unreserveQueue, canSkip, chunks.Length);
             job.IsPendingChanged += this.Job_IsPendingChanged;
             job.Completed += this.Job_Completed;
 
             // Get the owners of the job, creating the owner queues if necessary
-            JobQueue[] owners;
-            if (!job.IsMasterJob)
+            ChunkJobQueue[] chunkQueues = new ChunkJobQueue[chunks.Length];
+            this.queuesLock.Enter();
+            try
             {
-                owners = new JobQueue[chunks.Length];
-                this.queuesLock.Enter();
-                try
+                // Build the set of owners, checking whether the job can be enqueued
+                for (int i = 0; i < chunks.Length; i++)
                 {
-                    for (int i = 0; i < chunks.Length; i++)
+                    ChunkJobQueue queue = this.GetOrInitialiseQueue(chunks[i]);
+                    if (!canEnqueue(queue))
                     {
-                        owners[i] = this.GetOrInitialiseQueue(chunks[i]);
-                    }
-                }
-                finally
-                {
-                    this.queuesLock.Exit();
-                }
-            }
-            else
-            {
-                this.queuesLock.Enter();
-                try
-                {
-                    // Get the owners which is *all* chunk queues plus the master queue itself
-                    int i = 0;
-                    owners = new JobQueue[this.chunkQueues.Count + 1];
-                    owners[i++] = this.masterQueue;
-                    foreach (ChunkJobQueue jobs in this.chunkQueues.Values)
-                    {
-                        owners[i++] = jobs;
+                        return false;
                     }
 
-                    // Add this to the master queue job list
-                    this.masterQueueJobs.Add(job);
+                    chunkQueues[i] = queue;
                 }
-                finally
+
+                // Reserve the owner queues
+                foreach (ChunkJobQueue queue in chunkQueues)
                 {
-                    this.queuesLock.Exit();
+                    reserveQueue(queue);
                 }
+            }
+            finally
+            {
+                this.queuesLock.Exit();
             }
 
             // Add the owners and enqueue the job
-            job.AddOwners(owners);
-            foreach (JobQueue queue in owners)
+            job.AddOwners(chunkQueues);
+            foreach (ChunkJobQueue queue in chunkQueues)
             {
                 queue.Enqueue(job);
             }
+
+            return true;
         }
 
         /// <summary>
@@ -206,27 +270,6 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Gets the chunk queue state.
-        /// </summary>
-        /// <param name="chunk">The chunk.</param>
-        /// <returns>The queue state.</returns>
-        public ChunkJobQueueState GetQueueState(Vector2I chunk)
-        {
-            ChunkJobQueue queue;
-            this.queuesLock.Enter();
-            try
-            {
-                this.chunkQueues.TryGetValue(chunk, out queue);
-            }
-            finally
-            {
-                this.queuesLock.Exit();
-            }
-
-            return queue != null ? queue.State : null;
-        }
-
-        /// <summary>
         /// Gets the job queue for the given chunk, initialising the queue if one doesn't exist.
         /// </summary>
         /// <param name="chunk">The chunk.</param>
@@ -250,7 +293,7 @@ namespace Dwarves.Core.Jobs
         /// <param name="job">The job.</param>
         private void MoveToNextJob(Job job)
         {
-            if (job.IsMasterJob)
+            if (job is MasterJob)
             {
                 this.queuesLock.Enter();
                 try

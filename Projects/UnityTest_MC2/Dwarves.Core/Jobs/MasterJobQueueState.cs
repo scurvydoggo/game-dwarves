@@ -32,30 +32,48 @@ namespace Dwarves.Core.Jobs
         /// Check whether a AddChunks job can execute.
         /// </summary>
         /// <param name="chunks">The chunks.</param>
-        /// <param name="id">The identifier for the job.</param>
-        /// <returns>True if the job can be executed.</returns>
-        public bool CanAddChunks(List<Vector2I> chunks, Guid id)
+        /// <returns>True if the job can be enqueued.</returns>
+        public bool CanAddChunks(List<Vector2I> chunks)
         {
-            return this.CanAddRemoveChunks(chunks, id, true);
+            return this.CanAddRemoveChunks(chunks, true);
         }
 
         /// <summary>
         /// Check whether a RemoveChunks job can execute.
         /// </summary>
         /// <param name="chunks">The chunks.</param>
-        /// <param name="id">The identifier for the job.</param>
-        /// <returns>True if the job can be executed.</returns>
-        public bool CanRemoveChunks(List<Vector2I> chunks, Guid id)
+        /// <returns>True if the job can be enqueued.</returns>
+        public bool CanRemoveChunks(List<Vector2I> chunks)
         {
-            return this.CanAddRemoveChunks(chunks, id, false);
+            return this.CanAddRemoveChunks(chunks, false);
         }
 
         /// <summary>
-        /// Completes a AddChunks job.
+        /// Reserves a AddChunks job.
         /// </summary>
         /// <param name="chunks">The chunks.</param>
         /// <param name="id">The identifier for the job.</param>
-        public void CompleteAddRemoveChunks(List<Vector2I> chunks, Guid id)
+        public void ReserveAddChunks(List<Vector2I> chunks, Guid id)
+        {
+            this.ReserveAddRemoveChunks(chunks, id, true);
+        }
+
+        /// <summary>
+        /// Reserves a RemoveChunks job.
+        /// </summary>
+        /// <param name="chunks">The chunks.</param>
+        /// <param name="id">The identifier for the job.</param>
+        public void ReserveRemoveChunks(List<Vector2I> chunks, Guid id)
+        {
+            this.ReserveAddRemoveChunks(chunks, id, false);
+        }
+
+        /// <summary>
+        /// Un-reserves a AddChunks/RemoveChunks job.
+        /// </summary>
+        /// <param name="chunks">The chunks.</param>
+        /// <param name="id">The identifier for the job.</param>
+        public void UnreserveAddRemoveChunks(List<Vector2I> chunks, Guid id)
         {
             lock ((this.addRemoveChunks as ICollection).SyncRoot)
             {
@@ -70,40 +88,28 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Check whether a RemoveChunks job can execute.
+        /// Check whether a AddChunks/RemoveChunks job can execute.
         /// </summary>
         /// <param name="chunks">The chunks.</param>
-        /// <param name="id">The identifier for the job.</param>
         /// <param name="isAdd">Indicates whether this is an Add job; False indicates a Remove job.</param>
-        /// <returns>True if the job can be executed.</returns>
-        private bool CanAddRemoveChunks(List<Vector2I> chunks, Guid id, bool isAdd)
+        /// <returns>True if the job can be enqueued.</returns>
+        private bool CanAddRemoveChunks(List<Vector2I> chunks, bool isAdd)
         {
             List<Vector2I> toRemove = null;
             lock ((this.addRemoveChunks as ICollection).SyncRoot)
             {
                 foreach (Vector2I chunk in chunks)
                 {
+                    // If the last job queued for this chunk is of the same type (add vs remove), don't bother
                     AddRemoveContext context;
-                    if (this.addRemoveChunks.TryGetValue(chunk, out context))
+                    if (this.addRemoveChunks.TryGetValue(chunk, out context) && context.IsAdd == isAdd)
                     {
-                        // If the last queued job is an add and the new job is a removal (and vice versa), allow it
-                        if (context.IsAdd != isAdd)
+                        if (toRemove == null)
                         {
-                            this.addRemoveChunks[chunk] = new AddRemoveContext(id, isAdd);
+                            toRemove = new List<Vector2I>();
                         }
-                        else
-                        {
-                            if (toRemove == null)
-                            {
-                                toRemove = new List<Vector2I>();
-                            }
 
-                            toRemove.Add(chunk);
-                        }
-                    }
-                    else
-                    {
-                        this.addRemoveChunks.Add(chunk, new AddRemoveContext(id, isAdd));
+                        toRemove.Add(chunk);
                     }
                 }
             }
@@ -117,6 +123,30 @@ namespace Dwarves.Core.Jobs
             }
 
             return chunks.Count > 0;
+        }
+
+        /// <summary>
+        /// Check whether a AddChunks/RemoveChunks job can execute.
+        /// </summary>
+        /// <param name="chunks">The chunks.</param>
+        /// <param name="id">The identifier for the job.</param>
+        /// <param name="isAdd">Indicates whether this is an Add job; False indicates a Remove job.</param>
+        private void ReserveAddRemoveChunks(List<Vector2I> chunks, Guid id, bool isAdd)
+        {
+            lock ((this.addRemoveChunks as ICollection).SyncRoot)
+            {
+                foreach (Vector2I chunk in chunks)
+                {
+                    if (this.addRemoveChunks.ContainsKey(chunk))
+                    {
+                        this.addRemoveChunks[chunk] = new AddRemoveContext(id, isAdd);
+                    }
+                    else
+                    {
+                        this.addRemoveChunks.Add(chunk, new AddRemoveContext(id, isAdd));
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -167,6 +167,28 @@ namespace Dwarves.Core.Math
         }
 
         /// <summary>
+        /// Perform the equal operator.
+        /// </summary>
+        /// <param name="v0">The first vector.</param>
+        /// <param name="v1">The second vector.</param>
+        /// <returns>True if the first vector is equal to the second vector.</returns>
+        public static bool operator ==(Vector2I v0, Vector2I v1)
+        {
+            return v0.X == v1.X && v0.Y == v1.Y;
+        }
+
+        /// <summary>
+        /// Perform the not equal operator.
+        /// </summary>
+        /// <param name="v0">The first vector.</param>
+        /// <param name="v1">The second vector.</param>
+        /// <returns>True if the first vector is not equal to the second vector.</returns>
+        public static bool operator !=(Vector2I v0, Vector2I v1)
+        {
+            return v0.X != v1.X || v0.Y != v1.Y;
+        }
+
+        /// <summary>
         /// Perform the less than operator.
         /// </summary>
         /// <param name="v0">The first vector.</param>

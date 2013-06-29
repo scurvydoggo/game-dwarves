@@ -19,27 +19,17 @@ namespace Dwarves.Core.Jobs
     /// <summary>
     /// The Job class.
     /// </summary>
-    public class Job
+    public abstract class Job
     {
         /// <summary>
         /// The work to be executed by the job.
         /// </summary>
-        private Action workAction;
-
-        /// <summary>
-        /// The finalisation to be executed on completion. This can be null.
-        /// </summary>
-        private Action finaliseAction;
+        private Action work;
 
         /// <summary>
         /// Indicates whether the job can be skipped.
         /// </summary>
         private bool canSkip;
-
-        /// <summary>
-        /// The owners of the job.
-        /// </summary>
-        private List<JobQueue> owners;
 
         /// <summary>
         /// The number of queues that are pending this job.
@@ -54,18 +44,14 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Initialises a new instance of the Job class.
         /// </summary>
-        /// <param name="workAction">The work to be executed by the job.</param>
-        /// <param name="finaliseAction">The finalisation to be executed on completion. This can be null.</param>
+        /// <param name="work">The work to be executed by the job.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
-        /// <param name="isMasterJob">Indicates whether this is a master job.</param>
         /// <param name="ownerCapacity">The initial capacity for the owners list.</param>
-        public Job(Action workAction, Action finaliseAction, bool canSkip, bool isMasterJob, int ownerCapacity)
+        public Job(Action work, bool canSkip, int ownerCapacity)
         {
-            this.workAction = workAction;
-            this.finaliseAction = finaliseAction;
+            this.work = work;
             this.canSkip = canSkip;
-            this.IsMasterJob = isMasterJob;
-            this.owners = new List<JobQueue>(ownerCapacity);
+            this.Owners = new List<JobQueue>(ownerCapacity);
         }
 
         /// <summary>
@@ -79,11 +65,6 @@ namespace Dwarves.Core.Jobs
         public event JobEvent Completed;
 
         /// <summary>
-        /// Gets a value indicating whether this is a master job.
-        /// </summary>
-        public bool IsMasterJob { get; private set; }
-
-        /// <summary>
         /// Gets a value indicating whether all owner queues are pending this job.
         /// </summary>
         public bool IsPending { get; private set; }
@@ -93,13 +74,18 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public bool IsSkipRequested
         {
-            get { return this.canSkip && this.skipCount >= this.owners.Count; }
+            get { return this.canSkip && this.skipCount >= this.Owners.Count; }
         }
 
         /// <summary>
         /// Gets a value indicating whether the job completed execution.
         /// </summary>
         public bool IsCompleted { get; private set; }
+
+        /// <summary>
+        /// Gets the owners of the job.
+        /// </summary>
+        protected List<JobQueue> Owners { get; private set; }
 
         /// <summary>
         /// Execute the job.
@@ -109,14 +95,16 @@ namespace Dwarves.Core.Jobs
             try
             {
                 // Perform the work
-                this.workAction();
+                this.work();
             }
             finally
             {
-                // Finalise the job
-                if (this.finaliseAction != null)
+                try
                 {
-                    this.finaliseAction();
+                    this.FinaliseOwners();
+                }
+                catch
+                {
                 }
             }
 
@@ -141,7 +129,7 @@ namespace Dwarves.Core.Jobs
                     Interlocked.Increment(ref this.skipCount);
                 }
 
-                if (pendingCount == this.owners.Count)
+                if (pendingCount == this.Owners.Count)
                 {
                     this.IsPending = true;
                     this.IsPendingChanged(this, this);
@@ -155,16 +143,21 @@ namespace Dwarves.Core.Jobs
         /// <returns>The owners.</returns>
         public IEnumerable<JobQueue> GetOwners()
         {
-            return this.owners;
+            return this.Owners;
         }
 
         /// <summary>
         /// Adds owner queues.
         /// </summary>
         /// <param name="owners">The owners.</param>
-        public void AddOwners(params JobQueue[] owners)
+        public virtual void AddOwners(params JobQueue[] owners)
         {
-            this.owners.AddRange(owners);
+            this.Owners.AddRange(owners);
         }
+
+        /// <summary>
+        /// Finalises the owner queue(s) on the completion of the job.
+        /// </summary>
+        protected abstract void FinaliseOwners();
     }
 }

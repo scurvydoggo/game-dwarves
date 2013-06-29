@@ -194,13 +194,12 @@ namespace Dwarves.Core
             if (toRemove != null)
             {
                 Guid id = Guid.NewGuid();
-                if (JobSystem.Instance.Scheduler.MasterQueueState.CanRemoveChunks(toRemove, id))
-                {
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.RemoveChunksJob(toRemove),
-                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddRemoveChunks(toRemove, id),
-                        false);
-                }
+                JobSystem.Instance.Scheduler.EnqueueMaster(
+                    () => this.RemoveChunksJob(toRemove),
+                    (q) => q.State.CanRemoveChunks(toRemove),
+                    (q) => q.State.ReserveRemoveChunks(toRemove, id),
+                    (q) => q.State.UnreserveAddRemoveChunks(toRemove, id),
+                    false);
             }
 
             // Enqueue the new chunk jobs
@@ -212,38 +211,35 @@ namespace Dwarves.Core
                 // Add the chunks
                 Guid id = Guid.NewGuid();
                 var addChunksSet = new List<Vector2I>(newChunks);
-                if (JobSystem.Instance.Scheduler.MasterQueueState.CanAddChunks(addChunksSet, id))
-                {
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.AddChunksJob(addChunksSet),
-                        () => JobSystem.Instance.Scheduler.MasterQueueState.CompleteAddRemoveChunks(addChunksSet, id),
-                        true);
-                }
+                JobSystem.Instance.Scheduler.EnqueueMaster(
+                    () => this.AddChunksJob(addChunksSet),
+                    (q) => q.State.CanAddChunks(addChunksSet),
+                    (q) => q.State.ReserveAddChunks(addChunksSet, id),
+                    (q) => q.State.UnreserveAddRemoveChunks(addChunksSet, id),
+                    true);
 
                 // Load the point data for each new chunk
                 foreach (Vector2I chunk in newChunks)
                 {
-                    if (JobSystem.Instance.Scheduler.GetQueueState(chunk).CanLoadPoints())
-                    {
-                        JobSystem.Instance.Scheduler.Enqueue(
-                            () => this.LoadPointsJob(chunk),
-                            () => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteLoadPoints(),
-                            true,
-                            chunk);
-                    }
+                    JobSystem.Instance.Scheduler.Enqueue(
+                        () => this.LoadPointsJob(chunk),
+                        (q) => q.State.CanLoadPoints(),
+                        (q) => q.State.ReserveLoadPoints(),
+                        (q) => q.State.UnreserveLoadPoints(),
+                        true,
+                        chunk);
                 }
 
                 // Rebuild the new chunks and their neighbours
                 foreach (Vector2I chunk in newChunksAndNeighbours)
                 {
-                    if (JobSystem.Instance.Scheduler.GetQueueState(chunk).CanRebuildMesh())
-                    {
-                        JobSystem.Instance.Scheduler.Enqueue(
-                            () => this.MeshBuilder.RebuildMesh(chunk),
-                            () => JobSystem.Instance.Scheduler.GetQueueState(chunk).CompleteRebuildMesh(),
-                            true,
-                            TerrainChunk.GetNeighbours(chunk));
-                    }
+                    JobSystem.Instance.Scheduler.Enqueue(
+                        () => this.MeshBuilder.RebuildMesh(chunk),
+                        (q) => q.State.CanRebuildMesh(chunk),
+                        (q) => q.State.ReserveRebuildMesh(chunk),
+                        (q) => q.State.UnreserveRebuildMesh(chunk),
+                        true,
+                        TerrainChunk.GetNeighbours(chunk));
                 }
             }
         }

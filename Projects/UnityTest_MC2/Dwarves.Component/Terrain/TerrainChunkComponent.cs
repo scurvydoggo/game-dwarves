@@ -6,7 +6,6 @@
 namespace Dwarves.Component.Terrain
 {
     using Dwarves.Core;
-    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Terrain;
     using UnityEngine;
@@ -52,27 +51,22 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            ChunkJobQueueState queueState = JobSystem.Instance.Scheduler.GetQueueState(this.Chunk);
-            if (queueState != null)
-            {
-                //if (queueState.CanRebuildMesh())
-                //{
-                //    JobSystem.Instance.Scheduler.Enqueue(
-                //        () => TerrainSystem.Instance.MeshBuilder.RebuildMesh(this.Chunk),
-                //        () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
-                //        true,
-                //        TerrainChunk.GetNeighbours(this.Chunk));
-                //}
+            //if (queueState.CanRebuildMesh())
+            //{
+            //    JobSystem.Instance.Scheduler.Enqueue(
+            //        () => TerrainSystem.Instance.MeshBuilder.RebuildMesh(this.Chunk),
+            //        () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
+            //        true,
+            //        TerrainChunk.GetNeighbours(this.Chunk));
+            //}
 
-                if (queueState.CanUpdateMeshFilter())
-                {
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        this.UpdateMeshFilterJob,
-                        () => JobSystem.Instance.Scheduler.GetQueueState(this.Chunk).CompleteUpdateMeshFilter(),
-                        true,
-                        this.Chunk);
-                }
-            }
+            bool queued = JobSystem.Instance.Scheduler.Enqueue(
+                () => this.UpdateMeshFilterJob(),
+                (q) => q.State.CanUpdateMeshFilter(),
+                (q) => q.State.ReserveUpdateMeshFilter(),
+                (q) => q.State.UnreserveUpdateMeshFilter(),
+                true,
+                this.Chunk);
         }
 
         /// <summary>

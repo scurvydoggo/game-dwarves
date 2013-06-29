@@ -5,6 +5,7 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Jobs
 {
+    using System.Collections;
     using System.Collections.Generic;
     using Dwarves.Core.Math;
 
@@ -13,11 +14,6 @@ namespace Dwarves.Core.Jobs
     /// </summary>
     public class ChunkJobQueueState
     {
-        /// <summary>
-        /// The locking object for jobs.
-        /// </summary>
-        private readonly object jobsLock = new object();
-
         /// <summary>
         /// Indicates whether the point data will be newer than the mesh data once all queued jobs are complete.
         /// </summary>
@@ -51,71 +47,74 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Initialises a new instance of the ChunkJobQueueState class.
         /// </summary>
-        public ChunkJobQueueState()
+        /// <param name="chunk">The chunk.</param>
+        public ChunkJobQueueState(Vector2I chunk)
         {
             this.digCircle = new Dictionary<Vector2I, int>();
         }
 
         /// <summary>
+        /// Gets the chunk.
+        /// </summary>
+        public Vector2I Chunk { get; private set; }
+
+        /// <summary>
         /// Check whether a LoadPoints job can execute.
         /// </summary>
-        /// <returns>True if the job can be executed.</returns>
+        /// <returns>True if the job can be enqueued.</returns>
         public bool CanLoadPoints()
         {
-            lock (this.jobsLock)
-            {
-                if (!this.loadPoints)
-                {
-                    this.loadPoints = true;
-                    this.rebuildMeshRequired = true;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return !this.loadPoints;
         }
 
         /// <summary>
-        /// Completes a LoadPoints job.
+        /// Reserves a LoadPoints job.
         /// </summary>
-        public void CompleteLoadPoints()
+        public void ReserveLoadPoints()
         {
-            lock (this.jobsLock)
-            {
-                this.loadPoints = false;
-            }
+            this.loadPoints = true;
+            this.rebuildMeshRequired = true;
+        }
+
+        /// <summary>
+        /// Un-reserves a LoadPoints job.
+        /// </summary>
+        public void UnreserveLoadPoints()
+        {
+            this.loadPoints = false;
         }
 
         /// <summary>
         /// Check whether a RebuildMesh job can execute.
         /// </summary>
-        /// <returns>True if the job can be executed.</returns>
-        public bool CanRebuildMesh()
+        /// <param name="chunk">The chunk being rebuilt.</param>
+        /// <returns>True if the job can be enqueued.</returns>
+        public bool CanRebuildMesh(Vector2I chunk)
         {
-            lock (this.jobsLock)
+            return this.Chunk != chunk || !this.rebuildingMesh;// && this.rebuildMeshRequired)
+        }
+
+        /// <summary>
+        /// Reserves a RebuildMesh job.
+        /// </summary>
+        /// <param name="chunk">The chunk being rebuilt.</param>
+        public void ReserveRebuildMesh(Vector2I chunk)
+        {
+            if (this.Chunk == chunk)
             {
-                if (!this.rebuildingMesh)// && this.rebuildMeshRequired)
-                {
-                    this.rebuildingMesh = true;
-                    this.rebuildMeshRequired = false;
-                    this.meshFilterUpdateRequired = true;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                this.rebuildingMesh = true;
+                this.rebuildMeshRequired = false;
+                this.meshFilterUpdateRequired = true;
             }
         }
 
         /// <summary>
-        /// Completes a RebuildMesh job.
+        /// Un-reserves a RebuildMesh job.
         /// </summary>
-        public void CompleteRebuildMesh()
+        /// <param name="chunk">The chunk being rebuilt.</param>
+        public void UnreserveRebuildMesh(Vector2I chunk)
         {
-            lock (this.jobsLock)
+            if (this.Chunk == chunk)
             {
                 this.rebuildingMesh = false;
             }
@@ -124,80 +123,97 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Check whether a UpdateMeshFilter job can execute.
         /// </summary>
-        /// <returns>True if the job can be executed.</returns>
+        /// <returns>True if the job can be enqueued.</returns>
         public bool CanUpdateMeshFilter()
         {
-            lock (this.jobsLock)
-            {
-                if (!this.updatingMeshFilter && this.meshFilterUpdateRequired)
-                {
-                    this.updatingMeshFilter = true;
-                    this.meshFilterUpdateRequired = false;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return !this.updatingMeshFilter;// && this.meshFilterUpdateRequired;
         }
 
         /// <summary>
-        /// Completes a UpdateMeshFilter job.
+        /// Reserves a UpdateMeshFilter job.
         /// </summary>
-        public void CompleteUpdateMeshFilter()
+        public void ReserveUpdateMeshFilter()
         {
-            lock (this.jobsLock)
-            {
-                this.updatingMeshFilter = false;
-            }
+            this.updatingMeshFilter = true;
+            this.meshFilterUpdateRequired = false;
+        }
+
+        /// <summary>
+        /// Un-reserves a UpdateMeshFilter job.
+        /// </summary>
+        public void UnreserveUpdateMeshFilter()
+        {
+            this.updatingMeshFilter = false;
         }
 
         /// <summary>
         /// Check whether a DigCircle job can execute.
         /// </summary>
+        /// <param name="chunk">The chunk in which the origin lies.</param>
         /// <param name="origin">The circle origin.</param>
         /// <param name="radius">The circle radius.</param>
-        /// <returns>True if the job can be executed.</returns>
-        public bool CanDigCircle(Vector2I origin, int radius)
+        /// <returns>True if the job can be enqueued.</returns>
+        public bool CanDigCircle(Vector2I chunk, Vector2I origin, int radius)
         {
-            lock (this.jobsLock)
+            if (chunk == this.Chunk)
             {
+                bool exists;
                 int existing;
-                if (this.digCircle.TryGetValue(origin, out existing))
+                lock ((this.digCircle as ICollection).SyncRoot)
                 {
-                    if (radius > existing)
+                    exists = this.digCircle.TryGetValue(origin, out existing);
+                }
+
+                return !exists || radius > existing;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Reserves a DigCircle job.
+        /// </summary>
+        /// <param name="chunk">The chunk in which the origin lies.</param>
+        /// <param name="origin">The circle origin.</param>
+        /// <param name="radius">The circle radius.</param>
+        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius)
+        {
+            if (chunk == this.Chunk)
+            {
+                lock ((this.digCircle as ICollection).SyncRoot)
+                {
+                    if (this.digCircle.ContainsKey(origin))
                     {
                         this.digCircle[origin] = radius;
                         this.rebuildMeshRequired = true;
-                        return true;
                     }
                     else
                     {
-                        return false;
+                        this.digCircle.Add(origin, radius);
+                        this.rebuildMeshRequired = true;
                     }
-                }
-                else
-                {
-                    this.digCircle.Add(origin, radius);
-                    this.rebuildMeshRequired = true;
-                    return true;
                 }
             }
         }
 
         /// <summary>
-        /// Completes a DigCircle job.
+        /// Un-reserves a DigCircle job.
         /// </summary>
+        /// <param name="chunk">The chunk in which the origin lies.</param>
         /// <param name="origin">The circle origin.</param>
         /// <param name="radius">The circle radius.</param>
-        public void CompleteDigCircle(Vector2I origin, int radius)
+        public void UnreserveDigCircle(Vector2I chunk, Vector2I origin, int radius)
         {
-            lock (this.jobsLock)
+            if (chunk == this.Chunk)
             {
-                if (this.digCircle[origin] == radius)
+                lock ((this.digCircle as ICollection).SyncRoot)
                 {
-                    this.digCircle.Remove(origin);
+                    if (this.digCircle[origin] == radius)
+                    {
+                        this.digCircle.Remove(origin);
+                    }
                 }
             }
         }

@@ -6,7 +6,6 @@
 namespace Dwarves.Core.Terrain.Mutation
 {
     using System;
-    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using UnityEngine;
 
@@ -84,26 +83,24 @@ namespace Dwarves.Core.Terrain.Mutation
         {
             Vector2I originI = new Vector2I((int)Math.Round(origin.x), (int)Math.Round(origin.y));
             int radiusI = (int)radius;
-
             Vector2I chunk = Metrics.ChunkIndex(originI.X, originI.Y);
-            ChunkJobQueueState queueState = JobSystem.Instance.Scheduler.GetQueueState(chunk);
-            if (queueState != null && queueState.CanDigCircle(originI, radiusI))
-            {
-                // Get the affected chunks
-                var worldBounds = new RectangleI(
-                    (int)(origin.x - (radius / 2)) - 1,
-                    (int)(origin.y - (radius / 2)) - 1,
-                    (int)radius + 3,
-                    (int)radius + 3);
-                RectangleI chunkBounds = Metrics.WorldToChunk(worldBounds);
 
-                // Enqueue the job
-                JobSystem.Instance.Scheduler.Enqueue(
-                    () => this.DigCircleJob(origin, radius),
-                    () => queueState.CompleteDigCircle(originI, radiusI),
-                    false,
-                    TerrainChunk.GetChunks(chunkBounds));
-            }
+            // Get the affected chunks
+            var worldBounds = new RectangleI(
+                (int)(origin.x - (radius / 2)) - 1,
+                (int)(origin.y - (radius / 2)) - 1,
+                (int)radius + 3,
+                (int)radius + 3);
+            RectangleI chunkBounds = Metrics.WorldToChunk(worldBounds);
+
+            // Enqueue the job
+            JobSystem.Instance.Scheduler.Enqueue(
+                () => this.DigCircleJob(origin, radius),
+                (q) => q.State.CanDigCircle(chunk, originI, radiusI),
+                (q) => q.State.ReserveDigCircle(chunk, originI, radiusI),
+                (q) => q.State.UnreserveDigCircle(chunk, originI, radiusI),
+                false,
+                TerrainChunk.GetChunks(chunkBounds));
         }
 
         #endregion Public Methods
