@@ -87,10 +87,10 @@ namespace Dwarves.Core.Terrain.Mutation
 
             // Get the affected chunks
             var worldBounds = new RectangleI(
-                (int)(origin.x - (radius / 2)) - 1,
-                (int)(origin.y - (radius / 2)) - 1,
-                (int)radius + 3,
-                (int)radius + 3);
+                (int)(origin.x - radius - 0.5f) - 1,
+                (int)(origin.y + radius + 0.5f) + 1,
+                (int)((radius * 2) + 0.5f) + 3,
+                (int)((radius * 2) + 0.5f) + 3);
             RectangleI chunkBounds = Metrics.WorldToChunk(worldBounds);
 
             // Enqueue the job

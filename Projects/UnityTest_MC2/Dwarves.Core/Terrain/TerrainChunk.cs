@@ -89,7 +89,7 @@ namespace Dwarves.Core.Terrain
             int i = 0;
             for (int x = bounds.X; x < bounds.X + bounds.Width; x++)
             {
-                for (int y = bounds.Y; y < bounds.Y + bounds.Height; y++)
+                for (int y = bounds.Y; y > bounds.Y - bounds.Height; y--)
                 {
                     chunks[i++] = new Vector2I(x, y);
                 }

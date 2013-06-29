@@ -218,15 +218,15 @@ namespace Dwarves.Core.Jobs
                     if (this.digCircle.ContainsKey(origin))
                     {
                         this.digCircle[origin] = radius;
-                        this.rebuildMeshRequired = true;
                     }
                     else
                     {
                         this.digCircle.Add(origin, radius);
-                        this.rebuildMeshRequired = true;
                     }
                 }
             }
+
+            this.rebuildMeshRequired = true;
         }
 
         /// <summary>
