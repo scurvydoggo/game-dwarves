@@ -30,6 +30,11 @@ namespace Dwarves.Core.Jobs
         private bool loadPoints;
 
         /// <summary>
+        /// Indicates whether a load points job has completed.
+        /// </summary>
+        private bool loadPointsCompleted;
+
+        /// <summary>
         /// Indicates whether a job is queued to rebuild the chunk mesh.
         /// </summary>
         private bool rebuildingMesh;
@@ -78,9 +83,13 @@ namespace Dwarves.Core.Jobs
             if (this.Chunk == chunk)
             {
                 this.loadPoints = true;
+                this.rebuildMeshRequired = true;
             }
-
-            this.rebuildMeshRequired = true;
+            else if (this.loadPointsCompleted)
+            {
+                // If a neighbouring chunk has its points loaded, then its mesh will have to be rebuilt
+                this.rebuildMeshRequired = true;
+            }
         }
 
         /// <summary>
@@ -92,6 +101,7 @@ namespace Dwarves.Core.Jobs
             if (this.Chunk == chunk)
             {
                 this.loadPoints = false;
+                this.loadPointsCompleted = true;
             }
         }
 
