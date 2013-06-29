@@ -206,10 +206,12 @@ namespace Dwarves.Core
                 // Load the point data for each new chunk
                 foreach (Vector2I chunk in newChunks)
                 {
-                    // Get the chunks which have been loaded
-                    var chunks = new List<Vector2I>(TerrainChunk.GetNeighboursExcluding(chunk));
-                    JobSystem.Instance.Scheduler.TrimChunks(chunks, (q) => q.State.LoadPointsCompleted);
-                    chunks.Add(chunk);
+                    // Get an array of the chunk and its neighbours that have been loaded
+                    var neighbours = new List<Vector2I>(TerrainChunk.GetNeighboursExcluding(chunk));
+                    JobSystem.Instance.Scheduler.TrimChunks(neighbours, (q) => q.State.LoadPointsCompleted);
+                    var chunks = new Vector2I[neighbours.Count + 1];
+                    chunks[0] = chunk;
+                    neighbours.CopyTo(chunks, 1);
 
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.LoadPointsJob(chunk),
@@ -217,7 +219,7 @@ namespace Dwarves.Core
                         (q) => q.State.ReserveLoadPoints(chunk),
                         (q) => q.State.UnreserveLoadPoints(chunk),
                         true,
-                        chunks.ToArray());
+                        chunks);
                 }
             }
         }
