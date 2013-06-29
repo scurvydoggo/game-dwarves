@@ -50,6 +50,7 @@ namespace Dwarves.Core.Jobs
         /// <param name="chunk">The chunk.</param>
         public ChunkJobQueueState(Vector2I chunk)
         {
+            this.Chunk = chunk;
             this.digCircle = new Dictionary<Vector2I, int>();
         }
 
@@ -126,7 +127,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanUpdateMeshFilter()
         {
-            return !this.updatingMeshFilter;// && this.meshFilterUpdateRequired;
+            return !this.updatingMeshFilter && this.meshFilterUpdateRequired;
         }
 
         /// <summary>
