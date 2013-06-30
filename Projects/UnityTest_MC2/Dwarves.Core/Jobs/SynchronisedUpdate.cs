@@ -11,7 +11,8 @@ namespace Dwarves.Core.Jobs
 
     /// <summary>
     /// Used to synchronise updates through the chunk pipeline such that chunks are updated on-screen in a single
-    /// frame. This is to prevent flickering when two neighbouring meshes are updated in separate frames.
+    /// frame. This is to prevent flickering when two neighbouring meshes are updated in separate frames when a change
+    /// in geometry is shared across them.
     /// </summary>
     public class SynchronisedUpdate
     {
