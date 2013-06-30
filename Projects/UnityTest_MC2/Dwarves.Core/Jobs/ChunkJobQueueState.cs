@@ -22,7 +22,7 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Indicates whether the a mesh filter update job needs to be queued due to changes to mesh data.
         /// </summary>
-        private RequiredWork updateMeshFilterUpdateState;
+        private RequiredWork updateMeshFilterState;
 
         /// <summary>
         /// Indicates whether a job is queued to load the points.
@@ -52,7 +52,7 @@ namespace Dwarves.Core.Jobs
         {
             this.Chunk = chunk;
             this.rebuildMeshState = new RequiredWork();
-            this.updateMeshFilterUpdateState = new RequiredWork();
+            this.updateMeshFilterState = new RequiredWork();
             this.digCircleInProgress = new Dictionary<Vector2I, int>();
         }
 
@@ -82,9 +82,7 @@ namespace Dwarves.Core.Jobs
         /// Reserves a LoadPoints job.
         /// </summary>
         /// <param name="chunk">The chunk being loaded.</param>
-        /// <param name="chunksToSync">The chunks requiring synchronisation to ensure that the mesh filter is updated
-        /// in the one frame for all the chunks.</param>
-        public void ReserveLoadPoints(Vector2I chunk, ChunkSync chunksToSync)
+        public void ReserveLoadPoints(Vector2I chunk)
         {
             if (this.Chunk == chunk)
             {
@@ -92,7 +90,6 @@ namespace Dwarves.Core.Jobs
             }
 
             this.rebuildMeshState.IsUpdateRequired = true;
-            this.rebuildMeshState.AddChunksToSynchronise(chunksToSync);
         }
 
         /// <summary>
@@ -131,8 +128,14 @@ namespace Dwarves.Core.Jobs
             if (this.Chunk == chunk)
             {
                 this.rebuildMeshInProgress = true;
+
+                // Indicate that a mesh filter update is required and add any chunks requiring a synchronised update
+                this.updateMeshFilterState.IsUpdateRequired = true;
+                this.updateMeshFilterState.AddChunksToSynchronise(this.rebuildMeshState);
+
+                // Reset the rebuild mesh required state
                 this.rebuildMeshState.IsUpdateRequired = false;
-                this.updateMeshFilterUpdateState.IsUpdateRequired = true;
+                this.rebuildMeshState.ResetChunksToSynchronise();
             }
         }
 
@@ -158,7 +161,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanUpdateMeshFilter()
         {
-            return !this.updateMeshFilterInProgress && this.updateMeshFilterUpdateState.IsUpdateRequired;
+            return !this.updateMeshFilterInProgress && this.updateMeshFilterState.IsUpdateRequired;
         }
 
         /// <summary>
@@ -167,7 +170,7 @@ namespace Dwarves.Core.Jobs
         public void ReserveUpdateMeshFilter()
         {
             this.updateMeshFilterInProgress = true;
-            this.updateMeshFilterUpdateState.IsUpdateRequired = false;
+            this.updateMeshFilterState.IsUpdateRequired = false;
         }
 
         /// <summary>
@@ -214,7 +217,9 @@ namespace Dwarves.Core.Jobs
         /// <param name="chunk">The chunk in which the origin lies.</param>
         /// <param name="origin">The circle origin.</param>
         /// <param name="radius">The circle radius.</param>
-        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius)
+        /// <param name="chunksToSync">The chunks requiring synchronisation such that their mesh filters are updated in
+        /// the same frame.</param>
+        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius, ChunkSync chunksToSync)
         {
             if (chunk == this.Chunk)
             {
@@ -232,6 +237,10 @@ namespace Dwarves.Core.Jobs
             }
 
             this.rebuildMeshState.IsUpdateRequired = true;
+            if (chunksToSync != null)
+            {
+                rebuildMeshState.AddChunksToSynchronise(chunksToSync);
+            }
         }
 
         /// <summary>
@@ -257,14 +266,14 @@ namespace Dwarves.Core.Jobs
         #endregion
 
         /// <summary>
-        /// Indicates the type of work that is required for an aspect of the chunk, such as a mesh rebuild required.
-        /// This class is not thread safe.
+        /// Indicates the type of work that is required for a stage in the chunk pipeline. This class is not thread
+        /// safe.
         /// </summary>
         private class RequiredWork
         {
             /// <summary>
-            /// Gets the chunk synchronisation that is required for this aspect of the chunk. Null indicates no
-            /// synchronisation is required.
+            /// The chunks that require synchronisation for this and future stages. This will ultimately result in the
+            /// synchronised chunks being updated in the same frame.
             /// </summary>
             private List<ChunkSync> chunksToSync;
 
@@ -298,6 +307,18 @@ namespace Dwarves.Core.Jobs
                 }
 
                 this.chunksToSync.Add(chunksToSync);
+            }
+
+            /// <summary>
+            /// Add the chunks to synchronise from the other instance.
+            /// </summary>
+            /// <param name="other">The other instance.</param>
+            public void AddChunksToSynchronise(RequiredWork other)
+            {
+                foreach (ChunkSync otherChunks in other.chunksToSync)
+                {
+                    this.AddChunksToSynchronise(otherChunks);
+                }
             }
 
             /// <summary>

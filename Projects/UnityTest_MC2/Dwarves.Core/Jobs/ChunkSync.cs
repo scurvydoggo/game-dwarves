@@ -31,6 +31,11 @@ namespace Dwarves.Core.Jobs
         /// <param name="chunks">The chunks requiring synchronisation.</param>
         public ChunkSync(params Vector2I[] chunks)
         {
+            if (chunks.Length <= 1)
+            {
+                throw new InvalidOperationException("Two or more chunks are required for ChunkSync.");
+            }
+
             this.chunks = new Dictionary<Vector2I, bool>();
             foreach (Vector2I chunk in chunks)
             {
@@ -42,18 +47,6 @@ namespace Dwarves.Core.Jobs
         /// Indicates that the chunks are synchronised.
         /// </summary>
         public event EventHandler IsSynchronised;
-
-        /// <summary>
-        /// Adds a chunk.
-        /// </summary>
-        /// <param name="chunk">The chunk.</param>
-        public void AddChunk(Vector2I chunk)
-        {
-            if (!this.chunks.ContainsKey(chunk))
-            {
-                this.chunks.Add(chunk, false);
-            }
-        }
 
         /// <summary>
         /// Indicate that a chunk is ready.

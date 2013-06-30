@@ -217,7 +217,7 @@ namespace Dwarves.Core
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.LoadPointsJob(chunk),
                         (q) => q.State.CanLoadPoints(chunk),
-                        (q) => q.State.ReserveLoadPoints(chunk, new ChunkSync(chunks)),
+                        (q) => q.State.ReserveLoadPoints(chunk),
                         (q) => q.State.UnreserveLoadPoints(chunk),
                         true,
                         chunks);
