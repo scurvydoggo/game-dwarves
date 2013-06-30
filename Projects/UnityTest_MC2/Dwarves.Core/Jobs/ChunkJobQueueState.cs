@@ -82,7 +82,9 @@ namespace Dwarves.Core.Jobs
         /// Reserves a LoadPoints job.
         /// </summary>
         /// <param name="chunk">The chunk being loaded.</param>
-        public void ReserveLoadPoints(Vector2I chunk)
+        /// <param name="chunksToSync">The chunks requiring synchronisation to ensure that the mesh filter is updated
+        /// in the one frame for all the chunks.</param>
+        public void ReserveLoadPoints(Vector2I chunk, ChunkSync chunksToSync)
         {
             if (this.Chunk == chunk)
             {
@@ -90,6 +92,7 @@ namespace Dwarves.Core.Jobs
             }
 
             this.rebuildMeshState.IsUpdateRequired = true;
+            this.rebuildMeshState.AddChunksToSynchronise(chunksToSync);
         }
 
         /// <summary>
@@ -255,19 +258,46 @@ namespace Dwarves.Core.Jobs
 
         /// <summary>
         /// Indicates the type of work that is required for an aspect of the chunk, such as a mesh rebuild required.
+        /// This class is not thread safe.
         /// </summary>
         private class RequiredWork
         {
+            /// <summary>
+            /// Gets the chunk synchronisation that is required for this aspect of the chunk. Null indicates no
+            /// synchronisation is required.
+            /// </summary>
+            private List<ChunkSync> chunksToSync;
+
+            /// <summary>
+            /// Initialises a new instance of the RequiredWork class.
+            /// </summary>
+            public RequiredWork()
+            {
+                this.chunksToSync = new List<ChunkSync>();
+            }
+
             /// <summary>
             /// Gets or sets a value indicating whether work is required to update this aspect.
             /// </summary>
             public bool IsUpdateRequired { get; set; }
 
             /// <summary>
-            /// Gets or sets the chunk synchronisation that is required for this aspect of the chunk. Null indicates no
-            /// synchronisation is required.
+            /// Set the chunks to synchronise.
             /// </summary>
-            public ChunkSync ChunkSync { get; set; }
+            /// <param name="chunksToSync">The chunks requiring synchronisation to ensure that the mesh filter is updated
+            /// in the one frame for all the chunks.</param>
+            public void AddChunksToSynchronise(ChunkSync chunksToSync)
+            {
+                this.chunksToSync.Add(chunksToSync);
+            }
+
+            /// <summary>
+            /// Reset the chunk synchronise.
+            /// </summary>
+            public void ResetChunksToSynchronise()
+            {
+                this.chunksToSync.Clear();
+            }
         }
     }
 }

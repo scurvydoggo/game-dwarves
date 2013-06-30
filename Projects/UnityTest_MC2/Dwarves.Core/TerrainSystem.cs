@@ -14,6 +14,7 @@ namespace Dwarves.Core
     using Dwarves.Core.Terrain.Geometry;
     using Dwarves.Core.Terrain.Mutation;
     using Dwarves.Core.Terrain.Serialisation;
+    using Dwarves.Core.Jobs;
 
     /// <summary>
     /// The terrain sub-system.
@@ -216,7 +217,7 @@ namespace Dwarves.Core
                     JobSystem.Instance.Scheduler.Enqueue(
                         () => this.LoadPointsJob(chunk),
                         (q) => q.State.CanLoadPoints(chunk),
-                        (q) => q.State.ReserveLoadPoints(chunk),
+                        (q) => q.State.ReserveLoadPoints(chunk, new ChunkSync(chunks)),
                         (q) => q.State.UnreserveLoadPoints(chunk),
                         true,
                         chunks);
