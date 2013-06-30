@@ -219,7 +219,7 @@ namespace Dwarves.Core.Jobs
         /// <param name="radius">The circle radius.</param>
         /// <param name="chunksToSync">The chunks requiring synchronisation such that their mesh filters are updated in
         /// the same frame.</param>
-        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius, ChunkSync chunksToSync)
+        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius, SynchronisedUpdate chunksToSync)
         {
             if (chunk == this.Chunk)
             {
@@ -239,7 +239,7 @@ namespace Dwarves.Core.Jobs
             this.rebuildMeshState.IsUpdateRequired = true;
             if (chunksToSync != null)
             {
-                rebuildMeshState.AddChunksToSynchronise(chunksToSync);
+                this.rebuildMeshState.AddChunksToSynchronise(chunksToSync);
             }
         }
 
@@ -272,17 +272,16 @@ namespace Dwarves.Core.Jobs
         private class RequiredWork
         {
             /// <summary>
-            /// The chunks that require synchronisation for this and future stages. This will ultimately result in the
-            /// synchronised chunks being updated in the same frame.
+            /// The chunks that need to be updated on-screen in a single frame.
             /// </summary>
-            private List<ChunkSync> chunksToSync;
+            private List<SynchronisedUpdate> toSync;
 
             /// <summary>
             /// Initialises a new instance of the RequiredWork class.
             /// </summary>
             public RequiredWork()
             {
-                this.chunksToSync = new List<ChunkSync>();
+                this.toSync = new List<SynchronisedUpdate>();
             }
 
             /// <summary>
@@ -293,20 +292,20 @@ namespace Dwarves.Core.Jobs
             /// <summary>
             /// Add a set of chunks to synchronise.
             /// </summary>
-            /// <param name="chunksToSync">The chunks requiring synchronisation to ensure that the mesh filter is updated
+            /// <param name="chunks">The chunks requiring synchronisation to ensure that the mesh filter is updated
             /// in the one frame for all the chunks.</param>
-            public void AddChunksToSynchronise(ChunkSync chunksToSync)
+            public void AddChunksToSynchronise(SynchronisedUpdate chunks)
             {
                 // Don't do anything if these chunks already exist
-                foreach (ChunkSync existing in this.chunksToSync)
+                foreach (SynchronisedUpdate existingChunks in this.toSync)
                 {
-                    if (existing.Contains(chunksToSync))
+                    if (existingChunks.Contains(chunks))
                     {
                         return;
                     }
                 }
 
-                this.chunksToSync.Add(chunksToSync);
+                this.toSync.Add(chunks);
             }
 
             /// <summary>
@@ -315,7 +314,7 @@ namespace Dwarves.Core.Jobs
             /// <param name="other">The other instance.</param>
             public void AddChunksToSynchronise(RequiredWork other)
             {
-                foreach (ChunkSync otherChunks in other.chunksToSync)
+                foreach (SynchronisedUpdate otherChunks in other.toSync)
                 {
                     this.AddChunksToSynchronise(otherChunks);
                 }
@@ -326,7 +325,7 @@ namespace Dwarves.Core.Jobs
             /// </summary>
             public void ResetChunksToSynchronise()
             {
-                this.chunksToSync.Clear();
+                this.toSync.Clear();
             }
         }
     }

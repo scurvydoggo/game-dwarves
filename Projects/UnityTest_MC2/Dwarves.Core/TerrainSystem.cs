@@ -14,7 +14,6 @@ namespace Dwarves.Core
     using Dwarves.Core.Terrain.Geometry;
     using Dwarves.Core.Terrain.Mutation;
     using Dwarves.Core.Terrain.Serialisation;
-    using Dwarves.Core.Jobs;
 
     /// <summary>
     /// The terrain sub-system.

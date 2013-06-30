@@ -6,9 +6,9 @@
 namespace Dwarves.Core.Terrain.Mutation
 {
     using System;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using UnityEngine;
-    using Dwarves.Core.Jobs;
 
     /// <summary>
     /// Mutates voxel terrain.
@@ -96,7 +96,7 @@ namespace Dwarves.Core.Terrain.Mutation
             Vector2I[] chunks = TerrainChunk.GetChunks(chunkBounds);
 
             // Enqueue the job
-            ChunkSync chunksToSync = chunks.Length > 1 ? new ChunkSync(chunks) : null;
+            SynchronisedUpdate chunksToSync = chunks.Length > 1 ? new SynchronisedUpdate(chunks) : null;
             JobSystem.Instance.Scheduler.Enqueue(
                 () => this.DigCircleJob(origin, radius),
                 (q) => q.State.CanDigCircle(chunk, originI, radiusI),

@@ -46,7 +46,7 @@
     <Compile Include="Jobs\ChunkJob.cs" />
     <Compile Include="Jobs\ChunkJobQueue.cs" />
     <Compile Include="Jobs\ChunkJobQueueState.cs" />
-    <Compile Include="Jobs\ChunkSync.cs" />
+    <Compile Include="Jobs\SynchronisedUpdate.cs" />
     <Compile Include="Jobs\MasterJob.cs" />
     <Compile Include="Jobs\MasterJobQueueState.cs" />
     <Compile Include="Jobs\Job.cs" />
