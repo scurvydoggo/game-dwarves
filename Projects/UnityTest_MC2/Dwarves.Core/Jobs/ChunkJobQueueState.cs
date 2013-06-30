@@ -282,13 +282,26 @@ namespace Dwarves.Core.Jobs
             public bool IsUpdateRequired { get; set; }
 
             /// <summary>
-            /// Set the chunks to synchronise.
+            /// Add a set of chunks to synchronise.
             /// </summary>
             /// <param name="chunksToSync">The chunks requiring synchronisation to ensure that the mesh filter is updated
             /// in the one frame for all the chunks.</param>
             public void AddChunksToSynchronise(ChunkSync chunksToSync)
             {
-                this.chunksToSync.Add(chunksToSync);
+                bool alreadyExists = false;
+                foreach (ChunkSync existing in this.chunksToSync)
+                {
+                    if (existing.Contains(chunksToSync))
+                    {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyExists)
+                {
+                    this.chunksToSync.Add(chunksToSync);
+                }
             }
 
             /// <summary>

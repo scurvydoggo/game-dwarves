@@ -71,5 +71,23 @@ namespace Dwarves.Core.Jobs
                 }
             }
         }
+
+        /// <summary>
+        /// Determines whether this instance contains all of the chunks of the other set.
+        /// </summary>
+        /// <param name="other">The other.</param>
+        /// <returns>True if this instance contains all of the chunks.</returns>
+        public bool Contains(ChunkSync other)
+        {
+            foreach (Vector2I chunk in other.chunks.Keys)
+            {
+                if (!this.chunks.ContainsKey(chunk))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
