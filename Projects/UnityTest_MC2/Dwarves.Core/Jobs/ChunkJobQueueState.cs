@@ -288,20 +288,16 @@ namespace Dwarves.Core.Jobs
             /// in the one frame for all the chunks.</param>
             public void AddChunksToSynchronise(ChunkSync chunksToSync)
             {
-                bool alreadyExists = false;
+                // Don't do anything if these chunks already exist
                 foreach (ChunkSync existing in this.chunksToSync)
                 {
                     if (existing.Contains(chunksToSync))
                     {
-                        alreadyExists = true;
-                        break;
+                        return;
                     }
                 }
 
-                if (!alreadyExists)
-                {
-                    this.chunksToSync.Add(chunksToSync);
-                }
+                this.chunksToSync.Add(chunksToSync);
             }
 
             /// <summary>
