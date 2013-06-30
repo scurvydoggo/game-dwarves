@@ -15,34 +15,34 @@ namespace Dwarves.Core.Jobs
     public class ChunkJobQueueState
     {
         /// <summary>
-        /// Indicates whether the point data will be newer than the mesh data once all queued jobs are complete.
+        /// Indicates whether the a rebuild mesh job needs to be queued due to changes to point data.
         /// </summary>
-        private bool rebuildMeshRequired;
+        private RequiredWork rebuildMeshState;
 
         /// <summary>
-        /// Indicates whether the mesh data will be newer than the mesh filter once all queued jobs are complete.
+        /// Indicates whether the a mesh filter update job needs to be queued due to changes to mesh data.
         /// </summary>
-        private bool meshFilterUpdateRequired;
+        private RequiredWork updateMeshFilterUpdateState;
 
         /// <summary>
         /// Indicates whether a job is queued to load the points.
         /// </summary>
-        private bool loadPoints;
+        private bool loadPointsInProgress;
 
         /// <summary>
         /// Indicates whether a job is queued to rebuild the chunk mesh.
         /// </summary>
-        private bool rebuildingMesh;
+        private bool rebuildMeshInProgress;
 
         /// <summary>
         /// Indicates whether a job is queued to update the mesh filter.
         /// </summary>
-        private bool updatingMeshFilter;
+        private bool updateMeshFilterInProgress;
 
         /// <summary>
         /// The dictionary tracking the current dig circle jobs.
         /// </summary>
-        private Dictionary<Vector2I, int> digCircle;
+        private Dictionary<Vector2I, int> digCircleInProgress;
 
         /// <summary>
         /// Initialises a new instance of the ChunkJobQueueState class.
@@ -51,7 +51,9 @@ namespace Dwarves.Core.Jobs
         public ChunkJobQueueState(Vector2I chunk)
         {
             this.Chunk = chunk;
-            this.digCircle = new Dictionary<Vector2I, int>();
+            this.rebuildMeshState = new RequiredWork();
+            this.updateMeshFilterUpdateState = new RequiredWork();
+            this.digCircleInProgress = new Dictionary<Vector2I, int>();
         }
 
         /// <summary>
@@ -73,7 +75,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanLoadPoints(Vector2I chunk)
         {
-            return this.Chunk != chunk || !this.loadPoints;
+            return this.Chunk != chunk || !this.loadPointsInProgress;
         }
 
         /// <summary>
@@ -84,10 +86,10 @@ namespace Dwarves.Core.Jobs
         {
             if (this.Chunk == chunk)
             {
-                this.loadPoints = true;
+                this.loadPointsInProgress = true;
             }
 
-            this.rebuildMeshRequired = true;
+            this.rebuildMeshState.IsUpdateRequired = true;
         }
 
         /// <summary>
@@ -98,7 +100,7 @@ namespace Dwarves.Core.Jobs
         {
             if (this.Chunk == chunk)
             {
-                this.loadPoints = false;
+                this.loadPointsInProgress = false;
                 this.LoadPointsCompleted = true;
             }
         }
@@ -114,7 +116,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanRebuildMesh(Vector2I chunk)
         {
-            return this.Chunk != chunk || (!this.rebuildingMesh && this.rebuildMeshRequired);
+            return this.Chunk != chunk || (!this.rebuildMeshInProgress && this.rebuildMeshState.IsUpdateRequired);
         }
 
         /// <summary>
@@ -125,9 +127,9 @@ namespace Dwarves.Core.Jobs
         {
             if (this.Chunk == chunk)
             {
-                this.rebuildingMesh = true;
-                this.rebuildMeshRequired = false;
-                this.meshFilterUpdateRequired = true;
+                this.rebuildMeshInProgress = true;
+                this.rebuildMeshState.IsUpdateRequired = false;
+                this.updateMeshFilterUpdateState.IsUpdateRequired = true;
             }
         }
 
@@ -139,7 +141,7 @@ namespace Dwarves.Core.Jobs
         {
             if (this.Chunk == chunk)
             {
-                this.rebuildingMesh = false;
+                this.rebuildMeshInProgress = false;
             }
         }
 
@@ -153,7 +155,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanUpdateMeshFilter()
         {
-            return !this.updatingMeshFilter && this.meshFilterUpdateRequired;
+            return !this.updateMeshFilterInProgress && this.updateMeshFilterUpdateState.IsUpdateRequired;
         }
 
         /// <summary>
@@ -161,8 +163,8 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void ReserveUpdateMeshFilter()
         {
-            this.updatingMeshFilter = true;
-            this.meshFilterUpdateRequired = false;
+            this.updateMeshFilterInProgress = true;
+            this.updateMeshFilterUpdateState.IsUpdateRequired = false;
         }
 
         /// <summary>
@@ -170,7 +172,7 @@ namespace Dwarves.Core.Jobs
         /// </summary>
         public void UnreserveUpdateMeshFilter()
         {
-            this.updatingMeshFilter = false;
+            this.updateMeshFilterInProgress = false;
         }
 
         #endregion
@@ -190,9 +192,9 @@ namespace Dwarves.Core.Jobs
             {
                 bool exists;
                 int existing;
-                lock ((this.digCircle as ICollection).SyncRoot)
+                lock ((this.digCircleInProgress as ICollection).SyncRoot)
                 {
-                    exists = this.digCircle.TryGetValue(origin, out existing);
+                    exists = this.digCircleInProgress.TryGetValue(origin, out existing);
                 }
 
                 return !exists || radius > existing;
@@ -213,20 +215,20 @@ namespace Dwarves.Core.Jobs
         {
             if (chunk == this.Chunk)
             {
-                lock ((this.digCircle as ICollection).SyncRoot)
+                lock ((this.digCircleInProgress as ICollection).SyncRoot)
                 {
-                    if (this.digCircle.ContainsKey(origin))
+                    if (this.digCircleInProgress.ContainsKey(origin))
                     {
-                        this.digCircle[origin] = radius;
+                        this.digCircleInProgress[origin] = radius;
                     }
                     else
                     {
-                        this.digCircle.Add(origin, radius);
+                        this.digCircleInProgress.Add(origin, radius);
                     }
                 }
             }
 
-            this.rebuildMeshRequired = true;
+            this.rebuildMeshState.IsUpdateRequired = true;
         }
 
         /// <summary>
@@ -239,16 +241,33 @@ namespace Dwarves.Core.Jobs
         {
             if (chunk == this.Chunk)
             {
-                lock ((this.digCircle as ICollection).SyncRoot)
+                lock ((this.digCircleInProgress as ICollection).SyncRoot)
                 {
-                    if (this.digCircle[origin] == radius)
+                    if (this.digCircleInProgress[origin] == radius)
                     {
-                        this.digCircle.Remove(origin);
+                        this.digCircleInProgress.Remove(origin);
                     }
                 }
             }
         }
 
         #endregion
+
+        /// <summary>
+        /// Indicates the type of work that is required for an aspect of the chunk, such as a mesh rebuild required.
+        /// </summary>
+        private class RequiredWork
+        {
+            /// <summary>
+            /// Gets or sets a value indicating whether work is required to update this aspect.
+            /// </summary>
+            public bool IsUpdateRequired { get; set; }
+
+            /// <summary>
+            /// Gets or sets the chunk synchronisation that is required for this aspect of the chunk. Null indicates no
+            /// synchronisation is required.
+            /// </summary>
+            public ChunkSync ChunkSync { get; set; }
+        }
     }
 }
