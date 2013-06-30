@@ -8,6 +8,7 @@ namespace Dwarves.Core.Jobs
     using System.Collections;
     using System.Collections.Generic;
     using Dwarves.Core.Math;
+    using UnityEngine;
 
     /// <summary>
     /// The state of a chunk job queue.
@@ -131,11 +132,11 @@ namespace Dwarves.Core.Jobs
 
                 // Indicate that a mesh filter update is required and add any chunks requiring a synchronised update
                 this.updateMeshFilterState.IsUpdateRequired = true;
-                this.updateMeshFilterState.AddChunksToSynchronise(this.rebuildMeshState);
-
+                this.updateMeshFilterState.AddChunksToSync(this.rebuildMeshState.ChunksToSync);
+                
                 // Reset the rebuild mesh required state
                 this.rebuildMeshState.IsUpdateRequired = false;
-                this.rebuildMeshState.ResetChunksToSynchronise();
+                this.rebuildMeshState.ChunksToSync.Clear();
             }
         }
 
@@ -219,7 +220,7 @@ namespace Dwarves.Core.Jobs
         /// <param name="radius">The circle radius.</param>
         /// <param name="chunksToSync">The chunks requiring synchronisation such that their mesh filters are updated in
         /// the same frame.</param>
-        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius, SynchronisedUpdate chunksToSync)
+        public void ReserveDigCircle(Vector2I chunk, Vector2I origin, int radius, Vector2I[] chunksToSync)
         {
             if (chunk == this.Chunk)
             {
@@ -237,9 +238,9 @@ namespace Dwarves.Core.Jobs
             }
 
             this.rebuildMeshState.IsUpdateRequired = true;
-            if (chunksToSync != null)
+            if (chunksToSync.Length > 1)
             {
-                this.rebuildMeshState.AddChunksToSynchronise(chunksToSync);
+                this.rebuildMeshState.AddChunksToSync(chunksToSync);
             }
         }
 
@@ -272,16 +273,11 @@ namespace Dwarves.Core.Jobs
         private class RequiredWork
         {
             /// <summary>
-            /// The chunks that need to be updated on-screen in a single frame.
-            /// </summary>
-            private List<SynchronisedUpdate> toSync;
-
-            /// <summary>
             /// Initialises a new instance of the RequiredWork class.
             /// </summary>
             public RequiredWork()
             {
-                this.toSync = new List<SynchronisedUpdate>();
+                this.ChunksToSync = new HashSet<Vector2I>();
             }
 
             /// <summary>
@@ -290,42 +286,20 @@ namespace Dwarves.Core.Jobs
             public bool IsUpdateRequired { get; set; }
 
             /// <summary>
-            /// Add a set of chunks to synchronise.
+            /// Gets the chunks that need to be updated on-screen in a single frame.
             /// </summary>
-            /// <param name="chunks">The chunks requiring synchronisation to ensure that the mesh filter is updated
-            /// in the one frame for all the chunks.</param>
-            public void AddChunksToSynchronise(SynchronisedUpdate chunks)
-            {
-                // Don't do anything if these chunks already exist
-                foreach (SynchronisedUpdate existingChunks in this.toSync)
-                {
-                    if (existingChunks.Contains(chunks))
-                    {
-                        return;
-                    }
-                }
-
-                this.toSync.Add(chunks);
-            }
+            public HashSet<Vector2I> ChunksToSync { get; private set; }
 
             /// <summary>
-            /// Add the chunks to synchronise from the other instance.
+            /// Adds a range of chunks to sync.
             /// </summary>
-            /// <param name="other">The other instance.</param>
-            public void AddChunksToSynchronise(RequiredWork other)
+            /// <param name="chunks">The chunks.</param>
+            public void AddChunksToSync(IEnumerable<Vector2I> chunks)
             {
-                foreach (SynchronisedUpdate otherChunks in other.toSync)
+                foreach (Vector2I chunk in chunks)
                 {
-                    this.AddChunksToSynchronise(otherChunks);
+                    this.ChunksToSync.Add(chunk);
                 }
-            }
-
-            /// <summary>
-            /// Reset the chunk synchronise.
-            /// </summary>
-            public void ResetChunksToSynchronise()
-            {
-                this.toSync.Clear();
             }
         }
     }
