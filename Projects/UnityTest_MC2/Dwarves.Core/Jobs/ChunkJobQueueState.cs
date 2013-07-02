@@ -131,8 +131,8 @@ namespace Dwarves.Core.Jobs
                 this.rebuildMeshInProgress = true;
 
                 // Indicate that a mesh filter update is required and add any chunks requiring a synchronised update
+                this.updateMeshFilterState.AddChunksToSynchronise(this.rebuildMeshState.ChunksToSync);
                 this.updateMeshFilterState.IsUpdateRequired = true;
-                this.updateMeshFilterState.AddChunksToSynchronise(this.rebuildMeshState.ToSync);
                 
                 // Reset the rebuild mesh required state
                 this.rebuildMeshState.IsUpdateRequired = false;
@@ -237,8 +237,8 @@ namespace Dwarves.Core.Jobs
                 }
             }
 
-            this.rebuildMeshState.IsUpdateRequired = true;
             this.rebuildMeshState.AddChunksToSynchronise(toSync);
+            this.rebuildMeshState.IsUpdateRequired = true;
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Dwarves.Core.Jobs
             /// <summary>
             /// Gets the chunks that need to be updated on-screen in a single frame.
             /// </summary>
-            public SynchronisedUpdate ToSync { get; private set; }
+            public SynchronisedUpdate ChunksToSync { get; private set; }
 
             /// <summary>
             /// Set the chunks to synchronise.
@@ -287,13 +287,13 @@ namespace Dwarves.Core.Jobs
             {
                 if (toSync != null)
                 {
-                    if (this.ToSync == null)
+                    if (this.ChunksToSync == null)
                     {
-                        this.ToSync = toSync;
+                        this.ChunksToSync = toSync;
                     }
                     else
                     {
-                        this.ToSync.Merge(toSync);
+                        this.ChunksToSync.Merge(toSync);
                     }
                 }
             }
@@ -303,7 +303,7 @@ namespace Dwarves.Core.Jobs
             /// </summary>
             public void ClearChunksToSynchronise()
             {
-                this.ToSync = null;
+                this.ChunksToSync = null;
             }
         }
     }
