@@ -139,6 +139,7 @@ namespace Dwarves.Core.Jobs
                 this.rebuildMeshInProgress = true;
 
                 // Merge the rebuild mesh sync chunks into the update mesh filter chunks
+                this.updateMeshFilterRequired = true;
                 if (this.updateMeshFilterSync == null)
                 {
                     if (this.rebuildMeshSync != null)
@@ -153,11 +154,8 @@ namespace Dwarves.Core.Jobs
                 }
 
                 // Reset the rebuild mesh required flags
-                this.rebuildMeshSync = null;
                 this.rebuildMeshRequired = false;
-
-                // Set the update mesh filter required flag
-                this.updateMeshFilterRequired = true;
+                this.rebuildMeshSync = null;
             }
         }
 
@@ -183,7 +181,10 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanUpdateMeshFilter()
         {
-            return !this.updateMeshFilterInProgress && this.updateMeshFilterRequired;
+            return
+                !this.updateMeshFilterInProgress &&
+                this.updateMeshFilterRequired &&
+                (this.updateMeshFilterSync == null || this.updateMeshFilterSync.IsSynchronised);
         }
 
         /// <summary>
@@ -193,6 +194,7 @@ namespace Dwarves.Core.Jobs
         {
             this.updateMeshFilterInProgress = true;
             this.updateMeshFilterRequired = false;
+            this.updateMeshFilterSync = null;
         }
 
         /// <summary>
@@ -258,8 +260,8 @@ namespace Dwarves.Core.Jobs
                 }
             }
 
-            this.rebuildMeshSync = SynchronisedUpdate.Merge(this.rebuildMeshSync, toSync);
             this.rebuildMeshRequired = true;
+            this.rebuildMeshSync = SynchronisedUpdate.Merge(this.rebuildMeshSync, toSync);
         }
 
         /// <summary>
