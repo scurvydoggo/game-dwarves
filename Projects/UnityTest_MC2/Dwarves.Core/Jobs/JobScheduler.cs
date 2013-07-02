@@ -81,18 +81,15 @@ namespace Dwarves.Core.Jobs
         /// Enqueue a master job. A master job requires exclusive access to all chunks.
         /// </summary>
         /// <param name="work">The work to be executed by the job.</param>
-        /// <param name="canEnqueue">Evaluates whether the job can be enqueued. If the master queue evaluate false the
-        /// job will not be enqueued.</param>
-        /// <param name="reserveQueue">Reserve the master queue to indicate that this job is currently queued or
-        /// executing.</param>
+        /// <param name="reserveQueue">Evaluates whether the job can be enqueued. If so, the master queue is reserved to
+        /// indicate that this job is currently queued or executing.</param>
         /// <param name="unreserveQueue">Un-reserve the master queue to indicate that this job is no longer queued or
         /// executing.</param>
         /// <param name="canSkip">Indicates whether the job can be skipped.</param>
         /// <returns>True if the job was enqueued.</returns>
         public bool EnqueueMaster(
             Action work,
-            Predicate<MasterJobQueue> canEnqueue,
-            Action<MasterJobQueue> reserveQueue,
+            Predicate<MasterJobQueue> reserveQueue,
             Action<MasterJobQueue> unreserveQueue,
             bool canSkip)
         {
@@ -106,14 +103,11 @@ namespace Dwarves.Core.Jobs
             this.queuesLock.Enter();
             try
             {
-                // Determine whether the job can be enqueued in the master queue
-                if (!canEnqueue(this.masterQueue))
+                // Reserve the master queue
+                if (!reserveQueue(this.masterQueue))
                 {
                     return false;
                 }
-
-                // Reserve the master queue
-                reserveQueue(this.masterQueue);
 
                 // Retain a reference to this master job
                 this.masterQueueJobs.Add(job);
