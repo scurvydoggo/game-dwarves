@@ -18,12 +18,22 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Indicates whether the a rebuild mesh job needs to be queued due to changes to point data.
         /// </summary>
-        private RequiredWork rebuildMeshState;
+        private bool rebuildMeshRequired;
 
         /// <summary>
         /// Indicates whether the a mesh filter update job needs to be queued due to changes to mesh data.
         /// </summary>
-        private RequiredWork updateMeshFilterState;
+        private bool updateMeshFilterRequired;
+
+        /// <summary>
+        /// The chunks which need to be updated in the same frame which are ready to have their meshes rebuilt.
+        /// </summary>
+        private SynchronisedUpdate rebuildMeshSync;
+
+        /// <summary>
+        /// The chunks which need to be updated in the same frame which are ready to have their mesh filters updated.
+        /// </summary>
+        private SynchronisedUpdate updateMeshFilterSync;
 
         /// <summary>
         /// Indicates whether a job is queued to load the points.
@@ -52,8 +62,6 @@ namespace Dwarves.Core.Jobs
         public ChunkJobQueueState(Vector2I chunk)
         {
             this.Chunk = chunk;
-            this.rebuildMeshState = new RequiredWork();
-            this.updateMeshFilterState = new RequiredWork();
             this.digCircleInProgress = new Dictionary<Vector2I, int>();
         }
 
@@ -90,7 +98,7 @@ namespace Dwarves.Core.Jobs
                 this.loadPointsInProgress = true;
             }
 
-            this.rebuildMeshState.IsUpdateRequired = true;
+            this.rebuildMeshRequired = true;
         }
 
         /// <summary>
@@ -117,7 +125,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanRebuildMesh(Vector2I chunk)
         {
-            return this.Chunk != chunk || (!this.rebuildMeshInProgress && this.rebuildMeshState.IsUpdateRequired);
+            return this.Chunk != chunk || (!this.rebuildMeshInProgress && this.rebuildMeshRequired);
         }
 
         /// <summary>
@@ -130,13 +138,26 @@ namespace Dwarves.Core.Jobs
             {
                 this.rebuildMeshInProgress = true;
 
-                // Indicate that a mesh filter update is required and add any chunks requiring a synchronised update
-                this.updateMeshFilterState.AddChunksToSynchronise(this.rebuildMeshState.ChunksToSync);
-                this.updateMeshFilterState.IsUpdateRequired = true;
-                
-                // Reset the rebuild mesh required state
-                this.rebuildMeshState.IsUpdateRequired = false;
-                this.rebuildMeshState.ClearChunksToSynchronise();
+                // Merge the rebuild mesh sync chunks into the update mesh filter chunks
+                if (this.updateMeshFilterSync == null)
+                {
+                    if (this.rebuildMeshSync != null)
+                    {
+                        this.updateMeshFilterSync = this.rebuildMeshSync;
+                        this.updateMeshFilterSync.SetReady(this.Chunk);
+                    }
+                }
+                else
+                {
+                    this.updateMeshFilterSync.Merge(this.rebuildMeshSync);
+                }
+
+                // Reset the rebuild mesh required flags
+                this.rebuildMeshSync = null;
+                this.rebuildMeshRequired = false;
+
+                // Set the update mesh filter required flag
+                this.updateMeshFilterRequired = true;
             }
         }
 
@@ -162,7 +183,7 @@ namespace Dwarves.Core.Jobs
         /// <returns>True if the job can be enqueued.</returns>
         public bool CanUpdateMeshFilter()
         {
-            return !this.updateMeshFilterInProgress && this.updateMeshFilterState.IsUpdateRequired;
+            return !this.updateMeshFilterInProgress && this.updateMeshFilterRequired;
         }
 
         /// <summary>
@@ -171,7 +192,7 @@ namespace Dwarves.Core.Jobs
         public void ReserveUpdateMeshFilter()
         {
             this.updateMeshFilterInProgress = true;
-            this.updateMeshFilterState.IsUpdateRequired = false;
+            this.updateMeshFilterRequired = false;
         }
 
         /// <summary>
@@ -237,8 +258,8 @@ namespace Dwarves.Core.Jobs
                 }
             }
 
-            this.rebuildMeshState.AddChunksToSynchronise(toSync);
-            this.rebuildMeshState.IsUpdateRequired = true;
+            this.rebuildMeshSync = SynchronisedUpdate.Merge(this.rebuildMeshSync, toSync);
+            this.rebuildMeshRequired = true;
         }
 
         /// <summary>
@@ -262,49 +283,5 @@ namespace Dwarves.Core.Jobs
         }
 
         #endregion
-
-        /// <summary>
-        /// Indicates the type of work that is required for a stage in the chunk pipeline. This class is not thread
-        /// safe.
-        /// </summary>
-        private class RequiredWork
-        {
-            /// <summary>
-            /// Gets or sets a value indicating whether work is required to update this aspect.
-            /// </summary>
-            public bool IsUpdateRequired { get; set; }
-
-            /// <summary>
-            /// Gets the chunks that need to be updated on-screen in a single frame.
-            /// </summary>
-            public SynchronisedUpdate ChunksToSync { get; private set; }
-
-            /// <summary>
-            /// Set the chunks to synchronise.
-            /// </summary>
-            /// <param name="toSync">The chunks to synchronise.</param>
-            public void AddChunksToSynchronise(SynchronisedUpdate toSync)
-            {
-                if (toSync != null)
-                {
-                    if (this.ChunksToSync == null)
-                    {
-                        this.ChunksToSync = toSync;
-                    }
-                    else
-                    {
-                        this.ChunksToSync.Merge(toSync);
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Reset the chunks to synchronise.
-            /// </summary>
-            public void ClearChunksToSynchronise()
-            {
-                this.ChunksToSync = null;
-            }
-        }
     }
 }
