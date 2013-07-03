@@ -155,11 +155,12 @@ namespace Dwarves.Component.Terrain
                 var meshes = new MeshArrays[chunksToSync.Length];
                 for (int i = 0; i < meshes.Length; i++)
                 {
-                    if (TerrainSystem.Instance.Terrain.TryGetChunk(this.Chunk, out chunk))
+                    Vector2I chunkIndex = chunksToSync[i];
+                    if (TerrainSystem.Instance.Terrain.TryGetChunk(chunkIndex, out chunk))
                     {
                         // Copy the mesh data into arrays
                         meshes[i] = new MeshArrays(
-                            this.Chunk,
+                            chunkIndex,
                             chunk.Mesh.Data.Vertices.ToArray(),
                             chunk.Mesh.Data.Normals.ToArray(),
                             chunk.Mesh.Data.Indices.ToArray(),
