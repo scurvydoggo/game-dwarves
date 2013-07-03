@@ -178,13 +178,27 @@ namespace Dwarves.Core.Jobs
         /// <summary>
         /// Check whether a UpdateMeshFilter job can execute.
         /// </summary>
+        /// <param name="chunksToSync">The chunks that need to have their mesh filter updated in the same frame as
+        /// this. Null if no chunk sync is required.</param>
         /// <returns>True if the job can be enqueued.</returns>
-        public bool CanUpdateMeshFilter()
+        public bool CanUpdateMeshFilter(out Vector2I[] chunksToSync)
         {
-            return
-                !this.updateMeshFilterInProgress &&
-                this.updateMeshFilterRequired &&
-                (this.updateMeshFilterSync == null || this.updateMeshFilterSync.IsSynchronised);
+            if (!this.updateMeshFilterInProgress && this.updateMeshFilterRequired)
+            {
+                if (this.updateMeshFilterSync == null)
+                {
+                    chunksToSync = null;
+                    return true;
+                }
+                else if (this.updateMeshFilterSync.IsSynchronised)
+                {
+                    chunksToSync = this.updateMeshFilterSync.GetChunks();
+                    return true;
+                }
+            }
+
+            chunksToSync = null;
+            return false;
         }
 
         /// <summary>

@@ -87,6 +87,15 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
+        /// Gets the chunks being synchronised.
+        /// </summary>
+        /// <returns>The chunks being synchronised.</returns>
+        public Vector2I[] GetChunks()
+        {
+            return this.content.GetChunks();
+        }
+
+        /// <summary>
         /// The actual content of the class.
         /// </summary>
         private class Content
@@ -152,6 +161,17 @@ namespace Dwarves.Core.Jobs
                         }
                     }
                 }
+            }
+
+            /// <summary>
+            /// Gets the chunks being synchronised.
+            /// </summary>
+            /// <returns>The chunks being synchronised.</returns>
+            public Vector2I[] GetChunks()
+            {
+                var chunks = new Vector2I[this.Chunks.Count];
+                this.Chunks.Keys.CopyTo(chunks, 0);
+                return chunks;
             }
         }
     }
