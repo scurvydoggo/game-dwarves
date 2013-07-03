@@ -90,12 +90,13 @@ namespace Dwarves.Component.Terrain
                     (q) => q.State.CanUpdateMeshFilter(out chunksToSync),
                     MissingQueue.Fail))
                 {
+                    Vector2I[] chunks = chunksToSync != null ? chunksToSync : new Vector2I[] { this.Chunk };
                     JobSystem.Instance.Scheduler.EnqueueChunks(
                         () => this.UpdateMeshFilterJob(chunksToSync),
                         (q) => q.State.ReserveUpdateMeshFilter(),
                         (q) => q.State.UnreserveUpdateMeshFilter(),
                         true,
-                        this.Chunk);
+                        chunks);
                 }
             }
             finally
