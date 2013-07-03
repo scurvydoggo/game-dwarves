@@ -26,14 +26,11 @@ namespace Dwarves.Core.Jobs
         private bool updateMeshFilterRequired;
 
         /// <summary>
-        /// The chunks which need to be updated in the same frame which are ready to have their meshes rebuilt.
+        /// Synchronises rebuilding of meshes for adjacent chunks such that they are updated in the same frame with no
+        /// flickering along the boundaries. This only applies in the situation where a change in the geometry spans
+        /// both meshes (such as a tunnel being dug across the boundary).
         /// </summary>
-        private SynchronisedUpdate rebuildMeshSync;
-
-        /// <summary>
-        /// The chunks which need to be updated in the same frame which are ready to have their mesh filters updated.
-        /// </summary>
-        private SynchronisedUpdate updateMeshFilterSync;
+        private SynchronisedUpdate meshFilterSync;
 
         /// <summary>
         /// Indicates whether a job is queued to load the points.
@@ -140,22 +137,13 @@ namespace Dwarves.Core.Jobs
 
                 // Merge the rebuild mesh sync chunks into the update mesh filter chunks
                 this.updateMeshFilterRequired = true;
-                if (this.updateMeshFilterSync == null)
+                if (this.meshFilterSync != null)
                 {
-                    if (this.rebuildMeshSync != null)
-                    {
-                        this.updateMeshFilterSync = this.rebuildMeshSync;
-                        this.updateMeshFilterSync.SetReady(this.Chunk);
-                    }
-                }
-                else
-                {
-                    this.updateMeshFilterSync.Merge(this.rebuildMeshSync);
+                    this.meshFilterSync.SetReady(this.Chunk);
                 }
 
                 // Reset the rebuild mesh required flags
                 this.rebuildMeshRequired = false;
-                this.rebuildMeshSync = null;
             }
         }
 
@@ -185,14 +173,14 @@ namespace Dwarves.Core.Jobs
         {
             if (!this.updateMeshFilterInProgress && this.updateMeshFilterRequired)
             {
-                if (this.updateMeshFilterSync == null)
+                if (this.meshFilterSync == null)
                 {
                     chunksToSync = null;
                     return true;
                 }
-                else if (this.updateMeshFilterSync.IsSynchronised)
+                else if (this.meshFilterSync.IsSynchronised)
                 {
-                    chunksToSync = this.updateMeshFilterSync.GetChunks();
+                    chunksToSync = this.meshFilterSync.GetChunks();
                     return true;
                 }
             }
@@ -208,7 +196,7 @@ namespace Dwarves.Core.Jobs
         {
             this.updateMeshFilterInProgress = true;
             this.updateMeshFilterRequired = false;
-            this.updateMeshFilterSync = null;
+            this.meshFilterSync = null;
         }
 
         /// <summary>
@@ -275,7 +263,7 @@ namespace Dwarves.Core.Jobs
             }
 
             this.rebuildMeshRequired = true;
-            this.rebuildMeshSync = SynchronisedUpdate.Merge(this.rebuildMeshSync, toSync);
+            this.meshFilterSync = SynchronisedUpdate.MergeAndReset(this.meshFilterSync, toSync);
         }
 
         /// <summary>

@@ -37,19 +37,19 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Merge the two instance such that they have the same chunks and share the same ready counter. If one of the
-        /// instances is null, the non-null instance is returned.
+        /// Merge the two instance such that they have the same chunks and share the same ready counter. Common
+        /// chunks are reset to non-ready. If one of the instances is null, the non-null instance is returned.
         /// </summary>
         /// <param name="first">The first instance.</param>
         /// <param name="second">The second instance.</param>
         /// <returns>The merged instance.</returns>
-        public static SynchronisedUpdate Merge(SynchronisedUpdate first, SynchronisedUpdate second)
+        public static SynchronisedUpdate MergeAndReset(SynchronisedUpdate first, SynchronisedUpdate second)
         {
             if (first != null)
             {
                 if (second != null)
                 {
-                    first.Merge(second);
+                    first.MergeAndReset(second);
                     return first;
                 }
                 else
@@ -64,15 +64,16 @@ namespace Dwarves.Core.Jobs
         }
 
         /// <summary>
-        /// Merge the two instance such that they have the same chunks and share the same ready counter.
+        /// Merge the two instance such that they have the same chunks and share the same ready counter. Common
+        /// chunks are reset to non-ready.
         /// </summary>
         /// <param name="other">The other instance.</param>
-        public void Merge(SynchronisedUpdate other)
+        public void MergeAndReset(SynchronisedUpdate other)
         {
             if (other != null)
             {
                 // Update the references such that both instances have the same content
-                this.content.AddOther(other.content);
+                this.content.MergeAndReset(other.content);
                 other.content = this.content;
             }
         }
@@ -145,19 +146,29 @@ namespace Dwarves.Core.Jobs
             }
 
             /// <summary>
-            /// Add the chunks from the other instance and update the ready count.
+            /// Merge the two instance such that they have the same chunks and share the same ready counter. Common
+            /// chunks are reset to non-ready.
             /// </summary>
             /// <param name="other">The other instance.</param>
-            public void AddOther(Content other)
+            public void MergeAndReset(Content other)
             {
-                foreach (KeyValuePair<Vector2I, bool> kvp in other.Chunks)
+                if (this != other)
                 {
-                    if (!this.Chunks.ContainsKey(kvp.Key))
+                    foreach (KeyValuePair<Vector2I, bool> kvp in other.Chunks)
                     {
-                        this.Chunks.Add(kvp.Key, kvp.Value);
-                        if (kvp.Value)
+                        bool existing;
+                        if (this.Chunks.TryGetValue(kvp.Key, out existing))
                         {
-                            this.meshFilterReadyCount++;
+                            if (existing)
+                            {
+                                // This chunk was previously ready, so reset and decrement
+                                this.Chunks[kvp.Key] = false;
+                                this.meshFilterReadyCount--;
+                            }
+                        }
+                        else
+                        {
+                            this.Chunks.Add(kvp.Key, false);
                         }
                     }
                 }
