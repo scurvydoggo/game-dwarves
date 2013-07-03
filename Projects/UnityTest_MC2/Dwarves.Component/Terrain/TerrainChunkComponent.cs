@@ -6,9 +6,10 @@
 namespace Dwarves.Component.Terrain
 {
     using Dwarves.Core;
-    using Dwarves.Core.Math;
-    using Dwarves.Core.Terrain;
-    using UnityEngine;
+using Dwarves.Core.Jobs;
+using Dwarves.Core.Math;
+using Dwarves.Core.Terrain;
+using UnityEngine;
 
     /// <summary>
     /// Represents a terrain mesh.
@@ -21,6 +22,11 @@ namespace Dwarves.Component.Terrain
         /// The mesh filter component.
         /// </summary>
         private MeshFilter cMeshFilter;
+
+        /// <summary>
+        /// The chunk and its neighbours.
+        /// </summary>
+        private Vector2I[] chunkAndNeighbours;
 
         /// <summary>
         /// Gets or sets the chunk index.
@@ -43,6 +49,7 @@ namespace Dwarves.Component.Terrain
         public void Start()
         {
             this.cMeshFilter = this.GetComponent<MeshFilter>();
+            this.chunkAndNeighbours = TerrainChunk.GetNeighboursIncluding(this.Chunk);
             this.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Terrain_GrassMud");
         }
 
@@ -51,21 +58,49 @@ namespace Dwarves.Component.Terrain
         /// </summary>
         public void Update()
         {
-            JobSystem.Instance.Scheduler.Enqueue(
-                () => this.RebuildMeshJob(),
-                (q) => q.State.CanRebuildMesh(this.Chunk),
-                (q) => q.State.ReserveRebuildMesh(this.Chunk),
-                (q) => q.State.UnreserveRebuildMesh(this.Chunk),
-                true,
-                TerrainChunk.GetNeighboursIncluding(this.Chunk));
-
-            JobSystem.Instance.Scheduler.Enqueue(
-                () => this.UpdateMeshFilterJob(),
-                (q) => q.State.CanUpdateMeshFilter(),
-                (q) => q.State.ReserveUpdateMeshFilter(),
-                (q) => q.State.UnreserveUpdateMeshFilter(),
-                true,
-                this.Chunk);
+            // Rebuild the mesh
+            JobSystem.Instance.Scheduler.BeginEnqueueChunks();
+            try
+            {
+                if (JobSystem.Instance.Scheduler.ForAllChunks(
+                    this.chunkAndNeighbours,
+                    (q) => q.State.CanRebuildMesh(this.Chunk),
+                    MissingQueue.Skip))
+                {
+                    JobSystem.Instance.Scheduler.EnqueueChunks(
+                        () => this.RebuildMeshJob(),
+                        (q) => q.State.ReserveRebuildMesh(this.Chunk),
+                        (q) => q.State.UnreserveRebuildMesh(this.Chunk),
+                        true,
+                        this.chunkAndNeighbours);
+                }
+            }
+            finally
+            {
+                JobSystem.Instance.Scheduler.EndEnqueueChunks();
+            }
+            
+            // Update the mesh filter
+            JobSystem.Instance.Scheduler.BeginEnqueueChunks();
+            try
+            {
+                if (JobSystem.Instance.Scheduler.ForAllChunks(
+                    this.Chunk,
+                    (q) => q.State.CanUpdateMeshFilter(),
+                    MissingQueue.Skip))
+                {
+                    JobSystem.Instance.Scheduler.EnqueueChunks(
+                        () => this.UpdateMeshFilterJob(),
+                        (q) => q.State.ReserveUpdateMeshFilter(),
+                        (q) => q.State.UnreserveUpdateMeshFilter(),
+                        true,
+                        this.Chunk);
+                }
+            }
+            finally
+            {
+                JobSystem.Instance.Scheduler.EndEnqueueChunks();
+            }
         }
 
         /// <summary>

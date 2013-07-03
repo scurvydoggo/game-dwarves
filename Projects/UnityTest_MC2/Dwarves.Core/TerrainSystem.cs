@@ -7,6 +7,7 @@ namespace Dwarves.Core
 {
     using System;
     using System.Collections.Generic;
+    using Dwarves.Core.Jobs;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
     using Dwarves.Core.Terrain;
@@ -211,13 +212,26 @@ namespace Dwarves.Core
                     chunks[0] = chunk;
                     neighbours.CopyTo(chunks, 1);
 
-                    JobSystem.Instance.Scheduler.Enqueue(
-                        () => this.LoadPointsJob(chunk),
-                        (q) => q.State.CanLoadPoints(chunk),
-                        (q) => q.State.ReserveLoadPoints(chunk),
-                        (q) => q.State.UnreserveLoadPoints(chunk),
-                        true,
-                        chunks);
+                    JobSystem.Instance.Scheduler.BeginEnqueueChunks();
+                    try
+                    {
+                        if (JobSystem.Instance.Scheduler.ForAllChunks(
+                            chunks,
+                            (q) => q.State.CanLoadPoints(chunk),
+                            MissingQueue.Skip))
+                        {
+                            JobSystem.Instance.Scheduler.EnqueueChunks(
+                                () => this.LoadPointsJob(chunk),
+                                (q) => q.State.ReserveLoadPoints(chunk),
+                                (q) => q.State.UnreserveLoadPoints(chunk),
+                                true,
+                                chunks);
+                        }
+                    }
+                    finally
+                    {
+                        JobSystem.Instance.Scheduler.EndEnqueueChunks();
+                    }
                 }
             }
         }

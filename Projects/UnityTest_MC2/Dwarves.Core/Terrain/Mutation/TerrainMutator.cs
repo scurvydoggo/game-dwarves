@@ -94,16 +94,29 @@ namespace Dwarves.Core.Terrain.Mutation
                 (int)((radius * 2) + 0.5f) + 3);
             RectangleI chunkBounds = Metrics.WorldToChunk(worldBounds);
             Vector2I[] chunks = TerrainChunk.GetChunks(chunkBounds);
+            SynchronisedUpdate toSync = chunks.Length > 1 ? new SynchronisedUpdate(chunks) : null;
 
             // Enqueue the job
-            SynchronisedUpdate toSync = chunks.Length > 1 ? new SynchronisedUpdate(chunks) : null;
-            JobSystem.Instance.Scheduler.Enqueue(
-                () => this.DigCircleJob(origin, radius),
-                (q) => q.State.CanDigCircle(chunk, originI, radiusI),
-                (q) => q.State.ReserveDigCircle(chunk, originI, radiusI, toSync),
-                (q) => q.State.UnreserveDigCircle(chunk, originI, radiusI),
-                false,
-                chunks);
+            JobSystem.Instance.Scheduler.BeginEnqueueChunks();
+            try
+            {
+                if (JobSystem.Instance.Scheduler.ForAllChunks(
+                    chunks,
+                    (q) => q.State.CanDigCircle(chunk, originI, radiusI),
+                    MissingQueue.Skip))
+                {
+                    JobSystem.Instance.Scheduler.EnqueueChunks(
+                        () => this.DigCircleJob(origin, radius),
+                        (q) => q.State.ReserveDigCircle(chunk, originI, radiusI, toSync),
+                        (q) => q.State.UnreserveDigCircle(chunk, originI, radiusI),
+                        false,
+                        chunks);
+                }
+            }
+            finally
+            {
+                JobSystem.Instance.Scheduler.EndEnqueueChunks();
+            }
         }
 
         #endregion Public Methods
