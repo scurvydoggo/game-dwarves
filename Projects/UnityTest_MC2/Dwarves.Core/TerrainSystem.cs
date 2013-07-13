@@ -32,14 +32,9 @@ namespace Dwarves.Core
         private TerrainPointGenerator pointGenerator;
 
         /// <summary>
-        /// The surface generator.
-        /// </summary>
-        private TerrainSurfaceGenerator surfaceGenerator;
-
-        /// <summary>
         /// Initialises a new instance of the TerrainSystem class.
         /// </summary>
-        /// <param name="seed">The seed value used by the terrain generator.</param>
+        /// <param name="seed">The seed value for the terrain.</param>
         /// <param name="octaves">The number of octaves of noise used by the terrain generator.</param>
         /// <param name="baseFrequency">The base frequency which is the frequency of the lowest octave used by the
         /// terrain generator.</param>
@@ -47,9 +42,7 @@ namespace Dwarves.Core
         /// terrain generator.</param>
         private TerrainSystem(int seed, int octaves, float baseFrequency, float persistence)
         {
-            // Initialise the noise generator
-            var simplexGenerator = new SimplexNoiseGenerator();
-            this.Noise = new CompoundNoiseGenerator(simplexGenerator, seed, (byte)octaves, baseFrequency, persistence);
+            this.Seed = seed;
 
             // Initialise the terrain
             this.Terrain = new DwarfTerrain();
@@ -59,8 +52,8 @@ namespace Dwarves.Core
 
             // Initialise the point/mesh construction objects
             this.serialiser = new TerrainSerialiser();
-            this.pointGenerator = new TerrainPointGenerator(this.Noise);
-            this.surfaceGenerator = new TerrainSurfaceGenerator(this.Noise);
+            this.pointGenerator = new TerrainPointGenerator(
+                new SimplexNoiseGenerator(), seed, octaves, baseFrequency, persistence);
             this.MeshBuilder = new TerrainMeshBuilder(this.Terrain);
         }
 
@@ -68,6 +61,11 @@ namespace Dwarves.Core
         /// Gets the singleton instance.
         /// </summary>
         public static TerrainSystem Instance { get; private set; }
+
+        /// <summary>
+        /// Gets the seed value for the terrain.
+        /// </summary>
+        public int Seed { get; private set; }
 
         /// <summary>
         /// Gets the terrain.
@@ -83,11 +81,6 @@ namespace Dwarves.Core
         /// Gets the mesh builder.
         /// </summary>
         public TerrainMeshBuilder MeshBuilder { get; private set; }
-
-        /// <summary>
-        /// Gets the noise generator for the terrain.
-        /// </summary>
-        public INoiseGenerator Noise { get; private set; }
 
         /// <summary>
         /// Initialises the singleton instance.
@@ -247,7 +240,7 @@ namespace Dwarves.Core
                 // Add the surface heights for the chunk's x position
                 if (!TerrainSystem.Instance.Terrain.SurfaceHeights.ContainsKey(chunkIndex.X))
                 {
-                    float[] heights = this.surfaceGenerator.GenerateSurfaceHeights(chunkIndex.X);
+                    float[] heights = this.pointGenerator.GenerateSurfaceHeights(chunkIndex.X);
                     TerrainSystem.Instance.Terrain.SurfaceHeights.Add(chunkIndex.X, heights);
                 }
 

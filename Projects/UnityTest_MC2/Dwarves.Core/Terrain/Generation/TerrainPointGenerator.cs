@@ -15,17 +15,57 @@ namespace Dwarves.Core.Terrain.Generation
     public class TerrainPointGenerator
     {
         /// <summary>
-        /// The noise generator.
+        /// The base noise generator.
         /// </summary>
-        private INoiseGenerator noiseGenerator;
+        private INoiseGenerator baseGenerator;
+
+        /// <summary>
+        /// The surface noise generator.
+        /// </summary>
+        private INoiseGenerator surfaceGenerator;
 
         /// <summary>
         /// Initialises a new instance of the TerrainPointGenerator class.
         /// </summary>
-        /// <param name="noiseGenerator">The noise generator.</param>
-        public TerrainPointGenerator(INoiseGenerator noiseGenerator)
+        /// <param name="baseGenerator">The base noise generator.</param>
+        /// <param name="seed">The seed value for the terrain.</param>
+        /// <param name="octaves">The number of octaves of noise used by the terrain generator.</param>
+        /// <param name="baseFrequency">The base frequency which is the frequency of the lowest octave used by the
+        /// terrain generator.</param>
+        /// <param name="persistence">The persistence value, which determines the amplitude for each octave used by the
+        /// terrain generator.</param>
+        public TerrainPointGenerator(
+            INoiseGenerator baseGenerator,
+            int seed,
+            int octaves,
+            float baseFrequency,
+            float persistence)
         {
-            this.noiseGenerator = noiseGenerator;
+            this.baseGenerator = baseGenerator;
+            this.surfaceGenerator =
+                new CompoundNoiseGenerator(this.baseGenerator, seed, (byte)octaves, baseFrequency, persistence);
+        }
+
+        /// <summary>
+        /// Generate the heights for each x-coordinate for the given chunk.
+        /// </summary>
+        /// <param name="chunkIndexX">The chunk index's x component.</param>
+        /// <returns>The surface heights.</returns>
+        public float[] GenerateSurfaceHeights(int chunkIndexX)
+        {
+            var heights = new float[Metrics.ChunkWidth];
+
+            int originX = chunkIndexX * Metrics.ChunkWidth;
+            for (int x = 0; x < Metrics.ChunkWidth; x++)
+            {
+                // Generate the noise value at this x position
+                float noise = this.surfaceGenerator.Generate(originX + x);
+
+                // Obtain the height by scaling the noise with the surface amplitude
+                heights[x] = noise * Metrics.SurfaceAmplitude;
+            }
+
+            return heights;
         }
 
         /// <summary>
