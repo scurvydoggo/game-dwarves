@@ -44,6 +44,8 @@ namespace Dwarves.Core.Terrain.Generation
             this.baseGenerator = baseGenerator;
             this.surfaceGenerator =
                 new CompoundNoiseGenerator(this.baseGenerator, seed, (byte)octaves, baseFrequency, persistence);
+
+            // Create the terrain feature generators
         }
 
         /// <summary>

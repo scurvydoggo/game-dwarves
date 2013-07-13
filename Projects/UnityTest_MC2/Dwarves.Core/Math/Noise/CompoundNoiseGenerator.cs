@@ -14,6 +14,16 @@ namespace Dwarves.Core.Math.Noise
     public class CompoundNoiseGenerator : INoiseGenerator
     {
         /// <summary>
+        /// The base noise generator.
+        /// </summary>
+        private INoiseGenerator baseGenerator;
+
+        /// <summary>
+        /// The number of octaves of noise.
+        /// </summary>
+        private byte octaves;
+
+        /// <summary>
         /// The noise function seed value for each octave.
         /// </summary>
         private Dictionary<byte, int> seeds;
@@ -27,26 +37,6 @@ namespace Dwarves.Core.Math.Noise
         /// The frequency for each octave.
         /// </summary>
         private Dictionary<byte, float> amplitudes;
-
-        /// <summary>
-        /// The seed value.
-        /// </summary>
-        private int seed;
-
-        /// <summary>
-        /// The number of octaves of noise.
-        /// </summary>
-        private byte octaves;
-
-        /// <summary>
-        /// The base frequency which is the frequency of the lowest octave.
-        /// </summary>
-        private float baseFrequency;
-
-        /// <summary>
-        /// The persistence value, which determines the amplitude for each octave.
-        /// </summary>
-        private float persistence;
 
         /// <summary>
         /// Initialises a new instance of the CompoundNoiseGenerator class.
@@ -63,96 +53,29 @@ namespace Dwarves.Core.Math.Noise
             float baseFrequency,
             float persistence)
         {
-            this.BaseGenerator = baseGenerator;
-            this.seed = seed;
+            this.baseGenerator = baseGenerator;
             this.octaves = octaves;
-            this.baseFrequency = baseFrequency;
-            this.persistence = persistence;
-            this.UpdateNoiseProperties();
-        }
 
-        /// <summary>
-        /// Gets or sets the base noise generator.
-        /// </summary>
-        public INoiseGenerator BaseGenerator { get; set; }
-
-        /// <summary>
-        /// Gets or sets the seed value.
-        /// </summary>
-        public int Seed
-        {
-            get
+            // Generate the seed for each octave's noise function
+            var random = new Random(seed);
+            this.seeds = new Dictionary<byte, int>(this.octaves);
+            for (byte i = 0; i < this.octaves; i++)
             {
-                return this.seed;
+                this.seeds[i] = random.Next();
             }
 
-            set
+            // Pre-calculate the frequency for each octave
+            this.frequencies = new Dictionary<byte, float>(this.octaves);
+            for (byte i = 0; i < this.octaves; i++)
             {
-                if (this.seed != value)
-                {
-                    this.seed = value;
-                    this.UpdateNoiseProperties();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of octaves.
-        /// </summary>
-        public byte Octaves
-        {
-            get
-            {
-                return this.octaves;
+                this.frequencies[i] = (float)Math.Pow(2, i) * baseFrequency;
             }
 
-            set
+            // Pre-calculate the amplitude for each octave
+            this.amplitudes = new Dictionary<byte, float>(this.octaves);
+            for (byte i = 0; i < this.octaves; i++)
             {
-                if (this.octaves != value)
-                {
-                    this.octaves = value;
-                    this.UpdateNoiseProperties();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the base frequency which is the frequency of the lowest octave.
-        /// </summary>
-        public float BaseFrequency
-        {
-            get
-            {
-                return this.baseFrequency;
-            }
-
-            set
-            {
-                if (this.baseFrequency != value)
-                {
-                    this.baseFrequency = value;
-                    this.UpdateNoiseProperties();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the persistence value, which determines the amplitude for each octave.
-        /// </summary>
-        public float Persistence
-        {
-            get
-            {
-                return this.persistence;
-            }
-
-            set
-            {
-                if (this.persistence != value)
-                {
-                    this.persistence = value;
-                    this.UpdateNoiseProperties();
-                }
+                this.amplitudes[i] = (float)Math.Pow(persistence, i);
             }
         }
 
@@ -165,13 +88,13 @@ namespace Dwarves.Core.Math.Noise
         {
             float total = 0;
 
-            for (byte i = 0; i < this.Octaves; i++)
+            for (byte i = 0; i < this.octaves; i++)
             {
                 int seed = this.seeds[i];
                 float frequency = this.frequencies[i];
                 float amplitude = this.amplitudes[i];
 
-                total += this.BaseGenerator.Generate(seed, x * frequency) * amplitude;
+                total += this.baseGenerator.Generate(seed, x * frequency) * amplitude;
             }
 
             return total;
@@ -187,13 +110,13 @@ namespace Dwarves.Core.Math.Noise
         {
             float total = 0;
 
-            for (byte i = 0; i < this.Octaves; i++)
+            for (byte i = 0; i < this.octaves; i++)
             {
                 int seed = this.seeds[i];
                 float frequency = this.frequencies[i];
                 float amplitude = this.amplitudes[i];
 
-                total += this.BaseGenerator.Generate(seed, x * frequency, y * frequency) * amplitude;
+                total += this.baseGenerator.Generate(seed, x * frequency, y * frequency) * amplitude;
             }
 
             return total;
@@ -210,13 +133,13 @@ namespace Dwarves.Core.Math.Noise
         {
             float total = 0;
 
-            for (byte i = 0; i < this.Octaves; i++)
+            for (byte i = 0; i < this.octaves; i++)
             {
                 int seed = this.seeds[i];
                 float frequency = this.frequencies[i];
                 float amplitude = this.amplitudes[i];
 
-                total += this.BaseGenerator.Generate(seed, x * frequency, y * frequency, z * frequency) * amplitude;
+                total += this.baseGenerator.Generate(seed, x * frequency, y * frequency, z * frequency) * amplitude;
             }
 
             return total;
@@ -233,35 +156,6 @@ namespace Dwarves.Core.Math.Noise
         public float Generate(float x, float y, float z, float w)
         {
             throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Update the properties used by the noise generator.
-        /// </summary>
-        private void UpdateNoiseProperties()
-        {
-            var random = new Random(this.Seed);
-
-            // Generate the seed for each octave's noise function
-            this.seeds = new Dictionary<byte, int>(this.Octaves);
-            for (byte i = 0; i < this.Octaves; i++)
-            {
-                this.seeds[i] = random.Next();
-            }
-
-            // Pre-calculate the frequency for each octave
-            this.frequencies = new Dictionary<byte, float>(this.Octaves);
-            for (byte i = 0; i < this.Octaves; i++)
-            {
-                this.frequencies[i] = (float)Math.Pow(2, i) * this.BaseFrequency;
-            }
-
-            // Pre-calculate the amplitude for each octave
-            this.amplitudes = new Dictionary<byte, float>(this.Octaves);
-            for (byte i = 0; i < this.Octaves; i++)
-            {
-                this.amplitudes[i] = (float)Math.Pow(this.Persistence, i);
-            }
         }
     }
 }

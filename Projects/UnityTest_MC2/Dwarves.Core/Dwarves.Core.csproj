@@ -55,6 +55,7 @@
     <Compile Include="Jobs\MasterJobQueue.cs" />
     <Compile Include="Jobs\SpinLock.cs" />
     <Compile Include="Jobs\SynchronisedUpdate.cs" />
+    <Compile Include="Math\Noise\SeededNoiseGenerator.cs" />
     <Compile Include="TerrainSystem.cs" />
     <Compile Include="JobSystem.cs" />
     <Compile Include="Geometry\MeshData.cs" />
