@@ -5,6 +5,8 @@
 // ----------------------------------------------------------------------------
 namespace Dwarves.Core.Terrain.Generation
 {
+    using System;
+    using System.Collections.Generic;
     using Dwarves.Core.Lighting;
     using Dwarves.Core.Math;
     using Dwarves.Core.Math.Noise;
@@ -23,6 +25,11 @@ namespace Dwarves.Core.Terrain.Generation
         /// The surface noise generator.
         /// </summary>
         private INoiseGenerator surfaceGenerator;
+
+        /// <summary>
+        /// The cave attributes.
+        /// </summary>
+        private CaveAttributes[] caves;
 
         /// <summary>
         /// Initialises a new instance of the TerrainPointGenerator class.
@@ -45,7 +52,8 @@ namespace Dwarves.Core.Terrain.Generation
             this.surfaceGenerator =
                 new CompoundNoiseGenerator(this.baseGenerator, seed, (byte)octaves, baseFrequency, persistence);
 
-            // Create the terrain feature generators
+            // Set the cave attributes
+            this.caves = this.CreateCaveAttributes(seed);
         }
 
         /// <summary>
@@ -126,6 +134,22 @@ namespace Dwarves.Core.Terrain.Generation
             }
 
             chunk.SurfacePosition = surfacePosition.Value;
+        }
+
+        /// <summary>
+        /// Creates the cave attributes.
+        /// </summary>
+        /// <param name="seed">The seed value for the terrain.</param>
+        /// <returns>The cave attributes.</returns>
+        private CaveAttributes[] CreateCaveAttributes(int seed)
+        {
+            var caves = new List<CaveAttributes>();
+            var random = new Random(seed);
+
+            // Test cave
+            caves.Add(new CaveAttributes(random.Next(), 0.5f));
+
+            return caves.ToArray();
         }
 
         /// <summary>
