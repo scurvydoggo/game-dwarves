@@ -194,22 +194,25 @@ namespace Dwarves.Core.Terrain.Generation
             }
             else
             {
+                material = TerrainMaterial.Dirt;
+                light = Colour.White;
+
                 if (y < surfaceI)
                 {
                     // The voxel lies under the surface
                     foreDensity = TerrainVoxel.DensityMin;
                     backDensity = TerrainVoxel.DensityMin;
-                    material = TerrainMaterial.Dirt;
-                    light = Colour.White;
                 }
                 else
                 {
                     // This voxel lies on the surface, so scale the density by the noise value
                     foreDensity = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
                     backDensity = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
-                    material = TerrainMaterial.Dirt;
-                    light = Colour.White;
                 }
+
+                // Dig out underground features in the foreground
+                // TODO
+                // foreDensity = ???
             }
 
             // TODO: Remove this
