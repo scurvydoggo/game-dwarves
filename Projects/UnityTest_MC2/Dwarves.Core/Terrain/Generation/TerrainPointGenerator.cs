@@ -88,47 +88,18 @@ namespace Dwarves.Core.Terrain.Generation
             int originX = chunk.Index.X * Metrics.ChunkWidth;
             int originY = chunk.Index.Y * Metrics.ChunkHeight;
 
-            // Fill the points
             SurfacePosition? surfacePosition = null;
             for (int x = 0; x < Metrics.ChunkWidth; x++)
             {
                 // Determine where the surface lies for this x position
                 float surface = surfaceHeights[x];
-                int surfaceI = (int)System.Math.Floor(surface);
-                float surfaceFractional = surface - surfaceI;
 
-                // Create the points
+                // Update the on-going check for the surface position
+                surfacePosition = this.UpdateSurfacePosition(surfacePosition, surface, originY);
+
                 for (int y = 0; y < Metrics.ChunkHeight; y++)
                 {
-                    chunk.Points[x, y] = this.CreatePoint(originX + x, originY + y, surfaceI, surfaceFractional);
-                }
-
-                // Determine whether the surface lies above/below/inside at this x position
-                SurfacePosition surfacePositionX;
-                if (surfaceI < originY)
-                {
-                    surfacePositionX = SurfacePosition.Below;
-                }
-                else
-                {
-                    if (surfaceI < originY + Metrics.ChunkHeight)
-                    {
-                        surfacePositionX = SurfacePosition.Inside;
-                    }
-                    else
-                    {
-                        surfacePositionX = SurfacePosition.Above;
-                    }
-                }
-
-                // Check if the surface so far lies above/below/inside the chunk
-                if (!surfacePosition.HasValue)
-                {
-                    surfacePosition = surfacePositionX;
-                }
-                else if (surfacePosition.Value != surfacePositionX)
-                {
-                    surfacePosition = SurfacePosition.Inside;
+                    chunk.Points[x, y] = this.CreatePoint(originX + x, originY + y, surface);
                 }
             }
 
@@ -152,15 +123,61 @@ namespace Dwarves.Core.Terrain.Generation
         }
 
         /// <summary>
+        /// Determines the surface position relative to an entire chunk during point generation.
+        /// </summary>
+        /// <param name="current">The previously identified surface position.</param>
+        /// <param name="surface">The surface position.</param>
+        /// <param name="chunkOriginY">The Y origin of the chunk.</param>
+        /// <returns>THe updated surface position.</returns>
+        private SurfacePosition UpdateSurfacePosition(SurfacePosition? current, float surface, int chunkOriginY)
+        {
+            if (current.HasValue && current.Value == SurfacePosition.Inside)
+            {
+                return current.Value;
+            }
+            else
+            {
+                int surfaceI = (int)System.Math.Floor(surface);
+                SurfacePosition surfacePositionX;
+                if (surfaceI < chunkOriginY)
+                {
+                    surfacePositionX = SurfacePosition.Below;
+                }
+                else
+                {
+                    if (surfaceI < chunkOriginY + Metrics.ChunkHeight)
+                    {
+                        surfacePositionX = SurfacePosition.Inside;
+                    }
+                    else
+                    {
+                        surfacePositionX = SurfacePosition.Above;
+                    }
+                }
+
+                if (current.HasValue && current.Value != surfacePositionX)
+                {
+                    return SurfacePosition.Inside;
+                }
+                else
+                {
+                    return surfacePositionX;
+                }
+            }
+        }
+
+        /// <summary>
         /// Creates the point at the given world position.
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
-        /// <param name="surfaceI">The integral portion of the surface height at this x position.</param>
-        /// <param name="surfaceFractional">The fractional portion of the surface height at this x position.</param>
-        /// <returns>The point. Null value represents an 'air' point.</returns>
-        private TerrainPoint CreatePoint(int x, int y, int surfaceI, float surfaceFractional)
+        /// <param name="surface">The surface height at this x position.</param>
+        /// <returns>The point.</returns>
+        private TerrainPoint CreatePoint(int x, int y, float surface)
         {
+            int surfaceI = (int)System.Math.Floor(surface);
+            float surfaceFractional = surface - surfaceI;
+
             byte density;
             TerrainMaterial material;
             Colour? light;
@@ -169,7 +186,7 @@ namespace Dwarves.Core.Terrain.Generation
             if (y == surfaceI)
             {
                 // This voxel lies on the surface, so scale the density by the noise value
-                density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surfaceFractional));
+                density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
                 material = TerrainMaterial.Dirt;
                 light = Colour.White;
             }
