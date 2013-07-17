@@ -178,31 +178,34 @@ namespace Dwarves.Core.Terrain.Generation
             int surfaceI = (int)System.Math.Floor(surface);
             float surfaceFractional = surface - surfaceI;
 
-            byte density;
+            byte fillDensity;
             TerrainMaterial material;
             Colour? light;
 
             // Determine the density and material at this point
-            if (y == surfaceI)
+            if (y > surfaceI)
             {
-                // This voxel lies on the surface, so scale the density by the noise value
-                density = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
-                material = TerrainMaterial.Dirt;
-                light = Colour.White;
-            }
-            else if (y <= surfaceI)
-            {
-                // The voxel lies under the surface
-                density = TerrainVoxel.DensityMin;
-                material = TerrainMaterial.Dirt;
+                // The voxel lies above the surface
+                fillDensity = TerrainVoxel.DensityMax;
+                material = TerrainMaterial.Undefined;
                 light = Colour.White;
             }
             else
             {
-                // The voxel lies above the surface
-                density = TerrainVoxel.DensityMax;
-                material = TerrainMaterial.Undefined;
-                light = Colour.White;
+                if (y < surfaceI)
+                {
+                    // The voxel lies under the surface
+                    fillDensity = TerrainVoxel.DensityMin;
+                    material = TerrainMaterial.Dirt;
+                    light = Colour.White;
+                }
+                else
+                {
+                    // This voxel lies on the surface, so scale the density by the noise value
+                    fillDensity = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
+                    material = TerrainMaterial.Dirt;
+                    light = Colour.White;
+                }
             }
 
             // TODO: Remove this
@@ -213,10 +216,10 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Create the voxel at each depth point
             TerrainVoxel[] voxels = new TerrainVoxel[Metrics.ChunkDepth];
-            for (int z = 0; z < voxels.Length; z++)
+            voxels[0] = TerrainVoxel.CreateEmpty();
+            for (int z = 1; z < voxels.Length; z++)
             {
-                voxels[z] = z > 0 && z < voxels.Length - 1 ?
-                    new TerrainVoxel(material, density) : TerrainVoxel.CreateEmpty();
+                voxels[z] = new TerrainVoxel(material, fillDensity);
             }
 
             return new TerrainPoint(voxels, light);
