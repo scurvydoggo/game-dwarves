@@ -45,7 +45,7 @@ namespace Dwarves.Core.Terrain.Geometry
 
             // Create the mesh for each cell in the chunk
             var chunkOrigin = Metrics.GetChunkOrigin(chunkIndex);
-            for (int z = 0; z < Metrics.ChunkDepth; z++)
+            for (int z = -1; z < Metrics.ChunkDepth; z++)
             {
                 for (int x = chunkOrigin.X; x < chunkOrigin.X + Metrics.ChunkWidth; x++)
                 {

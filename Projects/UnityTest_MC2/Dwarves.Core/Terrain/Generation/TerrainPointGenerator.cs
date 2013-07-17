@@ -216,8 +216,7 @@ namespace Dwarves.Core.Terrain.Generation
 
             // Create the voxel at each depth point
             TerrainVoxel[] voxels = new TerrainVoxel[Metrics.ChunkDepth];
-            voxels[0] = TerrainVoxel.CreateEmpty();
-            for (int z = 1; z < voxels.Length; z++)
+            for (int z = 0; z < voxels.Length; z++)
             {
                 voxels[z] = new TerrainVoxel(material, fillDensity);
             }

@@ -324,7 +324,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 TerrainPoint point = chunk.Points[chunkPos.X, chunkPos.Y];
                 if (point != null)
                 {
-                    for (int z = 0; z < Metrics.DigDepth; z++)
+                    for (int z = -1; z < Metrics.DigDepth; z++)
                     {
                         // Get the voxel
                         TerrainVoxel voxel = point.GetVoxel(z);
