@@ -16,9 +16,8 @@ namespace Dwarves.Core.Terrain.Serialisation
         /// <summary>
         /// Serialise the point data of the chunk.
         /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="chunk">The chunk.</param>
-        public void SerialisePointData(Vector2I chunkIndex, TerrainChunk chunk)
+        public void SerialisePointData(TerrainChunk chunk)
         {
             // TODO
             throw new NotImplementedException();
@@ -27,10 +26,9 @@ namespace Dwarves.Core.Terrain.Serialisation
         /// <summary>
         /// Attempt to deserialise the point data of the chunk.
         /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="chunk">The chunk.</param>
         /// <returns>True if the terrain chunk was deserialised.</returns>
-        public bool TryDeserialisePoints(Vector2I chunkIndex, TerrainChunk chunk)
+        public bool TryDeserialisePoints(TerrainChunk chunk)
         {
             // TODO: This is not yet implemented
             return false;

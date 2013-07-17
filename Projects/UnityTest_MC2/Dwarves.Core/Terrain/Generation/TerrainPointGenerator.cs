@@ -81,13 +81,12 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Creates a new chunk.
         /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="chunk">The chunk.</param>
         /// <param name="surfaceHeights">The surface heights.</param>
-        public void GeneratePoints(Vector2I chunkIndex, TerrainChunk chunk, float[] surfaceHeights)
+        public void GeneratePoints(TerrainChunk chunk, float[] surfaceHeights)
         {
-            int originX = chunkIndex.X * Metrics.ChunkWidth;
-            int originY = chunkIndex.Y * Metrics.ChunkHeight;
+            int originX = chunk.Index.X * Metrics.ChunkWidth;
+            int originY = chunk.Index.Y * Metrics.ChunkHeight;
 
             // Fill the points
             SurfacePosition? surfacePosition = null;

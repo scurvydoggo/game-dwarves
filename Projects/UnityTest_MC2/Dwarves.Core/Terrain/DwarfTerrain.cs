@@ -72,18 +72,17 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Add a chunk.
         /// </summary>
-        /// <param name="chunkIndex">The chunk index.</param>
         /// <param name="chunk">The chunk to add.</param>
-        public void AddChunk(Vector2I chunkIndex, TerrainChunk chunk)
+        public void AddChunk(TerrainChunk chunk)
         {
             lock (this.chunksLock)
             {
-                this.chunks.Add(chunkIndex, chunk);
+                this.chunks.Add(chunk.Index, chunk);
             }
 
             if (this.ChunkAdded != null)
             {
-                this.ChunkAdded(this, chunkIndex);
+                this.ChunkAdded(this, chunk.Index);
             }
         }
 

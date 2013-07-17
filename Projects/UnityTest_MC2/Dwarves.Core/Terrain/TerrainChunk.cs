@@ -15,11 +15,18 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initialises a new instance of the TerrainChunk class.
         /// </summary>
-        public TerrainChunk()
+        /// <param name="chunkIndex">The chunk index.</param>
+        public TerrainChunk(Vector2I chunkIndex)
         {
+            this.Index = chunkIndex;
             this.Points = new TerrainPoint[Metrics.ChunkWidth, Metrics.ChunkHeight];
             this.Mesh = new TerrainChunkMesh();
         }
+
+        /// <summary>
+        /// Gets the chunk index.
+        /// </summary>
+        public Vector2I Index { get; private set; }
 
         /// <summary>
         /// Gets the points in the chunk.

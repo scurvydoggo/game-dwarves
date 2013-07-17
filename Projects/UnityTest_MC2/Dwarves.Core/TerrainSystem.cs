@@ -244,7 +244,7 @@ namespace Dwarves.Core
                     TerrainSystem.Instance.Terrain.SurfaceHeights.Add(chunkIndex.X, heights);
                 }
 
-                TerrainSystem.Instance.Terrain.AddChunk(chunkIndex, new TerrainChunk());
+                TerrainSystem.Instance.Terrain.AddChunk(new TerrainChunk(chunkIndex));
             }
         }
 
@@ -276,11 +276,11 @@ namespace Dwarves.Core
             TerrainChunk chunk = this.Terrain.GetChunk(chunkIndex);
 
             // Attempt to deserialise the point data
-            if (!this.serialiser.TryDeserialisePoints(chunkIndex, chunk))
+            if (!this.serialiser.TryDeserialisePoints(chunk))
             {
                 // Generate the point data
                 float[] heights = this.Terrain.SurfaceHeights[chunkIndex.X];
-                this.pointGenerator.GeneratePoints(chunkIndex, chunk, heights);
+                this.pointGenerator.GeneratePoints(chunk, heights);
             }
         }
     }
