@@ -178,7 +178,8 @@ namespace Dwarves.Core.Terrain.Generation
             int surfaceI = (int)System.Math.Floor(surface);
             float surfaceFractional = surface - surfaceI;
 
-            byte fillDensity;
+            byte foreDensity;
+            byte backDensity;
             TerrainMaterial material;
             Colour? light;
 
@@ -186,7 +187,8 @@ namespace Dwarves.Core.Terrain.Generation
             if (y > surfaceI)
             {
                 // The voxel lies above the surface
-                fillDensity = TerrainVoxel.DensityMax;
+                foreDensity = TerrainVoxel.DensityMax;
+                backDensity = TerrainVoxel.DensityMax;
                 material = TerrainMaterial.Undefined;
                 light = Colour.White;
             }
@@ -195,14 +197,16 @@ namespace Dwarves.Core.Terrain.Generation
                 if (y < surfaceI)
                 {
                     // The voxel lies under the surface
-                    fillDensity = TerrainVoxel.DensityMin;
+                    foreDensity = TerrainVoxel.DensityMin;
+                    backDensity = TerrainVoxel.DensityMin;
                     material = TerrainMaterial.Dirt;
                     light = Colour.White;
                 }
                 else
                 {
                     // This voxel lies on the surface, so scale the density by the noise value
-                    fillDensity = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
+                    foreDensity = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
+                    backDensity = (byte)(TerrainVoxel.DensityMax - (TerrainVoxel.DensityMax * surface));
                     material = TerrainMaterial.Dirt;
                     light = Colour.White;
                 }
@@ -214,11 +218,17 @@ namespace Dwarves.Core.Terrain.Generation
             light = new Colour(lightTest, lightTest, lightTest);
             // TODO: Remove this
 
-            // Create the voxel at each depth point
+            // Create the foreground voxels (diggable terrain)
             TerrainVoxel[] voxels = new TerrainVoxel[Metrics.ChunkDepth];
-            for (int z = 0; z < voxels.Length; z++)
+            for (int z = 0; z < Metrics.DigDepth; z++)
             {
-                voxels[z] = new TerrainVoxel(material, fillDensity);
+                voxels[z] = new TerrainVoxel(material, foreDensity);
+            }
+
+            // Create the background voxels (undiggable terrain)
+            for (int z = Metrics.DigDepth; z < voxels.Length; z++)
+            {
+                voxels[z] = new TerrainVoxel(material, backDensity);
             }
 
             return new TerrainPoint(voxels, light);
