@@ -95,11 +95,24 @@ namespace Dwarves.Core.Terrain.Generation
                 float surface = surfaceHeights[x];
 
                 // Update the on-going check for the surface position
-                surfacePosition = this.UpdateSurfacePosition(surfacePosition, surface, originY);
+                surfacePosition = this.CheckSurfacePosition(surfacePosition, surface, originY);
 
                 for (int y = 0; y < Metrics.ChunkHeight; y++)
                 {
-                    chunk.Points[x, y] = this.CreatePoint(originX + x, originY + y, surface);
+                    // Calculate the background and foreground densities
+                    byte background = this.GetBackgroundDensity(originX + x, originY + y, surface);
+                    byte foreground = background;
+
+                    // Determine the material
+                    TerrainMaterial material = this.GetMaterial(originX + x, originY + y, surface);
+
+                    // TODO: Remove this
+                    int val = 255 - (int)(System.Math.Abs((float)(originY + y)) * 8);
+                    byte lightTest = val > 0 ? (byte)val : (byte)0;
+                    var light = new Colour(lightTest, lightTest, lightTest);
+                    // TODO: Remove this
+
+                    chunk.Points[x, y] = new TerrainPoint(foreground, background, material, light);
                 }
             }
 
@@ -129,7 +142,7 @@ namespace Dwarves.Core.Terrain.Generation
         /// <param name="surface">The surface position.</param>
         /// <param name="chunkOriginY">The Y origin of the chunk.</param>
         /// <returns>THe updated surface position.</returns>
-        private SurfacePosition UpdateSurfacePosition(SurfacePosition? current, float surface, int chunkOriginY)
+        private SurfacePosition CheckSurfacePosition(SurfacePosition? current, float surface, int chunkOriginY)
         {
             if (current.HasValue && current.Value == SurfacePosition.Inside)
             {
@@ -165,63 +178,55 @@ namespace Dwarves.Core.Terrain.Generation
                 }
             }
         }
-
+        
         /// <summary>
-        /// Creates the point at the given world position.
+        /// Determines the background density at the given world position.
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
         /// <param name="surface">The surface height at this x position.</param>
-        /// <returns>The point.</returns>
-        private TerrainPoint CreatePoint(int x, int y, float surface)
+        /// <returns>The background density.</returns>
+        private byte GetBackgroundDensity(int x, int y, float surface)
         {
             int surfaceI = (int)System.Math.Floor(surface);
-            float surfaceFractional = surface - surfaceI;
-
-            byte foreground;
-            byte background;
-            TerrainMaterial material;
-            Colour? light;
-
-            // Determine the density and material at this point
             if (y > surfaceI)
             {
-                // The voxel lies above the surface
-                foreground = TerrainPoint.DensityMax;
-                background = TerrainPoint.DensityMax;
-                material = TerrainMaterial.Undefined;
-                light = Colour.White;
+                // The point lies above the surface
+                return TerrainPoint.DensityMax;
             }
             else
             {
-                material = TerrainMaterial.Dirt;
-                light = Colour.White;
-
                 if (y < surfaceI)
                 {
-                    // The voxel lies under the surface
-                    foreground = TerrainPoint.DensityMin;
-                    background = TerrainPoint.DensityMin;
+                    // The point lies fully below the surface
+                    return TerrainPoint.DensityMin;
                 }
                 else
                 {
-                    // This voxel lies on the surface, so scale the density by the noise value
-                    foreground = (byte)(TerrainPoint.DensityMax - (TerrainPoint.DensityMax * surface));
-                    background = (byte)(TerrainPoint.DensityMax - (TerrainPoint.DensityMax * surface));
+                    // The surface lies between this point and the point above it, so interpolate the density
+                    return (byte)(TerrainPoint.DensityMax - (TerrainPoint.DensityMax * (surface - surfaceI)));
                 }
-
-                // Dig out underground features in the foreground
-                // TODO
-                // foreDensity = ???
             }
+        }
 
-            // TODO: Remove this
-            int val = 255 - (int)(System.Math.Abs((float)y) * 8);
-            byte lightTest = val > 0 ? (byte)val : (byte)0;
-            light = new Colour(lightTest, lightTest, lightTest);
-            // TODO: Remove this
-
-            return new TerrainPoint(foreground, background, material, light);
+        /// <summary>
+        /// Determines the material at the given world position.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="surface">The surface height at this x position.</param>
+        /// <returns>The material.</returns>
+        private TerrainMaterial GetMaterial(int x, int y, float surface)
+        {
+            int surfaceI = (int)System.Math.Floor(surface);
+            if (y > surfaceI)
+            {
+                return TerrainMaterial.Undefined;
+            }
+            else
+            {
+                return TerrainMaterial.Dirt;
+            }
         }
     }
 }
