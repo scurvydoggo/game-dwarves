@@ -83,7 +83,6 @@
     <Compile Include="Terrain\TerrainMaterial.cs" />
     <Compile Include="Metrics.cs" />
     <Compile Include="Terrain\TerrainPoint.cs" />
-    <Compile Include="Terrain\TerrainVoxel.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

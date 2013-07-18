@@ -167,7 +167,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                         var o = new Vector2I(originI.X, yAStep);
                         var s = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, TerrainVoxel.DensityMax);
+                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, TerrainPoint.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.LeftOrDown, xA - xBase);
                     }
 
@@ -180,7 +180,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                         var o = new Vector2I(originI.X, yBStep);
                         var s = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, TerrainVoxel.DensityMax);
+                        this.SetDensityLine(o, o.X - s.X - 1, Axis.X, Direction.LeftOrDown, TerrainPoint.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.LeftOrDown, xB - xBase);
                     }
                 }
@@ -195,7 +195,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                         var o = new Vector2I(originI.X, yAStep);
                         var s = new Vector2I(xBase, yAStep);
-                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
+                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainPoint.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
                     }
 
@@ -208,7 +208,7 @@ namespace Dwarves.Core.Terrain.Mutation
                         // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                         var o = new Vector2I(originI.X, yBStep);
                         var s = new Vector2I(xBase, yBStep);
-                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
+                        this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainPoint.DensityMax);
                         this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
                     }
                 }
@@ -235,7 +235,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Dig along the segment from [xBase, yAStep] to [xBase + 1, yAStep] at xA
                 var o = new Vector2I(originI.X, yAStep);
                 var s = new Vector2I(xBase, yAStep);
-                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
+                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainPoint.DensityMax);
                 this.DigSegment(s, Axis.X, Direction.RightOrUp, xA - xBase);
             }
 
@@ -248,7 +248,7 @@ namespace Dwarves.Core.Terrain.Mutation
                 // Dig along the segment from [xBase, yBStep] to [xBase + 1, yBStep] at xB
                 var o = new Vector2I(originI.X, yBStep);
                 var s = new Vector2I(xBase, yBStep);
-                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainVoxel.DensityMax);
+                this.SetDensityLine(o, s.X - o.X, Axis.X, Direction.RightOrUp, TerrainPoint.DensityMax);
                 this.DigSegment(s, Axis.X, Direction.RightOrUp, xB - xBase);
             }
         }
@@ -273,26 +273,26 @@ namespace Dwarves.Core.Terrain.Mutation
             {
                 if (intersection > 0.5f)
                 {
-                    dBottomLeft = TerrainVoxel.DensityMax;
-                    dTopRight = (byte)(TerrainVoxel.DensityMax * (intersection - 0.5f));
+                    dBottomLeft = TerrainPoint.DensityMax;
+                    dTopRight = (byte)(TerrainPoint.DensityMax * (intersection - 0.5f));
                 }
                 else
                 {
-                    dBottomLeft = (byte)(TerrainVoxel.DensityMax * (intersection + 0.5f));
-                    dTopRight = TerrainVoxel.DensityMin;
+                    dBottomLeft = (byte)(TerrainPoint.DensityMax * (intersection + 0.5f));
+                    dTopRight = TerrainPoint.DensityMin;
                 }
             }
             else
             {
                 if (intersection > 0.5f)
                 {
-                    dBottomLeft = TerrainVoxel.DensityMin;
-                    dTopRight = (byte)(TerrainVoxel.DensityMax * (1.5f - intersection));
+                    dBottomLeft = TerrainPoint.DensityMin;
+                    dTopRight = (byte)(TerrainPoint.DensityMax * (1.5f - intersection));
                 }
                 else
                 {
-                    dBottomLeft = (byte)(TerrainVoxel.DensityMax * (0.5f - intersection));
-                    dTopRight = TerrainVoxel.DensityMax;
+                    dBottomLeft = (byte)(TerrainPoint.DensityMax * (0.5f - intersection));
+                    dTopRight = TerrainPoint.DensityMax;
                 }
             }
 
@@ -308,7 +308,7 @@ namespace Dwarves.Core.Terrain.Mutation
         }
 
         /// <summary>
-        /// Set the density of the given point (from z=0 to z=DigDepth).
+        /// Set the foreground density of the given point.
         /// </summary>
         /// <param name="position">The position.</param>
         /// <param name="density">The density.</param>
@@ -324,16 +324,9 @@ namespace Dwarves.Core.Terrain.Mutation
                 TerrainPoint point = chunk.Points[chunkPos.X, chunkPos.Y];
                 if (point != null)
                 {
-                    for (int z = -1; z < Metrics.DigDepth; z++)
+                    if (point.Foreground < density)
                     {
-                        // Get the voxel
-                        TerrainVoxel voxel = point.GetVoxel(z);
-
-                        // Update the voxel density
-                        if (voxel.Density < density)
-                        {
-                            voxel.Density = density;
-                        }
+                        point.Foreground = density;
                     }
                 }
             }

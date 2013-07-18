@@ -116,20 +116,20 @@ namespace Dwarves.Core.Terrain
         }
 
         /// <summary>
-        /// Gets the voxel at the given chunk position.
+        /// Gets the density at the given chunk position.
         /// </summary>
         /// <param name="pos">The chunk position.</param>
-        /// <returns>The voxel.</returns>
-        public TerrainVoxel GetVoxel(Vector3I pos)
+        /// <returns>The density.</returns>
+        public byte GetDensity(Vector3I pos)
         {
             TerrainPoint point = this.Points[pos.X, pos.Y];
             if (point != null)
             {
-                return point.GetVoxel(pos.Z);
+                return point.GetDensity(pos.Z);
             }
             else
             {
-                return TerrainVoxel.CreateEmpty();
+                return TerrainPoint.DensityMax;
             }
         }
     }

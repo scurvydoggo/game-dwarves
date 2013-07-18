@@ -14,28 +14,49 @@ namespace Dwarves.Core.Terrain
     public class TerrainPoint
     {
         /// <summary>
-        /// The voxels.
+        /// The minimum density value. This lies inside the surface.
         /// </summary>
-        private TerrainVoxel[] voxels;
+        public const byte DensityMin = 0x00;
+
+        /// <summary>
+        /// The maximum density value. This lies outside the surface.
+        /// </summary>
+        public const byte DensityMax = 0xFF;
+
+        /// <summary>
+        /// The density at which the surface lies (aka the isolevel).
+        /// </summary>
+        public const byte DensitySurface = 0x7F;
 
         /// <summary>
         /// Initialises a new instance of the TerrainPoint class.
         /// </summary>
-        /// <param name="voxels">The voxels.</param>
-        public TerrainPoint(TerrainVoxel[] voxels) : this(voxels, null)
-        {
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the TerrainPoint class.
-        /// </summary>
-        /// <param name="voxels">The voxels.</param>
+        /// <param name="foreground">The density of the foreground.</param>
+        /// <param name="background">The density of the background.</param>
+        /// <param name="material">The material.</param>
         /// <param name="light">The light value.</param>
-        public TerrainPoint(TerrainVoxel[] voxels, Colour? light)
+        public TerrainPoint(byte foreground, byte background, TerrainMaterial material, Colour? light)
         {
-            this.voxels = voxels;
+            this.Foreground = foreground;
+            this.Background = background;
+            this.Material = material;
             this.Light = light;
         }
+
+        /// <summary>
+        /// Gets or sets the density of the foreground, which is the portion of the terrain that can be dug.
+        /// </summary>
+        public byte Foreground { get; set; }
+
+        /// <summary>
+        /// Gets or sets the density of the background, which is the portion of the terrain that cannot be dug.
+        /// </summary>
+        public byte Background { get; set; }
+
+        /// <summary>
+        /// Gets or sets the material.
+        /// </summary>
+        public TerrainMaterial Material { get; set; }
 
         /// <summary>
         /// Gets or sets the light value.
@@ -43,20 +64,26 @@ namespace Dwarves.Core.Terrain
         public Colour? Light { get; set; }
         
         /// <summary>
-        /// Gets the voxel at the given z depth.
+        /// Gets the density at the given z depth.
         /// </summary>
         /// <param name="z">The z depth.</param>
-        /// <returns>The voxel.</returns>
-        public TerrainVoxel GetVoxel(int z)
+        /// <returns>The density.</returns>
+        public byte GetDensity(int z)
         {
-            if (z >= 0 && z < this.voxels.Length)
+            if (z >= 0)
             {
-                return this.voxels[z];
+                if (z < Metrics.DigDepth)
+                {
+                    return this.Foreground;
+                }
+                else if (z < Metrics.ChunkDepth)
+                {
+                    return this.Background;
+                }
             }
-            else
-            {
-                return TerrainVoxel.CreateEmpty();
-            }
+
+            // Return the 'air' density
+            return TerrainPoint.DensityMax;
         }
     }
 }

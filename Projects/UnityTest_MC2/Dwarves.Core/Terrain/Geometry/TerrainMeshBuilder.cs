@@ -66,7 +66,7 @@ namespace Dwarves.Core.Terrain.Geometry
         private void CreateMeshCell(Vector3I pos, MeshData mesh, SharedIndices sharedIndices)
         {
             // Get the voxels and light at each corner of the cell
-            var corners = new TerrainVoxel[8];
+            var corners = new byte[8];
             var light = new Color?[8];
             for (int i = 0; i < corners.Length; i++)
             {
@@ -74,18 +74,18 @@ namespace Dwarves.Core.Terrain.Geometry
                 TerrainPoint point = this.terrain.GetPoint(cornerPos);
                 if (point != null)
                 {
-                    corners[i] = point.GetVoxel(cornerPos.Z);
+                    corners[i] = point.GetDensity(cornerPos.Z);
                     light[i] = point.Light.Value.ToColor();
                 }
                 else
                 {
-                    corners[i] = TerrainVoxel.CreateEmpty();
+                    corners[i] = TerrainPoint.DensityMax;
                 }
             }
 
             // Get the case code
             byte caseCode = MarchingCubes.GetCaseCode(corners);
-            if ((caseCode ^ ((corners[7].Density >> 7) & 0xFF)) == 0)
+            if ((caseCode ^ ((corners[7] >> 7) & 0xFF)) == 0)
             {
                 // For these cases there is no triangulation
                 return;
@@ -159,14 +159,14 @@ namespace Dwarves.Core.Terrain.Geometry
         /// </summary>
         /// <param name="pos">The position.</param>
         /// <param name="mesh">The mesh.</param>
-        /// <param name="corners">The voxel data for cell corners.</param>
+        /// <param name="corners">The density at each corner of the cell.</param>
         /// <param name="light">The light data for cell corners.</param>
         /// <param name="cornerA">The first corner index of the of the edge on which the vertex lies.</param>
         /// <param name="cornerB">The second corner index of the of the edge on which the vertex lies.</param>
         private void CreateVertex(
             Vector3I pos,
             MeshData mesh,
-            TerrainVoxel[] corners,
+            byte[] corners,
             Color?[] light,
             byte cornerA,
             byte cornerB)
@@ -178,8 +178,8 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3 pB = new Vector3(pBI.X, pBI.Y, pBI.Z);
 
             // Get the end point densities
-            byte densityA = corners[cornerA].Density;
-            byte densityB = corners[cornerB].Density;
+            byte densityA = corners[cornerA];
+            byte densityB = corners[cornerB];
 
             // Calculate the interpolation ratio
             float ratio = this.CalculateRatio(densityA, densityB);
@@ -210,12 +210,12 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The normal.</returns>
         private Vector3 CalculateNormal(Vector3I pos)
         {
-            byte x0 = this.terrain.GetVoxel(pos - Vector3I.UnitX).Density;
-            byte x1 = this.terrain.GetVoxel(pos + Vector3I.UnitX).Density;
-            byte y0 = this.terrain.GetVoxel(pos - Vector3I.UnitY).Density;
-            byte y1 = this.terrain.GetVoxel(pos + Vector3I.UnitY).Density;
-            byte z0 = this.terrain.GetVoxel(pos - Vector3I.UnitZ).Density;
-            byte z1 = this.terrain.GetVoxel(pos + Vector3I.UnitZ).Density;
+            byte x0 = this.terrain.GetDensity(pos - Vector3I.UnitX);
+            byte x1 = this.terrain.GetDensity(pos + Vector3I.UnitX);
+            byte y0 = this.terrain.GetDensity(pos - Vector3I.UnitY);
+            byte y1 = this.terrain.GetDensity(pos + Vector3I.UnitY);
+            byte z0 = this.terrain.GetDensity(pos - Vector3I.UnitZ);
+            byte z1 = this.terrain.GetDensity(pos + Vector3I.UnitZ);
 
             Vector3 normal = new Vector3((x1 - x0) * 0.5f, (y1 - y0) * 0.5f, (z1 - z0) * 0.5f);
             normal.Normalize();
@@ -230,11 +230,11 @@ namespace Dwarves.Core.Terrain.Geometry
         /// <returns>The interpolation ratio between 0 and 1.</returns>
         private float CalculateRatio(byte densityA, byte densityB)
         {
-            if (TerrainVoxel.DensitySurface - densityA == 0)
+            if (TerrainPoint.DensitySurface - densityA == 0)
             {
                 return 0;
             }
-            else if (TerrainVoxel.DensitySurface - densityB == 0)
+            else if (TerrainPoint.DensitySurface - densityB == 0)
             {
                 return 1;
             }
@@ -244,7 +244,7 @@ namespace Dwarves.Core.Terrain.Geometry
             }
             else
             {
-                return (float)(TerrainVoxel.DensitySurface - densityA) / (densityB - densityA);
+                return (float)(TerrainPoint.DensitySurface - densityA) / (densityB - densityA);
             }
         }
 
