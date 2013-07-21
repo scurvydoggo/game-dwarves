@@ -131,7 +131,7 @@ namespace Dwarves.Core.Terrain.Generation
                     TerrainMaterial material = this.GetMaterial(worldX, worldY, surface);
 
                     // TODO: Remove this
-                    int val = 255 - (int)(System.Math.Abs((float)(worldY)) * 8);
+                    int val = 255 - (int)(System.Math.Abs((float)worldY) * 8);
                     byte lightTest = val > 0 ? (byte)val : (byte)0;
                     var light = new Colour(lightTest, lightTest, lightTest);
                     // TODO: Remove this
@@ -148,12 +148,12 @@ namespace Dwarves.Core.Terrain.Generation
         }
 
         /// <summary>
-        /// Updates the density
+        /// Updates the foreground density if the given density is larger than the point's.
         /// </summary>
-        /// <param name="chunk"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="density"></param>
+        /// <param name="chunk">The chunk.</param>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <param name="density">The foreground density.</param>
         private void UpdateForegroundIfGreaterDensity(TerrainChunk chunk, int x, int y, byte density)
         {
             TerrainPoint point = chunk.Points[x, y];
