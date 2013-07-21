@@ -67,7 +67,7 @@ namespace Dwarves.Core.Terrain.Geometry
         {
             // Get the voxels and light at each corner of the cell
             var corners = new byte[8];
-            var light = new Color?[8];
+            var light = new Color[8];
             for (int i = 0; i < corners.Length; i++)
             {
                 Vector3I cornerPos = pos + MarchingCubes.CornerVector[i];
@@ -75,11 +75,12 @@ namespace Dwarves.Core.Terrain.Geometry
                 if (point != null)
                 {
                     corners[i] = point.GetDensity(cornerPos.Z);
-                    light[i] = point.Light.Value.ToColor();
+                    light[i] = point.Light.ToColor();
                 }
                 else
                 {
                     corners[i] = TerrainPoint.DensityMax;
+                    light[i] = Color.black;
                 }
             }
 
@@ -167,7 +168,7 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3I pos,
             MeshData mesh,
             byte[] corners,
-            Color?[] light,
+            Color[] light,
             byte cornerA,
             byte cornerB)
         {
@@ -193,9 +194,7 @@ namespace Dwarves.Core.Terrain.Geometry
             Vector3 normal = this.InterpolatePoint(nA, nB, ratio);
 
             // Interpolate the color value between the two end points
-            Color? colorA = light[cornerA];
-            Color? colorB = light[cornerB];
-            Color color = this.InterpolateColor(colorA, colorB, ratio);
+            Color color = this.InterpolateColor(light[cornerA], light[cornerB], ratio);
 
             // Add the vertex to the mesh
             mesh.Vertices.Add(point);
@@ -261,39 +260,6 @@ namespace Dwarves.Core.Terrain.Geometry
                 pointA.x + (ratio * (pointB.x - pointA.x)),
                 pointA.y + (ratio * (pointB.y - pointA.y)),
                 pointA.z + (ratio * (pointB.z - pointA.z)));
-        }
-
-        /// <summary>
-        /// Interpolate the colour between the two points.
-        /// </summary>
-        /// <param name="colorA">The first colour.</param>
-        /// <param name="colorB">The second colour.</param>
-        /// <param name="ratio">The interpolation value.</param>
-        /// <returns>The interpolated colour.</returns>
-        private Color InterpolateColor(Color? colorA, Color? colorB, float ratio)
-        {
-            if (colorA.HasValue)
-            {
-                if (colorB.HasValue)
-                {
-                    return this.InterpolateColor(colorA.Value, colorB.Value, ratio);
-                }
-                else
-                {
-                    return colorA.Value;
-                }
-            }
-            else
-            {
-                if (colorB.HasValue)
-                {
-                    return colorB.Value;
-                }
-                else
-                {
-                    return Color.black;
-                }
-            }
         }
 
         /// <summary>

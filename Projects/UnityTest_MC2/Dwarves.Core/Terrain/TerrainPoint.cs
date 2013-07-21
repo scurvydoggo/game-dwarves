@@ -32,7 +32,7 @@ namespace Dwarves.Core.Terrain
         /// Initialises a new instance of the TerrainPoint class.
         /// </summary>
         public TerrainPoint()
-            : this(TerrainPoint.DensityMin, TerrainPoint.DensityMin, TerrainMaterial.Undefined, null)
+            : this(TerrainPoint.DensityMin, TerrainPoint.DensityMin, TerrainMaterial.Undefined, Colour.Black)
         {
         }
 
@@ -43,7 +43,7 @@ namespace Dwarves.Core.Terrain
         /// <param name="background">The density of the background.</param>
         /// <param name="material">The material.</param>
         /// <param name="light">The light value.</param>
-        public TerrainPoint(byte foreground, byte background, TerrainMaterial material, Colour? light)
+        public TerrainPoint(byte foreground, byte background, TerrainMaterial material, Colour light)
         {
             this.Foreground = foreground;
             this.Background = background;
@@ -69,7 +69,7 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Gets or sets the light value.
         /// </summary>
-        public Colour? Light { get; set; }
+        public Colour Light { get; set; }
         
         /// <summary>
         /// Gets the density at the given z depth.
