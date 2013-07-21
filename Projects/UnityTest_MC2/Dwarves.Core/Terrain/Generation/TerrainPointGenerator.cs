@@ -374,7 +374,8 @@ namespace Dwarves.Core.Terrain.Generation
                 else
                 {
                     // The segment is fully outside the terrain
-                    return new SegmentDensities(TerrainPoint.DensitySurface + 1, TerrainPoint.DensitySurface + 1);
+                    //return new SegmentDensities(TerrainPoint.DensitySurface + 1, TerrainPoint.DensitySurface + 1);
+                    return new SegmentDensities(TerrainPoint.DensityMax, TerrainPoint.DensityMax);
                 }
             }
         }
