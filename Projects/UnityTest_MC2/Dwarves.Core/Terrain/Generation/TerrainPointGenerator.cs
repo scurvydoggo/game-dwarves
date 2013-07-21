@@ -112,7 +112,15 @@ namespace Dwarves.Core.Terrain.Generation
                     var light = new Colour(lightTest, lightTest, lightTest);
                     // TODO: Remove this
 
-                    chunk.Points[x, y] = new TerrainPoint(foreground, background, material, light);
+                    // Update the point
+                    TerrainPoint point = chunk.Points[x, y];
+                    point.Background = background;
+                    point.Material = material;
+                    point.Light = light;
+                    if (foreground > point.Foreground)
+                    {
+                        point.Foreground = foreground;
+                    }
                 }
             }
 

@@ -21,6 +21,15 @@ namespace Dwarves.Core.Terrain
             this.Index = chunkIndex;
             this.Points = new TerrainPoint[Metrics.ChunkWidth, Metrics.ChunkHeight];
             this.Mesh = new TerrainChunkMesh();
+
+            // Initialise the points
+            for (int x = 0; x < Metrics.ChunkWidth; x++)
+            {
+                for (int y = 0; y < Metrics.ChunkHeight; y++)
+                {
+                    this.Points[x, y] = new TerrainPoint();
+                }
+            }
         }
 
         /// <summary>

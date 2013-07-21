@@ -31,6 +31,14 @@ namespace Dwarves.Core.Terrain
         /// <summary>
         /// Initialises a new instance of the TerrainPoint class.
         /// </summary>
+        public TerrainPoint()
+            : this(TerrainPoint.DensityMin, TerrainPoint.DensityMin, TerrainMaterial.Undefined, null)
+        {
+        }
+
+        /// <summary>
+        /// Initialises a new instance of the TerrainPoint class.
+        /// </summary>
         /// <param name="foreground">The density of the foreground.</param>
         /// <param name="background">The density of the background.</param>
         /// <param name="material">The material.</param>
