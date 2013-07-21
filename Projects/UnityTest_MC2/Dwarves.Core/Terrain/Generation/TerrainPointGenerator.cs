@@ -103,6 +103,8 @@ namespace Dwarves.Core.Terrain.Generation
                     byte background = this.GetBackgroundDensity(originX + x, originY + y, surface);
                     byte foreground = background;
 
+                    var test = this.GetMaxSegmentDensities(originX + x, originY + y);
+
                     // Determine the material
                     TerrainMaterial material = this.GetMaterial(originX + x, originY + y, surface);
 
@@ -138,7 +140,7 @@ namespace Dwarves.Core.Terrain.Generation
             var random = new Random(seed);
 
             // Test cave
-            caves.Add(new CaveAttributes(random.Next(), 0.5f));
+            caves.Add(new CaveAttributes(0.5f, random.Next(), 0.05f));
 
             return caves.ToArray();
         }
@@ -235,6 +237,52 @@ namespace Dwarves.Core.Terrain.Generation
             {
                 return TerrainMaterial.Dirt;
             }
+        }
+
+        /// <summary>
+        /// Gets the maximum density at the end points of upper and right segments from the given point. The maximum
+        /// densities are selected by generating each gave at these points and taking the largest 'dug out' values.
+        /// </summary>
+        /// <param name="x">The x position.</param>
+        /// <param name="y">The y position.</param>
+        /// <returns>The maximum densities at the three points of the upper and right segments.</returns>
+        private SegmentDensities GetMaxSegmentDensities(int x, int y)
+        {
+            var densities = new SegmentDensities();
+
+            foreach (CaveAttributes cave in this.caves)
+            {
+                float xF = x * cave.Frequency;
+                float yF = y * cave.Frequency;
+
+                float origin = this.baseGenerator.Generate(xF, yF);
+                float up = this.baseGenerator.Generate(xF, yF + cave.Frequency);
+                float right = this.baseGenerator.Generate(xF + cave.Frequency, yF);
+            }
+
+            return densities;
+        }
+
+        /// <summary>
+        /// The densities of two segments that share the same bottom/left point. A segment is the space between two
+        /// adjacent terrain points which has significance a terrain edge cuts through it.
+        /// </summary>
+        private struct SegmentDensities
+        {
+            /// <summary>
+            /// Gets or sets the density at the origin point of the two segments.
+            /// </summary>
+            public byte DensityOrigin { get; set; }
+
+            /// <summary>
+            /// Gets or sets the density at the top point of the vertical segment.
+            /// </summary>
+            public byte DensityUp { get; set; }
+
+            /// <summary>
+            /// Gets or sets the density at the right point of the horizontal segment.
+            /// </summary>
+            public byte DensityRight { get; set; }
         }
     }
 }

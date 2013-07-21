@@ -13,13 +13,20 @@ namespace Dwarves.Core.Terrain.Generation
         /// <summary>
         /// Initialises a new instance of the CaveAttributes class.
         /// </summary>
-        /// <param name="seed">The seed value.</param>
         /// <param name="boundaryValue">The value at which the cave boundary lies.</param>
-        public CaveAttributes(int seed, float boundaryValue)
+        /// <param name="seed">The seed value.</param>
+        /// <param name="frequency">The frequency value.</param>
+        public CaveAttributes(float boundaryValue, int seed, float frequency)
         {
-            this.Seed = seed;
             this.BoundaryValue = boundaryValue;
+            this.Seed = seed;
+            this.Frequency = frequency;
         }
+
+        /// <summary>
+        /// Gets the value at which the cave boundary lies.
+        /// </summary>
+        public float BoundaryValue { get; private set; }
 
         /// <summary>
         /// Gets the seed for this cave.
@@ -27,8 +34,8 @@ namespace Dwarves.Core.Terrain.Generation
         public int Seed { get; private set; }
 
         /// <summary>
-        /// Gets the value at which the cave boundary lies.
+        /// Gets the frequency value.
         /// </summary>
-        public float BoundaryValue { get; private set; }
+        public float Frequency { get; private set; }
     }
 }
