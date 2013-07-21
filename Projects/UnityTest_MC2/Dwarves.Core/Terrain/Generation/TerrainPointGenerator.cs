@@ -99,17 +99,39 @@ namespace Dwarves.Core.Terrain.Generation
 
                 for (int y = 0; y < Metrics.ChunkHeight; y++)
                 {
-                    // Calculate the background and foreground densities
-                    byte background = this.GetBackgroundDensity(originX + x, originY + y, surface);
-                    byte foreground = background;
+                    int worldX = originX + x;
+                    int worldY = originY + y;
 
-                    var test = this.GetMaxSegmentDensities(originX + x, originY + y);
+                    // Calculate the background and foreground densities
+                    byte background = this.GetBackgroundDensity(worldX, worldY, surface);
+
+                    // Get the cave densities for this point
+                    PointDensities densities = this.GetCaveDensitiesForPoint(worldX, worldY);
+                    if (densities.Origin < background)
+                    {
+                        // The density cannot be less than the background (ie. if the background is dug out, the
+                        // foreground cannot be filled in)
+                        densities.Origin = background;
+                    }
+
+                    // Update the densities
+                    byte foreground = densities.Origin > background ? densities.Origin : background;
+                    this.UpdateForegroundIfGreaterDensity(chunk, x, y, foreground);
+                    if (x < Metrics.ChunkWidth - 1)
+                    {
+                        this.UpdateForegroundIfGreaterDensity(chunk, x + 1, y, densities.Right);
+                    }
+
+                    if (y < Metrics.ChunkHeight - 1)
+                    {
+                        this.UpdateForegroundIfGreaterDensity(chunk, x, y + 1, densities.Up);
+                    }
 
                     // Determine the material
-                    TerrainMaterial material = this.GetMaterial(originX + x, originY + y, surface);
+                    TerrainMaterial material = this.GetMaterial(worldX, worldY, surface);
 
                     // TODO: Remove this
-                    int val = 255 - (int)(System.Math.Abs((float)(originY + y)) * 8);
+                    int val = 255 - (int)(System.Math.Abs((float)(worldY)) * 8);
                     byte lightTest = val > 0 ? (byte)val : (byte)0;
                     var light = new Colour(lightTest, lightTest, lightTest);
                     // TODO: Remove this
@@ -119,14 +141,26 @@ namespace Dwarves.Core.Terrain.Generation
                     point.Background = background;
                     point.Material = material;
                     point.Light = light;
-                    if (foreground > point.Foreground)
-                    {
-                        point.Foreground = foreground;
-                    }
                 }
             }
 
             chunk.SurfacePosition = surfacePosition.Value;
+        }
+
+        /// <summary>
+        /// Updates the density
+        /// </summary>
+        /// <param name="chunk"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="density"></param>
+        private void UpdateForegroundIfGreaterDensity(TerrainChunk chunk, int x, int y, byte density)
+        {
+            TerrainPoint point = chunk.Points[x, y];
+            if (point.Foreground < density)
+            {
+                point.Foreground = density;
+            }
         }
 
         /// <summary>
@@ -140,7 +174,7 @@ namespace Dwarves.Core.Terrain.Generation
             var random = new Random(seed);
 
             // Test cave
-            caves.Add(new CaveAttributes(0.5f, random.Next(), 0.05f));
+            caves.Add(new CaveAttributes(0.4f, random.Next(), 0.025f));
 
             return caves.ToArray();
         }
@@ -240,15 +274,15 @@ namespace Dwarves.Core.Terrain.Generation
         }
 
         /// <summary>
-        /// Gets the maximum density at the end points of upper and right segments from the given point. The maximum
-        /// densities are selected by generating each gave at these points and taking the largest 'dug out' values.
+        /// Gets the densities for the given point's up/right directional segments. These densities are produced by the
+        /// cave digging algorithm.
         /// </summary>
         /// <param name="x">The x position.</param>
         /// <param name="y">The y position.</param>
-        /// <returns>The maximum densities at the three points of the upper and right segments.</returns>
-        private SegmentDensities GetMaxSegmentDensities(int x, int y)
+        /// <returns>The densities.</returns>
+        private PointDensities GetCaveDensitiesForPoint(int x, int y)
         {
-            var densities = new SegmentDensities();
+            var densities = new PointDensities();
 
             foreach (CaveAttributes cave in this.caves)
             {
@@ -258,9 +292,91 @@ namespace Dwarves.Core.Terrain.Generation
                 float origin = this.baseGenerator.Generate(xF, yF);
                 float up = this.baseGenerator.Generate(xF, yF + cave.Frequency);
                 float right = this.baseGenerator.Generate(xF + cave.Frequency, yF);
+
+                // Calculate the up segment densities
+                SegmentDensities segmentUp = this.CalculateDensities(origin, up, cave.BoundaryValue);
+                SegmentDensities segmentRight = this.CalculateDensities(origin, right, cave.BoundaryValue);
+
+                byte dOrigin = segmentUp.Start > segmentRight.Start ? segmentUp.Start : segmentRight.Start;
+                if (densities.Origin < origin)
+                {
+                    densities.Origin = dOrigin;
+                }
+
+                if (densities.Up < segmentUp.End)
+                {
+                    densities.Up = segmentUp.End;
+                }
+
+                if (densities.Right < segmentRight.End)
+                {
+                    densities.Right = segmentRight.End;
+                }
             }
 
             return densities;
+        }
+
+        /// <summary>
+        /// Calculate the densities of the segment for the given noise values.
+        /// </summary>
+        /// <param name="origin">The noise value at the origin.</param>
+        /// <param name="other">The noise value at the other end of the segment.</param>
+        /// <param name="boundary">The noise value at which the terrain boundary lies.</param>
+        /// <returns>The densities.</returns>
+        private SegmentDensities CalculateDensities(float origin, float other, float boundary)
+        {
+            if (origin < boundary)
+            {
+                if (other < boundary)
+                {
+                    // The segment is fully within the terrain
+                    return new SegmentDensities(TerrainPoint.DensityMin, TerrainPoint.DensityMin);
+                }
+                else
+                {
+                    // The terrain boundary cuts through this surface with the 'open air' away from the origin
+                    float intersection = (boundary - origin) / (other - origin);
+                    if (intersection > 0.5f)
+                    {
+                        return new SegmentDensities(
+                            TerrainPoint.DensityMin,
+                            (byte)(TerrainPoint.DensityMax * (1.5f - intersection)));
+                    }
+                    else
+                    {
+                        return new SegmentDensities(
+                            (byte)(TerrainPoint.DensityMax * (0.5f - intersection)),
+                            TerrainPoint.DensityMax);
+                    }
+                }
+            }
+            else
+            {
+                if (other < boundary)
+                {
+                    // The terrain boundary cuts through this surface with the 'open air' at the origin side
+                    float boundaryN = other - origin;
+                    float intersection = boundaryN != 0 ? (boundary - origin) / boundaryN : 0;
+                    if (intersection > 0.5f)
+                    {
+                        return new SegmentDensities(
+                            TerrainPoint.DensityMax,
+                            (byte)(TerrainPoint.DensityMax * (intersection - 0.5f)));
+                    }
+                    else
+                    {
+                        return new SegmentDensities(
+                            (byte)(TerrainPoint.DensityMax * (intersection + 0.5f)),
+                            TerrainPoint.DensityMin);
+                    }
+                }
+                else
+                {
+                    // The segment is fully outside the terrain
+                    return new SegmentDensities(TerrainPoint.DensitySurface + 1, TerrainPoint.DensitySurface + 1);
+                }
+            }
         }
 
         /// <summary>
@@ -270,19 +386,47 @@ namespace Dwarves.Core.Terrain.Generation
         private struct SegmentDensities
         {
             /// <summary>
-            /// Gets or sets the density at the origin point of the two segments.
+            /// Initialises a new instance of the SegmentDensities structure.
             /// </summary>
-            public byte DensityOrigin { get; set; }
+            /// <param name="start">The density at the start of the segment.</param>
+            /// <param name="end">The density at the end of the segment.</param>
+            public SegmentDensities(byte start, byte end)
+                : this()
+            {
+                this.Start = start;
+                this.End = end;
+            }
 
             /// <summary>
-            /// Gets or sets the density at the top point of the vertical segment.
+            /// Gets the density at the start of the segment.
             /// </summary>
-            public byte DensityUp { get; set; }
+            public byte Start { get; private set; }
 
             /// <summary>
-            /// Gets or sets the density at the right point of the horizontal segment.
+            /// Gets the density at the end of the segment.
             /// </summary>
-            public byte DensityRight { get; set; }
+            public byte End { get; private set; }
+        }
+
+        /// <summary>
+        /// The densities for a point its segments in the up and right directions.
+        /// </summary>
+        private struct PointDensities
+        {
+            /// <summary>
+            /// Gets or sets the density at the origin.
+            /// </summary>
+            public byte Origin { get; set; }
+
+            /// <summary>
+            /// Gets or sets the density at the upward segment's endpoint.
+            /// </summary>
+            public byte Up { get; set; }
+
+            /// <summary>
+            /// Gets or sets the density at the right-ward segment's endpoint.
+            /// </summary>
+            public byte Right { get; set; }
         }
     }
 }
