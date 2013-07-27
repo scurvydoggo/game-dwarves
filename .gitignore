@@ -17,6 +17,10 @@ Projects/UnityTest_MC2/Unity4/MCTest2/*.sln
 Projects/UnityTest_MC2/Unity4/MCTest2/*.csproj
 Projects/UnityTest_MC2/Unity4/MCTest2/Library/
 Projects/UnityTest_MC2/Unity4/MCTest2/Temp/
+Projects/UnityTest_MS/Unity4/MS/*.sln
+Projects/UnityTest_MS/Unity4/MS/*.csproj
+Projects/UnityTest_MS/Unity4/MS/Library/
+Projects/UnityTest_MS/Unity4/MS/Temp/
 *Dwarves.Core.dll
 *Dwarves.Component.dll
 *.suo
